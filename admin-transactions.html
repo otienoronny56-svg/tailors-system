@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Transactions | Admin</title>
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Enforce Montserrat Globally */
+        body,
+        .main-content {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* NUCLEAR ALIGNMENT FIX: Force sidebar flush to left */
+        body {
+            margin: 0 !important;
+            justify-content: flex-start !important;
+        }
+
+        /* --- Custom Grid Layouts --- */
+        .analytics-dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 3px solid var(--brand-gold);
+        }
+
+        .control-group {
+            flex: 1;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+        }
+
+        .control-group label {
+            font-size: 0.75em;
+            font-weight: 700;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-group input,
+        .control-group select {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.9em;
+            background: #fafafa;
+        }
+
+        .control-panel>button {
+            padding: 10px 20px !important;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            border-left: 4px solid transparent;
+            border: 1px solid #eee;
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .kpi-card.revenue {
+            border-left-color: var(--brand-gold);
+        }
+
+        .kpi-card.orders {
+            border-left-color: #3b82f6;
+        }
+
+        .kpi-card.value {
+            border-left-color: #10b981;
+        }
+
+        .kpi-card.profit {
+            border-left-color: #8b5cf6;
+        }
+
+        .kpi-card.debt {
+            border-left-color: #ef4444;
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            font-size: 2em;
+            font-weight: 800;
+            color: var(--brand-black);
+            margin-bottom: 5px;
+        }
+
+        .kpi-subtext {
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        /* Charts Area */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            height: 350px;
+            position: relative;
+        }
+
+        .chart-container h3 {
+            margin: 0 0 20px 0;
+            font-size: 1em;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .control-panel {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .control-panel>button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 20px;
+                padding-top: 60px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mobile-menu-btn" id="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">Sir<span class="sidebar-n">'s</span> <span class="sidebar-n">'n'</span>
+                        Suits</h1>
+                    <span class="sidebar-subtitle">BY GEORGE</span>
+                </div>
+            </div>
+
+            <p id="user-info">Logged in as: Owner</p>
+            <nav>
+                <a href="admin-dashboard.html"><i class="fas fa-crown" style="margin-right: 8px;"></i>
+                    Admin Dashboard</a>
+                <a href="admin-current-orders.html"><i class="fas fa-globe" style="margin-right: 8px;"></i> Global
+                    Active Orders</a>
+                <a href="admin-all-orders.html"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global
+                    Order History</a>
+                <a href="financial-overview.html"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial
+                    Overview</a>
+                <a href="admin-transactions.html" class="active"><i class="fas fa-list-ul"
+                        style="margin-right: 8px;"></i> Transactions</a>
+                <a href="admin-analytics.html"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics
+                    & AI</a>
+                <a href="admin-management.html"><i class="fas fa-cog" style="margin-right: 8px;"></i> Management &
+                    Setup</a>
+
+                <a href="admin-order-form.html" class="nav-cta"><i class="fas fa-plus" style="margin-right: 8px;"></i>
+                    New Global Order</a>
+
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div>
+                    <h1 style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">All
+                        Transactions</h1>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Detailed, real-time ledger of orders
+                        and payments.</p>
+                </div>
+                <button onclick="loadAllTransactions()" title="Refresh Data"
+                    style="background: transparent; border: 1px solid #ccc; color: #333; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </header>
+
+            <div class="analytics-dashboard">
+                <section class="control-panel">
+                    <div class="control-group">
+                        <label><i class="fas fa-calendar-alt"></i> Analysis Period</label>
+                        <input type="text" id="date-range-filter" placeholder="Select dates...">
+                    </div>
+
+                    <button onclick="exportDashboardData()" title="Export dashboard data"
+                        style="background: var(--brand-navy); color: var(--brand-gold); border: 1px solid var(--brand-gold); border-radius: 4px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                        <i class="fas fa-file-export"></i> Export Report
+                    </button>
+                </section>
+
+                <section class="kpi-grid" id="transactions-kpi-metrics" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="kpi-card orders">
+                        <div class="kpi-header">
+                            <i class="fas fa-shopping-bag" style="color: #3b82f6;"></i> Orders Received
+                        </div>
+                        <div class="kpi-value" id="trans-total-orders" style="color: var(--brand-navy);">Loading...
+                        </div>
+                        <div class="kpi-subtext">Expected Value: <span id="trans-expected-value"
+                                style="font-weight: 600; color: #10b981;">...</span></div>
+                    </div>
+
+                    <div class="kpi-card revenue">
+                        <div class="kpi-header">
+                            <i class="fas fa-coins" style="color: var(--brand-gold);"></i> Payments Received (Revenue)
+                        </div>
+                        <div class="kpi-value" id="trans-total-revenue" style="color: var(--brand-navy);">Loading...
+                        </div>
+                        <div class="kpi-subtext">Total cash collected</div>
+                    </div>
+
+                    <div class="kpi-card debt">
+                        <div class="kpi-header">
+                            <i class="fas fa-hand-holding-usd" style="color: #ef4444;"></i> Expected Balance
+                        </div>
+                        <div class="kpi-value" id="trans-expected-balance" style="color: var(--brand-navy);">Loading...
+                        </div>
+                        <div class="kpi-subtext">Pending payments</div>
+                    </div>
+                </section>
+
+                <section class="transactions-container"
+                    style="background: white; border-radius: 8px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 25px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px;">
+                        <h2 style="margin: 0; font-size: 1.25em; color: var(--brand-navy);"><i class="fas fa-history"
+                                style="color: var(--brand-gold);"></i> Transaction Ledger</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <select id="transaction-type-filter"
+                                style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9em; outline: none;">
+                                <option value="all">All Types</option>
+                                <option value="payment">Payments Only</option>
+                                <option value="order">Orders Only</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                            <thead>
+                                <tr>
+                                    <th
+                                        style="padding: 15px; text-align: left; color: #64748b; font-weight: 600; font-size: 0.85em; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                                        Type</th>
+                                    <th
+                                        style="padding: 15px; text-align: left; color: #64748b; font-weight: 600; font-size: 0.85em; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                                        Date & Time</th>
+                                    <th
+                                        style="padding: 15px; text-align: left; color: #64748b; font-weight: 600; font-size: 0.85em; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                                        Customer</th>
+                                    <th
+                                        style="padding: 15px; text-align: left; color: #64748b; font-weight: 600; font-size: 0.85em; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                                        Details</th>
+                                    <th
+                                        style="padding: 15px; text-align: right; color: #64748b; font-weight: 600; font-size: 0.85em; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                                        Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="all-transactions-tbody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                        <i class="fas fa-spinner fa-spin"
+                                            style="font-size: 2em; margin-bottom: 10px; color: var(--brand-gold);"></i><br>
+                                        Loading ledger data...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="admin-dashboard.html" class="nav-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Dash</span>
+        </a>
+        <a href="admin-current-orders.html" class="nav-item">
+            <i class="fas fa-globe"></i>
+            <span>Active</span>
+        </a>
+        <a href="admin-order-form.html" class="nav-item center-fab">
+            <div class="fab-circle">
+                <i class="fas fa-plus"></i>
+            </div>
+        </a>
+        <a href="financial-overview.html" class="nav-item active">
+            <i class="fas fa-wallet"></i>
+            <span>Finance</span>
+        </a>
+        <a href="admin-management.html" class="nav-item">
+            <i class="fas fa-cogs"></i>
+            <span>Setup</span>
+        </a>
+    </nav>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script src="mobile-nav.js"></script>
+
+    <script>
+        // Init Date Picker and Dropdowns
+        $(document).ready(function () {
+            // Setup Date Picker
+            $('#date-range-filter').daterangepicker({
+                opens: 'left',
+                ranges: {
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                startDate: moment().subtract(29, 'days'),
+                endDate: moment(),
+                locale: { format: 'MMM D, YYYY' }
+            }, function (start, end, label) {
+                if (typeof loadAllTransactions === 'function') {
+                    loadAllTransactions();
+                }
+            });
+
+            $('#transaction-type-filter').on('change', function () {
+                if (typeof loadAllTransactions === 'function') {
+                    loadAllTransactions();
+                }
+            });
+
+            // Initial load trigger on DOM ready for transactions
+            setTimeout(() => {
+                if (typeof loadAllTransactions === 'function') {
+                    loadAllTransactions();
+                }
+            }, 500);
+
+            // Log for debugging
+            if (typeof APP_CONFIG !== 'undefined') {
+                console.log("✅ Admin Transactions: Config Loaded Successfully for " + APP_CONFIG.appName);
+            } else {
+                console.error("❌ Admin Transactions: Config Missing!");
+            }
+        });
+    </script>
+</body>
+
+</html>
