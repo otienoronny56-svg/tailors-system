@@ -1,3 +1,4 @@
+
 // ==========================================
 // ⚙️ MASTER CONFIGURATION FILE
 // ==========================================
@@ -5,7 +6,7 @@
 const APP_CONFIG = {
     // === 1. CONTROL SWITCH (THE KILL SWITCH) ===
     // Options: "ACTIVE" (App works) or "SUSPENDED" (Shows Payment Screen)
-    SYSTEM_STATUS: "ACTIVE",
+    SYSTEM_STATUS: "ACTIVE", 
 
     // === 2. PAYMENT & SUPPORT DETAILS (For the Lock Screen) ===
     billing: {
@@ -15,16 +16,16 @@ const APP_CONFIG = {
     },
 
     // === 3. BRANDING IDENTITY ===
-    appName: "GENTLEMAN STANDARD",
-    appSubtitle: "BY RONNY",
-    logoPath: "logo.png",
+    appName: "OTIMA FASHION HOUSE",       
+    appSubtitle: "BY RONNY",         
+    logoPath: "logo.png",             
 
     // === 4. CONTACT DETAILS (For Receipts) ===
-    shopPhone: "0713044564",
-    currencySymbol: "Ksh",
+    shopPhone: "0721401495",       
+    currencySymbol: "Ksh",            
 
     // === 5. BACKEND CONNECTION (Supabase) ===
-    supabaseUrl: "https://nbksbimxyssfbgfxzcnc.supabase.co",
-    supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ia3NiaW14eXNzZmJnZnh6Y25jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0ODAxMDIsImV4cCI6MjA4MjA1NjEwMn0.l2xwq7uVCFy9SWlYoKnlm11uotTNJxhi_1Z1dZYtxHg",
-    serviceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ia3NiaW14eXNzZmJnZnh6Y25jIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjQ4MDEwMiwiZXhwIjoyMDgyMDU2MTAyfQ.K0ZYLQ5lMstENBkfO3jOKDSuTqReGaRJybinr_17CTE"
+    supabaseUrl: "https://jgvpwdlmxujeappsgxlw.supabase.co", 
+    supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnB3ZGxteHVqZWFwcHNneGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0ODIyMDQsImV4cCI6MjA4MjA1ODIwNH0.vWYixKfxq6PxsxEvfLgIZRmNsXmKdvxdG-I6YaRYV-4",
+    serviceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnB3ZGxteHVqZWFwcHNneGx3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjQ4MjIwNCwiZXhwIjoyMDgyMDU4MjA0fQ.UvndP35SqHwHBwpaaAmNVM9uK4AJW6NTtKu5mDSoszs"
 };
