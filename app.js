@@ -327,11 +327,19 @@ function initDebugger() { }
 function formatMeasurements(json) {
     try {
         if (!json || json === '{}') return 'No measurements recorded';
-        const m = JSON.parse(json);
+
+        let m = JSON.parse(json);
+        // Handle double-encoded JSON from legacy migrations
+        if (typeof m === 'string') {
+            try { m = JSON.parse(m); } catch (e) { }
+        }
+
         let h = '';
         for (let k in m) {
-            h += `<b>${k}:</b> `;
-            for (let s in m[k]) h += `${s}: ${m[k][s]}" `;
+            h += `<b>${k} Details:</b><br>`;
+            for (let s in m[k]) {
+                h += `<span style="display:inline-block; min-width:80px; color:#475569;">${s}:</span> <b>${m[k][s]}"</b><br>`;
+            }
             h += '<br>';
         }
         return h || 'No measurements';
@@ -1039,6 +1047,9 @@ function initOrderForm() {
     const garmentSelect = document.getElementById('garment-type-select');
     if (garmentSelect) garmentSelect.addEventListener('change', generateMeasurementFieldsManager);
 
+    // Setup Client Search
+    setupClientSearch('customer_phone');
+
     const orderForm = document.getElementById('order-form');
     if (orderForm) {
         orderForm.onsubmit = async (e) => {
@@ -1075,6 +1086,29 @@ function initOrderForm() {
 
                 const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
                 if (error) throw error;
+
+                // [NEW] Upsert Client Data
+                try {
+                    const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).single();
+                    let history = existingClient ? (existingClient.measurements_history || []) : [];
+                    history.unshift({
+                        date: new Date().toISOString(),
+                        garment: orderData.garment_type,
+                        measurements: measurements
+                    });
+                    history = history.slice(0, 10); // Keep last 10
+
+                    await supabaseClient.from('clients').upsert({
+                        name: orderData.customer_name,
+                        phone: orderData.customer_phone,
+                        measurements_history: history,
+                        last_garment_type: orderData.garment_type,
+                        notes: orderData.customer_preferences,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'phone' });
+                } catch (e) {
+                    console.error("Error upserting client:", e);
+                }
 
                 const deposit = parseFloat(document.getElementById('deposit_paid').value) || 0;
                 if (deposit > 0) {
@@ -2838,6 +2872,9 @@ function initAdminOrderForm() {
         garmentSelect.addEventListener('change', generateAdminOrderFormMeasurements);
     }
 
+    // Setup Client Search
+    setupClientSearch('customer_phone');
+
     // 4. Handle Form Submission
     const orderForm = document.getElementById('order-form');
     if (orderForm) {
@@ -2874,6 +2911,29 @@ function initAdminOrderForm() {
 
             const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
             if (error) return alert(error.message);
+
+            // [NEW] Upsert Client Data
+            try {
+                const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).single();
+                let history = existingClient ? (existingClient.measurements_history || []) : [];
+                history.unshift({
+                    date: new Date().toISOString(),
+                    garment: orderData.garment_type,
+                    measurements: measurements
+                });
+                history = history.slice(0, 10); // Keep last 10
+
+                await supabaseClient.from('clients').upsert({
+                    name: orderData.customer_name,
+                    phone: orderData.customer_phone,
+                    measurements_history: history,
+                    last_garment_type: orderData.garment_type,
+                    notes: orderData.customer_preferences || '',
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'phone' });
+            } catch (e) {
+                console.error("Error upserting client:", e);
+            }
 
             const deposit = parseFloat(document.getElementById('deposit_paid').value) || 0;
             if (deposit > 0) await supabaseClient.from('payments').insert([{ order_id: order.id, amount: deposit }]);
@@ -2999,30 +3059,41 @@ async function loadKPIMetrics(shopId) {
     }
 }
 
-async function loadRevenueChart(shopId) {
+async function loadRevenueTrend(daysStr) {
     try {
+        const days = parseInt(daysStr) || 30;
+
         let paymentsQuery = supabaseClient
             .from('payments')
             .select('amount, recorded_at')
             .order('recorded_at');
 
-        if (shopId !== 'all') {
-            paymentsQuery = paymentsQuery.eq('orders.shop_id', shopId);
-        }
+        // Apply Date Filter
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
+        paymentsQuery = paymentsQuery.gte('recorded_at', cutoffDate.toISOString());
 
         const { data: payments } = await paymentsQuery;
 
-        // Group by date
+        // Group by date, filling missing days with 0
         const dailyRevenue = {};
         const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+
+        // Initialize all days in range to 0 to prevent cut-off charts
+        for (let i = days - 1; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            dailyRevenue[dateFormat.format(d)] = 0;
+        }
 
         if (payments) {
             payments.forEach(payment => {
                 const date = new Date(payment.recorded_at);
                 const dateKey = dateFormat.format(date);
 
-                if (!dailyRevenue[dateKey]) dailyRevenue[dateKey] = 0;
-                dailyRevenue[dateKey] += payment.amount || 0;
+                if (dailyRevenue[dateKey] !== undefined) {
+                    dailyRevenue[dateKey] += payment.amount || 0;
+                }
             });
         }
 
@@ -3081,75 +3152,7 @@ async function loadRevenueChart(shopId) {
     }
 }
 
-async function loadProductMixChart(shopId) {
-    try {
-        let ordersQuery = supabaseClient
-            .from('orders')
-            .select('garment_type, price');
 
-        if (shopId !== 'all') {
-            ordersQuery = ordersQuery.eq('shop_id', shopId);
-        }
-
-        const { data: orders } = await ordersQuery;
-
-        // Group by garment type
-        const productData = {};
-        if (orders) {
-            orders.forEach(order => {
-                const type = order.garment_type || 'Unknown';
-                if (!productData[type]) productData[type] = 0;
-                productData[type] += order.price || 0;
-            });
-        }
-
-        const labels = Object.keys(productData);
-        const revenueData = Object.values(productData);
-
-        // Create chart
-        const canvas = document.getElementById('productMixChart');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-
-        if (analyticsCharts.productMixChart) {
-            analyticsCharts.productMixChart.destroy();
-        }
-
-        analyticsCharts.productMixChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: revenueData,
-                    backgroundColor: [
-                        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-                        '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((context.raw / total) * 100);
-                                return `${context.label}: Ksh ${context.raw.toLocaleString()} (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        logDebug("Product mix chart loaded", { products: labels.length }, 'success');
-    } catch (error) {
-        logDebug("Error loading product mix chart:", error, 'error');
-    }
-}
 
 async function loadShopPerformanceChart() {
     try {
@@ -3861,9 +3864,12 @@ window.generateExpenseInvoice = async function (expenseId) {
         const invoiceHTML = `
             <div id="temp-expense-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; background: #fff;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                    <div>
-                        <h1 style="margin: 0; font-size: 2em; letter-spacing: 2px; color: #000;">${shopName}</h1>
-                        <p style="margin: 5px 0 0 0; color: #666;">Expense Requisition / Receipt</p>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        ${(typeof APP_CONFIG !== 'undefined' && APP_CONFIG.logoPath) ? `<img src="${APP_CONFIG.logoPath}" alt="Logo" style="height: 60px; width: auto; object-fit: contain;">` : ''}
+                        <div>
+                            <h1 style="margin: 0; font-size: 2em; letter-spacing: 2px; color: #000;">${shopName}</h1>
+                            <p style="margin: 5px 0 0 0; color: #666;">Expense Requisition / Receipt</p>
+                        </div>
                     </div>
                     <div style="text-align: right;">
                         <h2 style="margin: 0; font-size: 1.8em; color: #f59e0b; text-transform: uppercase;">REQUEST</h2>
@@ -3986,9 +3992,12 @@ window.downloadInvoicePDF = async function (orderId) {
         const invoiceHTML = `
             <div id="temp-invoice-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; background: #fff;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                    <div>
-                        <h1 style="margin: 0; font-size: 2em; letter-spacing: 2px; color: #000;">${shopName}</h1>
-                        <p style="margin: 5px 0 0 0; color: #666;">Official Invoice</p>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        ${(typeof APP_CONFIG !== 'undefined' && APP_CONFIG.logoPath) ? `<img src="${APP_CONFIG.logoPath}" alt="Logo" style="height: 60px; width: auto; object-fit: contain;">` : ''}
+                        <div>
+                            <h1 style="margin: 0; font-size: 2em; letter-spacing: 2px; color: #000;">${shopName}</h1>
+                            <p style="margin: 5px 0 0 0; color: #666;">Official Invoice</p>
+                        </div>
                     </div>
                     <div style="text-align: right;">
                         <h2 style="margin: 0; font-size: 1.8em; color: #3b82f6; text-transform: uppercase;">INVOICE</h2>
@@ -4463,6 +4472,9 @@ function initAdminOrderForm() {
         garmentSelect.addEventListener('change', generateAdminOrderFormMeasurements);
     }
 
+    // Setup Client Search
+    setupClientSearch('customer_phone');
+
     // 4. Handle Form Submission
     const orderForm = document.getElementById('order-form');
     if (orderForm) {
@@ -4499,6 +4511,29 @@ function initAdminOrderForm() {
 
             const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
             if (error) return alert(error.message);
+
+            // [NEW] Upsert Client Data
+            try {
+                const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).single();
+                let history = existingClient ? (existingClient.measurements_history || []) : [];
+                history.unshift({
+                    date: new Date().toISOString(),
+                    garment: orderData.garment_type,
+                    measurements: measurements
+                });
+                history = history.slice(0, 10); // Keep last 10
+
+                await supabaseClient.from('clients').upsert({
+                    name: orderData.customer_name,
+                    phone: orderData.customer_phone,
+                    measurements_history: history,
+                    last_garment_type: orderData.garment_type,
+                    notes: orderData.customer_preferences || '',
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'phone' });
+            } catch (e) {
+                console.error("Error upserting client:", e);
+            }
 
             const deposit = parseFloat(document.getElementById('deposit_paid').value) || 0;
             if (deposit > 0) await supabaseClient.from('payments').insert([{ order_id: order.id, amount: deposit }]);
@@ -4660,17 +4695,123 @@ async function loadAdminExpensesList() {
                     <td style="font-weight:bold;">Ksh ${parseFloat(expense.amount).toLocaleString()}</td>
                     <td>${expense.notes || '-'}</td>
                     <td>
-                        <button class="small-btn" style="background:#3b82f6; width:auto;" 
-                                onclick="generateExpenseInvoice('${expense.id}')">
-                            📄 Invoice / Receipt
-                        </button>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="small-btn" style="background:#3b82f6; padding: 5px 8px;" 
+                                    onclick="generateExpenseInvoice('${expense.id}')" title="Invoice">
+                                <i class="fas fa-file-invoice"></i>
+                            </button>
+                            <button class="small-btn" style="background:#10b981; padding: 5px 8px;" 
+                                    onclick="openEditExpenseModal('${expense.id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="small-btn" style="background:#ef4444; padding: 5px 8px;" 
+                                    onclick="deleteExpense('${expense.id}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
         }
-
     } catch (error) {
         logDebug("Error loading admin expenses list:", error, 'error');
+    }
+}
+
+async function deleteExpense(id) {
+    if (!confirm("Are you sure you want to delete this expense? This will affect financial calculations.")) return;
+
+    try {
+        const { error } = await supabaseClient
+            .from('expenses')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        alert("Expense deleted successfully!");
+        loadAdminExpensesList();
+
+        // Refresh analytics if they exist in cache/system
+        if (typeof loadAnalyticsDashboard === 'function') loadAnalyticsDashboard();
+        if (typeof loadBIAnalytics === 'function') loadBIAnalytics();
+
+    } catch (error) {
+        alert("Error deleting expense: " + error.message);
+    }
+}
+
+async function openEditExpenseModal(id) {
+    try {
+        const { data: expense, error } = await supabaseClient
+            .from('expenses')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+
+        // Load shops for the modal select
+        await loadShopsForDropdown('edit-ex-shop');
+
+        // Populate fields
+        document.getElementById('edit-ex-id').value = expense.id;
+        document.getElementById('edit-ex-shop').value = expense.shop_id || '';
+        document.getElementById('edit-ex-cat').value = expense.category;
+        document.getElementById('edit-ex-amount').value = expense.amount;
+        document.getElementById('edit-ex-name').value = expense.item_name;
+        document.getElementById('edit-ex-notes').value = expense.notes || '';
+
+        // Show modal
+        const modal = document.getElementById('edit-expense-modal');
+        if (modal) {
+            modal.style.display = 'block';
+
+            // Setup submit handler
+            const form = document.getElementById('edit-expense-form');
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                await updateExpense(id);
+            };
+        }
+
+    } catch (error) {
+        alert("Error loading expense details: " + error.message);
+    }
+}
+
+function closeEditExpenseModal() {
+    const modal = document.getElementById('edit-expense-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function updateExpense(id) {
+    try {
+        const expenseData = {
+            shop_id: document.getElementById('edit-ex-shop').value || null,
+            item_name: document.getElementById('edit-ex-name').value,
+            amount: parseFloat(document.getElementById('edit-ex-amount').value) || 0,
+            category: document.getElementById('edit-ex-cat').value,
+            notes: document.getElementById('edit-ex-notes').value
+        };
+
+        const { error } = await supabaseClient
+            .from('expenses')
+            .update(expenseData)
+            .eq('id', id);
+
+        if (error) throw error;
+
+        alert("Expense updated successfully!");
+        closeEditExpenseModal();
+        loadAdminExpensesList();
+
+        // Refresh analytics
+        if (typeof loadAnalyticsDashboard === 'function') loadAnalyticsDashboard();
+        if (typeof loadBIAnalytics === 'function') loadBIAnalytics();
+
+    } catch (error) {
+        alert("Error updating expense: " + error.message);
     }
 }
 
@@ -4966,10 +5107,13 @@ async function loadAnalyticsDashboard() {
     try {
         const shopId = 'all';
 
+        const revenueDaysStr = document.getElementById('revenue-filter') ? document.getElementById('revenue-filter').value : '30';
+        const productMixDaysStr = document.getElementById('product-mix-filter') ? document.getElementById('product-mix-filter').value : '30';
+
         await Promise.all([
             loadKPIMetrics(shopId),
-            loadRevenueChart(shopId),
-            loadProductMixChart(shopId),
+            loadRevenueTrend(revenueDaysStr),
+            loadProductMixChart(shopId, productMixDaysStr),
             loadShopPerformanceChart(),
             loadExpenseChart(shopId),
             loadPerformanceTables(shopId),
@@ -5036,7 +5180,7 @@ async function loadKPIMetrics(shopId) {
     try {
         let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at');
         let ordersQuery = supabaseClient.from('orders').select('id, price, status, created_at');
-        let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at, created_at');
+        let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at');
 
         if (shopId !== 'all') {
             paymentsQuery = paymentsQuery.eq('orders.shop_id', shopId);
@@ -5149,30 +5293,41 @@ async function loadKPIMetrics(shopId) {
     }
 }
 
-async function loadRevenueChart(shopId) {
+async function loadRevenueTrend(daysStr) {
     try {
+        const days = parseInt(daysStr) || 30;
+
         let paymentsQuery = supabaseClient
             .from('payments')
             .select('amount, recorded_at')
             .order('recorded_at');
 
-        if (shopId !== 'all') {
-            paymentsQuery = paymentsQuery.eq('orders.shop_id', shopId);
-        }
+        // Apply Date Filter
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
+        paymentsQuery = paymentsQuery.gte('recorded_at', cutoffDate.toISOString());
 
         const { data: payments } = await paymentsQuery;
 
-        // Group by date
+        // Group by date, filling missing days with 0
         const dailyRevenue = {};
         const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+
+        // Initialize all days in range to 0
+        for (let i = days - 1; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            dailyRevenue[dateFormat.format(d)] = 0;
+        }
 
         if (payments) {
             payments.forEach(payment => {
                 const date = new Date(payment.recorded_at);
                 const dateKey = dateFormat.format(date);
 
-                if (!dailyRevenue[dateKey]) dailyRevenue[dateKey] = 0;
-                dailyRevenue[dateKey] += payment.amount || 0;
+                if (dailyRevenue[dateKey] !== undefined) {
+                    dailyRevenue[dateKey] += payment.amount || 0;
+                }
             });
         }
 
@@ -5247,11 +5402,18 @@ async function loadRevenueChart(shopId) {
     }
 }
 
-async function loadProductMixChart(shopId) {
+async function loadProductMixChart(shopId, daysStr) {
     try {
+        const days = parseInt(daysStr) || 30;
+
+        // Date filter
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
+
         let ordersQuery = supabaseClient
             .from('orders')
-            .select('garment_type, price');
+            .select('garment_type, price, created_at')
+            .gte('created_at', cutoffDate.toISOString());
 
         if (shopId !== 'all') {
             ordersQuery = ordersQuery.eq('shop_id', shopId);
@@ -5269,8 +5431,10 @@ async function loadProductMixChart(shopId) {
             });
         }
 
-        const labels = Object.keys(productData);
-        const revenueData = Object.values(productData);
+        // Sort by revenue descending
+        const sortedEntries = Object.entries(productData).sort((a, b) => b[1] - a[1]);
+        const labels = sortedEntries.map(e => e[0]);
+        const revenueData = sortedEntries.map(e => e[1]);
 
         // Create chart
         const canvas = document.getElementById('productMixChart');
@@ -5307,6 +5471,12 @@ async function loadProductMixChart(shopId) {
                     duration: 1200,
                     easing: 'easeOutQuart'
                 },
+                layout: {
+                    padding: {
+                        bottom: 40,
+                        left: 20
+                    }
+                },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -5324,10 +5494,17 @@ async function loadProductMixChart(shopId) {
                 scales: {
                     x: {
                         grid: { borderDash: [5, 5], color: '#f1f5f9' },
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (value) => `Ksh ${value.toLocaleString()}`,
+                            padding: 10
+                        }
                     },
                     y: {
-                        grid: { display: false }
+                        grid: { display: false },
+                        ticks: {
+                            padding: 10
+                        }
                     }
                 }
             }
@@ -6412,3 +6589,556 @@ async function loadAllTransactions() {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color:red;">Failed to load transactions.</td></tr>';
     }
 }
+
+async function exportTransactionsCSV() {
+    try {
+        const typeFilter = document.getElementById('transaction-type-filter')?.value || 'all';
+
+        let orderQuery = supabaseClient.from('orders').select('id, garment_type, customer_name, price, created_at, status').order('created_at', { ascending: false }).limit(250);
+        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, orders(customer_name, garment_type)').order('recorded_at', { ascending: false }).limit(250);
+
+        const [ordersData, paymentsData] = await Promise.all([orderQuery, paymentQuery]);
+
+        let rawTransactions = [];
+        if ((typeFilter === 'all' || typeFilter === 'order') && ordersData.data) {
+            ordersData.data.forEach(o => rawTransactions.push({
+                type: 'Order',
+                time: o.created_at,
+                customer: o.customer_name,
+                details: `Item: ${o.garment_type}`,
+                amount: o.price || 0
+            }));
+        }
+        if ((typeFilter === 'all' || typeFilter === 'payment') && paymentsData.data) {
+            paymentsData.data.forEach(p => rawTransactions.push({
+                type: 'Payment',
+                time: p.recorded_at,
+                customer: p.orders?.customer_name || 'Unknown',
+                details: `Method: ${p.payment_method} ${p.orders && p.orders.garment_type ? '(' + p.orders.garment_type + ')' : ''}`,
+                amount: p.amount || 0
+            }));
+        }
+
+        rawTransactions.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+        if (rawTransactions.length === 0) {
+            alert("No transactions to export.");
+            return;
+        }
+
+        let csvContent = "Type,Date,Client,Details,Amount (Ksh)\n";
+
+        rawTransactions.forEach(row => {
+            let safeDetails = (row.details || '').toString().replace(/"/g, '""');
+            let safeCustomer = (row.customer || '').toString().replace(/"/g, '""');
+            let safeDate = formatDate(row.time).replace(/"/g, '""');
+
+            csvContent += `"${row.type}","${safeDate}","${safeCustomer}","${safeDetails}","${row.amount}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Transactions_Export_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        logDebug("Error exporting transactions CSV:", error, 'error');
+        alert("Failed to export transactions.");
+    }
+}
+
+// ==========================================
+// 🏠 CLIENT DATABASE SYSTEM
+// ==========================================
+
+/**
+ * Attaches a search dropdown listener to the phone number field
+ * @param {string} phoneInputId - The ID of the phone input field
+ */
+function setupClientSearch(phoneInputId) {
+    const phoneInput = document.getElementById(phoneInputId);
+    if (!phoneInput) return;
+
+    // Create a results container if it doesn't exist
+    let resultsDiv = document.getElementById(`${phoneInputId}-results`);
+    if (!resultsDiv) {
+        resultsDiv = document.createElement('div');
+        resultsDiv.id = `${phoneInputId}-results`;
+        resultsDiv.className = 'search-results-popover';
+        phoneInput.parentNode.appendChild(resultsDiv);
+    }
+
+    phoneInput.addEventListener('input', async (e) => {
+        const val = e.target.value.trim();
+        if (val.length < 3) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+
+        try {
+            const { data: clients, error } = await supabaseClient
+                .from('clients')
+                .select('*')
+                .ilike('phone', `%${val}%`)
+                .limit(5);
+
+            if (error) throw error;
+
+            if (clients && clients.length > 0) {
+                resultsDiv.innerHTML = clients.map(c => `
+                    <div class="search-result-item" onclick="selectClient('${phoneInputId}', ${JSON.stringify(c).replace(/"/g, '&quot;')})">
+                        <strong>${c.phone}</strong> - ${c.name}
+                    </div>
+                `).join('');
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.style.display = 'none';
+            }
+        } catch (err) {
+            console.error("Client search error:", err);
+        }
+    });
+
+    // Close results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (e.target !== phoneInput && e.target !== resultsDiv) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+}
+
+/**
+ * Handles selection of a client from search results
+ */
+window.selectClient = function (phoneInputId, client) {
+    const phoneInput = document.getElementById(phoneInputId);
+    const nameInput = document.getElementById(phoneInputId === 'customer_phone' ? 'customer_name' : 'edit-customer-name');
+    const garmentSelect = document.getElementById(phoneInputId === 'customer_phone' ? 'garment-type-select' : 'edit-garment-type');
+    const notesArea = document.getElementById(phoneInputId === 'customer_phone' ? 'customer_preferences' : 'edit-preferences');
+
+    if (phoneInput) phoneInput.value = client.phone;
+    if (nameInput) nameInput.value = client.name;
+    if (notesArea) notesArea.value = client.notes || '';
+
+    // Auto-select last garment type if available
+    if (garmentSelect && client.last_garment_type) {
+        garmentSelect.value = client.last_garment_type;
+        // Trigger change to generate measurement fields
+        garmentSelect.dispatchEvent(new Event('change'));
+
+        // Populate measurements if history exists
+        setTimeout(() => {
+            if (client.measurements_history && client.measurements_history.length > 0) {
+                let latest = client.measurements_history[0].measurements;
+                if (typeof latest === 'string') {
+                    try { latest = JSON.parse(latest); } catch (e) { latest = null; }
+                }
+
+                if (latest) {
+                    const containerId = phoneInputId === 'customer_phone' ? 'measurement-fields-container' : 'admin-measurement-fields-container';
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        container.querySelectorAll('input').forEach(input => {
+                            const comp = input.dataset.component || input.dataset.c;
+                            const meas = input.dataset.measurement || input.dataset.m;
+                            if (latest[comp] && latest[comp][meas]) {
+                                input.value = latest[comp][meas];
+                            }
+                        });
+                    }
+                }
+            }
+        }, 100);
+    }
+
+    const resultsDiv = document.getElementById(`${phoneInputId}-results`);
+    if (resultsDiv) resultsDiv.style.display = 'none';
+};
+
+/**
+ * Loads the list of clients for the management page
+ */
+async function loadClients() {
+    const tbody = document.getElementById('clients-tbody');
+    if (!tbody) return;
+
+    try {
+        const searchVal = document.getElementById('client-search')?.value.trim() || '';
+        let query = supabaseClient.from('clients').select('*').order('name');
+
+        if (searchVal) {
+            query = query.or(`name.ilike.%${searchVal}%,phone.ilike.%${searchVal}%`);
+        }
+
+        const { data: clients, error } = await query;
+        if (error) throw error;
+
+        if (!clients || clients.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No clients found</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = clients.map(c => `
+            <tr>
+                <td style="font-weight:bold;">${c.name}</td>
+                <td>${c.phone}</td>
+                <td>${c.last_garment_type || '-'}</td>
+                <td>${formatDate(c.updated_at)}</td>
+                <td>
+                    <button class="small-btn" onclick="viewClientDetails('${c.id}')">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+    } catch (error) {
+        logDebug("Error loading clients:", error, 'error');
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:red;">Error loading clients</td></tr>';
+    }
+}
+
+/**
+ * Shows detailed measurement history for a client in a modal
+ */
+async function viewClientDetails(clientId) {
+    try {
+        const { data: client, error } = await supabaseClient
+            .from('clients')
+            .select('*')
+            .eq('id', clientId)
+            .single();
+
+        if (error) throw error;
+
+        const modal = document.getElementById('order-modal');
+        const content = modal.querySelector('.modal-content');
+
+        let historyHtml = '<p>No measurement history found.</p>';
+        if (client.measurements_history && client.measurements_history.length > 0) {
+            historyHtml = client.measurements_history.map((h, index) => `
+                <div class="history-item" id="history-item-${index}" style="border: 1px solid #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                        <span style="font-weight: 600;">${h.garment}</span>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span style="color: #64748b; font-size: 0.85em;">${formatDate(h.date)}</span>
+                            <button class="small-btn" onclick="editClientMeasurement('${client.id}', ${index})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+                    <div class="history-measurements" style="font-size: 0.9em; line-height: 1.6;">
+                        ${formatMeasurements(JSON.stringify(h.measurements))}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        content.innerHTML = `
+            <span class="close-btn" onclick="document.getElementById('order-modal').style.display='none'">&times;</span>
+            <div style="padding: 10px;">
+                <h2 style="color: var(--brand-navy); margin-bottom: 5px;">${client.name}</h2>
+                <p style="color: #64748b; margin-bottom: 20px;">${client.phone}</p>
+                
+                <div class="tabs" style="margin-bottom: 20px;">
+                    <h3 style="font-size: 1.1em; border-bottom: 2px solid var(--brand-gold); display: inline-block; padding-bottom: 5px; margin-bottom: 15px;">Measurement History</h3>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${historyHtml}
+                    </div>
+                </div>
+
+                ${client.notes ? `
+                    <div style="background: #fff8e1; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                        <strong style="display: block; margin-bottom: 5px;">Client Notes:</strong>
+                        <p style="margin: 0; font-size: 0.9em;">${client.notes}</p>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        modal.style.display = 'block';
+
+    } catch (error) {
+        logDebug("Error viewing client details:", error, 'error');
+        alert("Error loading client details");
+    }
+}
+
+/**
+ * Replaces a history item view with an edit form
+ */
+async function editClientMeasurement(clientId, historyIndex) {
+    try {
+        const { data: client, error } = await supabaseClient
+            .from('clients')
+            .select('measurements_history')
+            .eq('id', clientId)
+            .single();
+
+        if (error) throw error;
+
+        const historyItem = client.measurements_history[historyIndex];
+        const container = document.getElementById(`history-item-${historyIndex}`);
+        const measurementsDiv = container.querySelector('.history-measurements');
+
+        let measurementsObj = historyItem.measurements;
+        if (typeof measurementsObj === 'string') {
+            try { measurementsObj = JSON.parse(measurementsObj); } catch (e) { measurementsObj = {}; }
+        }
+
+        let formHtml = '<div style="margin-top: 15px;">';
+
+        // Iterate through categories and measurements
+        for (const cat in measurementsObj) {
+            formHtml += `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; color: var(--brand-navy); font-size: 0.9em; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${cat} Details</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;">
+            `;
+
+            for (const key in measurementsObj[cat]) {
+                const val = measurementsObj[cat][key];
+                formHtml += `
+                    <div style="display: flex; flex-direction: column;">
+                        <label style="font-size: 0.75em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">${key}</label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <input type="text" value="${val}" class="edit-meas-input" 
+                                   data-cat="${cat}" data-key="${key}"
+                                   style="width: 100%; padding: 8px; padding-right: 25px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; font-weight: 500;">
+                            <span style="position: absolute; right: 8px; color: #94a3b8; font-size: 0.8em; font-weight: bold;">"</span>
+                        </div>
+                    </div>
+                `;
+            }
+            formHtml += '</div></div>';
+        }
+        formHtml += '</div>';
+        formHtml += `
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button class="small-btn" style="background: var(--brand-navy); color: var(--brand-gold);" 
+                        onclick="saveClientMeasurement('${clientId}', ${historyIndex})">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button class="small-btn" style="background: #e2e8f0; color: #475569;" 
+                        onclick="viewClientDetails('${clientId}')">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        `;
+
+        measurementsDiv.innerHTML = formHtml;
+
+    } catch (error) {
+        logDebug("Error editing measurement:", error, 'error');
+        alert("Error loading measurement data for editing");
+    }
+}
+
+/**
+ * Saves updated measurements back to the client record
+ */
+async function saveClientMeasurement(clientId, historyIndex) {
+    try {
+        // Fetch current history
+        const { data: client, error: fetchError } = await supabaseClient
+            .from('clients')
+            .select('measurements_history')
+            .eq('id', clientId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        const history = [...client.measurements_history];
+        const item = history[historyIndex];
+
+        let measurementsObj = item.measurements;
+        if (typeof measurementsObj === 'string') {
+            try { measurementsObj = JSON.parse(measurementsObj); } catch (e) { measurementsObj = {}; }
+        }
+
+        // Collect new values
+        const container = document.getElementById(`history-item-${historyIndex}`);
+        const inputs = container.querySelectorAll('.edit-meas-input');
+
+        inputs.forEach(input => {
+            const cat = input.dataset.cat;
+            const key = input.dataset.key;
+            if (!measurementsObj[cat]) measurementsObj[cat] = {};
+            measurementsObj[cat][key] = input.value;
+        });
+
+        // Upgrade legacy strings to objects on save to fix them permanently
+        item.measurements = measurementsObj;
+
+        // Update database
+        const { error: updateError } = await supabaseClient
+            .from('clients')
+            .update({
+                measurements_history: history,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', clientId);
+
+        if (updateError) throw updateError;
+
+        // Refresh view
+        viewClientDetails(clientId);
+
+    } catch (error) {
+        logDebug("Error saving measurement:", error, 'error');
+        alert("Error saving measurement changes");
+    }
+}
+
+// ============================================
+// CUSTOM INVOICE GENERATOR (Admin Dashboard)
+// ============================================
+
+window.openCustomInvoiceModal = function () {
+    const modal = document.getElementById('custom-invoice-modal');
+    if (modal) {
+        // Pre-fill today's date
+        document.getElementById('ci-date').value = new Date().toISOString().split('T')[0];
+        modal.style.display = 'flex';
+    }
+};
+
+window.closeCustomInvoiceModal = function () {
+    const modal = document.getElementById('custom-invoice-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        // Clear form
+        document.getElementById('ci-billed-to').value = '';
+        document.getElementById('ci-description').value = '';
+        document.getElementById('ci-amount').value = '';
+        document.getElementById('ci-notes').value = '';
+    }
+};
+
+window.generateCustomInvoice = async function () {
+    try {
+        const billedTo = document.getElementById('ci-billed-to').value.trim();
+        const description = document.getElementById('ci-description').value.trim();
+        const amountStr = document.getElementById('ci-amount').value;
+        const dateVal = document.getElementById('ci-date').value;
+        const notes = document.getElementById('ci-notes').value.trim();
+
+        if (!billedTo || !description || !amountStr || !dateVal) {
+            return alert("Please fill in all required fields.");
+        }
+
+        const amount = parseFloat(amountStr);
+        const dateStr = new Date(dateVal).toLocaleDateString();
+        const shopName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName) ? APP_CONFIG.appName.toUpperCase() : "FASHION HOUSE";
+        const invoiceId = 'CUST-' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+
+        // Build HTML
+        const invoiceHTML = `
+            <div id="temp-custom-invoice-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; background: #fff;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        ${(typeof APP_CONFIG !== 'undefined' && APP_CONFIG.logoPath) ? `<img src="${APP_CONFIG.logoPath}" alt="Logo" style="height: 60px; width: auto; object-fit: contain;">` : ''}
+                        <div>
+                            <h1 style="margin: 0; font-size: 2em; letter-spacing: 2px; color: #000;">${shopName}</h1>
+                            <p style="margin: 5px 0 0 0; color: #666;">Official Invoice</p>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <h2 style="margin: 0; font-size: 1.8em; color: #3b82f6; text-transform: uppercase;">INVOICE</h2>
+                        <p style="margin: 5px 0 2px 0;"><strong>Date:</strong> ${dateStr}</p>
+                        <p style="margin: 0;"><strong>Invoice:</strong> #${invoiceId}</p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 40px;">
+                    <h3 style="margin: 0 0 10px 0; color: #666; font-size: 0.9em; text-transform: uppercase;">Billed To:</h3>
+                    <p style="margin: 0; font-size: 1.2em; font-weight: bold;">${billedTo}</p>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
+                            <th style="padding: 12px; text-align: left; font-weight: bold; color: #475569;">Description</th>
+                            <th style="padding: 12px; text-align: right; font-weight: bold; color: #475569;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 15px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 500;">${description}</td>
+                            <td style="padding: 15px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${formatCurrency(amount)}</td>
+                        </tr>
+                        ${notes ? `
+                        <tr>
+                            <td colspan="2" style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-style: italic; color: #64748b; font-size: 0.9em;">
+                                Notes: ${notes}
+                            </td>
+                        </tr>
+                        ` : ''}
+                    </tbody>
+                </table>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <table style="width: 300px; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 15px 12px; font-weight: bold; font-size: 1.2em; color: #0f172a;">Total Due:</td>
+                            <td style="padding: 15px 12px; text-align: right; font-weight: bold; font-size: 1.2em; color: #0f172a;">${formatCurrency(amount)}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.9em;">
+                    <p style="margin: 0;">Thank you for your business.</p>
+                </div>
+            </div>
+        `;
+
+        // Inject temporarily into DOM to print
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = invoiceHTML;
+        wrapper.style.position = 'absolute';
+        wrapper.style.left = '-9999px';
+        document.body.appendChild(wrapper);
+
+        const element = wrapper.firstElementChild;
+        let cName = billedTo.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+        const opt = {
+            margin: 0.5,
+            filename: `Invoice_${cName}_${invoiceId}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Download and cleanup
+        if (typeof html2canvas === 'undefined' || typeof html2pdf === 'undefined') {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+        }
+
+        const btn = document.querySelector('#custom-invoice-modal button[type="submit"]');
+        const origText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        btn.disabled = true;
+
+        await html2pdf().set(opt).from(element).save();
+
+        btn.innerHTML = origText;
+        btn.disabled = false;
+
+        document.body.removeChild(wrapper);
+        closeCustomInvoiceModal();
+
+    } catch (error) {
+        logDebug("Error generating custom invoice", error, 'error');
+        alert("An error occurred while generating the invoice.");
+        const btn = document.querySelector('#custom-invoice-modal button[type="submit"]');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-download"></i> Download PDF Invoice';
+            btn.disabled = false;
+        }
+    }
+};

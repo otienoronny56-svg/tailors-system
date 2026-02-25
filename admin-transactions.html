@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Transactions | Admin</title>
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
 
     <link rel="stylesheet" href="styles.css">
 
@@ -228,8 +228,13 @@
                     Order History</a>
                 <a href="financial-overview.html"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial
                     Overview</a>
+                <a href="admin-clients.html"><i class="fas fa-address-book" style="margin-right: 8px;"></i> Client
+                    Database</a>
+                <a href="admin-expenses.html"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i>
+                    Expenses</a>
                 <a href="admin-transactions.html" class="active"><i class="fas fa-list-ul"
-                        style="margin-right: 8px;"></i> Transactions</a>
+                        style="margin-right: 8px;"></i>
+                    Transactions</a>
                 <a href="admin-analytics.html"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics
                     & AI</a>
                 <a href="admin-management.html"><i class="fas fa-cog" style="margin-right: 8px;"></i> Management &
@@ -250,10 +255,18 @@
                     <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Detailed, real-time ledger of orders
                         and payments.</p>
                 </div>
-                <button onclick="loadAllTransactions()" title="Refresh Data"
-                    style="background: transparent; border: 1px solid #ccc; color: #333; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="loadAllTransactions()" title="Refresh Data"
+                        style="background: transparent; border: 1px solid #ccc; color: #333; height: 42px; width: 42px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button onclick="handleLogout()" title="Logout"
+                        style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
             </header>
 
             <div class="analytics-dashboard">
@@ -263,9 +276,9 @@
                         <input type="text" id="date-range-filter" placeholder="Select dates...">
                     </div>
 
-                    <button onclick="exportDashboardData()" title="Export dashboard data"
+                    <button onclick="exportTransactionsCSV()" title="Export transactions as CSV"
                         style="background: var(--brand-navy); color: var(--brand-gold); border: 1px solid var(--brand-gold); border-radius: 4px; font-weight: 600; cursor: pointer; white-space: nowrap;">
-                        <i class="fas fa-file-export"></i> Export Report
+                        <i class="fas fa-file-csv"></i> Export CSV
                     </button>
                 </section>
 
@@ -354,11 +367,11 @@
 
     <nav class="bottom-nav">
         <a href="admin-dashboard.html" class="nav-item">
-            <i class="fas fa-chart-line"></i>
+            <i class="fas fa-chart-pie"></i>
             <span>Dash</span>
         </a>
         <a href="admin-current-orders.html" class="nav-item">
-            <i class="fas fa-globe"></i>
+            <i class="fas fa-bolt"></i>
             <span>Active</span>
         </a>
         <a href="admin-order-form.html" class="nav-item center-fab">
@@ -366,9 +379,13 @@
                 <i class="fas fa-plus"></i>
             </div>
         </a>
-        <a href="financial-overview.html" class="nav-item active">
-            <i class="fas fa-wallet"></i>
-            <span>Finance</span>
+        <a href="admin-transactions.html" class="nav-item active">
+            <i class="fas fa-list-ul"></i>
+            <span>Ledger</span>
+        </a>
+        <a href="admin-clients.html" class="nav-item">
+            <i class="fas fa-address-book"></i>
+            <span>Clients</span>
         </a>
         <a href="admin-management.html" class="nav-item">
             <i class="fas fa-cogs"></i>

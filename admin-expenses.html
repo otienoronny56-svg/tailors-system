@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global Expenses | Sir's 'n' Suits</title>
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -78,18 +78,21 @@
 
             <p id="user-info">Logged in as: Owner</p>
             <nav>
-                <a href="admin-dashboard.html"><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin
-                    Dashboard</a>
+                <a href="admin-dashboard.html"><i class="fas fa-crown" style="margin-right: 8px;"></i>
+                    Admin Dashboard</a>
                 <a href="admin-current-orders.html"><i class="fas fa-globe" style="margin-right: 8px;"></i> Global
                     Active Orders</a>
                 <a href="admin-all-orders.html"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global
                     Order History</a>
                 <a href="financial-overview.html"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial
                     Overview</a>
+                <a href="admin-clients.html"><i class="fas fa-address-book" style="margin-right: 8px;"></i> Client
+                    Database</a>
+                <a href="admin-expenses.html" class="active"><i class="fas fa-file-invoice-dollar"
+                        style="margin-right: 8px;"></i>
+                    Expenses</a>
                 <a href="admin-transactions.html"><i class="fas fa-list-ul" style="margin-right: 8px;"></i>
                     Transactions</a>
-                <a href="admin-expenses.html" class="active"><i class="fas fa-coins" style="margin-right: 8px;"></i>
-                    Expenses</a>
                 <a href="admin-analytics.html"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics
                     & AI</a>
                 <a href="admin-management.html"><i class="fas fa-cog" style="margin-right: 8px;"></i> Management &
@@ -103,18 +106,23 @@
         </aside>
 
         <main class="main-content">
-            <header>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 5px;">
-                    <h1 style="margin: 0; font-size: 1.5em; color: var(--brand-navy);">Global Expense Management</h1>
-
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <button onclick="loadAdminExpensesList()" title="Refresh Data"
-                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
-                            onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
-                            onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
-                            <i class="fa-solid fa-arrows-rotate"></i>
-                        </button>
-                    </div>
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div>
+                    <h1 style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">Global
+                        Expense Management</h1>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Track and manage shop expenses.</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="loadAdminExpensesList()" title="Refresh Data"
+                        style="background: transparent; border: 1px solid #ccc; color: #333; height: 42px; width: 42px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button onclick="handleLogout()" title="Logout"
+                        style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
                 </div>
             </header>
 
@@ -199,9 +207,88 @@
         </main>
     </div>
 
-    <!-- BOTTOM NAVIGATION (Admin) -->
+    <!-- Edit Expense Modal -->
+    <div id="edit-expense-modal" class="modal"
+        style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
+        <div class="modal-content"
+            style="background-color: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 500px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
+                <h2 style="margin: 0; color: var(--brand-navy); font-size: 1.5em;"><i class="fas fa-edit"
+                        style="color: var(--brand-gold);"></i> Edit Expense</h2>
+                <span class="close" onclick="closeEditExpenseModal()"
+                    style="font-size: 28px; font-weight: bold; color: #94a3b8; cursor: pointer;">&times;</span>
+            </div>
+
+            <form id="edit-expense-form">
+                <input type="hidden" id="edit-ex-id">
+
+                <div style="margin-bottom: 15px;">
+                    <label
+                        style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Target
+                        Shop</label>
+                    <select id="edit-ex-shop"
+                        style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        <option value="">-- Global / HQ --</option>
+                        <!-- Options loaded via JS -->
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label
+                        style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Category
+                        *</label>
+                    <select id="edit-ex-cat" required
+                        style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        <option value="Fabrics/Materials">Fabrics & Materials</option>
+                        <option value="Haberdashery">Threads/Buttons/Zippers</option>
+                        <option value="Wages">Fundi Wages/Labor</option>
+                        <option value="Transport">Transport (Matatu/Boda)</option>
+                        <option value="Utilities">Electricity (Stima)/Water</option>
+                        <option value="Rent">Shop Rent</option>
+                        <option value="Food">Staff Tea/Lunch</option>
+                        <option value="Airtime">Airtime/Data</option>
+                        <option value="Repairs">Machine Repairs</option>
+                        <option value="Misc">Miscellaneous</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label
+                        style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Amount
+                        (Ksh) *</label>
+                    <input type="number" id="edit-ex-amount" required
+                        style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label
+                        style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Item
+                        Name / Details</label>
+                    <input type="text" id="edit-ex-name"
+                        style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label
+                        style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Notes</label>
+                    <textarea id="edit-ex-notes"
+                        style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; min-height: 80px;"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="closeEditExpenseModal()"
+                        style="flex: 1; background: #94a3b8; color: white;">Cancel</button>
+                    <button type="submit"
+                        style="flex: 2; background: var(--brand-navy); color: var(--brand-gold);">Update
+                        Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <nav class="bottom-nav">
-        <a href="admin-dashboard.html" class="nav-item active">
+        <a href="admin-dashboard.html" class="nav-item">
             <i class="fas fa-chart-pie"></i>
             <span>Dash</span>
         </a>
@@ -214,9 +301,9 @@
                 <i class="fas fa-plus"></i>
             </div>
         </a>
-        <a href="admin-expenses.html" class="nav-item">
-            <i class="fas fa-coins"></i>
-            <span>Expenses</span>
+        <a href="admin-clients.html" class="nav-item">
+            <i class="fas fa-address-book"></i>
+            <span>Clients</span>
         </a>
         <a href="admin-management.html" class="nav-item">
             <i class="fas fa-cogs"></i>

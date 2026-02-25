@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Database | Sir's 'n' Suits</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">Sir<span class="sidebar-n">'s</span> <span class="sidebar-n">'n'</span>
+                        Suits</h1>
+                    <span class="sidebar-subtitle">BY GEORGE</span>
+                </div>
+            </div>
+            <nav id="sidebar-nav">
+                <a href="manager-dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="all-orders.html"><i class="fas fa-folder-open"></i> All Orders</a>
+                <a href="clients.html" class="active"><i class="fas fa-address-book"></i> Clients</a>
+                <a href="worker-management.html"><i class="fas fa-users"></i> Workers</a>
+                <a href="expenses.html"><i class="fas fa-coins"></i> Expenses</a>
+                <a href="order-form.html" class="nav-cta"><i class="fas fa-plus"></i> New Order</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Client Database</h1>
+            </header>
+
+            <div class="filter-bar">
+                <div class="search-box" style="flex: 1; position: relative;">
+                    <i class="fas fa-search"
+                        style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                    <input type="text" id="client-search" placeholder="Search by name or phone..."
+                        style="padding-left: 45px; width: 100%;" oninput="loadClients()">
+                </div>
+            </div>
+
+            <section class="order-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Last Item</th>
+                            <th>Last Visit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clients-tbody">
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:20px;">Loading clients...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <div id="order-modal" class="modal">
+        <div class="modal-content"></div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof initApp === 'function') initApp();
+            loadClients();
+        });
+    </script>
+</body>
+
+</html>

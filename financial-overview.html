@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Financial Overview | Admin</title>
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
 
     <link rel="stylesheet" href="styles.css">
 
@@ -229,6 +229,10 @@
                 <a href="financial-overview.html" class="active"><i class="fas fa-chart-line"
                         style="margin-right: 8px;"></i> Financial
                     Overview</a>
+                <a href="admin-clients.html"><i class="fas fa-address-book" style="margin-right: 8px;"></i> Client
+                    Database</a>
+                <a href="admin-expenses.html"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i>
+                    Expenses</a>
                 <a href="admin-transactions.html"><i class="fas fa-list-ul" style="margin-right: 8px;"></i>
                     Transactions</a>
                 <a href="admin-analytics.html"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics
@@ -251,10 +255,18 @@
                     <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Real-time financial tracking and
                         operational auditing.</p>
                 </div>
-                <button onclick="loadAnalyticsDashboard()" title="Refresh Data"
-                    style="background: transparent; border: 1px solid #ccc; color: #333; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="loadAnalyticsDashboard()" title="Refresh Data"
+                        style="background: transparent; border: 1px solid #ccc; color: #333; height: 42px; width: 42px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button onclick="handleLogout()" title="Logout"
+                        style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
             </header>
 
             <div class="analytics-dashboard">
@@ -328,14 +340,16 @@
                             style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
                             <h3 style="margin: 0; border: none; padding: 0;"><i class="fas fa-chart-line"
                                     style="color: #666;"></i> Revenue Trend</h3>
-                            <select class="chart-filter"
+                            <select id="revenue-filter" class="chart-filter" onchange="loadRevenueTrend(this.value)"
                                 style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.8em; color: #555;">
                                 <option value="7">Last 7 Days</option>
                                 <option value="30" selected>Last 30 Days</option>
                                 <option value="90">Last 90 Days</option>
                             </select>
                         </div>
-                        <canvas id="revenueChart"></canvas>
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
                     </div>
 
                     <div class="chart-container">
@@ -343,11 +357,17 @@
                             style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
                             <h3 style="margin: 0; border: none; padding: 0;"><i class="fas fa-layer-group"
                                     style="color: #666;"></i> Product Mix (Revenue Share)</h3>
-                            <button class="chart-filter-btn"
-                                style="background: none; border: none; color: #888; cursor: pointer;"><i
-                                    class="fas fa-filter"></i></button>
+                            <select id="product-mix-filter" class="chart-filter"
+                                onchange="loadProductMixChart('all', this.value)"
+                                style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.8em; color: #555;">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30" selected>Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                            </select>
                         </div>
-                        <canvas id="productMixChart"></canvas>
+                        <div style="position: relative; height: 350px; width: 100%;">
+                            <canvas id="productMixChart"></canvas>
+                        </div>
                     </div>
 
                     <div class="chart-container">
@@ -457,11 +477,11 @@
 
     <nav class="bottom-nav">
         <a href="admin-dashboard.html" class="nav-item">
-            <i class="fas fa-chart-line"></i>
+            <i class="fas fa-chart-pie"></i>
             <span>Dash</span>
         </a>
         <a href="admin-current-orders.html" class="nav-item">
-            <i class="fas fa-globe"></i>
+            <i class="fas fa-bolt"></i>
             <span>Active</span>
         </a>
         <a href="admin-order-form.html" class="nav-item center-fab">
@@ -472,6 +492,10 @@
         <a href="financial-overview.html" class="nav-item active">
             <i class="fas fa-wallet"></i>
             <span>Finance</span>
+        </a>
+        <a href="admin-clients.html" class="nav-item">
+            <i class="fas fa-address-book"></i>
+            <span>Clients</span>
         </a>
         <a href="admin-management.html" class="nav-item">
             <i class="fas fa-cogs"></i>

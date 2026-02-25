@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Client Database | Sir's 'n' Suits</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">Sir<span class="sidebar-n">'s</span> <span class="sidebar-n">'n'</span>
+                        Suits</h1>
+                    <span class="sidebar-subtitle">BY GEORGE</span>
+                </div>
+            </div>
+            <nav>
+                <a href="admin-dashboard.html"><i class="fas fa-crown" style="margin-right: 8px;"></i>
+                    Admin Dashboard</a>
+                <a href="admin-current-orders.html"><i class="fas fa-globe" style="margin-right: 8px;"></i> Global
+                    Active Orders</a>
+                <a href="admin-all-orders.html"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global
+                    Order History</a>
+                <a href="financial-overview.html"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial
+                    Overview</a>
+                <a href="admin-clients.html" class="active"><i class="fas fa-address-book"
+                        style="margin-right: 8px;"></i> Client
+                    Database</a>
+                <a href="admin-expenses.html"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i>
+                    Expenses</a>
+                <a href="admin-transactions.html"><i class="fas fa-list-ul" style="margin-right: 8px;"></i>
+                    Transactions</a>
+                <a href="admin-analytics.html"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics
+                    & AI</a>
+                <a href="admin-management.html"><i class="fas fa-cog" style="margin-right: 8px;"></i> Management &
+                    Setup</a>
+
+                <a href="admin-order-form.html" class="nav-cta"><i class="fas fa-plus" style="margin-right: 8px;"></i>
+                    New Global Order</a>
+
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div>
+                    <h1 style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">Client
+                        Management (Global)</h1>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">View and manage clients from all shops.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="loadClients()" title="Refresh Data"
+                        style="background: transparent; border: 1px solid #ccc; color: #333; height: 42px; width: 42px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button onclick="handleLogout()" title="Logout"
+                        style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="filter-bar">
+                <div class="search-box" style="flex: 1; position: relative;">
+                    <i class="fas fa-search"
+                        style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                    <input type="text" id="client-search" placeholder="Search across all shops..."
+                        style="padding-left: 45px; width: 100%;" oninput="loadClients()">
+                </div>
+            </div>
+
+            <section class="order-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Last Item</th>
+                            <th>Last Visit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clients-tbody">
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:20px;">Loading clients...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <div id="order-modal" class="modal">
+        <div class="modal-content"></div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="admin-dashboard.html" class="nav-item">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dash</span>
+        </a>
+        <a href="admin-current-orders.html" class="nav-item">
+            <i class="fas fa-bolt"></i>
+            <span>Active</span>
+        </a>
+        <a href="admin-order-form.html" class="nav-item center-fab">
+            <div class="fab-circle">
+                <i class="fas fa-plus"></i>
+            </div>
+        </a>
+        <a href="admin-clients.html" class="nav-item active">
+            <i class="fas fa-address-book"></i>
+            <span>Clients</span>
+        </a>
+        <a href="admin-management.html" class="nav-item">
+            <i class="fas fa-cogs"></i>
+            <span>Setup</span>
+        </a>
+    </nav>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof initApp === 'function') initApp();
+            loadClients();
+        });
+    </script>
+</body>
+
+</html>

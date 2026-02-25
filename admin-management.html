@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Management | Sir's 'n' Suits</title>
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Mobile -->
@@ -337,6 +337,10 @@
                     Order History</a>
                 <a href="financial-overview.html"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial
                     Overview</a>
+                <a href="admin-clients.html"><i class="fas fa-address-book" style="margin-right: 8px;"></i> Client
+                    Database</a>
+                <a href="admin-expenses.html"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i>
+                    Expenses</a>
                 <a href="admin-transactions.html"><i class="fas fa-list-ul" style="margin-right: 8px;"></i>
                     Transactions</a>
                 <a href="admin-analytics.html"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics
@@ -358,10 +362,18 @@
                     <h1>Command Center</h1>
                     <p>Manage Shops, Managers, and Crews globally.</p>
                 </div>
-                <button onclick="loadAdminManagementScreen()" title="Refresh Data" class="btn-modern"
-                    style="width: auto; padding: 10px 15px; background: white; color: #475569; border: 1px solid #e2e8f0;">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="loadAdminManagementScreen()" title="Refresh Data" class="btn-modern"
+                        style="width: 42px; height: 42px; padding: 0; background: white; color: #475569; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button onclick="handleLogout()" title="Logout"
+                        style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
             </header>
 
             <div class="action-panels">
@@ -456,6 +468,30 @@
             </button>
         </div>
     </div>
+
+    <nav class="bottom-nav">
+        <a href="admin-dashboard.html" class="nav-item">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dash</span>
+        </a>
+        <a href="admin-current-orders.html" class="nav-item">
+            <i class="fas fa-bolt"></i>
+            <span>Active</span>
+        </a>
+        <a href="admin-order-form.html" class="nav-item center-fab">
+            <div class="fab-circle">
+                <i class="fas fa-plus"></i>
+            </div>
+        </a>
+        <a href="admin-clients.html" class="nav-item">
+            <i class="fas fa-address-book"></i>
+            <span>Clients</span>
+        </a>
+        <a href="admin-management.html" class="nav-item active">
+            <i class="fas fa-cogs"></i>
+            <span>Setup</span>
+        </a>
+    </nav>
 
     <script src="config.js"></script>
     <script src="app.js"></script>

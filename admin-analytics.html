@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Analytics | Sir's 'n' Suits</title>
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
     <link rel="stylesheet" href="styles.css">
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -355,6 +355,10 @@
                     Order History</a>
                 <a href="financial-overview.html"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial
                     Overview</a>
+                <a href="admin-clients.html"><i class="fas fa-address-book" style="margin-right: 8px;"></i> Client
+                    Database</a>
+                <a href="admin-expenses.html"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i>
+                    Expenses</a>
                 <a href="admin-transactions.html"><i class="fas fa-list-ul" style="margin-right: 8px;"></i>
                     Transactions</a>
                 <a href="admin-analytics.html" class="active"><i class="fas fa-chart-bar"
@@ -397,6 +401,12 @@
                     <button class="control-btn" onclick="loadBIAnalytics()" title="Refresh"
                         style="padding: 8px; width: 38px; justify-content: center;">
                         <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button onclick="handleLogout()" title="Logout"
+                        style="background: #ef4444; border: none; color: white; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     </button>
                 </div>
             </header>
@@ -527,7 +537,7 @@
             <span>Dash</span>
         </a>
         <a href="admin-current-orders.html" class="nav-item">
-            <i class="fas fa-globe"></i>
+            <i class="fas fa-bolt"></i>
             <span>Active</span>
         </a>
         <a href="admin-order-form.html" class="nav-item center-fab">
@@ -537,11 +547,11 @@
         </a>
         <a href="financial-overview.html" class="nav-item">
             <i class="fas fa-wallet"></i>
-            <span>Money</span>
+            <span>Finance</span>
         </a>
-        <a href="admin-management.html" class="nav-item">
-            <i class="fas fa-sliders-h"></i>
-            <span>Setup</span>
+        <a href="admin-clients.html" class="nav-item">
+            <i class="fas fa-address-book"></i>
+            <span>Clients</span>
         </a>
         <a href="admin-analytics.html" class="nav-item active">
             <i class="fas fa-chart-bar"></i>
