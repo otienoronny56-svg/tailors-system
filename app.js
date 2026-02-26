@@ -4684,6 +4684,9 @@ async function loadAdminExpensesList() {
 
         if (error) throw error;
 
+        // Render Summary Cards
+        renderExpenseSummaryCards(expenses);
+
         const tbody = document.getElementById('admin-expenses-tbody');
         if (tbody) {
             if (!expenses || expenses.length === 0) {
@@ -4721,6 +4724,58 @@ async function loadAdminExpensesList() {
     } catch (error) {
         logDebug("Error loading admin expenses list:", error, 'error');
     }
+}
+
+function renderExpenseSummaryCards(expenses) {
+    const cardsContainer = document.getElementById('expense-summary-cards');
+    if (!cardsContainer) return;
+
+    if (!expenses || expenses.length === 0) {
+        cardsContainer.innerHTML = '<p style="color: #64748b; font-style: italic;">No expense data for cards.</p>';
+        return;
+    }
+
+    // Group expenses by category
+    const summary = {};
+    expenses.forEach(ex => {
+        const cat = ex.category || 'Misc';
+        if (!summary[cat]) {
+            summary[cat] = { total: 0, count: 0 };
+        }
+        summary[cat].total += parseFloat(ex.amount || 0);
+        summary[cat].count += 1;
+    });
+
+    const categoryIcons = {
+        'Fabrics/Materials': 'fa-scissors',
+        'Tailoring Supplies': 'fa-needle',
+        'Haberdashery': 'fa-needle', // Compatibility
+        'Wages': 'fa-money-bill-wave',
+        'Transport': 'fa-truck',
+        'Utilities': 'fa-bolt',
+        'Rent': 'fa-building',
+        'Food': 'fa-utensils',
+        'Airtime': 'fa-mobile-alt',
+        'Repairs': 'fa-tools',
+        'Misc': 'fa-box-open'
+    };
+
+    cardsContainer.innerHTML = Object.keys(summary).sort((a, b) => summary[b].total - summary[a].total).map(cat => {
+        const icon = categoryIcons[cat] || 'fa-tag';
+        const data = summary[cat];
+        return `
+            <div class="expense-summary-card">
+                <div class="ex-icon-circle">
+                    <i class="fas ${icon}"></i>
+                </div>
+                <div class="ex-info">
+                    <h4>${cat.split('/')[0]}</h4>
+                    <p class="ex-amount">Ksh ${data.total.toLocaleString()}</p>
+                    <p class="ex-count">${data.count} entry${data.count !== 1 ? 'ies' : ''}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 async function deleteExpense(id) {

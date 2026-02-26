@@ -57,6 +57,63 @@
                 min-width: 100% !important;
             }
         }
+
+        .expense-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .expense-summary-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--brand-gold);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.2s;
+        }
+
+        .expense-summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .ex-icon-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--brand-navy);
+            font-size: 1.2em;
+        }
+
+        .ex-info h4 {
+            margin: 0;
+            font-size: 0.85em;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ex-info .ex-amount {
+            margin: 2px 0 0 0;
+            font-size: 1.1em;
+            font-weight: 800;
+            color: var(--brand-black);
+        }
+
+        .ex-info .ex-count {
+            margin: 0;
+            font-size: 0.75em;
+            color: #94a3b8;
+        }
     </style>
 </head>
 
@@ -141,7 +198,7 @@
                         <select id="admin-ex-cat" required style="margin-bottom: 0;">
                             <option value="">-- Select Category --</option>
                             <option value="Fabrics/Materials">Fabrics & Materials</option>
-                            <option value="Haberdashery">Threads/Buttons/Zippers</option>
+                            <option value="Tailoring Supplies">Tailoring Supplies (Threads/Buttons/Zips)</option>
                             <option value="Wages">Fundi Wages/Labor</option>
                             <option value="Transport">Transport (Matatu/Boda)</option>
                             <option value="Utilities">Electricity (Stima)/Water</option>
@@ -170,6 +227,13 @@
                     <button type="submit" style="width:auto; padding: 12px 25px; margin-bottom: 0;">Save
                         Expense</button>
                 </form>
+            </div>
+
+            <div id="expense-summary-container" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 15px;">Expense Breakdown by Category</h3>
+                <div id="expense-summary-cards" class="expense-summary-grid">
+                    <!-- Cards populated by JS -->
+                </div>
             </div>
 
             <div
