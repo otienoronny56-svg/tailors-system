@@ -6935,6 +6935,51 @@ async function viewClientDetails(clientId) {
     }
 }
 
+window.openNewClientModal = function () {
+    const modal = document.getElementById('new-client-modal');
+    if (modal) {
+        document.getElementById('new-client-form').reset();
+        modal.style.display = 'block';
+    }
+};
+
+window.closeNewClientModal = function () {
+    const modal = document.getElementById('new-client-modal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.saveNewClient = async function (e) {
+    if (e) e.preventDefault();
+
+    const name = document.getElementById('new-client-name').value.trim();
+    const phone = document.getElementById('new-client-phone').value.trim();
+    const notes = document.getElementById('new-client-notes').value.trim();
+
+    if (!name || !phone) return alert("Name and Phone are required.");
+
+    try {
+        const { error } = await supabaseClient
+            .from('clients')
+            .insert([{
+                name,
+                phone,
+                notes,
+                measurements_history: [],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            }]);
+
+        if (error) throw error;
+
+        alert("Client added successfully!");
+        closeNewClientModal();
+        if (typeof loadClients === 'function') loadClients();
+    } catch (error) {
+        logDebug("Error saving new client:", error, 'error');
+        alert("Error: " + error.message);
+    }
+};
+
 /**
  * Replaces a history item view with an edit form
  */
@@ -6959,29 +7004,41 @@ async function editClientMeasurement(clientId, historyIndex) {
 
         let formHtml = '<div style="margin-top: 15px;">';
 
-        // Iterate through categories and measurements
-        for (const cat in measurementsObj) {
+        // Check if history is empty or measurements are missing
+        if (!measurementsObj || Object.keys(measurementsObj).length === 0) {
             formHtml += `
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: var(--brand-navy); font-size: 0.9em; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${cat} Details</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;">
+                <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 15px; margin-bottom: 15px; text-align: center;">
+                    <p style="margin: 0; color: #856404; font-size: 0.9em;">No measurement details to edit yet.</p>
+                </div>
             `;
-
-            for (const key in measurementsObj[cat]) {
-                const val = measurementsObj[cat][key];
+        } else {
+            // Iterate through categories and measurements
+            for (const cat in measurementsObj) {
                 formHtml += `
-                    <div style="display: flex; flex-direction: column;">
-                        <label style="font-size: 0.75em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">${key}</label>
-                        <div style="position: relative; display: flex; align-items: center;">
-                            <input type="text" value="${val}" class="edit-meas-input" 
-                                   data-cat="${cat}" data-key="${key}"
-                                   style="width: 100%; padding: 8px; padding-right: 25px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; font-weight: 500;">
-                            <span style="position: absolute; right: 8px; color: #94a3b8; font-size: 0.8em; font-weight: bold;">"</span>
-                        </div>
-                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 10px 0; color: var(--brand-navy); font-size: 0.9em; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${cat} Details</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;">
                 `;
+
+                const fields = measurementsObj[cat];
+                if (fields && typeof fields === 'object') {
+                    for (const key in fields) {
+                        const val = fields[key];
+                        formHtml += `
+                            <div style="display: flex; flex-direction: column;">
+                                <label style="font-size: 0.75em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">${key}</label>
+                                <div style="position: relative; display: flex; align-items: center;">
+                                    <input type="text" value="${val}" class="edit-meas-input" 
+                                           data-cat="${cat}" data-key="${key}"
+                                           style="width: 100%; padding: 8px; padding-right: 25px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; font-weight: 500;">
+                                    <span style="position: absolute; right: 8px; color: #94a3b8; font-size: 0.8em; font-weight: bold;">"</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                formHtml += '</div></div>';
             }
-            formHtml += '</div></div>';
         }
         formHtml += '</div>';
         formHtml += `
