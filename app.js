@@ -4763,13 +4763,21 @@ function renderExpenseSummaryCards(expenses) {
     cardsContainer.innerHTML = Object.keys(summary).sort((a, b) => summary[b].total - summary[a].total).map(cat => {
         const icon = categoryIcons[cat] || 'fa-tag';
         const data = summary[cat];
+
+        // Simpler display names
+        let displayName = cat.split('/')[0];
+        if (cat === 'Tailoring Supplies' || cat === 'Haberdashery') displayName = 'Supplies';
+        if (cat === 'Fabrics/Materials') displayName = 'Materials';
+        if (cat === 'Utilities') displayName = 'Stima/Water';
+        if (cat === 'Wages') displayName = 'Fundi Wages';
+
         return `
             <div class="expense-summary-card">
                 <div class="ex-icon-circle">
                     <i class="fas ${icon}"></i>
                 </div>
                 <div class="ex-info">
-                    <h4>${cat.split('/')[0]}</h4>
+                    <h4>${displayName}</h4>
                     <p class="ex-amount">Ksh ${data.total.toLocaleString()}</p>
                     <p class="ex-count">${data.count} entry${data.count !== 1 ? 'ies' : ''}</p>
                 </div>
