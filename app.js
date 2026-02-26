@@ -1763,26 +1763,7 @@ async function loadScript(src) {
 // ==========================================
 // 👑 OWNER MODULE - ADMIN ORDERS
 
-async function loadAdminOrders(mode = 'current') {
-    logDebug(`Loading admin orders (${mode})`, null, 'info');
-    try {
-        let query = supabaseClient.from('orders')
-            .select('*')
-            .order('due_date', { ascending: true });
-
-        if (mode === 'current') {
-            query = query.neq('status', 6);
-        }
-
-        const { data: orders, error } = await query;
-        if (error) throw error;
-
-        // ...rest of your admin orders logic...
-    } catch (error) {
-        logDebug('Error loading admin orders:', error, 'error');
-        alert('Error loading admin orders: ' + error.message);
-    }
-}
+// Redundant loadAdminOrders removed - moved and updated below at line 2082
 
 async function loadAdminDashboard() {/* Lines 1587-1601 omitted */ }
 
@@ -2117,6 +2098,14 @@ async function loadAdminOrders(mode = 'current') {
             query = query.eq('status', parseInt(statusFilter));
         }
 
+        // [NEW] Search Filtering Logic
+        const searchTerm = document.getElementById('admin-search-input')?.value?.trim();
+        if (searchTerm) {
+            // Search in customer_name or customer_phone
+            // We use .or() for multiple column matching
+            query = query.or(`customer_name.ilike.%${searchTerm}%,customer_phone.ilike.%${searchTerm}%`);
+        }
+
         const { data: ordersData, error } = await query;
         if (error) throw error;
 
@@ -2246,6 +2235,15 @@ async function loadAdminOrders(mode = 'current') {
         }
     }
 }
+
+// [NEW] Debounce Helper for Search
+let adminSearchTimeout = null;
+window.debounceLoadOrders = function (mode) {
+    if (adminSearchTimeout) clearTimeout(adminSearchTimeout);
+    adminSearchTimeout = setTimeout(() => {
+        loadAdminOrders(mode);
+    }, 400); // 400ms delay
+};
 
 async function openAdminOrderView(orderId) {
     logDebug("Opening admin order view:", orderId, 'info');

@@ -116,14 +116,27 @@
                     </div>
                 </div>
 
-                <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div class="filter-bar"
+                    style="display: flex; gap: 10px; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); align-items: center;">
+                    <!-- Search Bar -->
+                    <div style="flex: 2; position: relative;">
+                        <i class="fas fa-search"
+                            style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
+                        <input type="text" id="admin-search-input" placeholder="Search by name or phone..."
+                            style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #ddd; border-radius: 4px;"
+                            oninput="debounceLoadOrders('all')">
+                    </div>
                     <!-- Shop Filter -->
-                    <select id="admin-shop-filter" style="width: 250px;">
+                    <select id="admin-shop-filter"
+                        style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                        onchange="loadAdminOrders('all')">
                         <option value="">Filter by Shop (All)</option>
                         <!-- Shops populated by JS -->
                     </select>
                     <!-- Status Filter -->
-                    <select id="admin-status-filter" style="width: 250px;">
+                    <select id="admin-status-filter"
+                        style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                        onchange="loadAdminOrders('all')">
                         <option value="">Filter by Status (All)</option>
                         <option value="1">1. Assigned</option>
                         <option value="2">2. In Progress</option>
