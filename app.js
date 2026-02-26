@@ -3818,118 +3818,172 @@ function downloadOrderPDF() {
 }
 
 // ==========================================
-// 📄 INVOICING LOGIC
+// 📄 INVOICING LOGIC (MODERNIZED)
 // ==========================================
+
+/**
+ * Generates a premium, modern HTML structure for Invoices and Requisitions
+ * Based on user-provided design reference.
+ */
+function generateModernInvoiceHTML(options) {
+    const {
+        title = "INVOICE",
+        subtitle = "Quality Tailoring Services",
+        invoiceNumber = "INV-2026-0001",
+        date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+        dueDate = "Upon Receipt",
+        billToName = "Customer Name",
+        billToPhone = "",
+        items = [], // { description, qty, unitPrice, total }
+        totals = { subtotal: 0, paid: 0, balance: 0 },
+        showPaymentDetails = true,
+        companyName = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.appName : "OTIMA FASHION HOUSE",
+        companyPhone = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.shopPhone : "",
+        companyLocation = "Nairobi, Kenya"
+    } = options;
+
+    const logo = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.logoPath : "logo.png";
+
+    let itemsHtml = items.map(item => `
+        <tr style="page-break-inside: avoid;">
+            <td style="padding: 12px 0; border-bottom: 1px dotted #e2e8f0; font-size: 14px;">${item.description}</td>
+            <td style="padding: 12px 0; border-bottom: 1px dotted #e2e8f0; text-align: center; font-size: 14px;">${item.qty || 1}</td>
+            <td style="padding: 12px 0; border-bottom: 1px dotted #e2e8f0; text-align: right; font-size: 14px;">${formatCurrency(item.unitPrice)}</td>
+            <td style="padding: 12px 0; border-bottom: 1px dotted #e2e8f0; text-align: right; font-weight: 700; font-size: 14px;">${formatCurrency(item.total)}</td>
+        </tr>
+    `).join('');
+
+    return `
+        <div style="font-family: 'Inter', -apple-system, sans-serif; width: 680px; margin: 0 auto; padding: 30px; color: #1e293b; background: #fff; line-height: 1.4; box-sizing: border-box; overflow: hidden;">
+            <!-- Header Section -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; page-break-inside: avoid;">
+                <div style="display: flex; gap: 15px; align-items: center; max-width: 65%;">
+                    <img src="${logo}" style="height: 60px; width: auto; object-fit: contain; border-radius: 6px;" alt="Logo">
+                    <div>
+                        <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a;">${companyName}</h1>
+                        <p style="margin: 1px 0 0 0; color: #64748b; font-size: 12px; font-weight: 500;">${subtitle}</p>
+                        <div style="margin: 10px 0 0 0; font-size: 11px; color: #64748b; line-height: 1.3;">
+                            Phone: ${companyPhone}<br>
+                            Location: ${companyLocation}
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <h2 style="margin: 0; font-size: 28px; font-weight: 900; color: #0f172a; text-transform: uppercase;">${title}</h2>
+                    <p style="margin: 2px 0 10px 0; font-size: 18px; font-weight: 700; color: #f59e0b;">${invoiceNumber}</p>
+                    <div style="font-size: 11px; color: #64748b;">
+                        Date: ${date}<br>
+                        Due Date: ${dueDate}
+                    </div>
+                </div>
+            </div>
+
+            <!-- "Bill To" Box -->
+            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 20px; margin-bottom: 30px; page-break-inside: avoid;">
+                <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">Bill To:</p>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a; text-transform: uppercase;">${billToName}</h3>
+                <p style="margin: 3px 0 0 0; font-size: 14px; color: #475569; font-weight: 500;">${billToPhone}</p>
+            </div>
+
+            <!-- Items Table -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                <thead>
+                    <tr style="border-bottom: 1.5px solid #0f172a;">
+                        <th style="padding: 10px 0; text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b;">Description</th>
+                        <th style="padding: 10px 0; text-align: center; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b;">Qty</th>
+                        <th style="padding: 10px 0; text-align: right; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b;">Unit Price</th>
+                        <th style="padding: 10px 0; text-align: right; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
+
+            <!-- Financial Summary -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 30px; page-break-inside: avoid;">
+                <div style="width: 280px;">
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                        <span style="color: #64748b; font-size: 14px; font-weight: 500;">Total:</span>
+                        <span style="font-weight: 700; font-size: 16px; color: #0f172a;">${formatCurrency(totals.subtotal)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+                        <span style="color: #64748b; font-size: 14px; font-weight: 500;">Paid:</span>
+                        <span style="font-weight: 700; font-size: 16px; color: #10b981;">${formatCurrency(totals.paid)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 15px 0 0 0;">
+                        <span style="font-weight: 800; font-size: 18px; color: #0f172a;">Balance:</span>
+                        <span style="font-weight: 900; font-size: 20px; color: #ef4444;">${formatCurrency(totals.balance)}</span>
+                    </div>
+                </div>
+            </div>
+
+            ${showPaymentDetails ? `
+            <!-- Payment Details Section -->
+            <div style="border-top: 1.5px solid #f1f5f9; padding-top: 25px; page-break-inside: avoid;">
+                <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase;">Payment Details:</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <p style="margin: 4px 0; font-size: 13px; color: #475569;"><strong>Paybill:</strong> <span style="color: #0f172a; font-weight: 600;">${options.paybill || APP_CONFIG.billing.paybill}</span></p>
+                        <p style="margin: 4px 0; font-size: 13px; color: #475569;"><strong>Account:</strong> <span style="color: #0f172a; font-weight: 600;">${options.account || APP_CONFIG.billing.account}</span></p>
+                    </div>
+                    <div>
+                        <p style="margin: 4px 0; font-size: 13px; color: #475569;"><strong>Account Name:</strong> <br><span style="color: #0f172a; font-weight: 600;">${options.accountName || APP_CONFIG.billing.accountName}</span></p>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Decorative Footer -->
+            <div style="margin-top: 60px; text-align: center; border-top: 1px dashed #e2e8f0; padding-top: 25px; page-break-inside: avoid;">
+                <p style="margin: 0; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">
+                    Thank you for choosing ${companyName}!
+                </p>
+                <div style="margin: 12px auto 0; width: 30px; height: 2px; background: #f59e0b; border-radius: 2px;"></div>
+            </div>
+        </div>
+    `;
+}
 
 window.generateExpenseInvoice = async function (expenseId) {
     if (!expenseId) return alert("Expense ID not found");
 
     try {
-        logDebug("Generating expense invoice for:", expenseId, 'info');
+        logDebug("Generating expense requisition for:", expenseId, 'info');
 
-        // 1. Fetch data
-        const { data: expense, error } = await supabaseClient
-            .from('expenses')
-            .select('*')
-            .eq('id', expenseId)
-            .single();
+        const [{ data: expense }, { data: profile }] = await Promise.all([
+            supabaseClient.from('expenses').select('*').eq('id', expenseId).single(),
+            supabaseClient.from('user_profiles').select('full_name').eq('id', USER_PROFILE?.id).single()
+        ]);
 
-        if (error || !expense) throw new Error("Expense not found");
+        if (!expense) throw new Error("Expense not found");
 
-        // 1.5 Manual Lookups to handle any FK relation edge-cases gracefully
-        let targetShop = 'HQ / Global';
-        if (expense.shop_id) {
-            const { data: shopData } = await supabaseClient.from('shops').select('name').eq('id', expense.shop_id).single();
-            if (shopData) targetShop = shopData.name;
-        }
-
-        let recordedBy = 'Administrator';
-        if (expense.manager_id) {
-            const { data: profile } = await supabaseClient.from('user_profiles').select('full_name').eq('id', expense.manager_id).single();
-            if (profile) {
-                recordedBy = profile.full_name;
-            } else {
-                const { data: worker } = await supabaseClient.from('workers').select('name').eq('id', expense.manager_id).single();
-                if (worker) {
-                    recordedBy = worker.name;
-                }
-            }
-        }
-
-        const shopName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName) ? APP_CONFIG.appName.toUpperCase() : "FASHION HOUSE";
         const amount = parseFloat(expense.amount) || 0;
-        const dateStr = new Date(expense.incurred_at || expense.created_at || new Date()).toLocaleDateString();
+        const recordedBy = profile?.full_name || 'Administrator';
 
-        // 2. Build Invoice HTML 
-        const invoiceHTML = `
-            <div id="temp-expense-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; background: #fff;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                        ${(typeof APP_CONFIG !== 'undefined' && APP_CONFIG.logoPath) ? `<img src="${APP_CONFIG.logoPath}" alt="Logo" style="height: 60px; width: auto; object-fit: contain;">` : ''}
-                        <div>
-                            <h1 style="margin: 0; font-size: 2em; letter-spacing: 2px; color: #000;">${shopName}</h1>
-                            <p style="margin: 5px 0 0 0; color: #666;">Expense Requisition / Receipt</p>
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <h2 style="margin: 0; font-size: 1.8em; color: #f59e0b; text-transform: uppercase;">REQUEST</h2>
-                        <p style="margin: 5px 0 2px 0;"><strong>Date:</strong> ${dateStr}</p>
-                        <p style="margin: 0;"><strong>EXP:</strong> #${String(expense.id).slice(0, 8).toUpperCase()}</p>
-                    </div>
-                </div>
+        const invoiceHTML = generateModernInvoiceHTML({
+            title: "EXPENSE REQUISITION",
+            subtitle: "Authorized Internal Request",
+            invoiceNumber: `EXP-${new Date(expense.incurred_at || expense.created_at).getFullYear()}-${String(expense.id).slice(-6).toUpperCase()}`,
+            date: formatDate(expense.incurred_at || expense.created_at),
+            dueDate: "Immediate",
+            billToName: recordedBy,
+            billToPhone: "Target Shop: " + (expense.shop_id ? "Production Unit" : "Global HQ"),
+            items: [{
+                description: `${expense.category}: ${expense.item_name}`,
+                qty: 1,
+                unitPrice: amount,
+                total: amount
+            }],
+            totals: {
+                subtotal: amount,
+                paid: 0,
+                balance: amount
+            },
+            showPaymentDetails: false // Per user request: expenses should not have paybill no.
+        });
 
-                <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
-                    <div>
-                        <h3 style="margin: 0 0 10px 0; color: #666; font-size: 0.9em; text-transform: uppercase;">Requested By:</h3>
-                        <p style="margin: 0; font-size: 1.2em; font-weight: bold;">${recordedBy}</p>
-                        <p style="margin: 5px 0 0 0; color: #666;">Role: ${expense.manager_id === USER_PROFILE?.id && USER_PROFILE?.role === 'owner' ? 'Owner / Admin' : 'Shop Manager'}</p>
-                    </div>
-                    <div style="text-align: right;">
-                        <h3 style="margin: 0 0 10px 0; color: #666; font-size: 0.9em; text-transform: uppercase;">Target Shop:</h3>
-                        <p style="margin: 0; font-size: 1.1em; font-weight: bold; color: #0f172a">${targetShop}</p>
-                    </div>
-                </div>
-
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-                    <thead>
-                        <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
-                            <th style="padding: 12px; text-align: left; font-weight: bold; color: #475569;">Category</th>
-                            <th style="padding: 12px; text-align: left; font-weight: bold; color: #475569;">Item / Details</th>
-                            <th style="padding: 12px; text-align: right; font-weight: bold; color: #475569;">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="padding: 15px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 500;">${expense.category}</td>
-                            <td style="padding: 15px 12px; border-bottom: 1px solid #e2e8f0;">${expense.item_name}</td>
-                            <td style="padding: 15px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${formatCurrency(amount)}</td>
-                        </tr>
-                        ${expense.notes ? `
-                        <tr>
-                            <td colspan="3" style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-style: italic; color: #64748b; font-size: 0.9em;">
-                                Notes: ${expense.notes}
-                            </td>
-                        </tr>
-                        ` : ''}
-                    </tbody>
-                </table>
-
-                <div style="display: flex; justify-content: flex-end;">
-                    <table style="width: 300px; border-collapse: collapse;">
-                        <tr>
-                            <td style="padding: 15px 12px; font-weight: bold; font-size: 1.2em; color: #0f172a;">Total Requisition:</td>
-                            <td style="padding: 15px 12px; text-align: right; font-weight: bold; font-size: 1.2em; color: #0f172a;">${formatCurrency(amount)}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.9em;">
-                    <p style="margin: 0;">Authorized Expense Record.</p>
-                </div>
-            </div>
-        `;
-
-        // 3. Inject temporarily into DOM to print
+        // Inject temporarily into DOM to print
         const wrapper = document.createElement('div');
         wrapper.innerHTML = invoiceHTML;
         wrapper.style.position = 'absolute';
@@ -3940,16 +3994,15 @@ window.generateExpenseInvoice = async function (expenseId) {
         let cName = (expense.category || 'Expense').replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
         const opt = {
-            margin: 0.5,
+            margin: [0.5, 0.5],
             filename: `Requisition_${cName}_${String(expense.id).slice(0, 6)}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            html2canvas: { scale: 2, useCORS: true, logging: false, width: 680 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        // 4. Download and cleanup (requires html2pdf library)
-        if (typeof html2canvas === 'undefined' || typeof html2pdf === 'undefined') {
-            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+        if (typeof html2pdf === 'undefined') {
             await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
         }
 
@@ -3957,22 +4010,28 @@ window.generateExpenseInvoice = async function (expenseId) {
         document.body.removeChild(wrapper);
 
     } catch (error) {
-        logDebug("Expense Invoice Error:", error, 'error');
+        logDebug("Expense Requisition Error:", error, 'error');
         alert("Error generating requisition: " + error.message);
     }
 }
 
 window.downloadInvoicePDF = async function (orderId) {
     if (!orderId) {
-        // Fallback if called from Admin Order Edit screen without ID
         if (typeof CURRENT_ORDER_ID !== 'undefined') orderId = CURRENT_ORDER_ID;
         else return alert("Order ID not found");
     }
 
     try {
-        logDebug("Generating invoice for:", orderId, 'info');
+        logDebug("Generating modern invoice for:", orderId, 'info');
 
-        // 1. Fetch data
+        // Check for UI-selected payment details
+        const payMethod = document.getElementById('invoice-payment-method')?.value;
+        let pDetails = {};
+        if (payMethod === 'custom') {
+            pDetails.paybill = document.getElementById('custom-paybill')?.value;
+            pDetails.account = document.getElementById('custom-account')?.value;
+        }
+
         const [{ data: order }, { data: payments }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
             supabaseClient.from('payments').select('*').eq('order_id', orderId)
@@ -3980,93 +4039,37 @@ window.downloadInvoicePDF = async function (orderId) {
 
         if (!order) throw new Error("Order not found");
 
-        const shopName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName) ? APP_CONFIG.appName.toUpperCase() : "FASHION HOUSE";
         const totalCost = parseFloat(order.price) || 0;
         const paid = payments ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) : 0;
         const balance = totalCost - paid;
 
-        let clientPhone = order.phone_number || order.customer_phone || 'N/A';
-        const dateStr = new Date().toLocaleDateString();
+        const invoiceHTML = generateModernInvoiceHTML({
+            title: "INVOICE",
+            subtitle: "Quality Tailoring Services",
+            invoiceNumber: `INV-${new Date(order.created_at || new Date()).getFullYear()}-${String(order.id).slice(-4).toUpperCase()}`,
+            date: formatDate(new Date().toISOString()),
+            dueDate: order.due_date ? formatDate(order.due_date) : "Upon Receipt",
+            billToName: order.customer_name,
+            billToPhone: order.customer_phone || order.phone_number || 'N/A',
+            items: [{
+                description: `Bespoke Tailoring: ${order.garment_type}`,
+                qty: 1,
+                unitPrice: totalCost,
+                total: totalCost
+            }],
+            totals: {
+                subtotal: totalCost,
+                paid: paid,
+                balance: Math.max(0, balance)
+            },
+            showPaymentDetails: true,
+            paybill: pDetails.paybill,
+            account: pDetails.account
+        });
 
-        // 2. Build Invoice HTML 
-        const invoiceHTML = `
-            <div id="temp-invoice-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; background: #fff;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                        ${(typeof APP_CONFIG !== 'undefined' && APP_CONFIG.logoPath) ? `<img src="${APP_CONFIG.logoPath}" alt="Logo" style="height: 60px; width: auto; object-fit: contain;">` : ''}
-                        <div>
-                            <h1 style="margin: 0; font-size: 2em; letter-spacing: 2px; color: #000;">${shopName}</h1>
-                            <p style="margin: 5px 0 0 0; color: #666;">Official Invoice</p>
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <h2 style="margin: 0; font-size: 1.8em; color: #3b82f6; text-transform: uppercase;">INVOICE</h2>
-                        <p style="margin: 5px 0 2px 0;"><strong>Date:</strong> ${dateStr}</p>
-                        <p style="margin: 0;"><strong>Order:</strong> #${String(order.id).slice(0, 8).toUpperCase()}</p>
-                    </div>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
-                    <div>
-                        <h3 style="margin: 0 0 10px 0; color: #666; font-size: 0.9em; text-transform: uppercase;">Billed To:</h3>
-                        <p style="margin: 0; font-size: 1.2em; font-weight: bold;">${order.customer_name}</p>
-                        <p style="margin: 5px 0 0 0;">Phone: ${clientPhone}</p>
-                    </div>
-                    <div style="text-align: right;">
-                        <h3 style="margin: 0 0 10px 0; color: #666; font-size: 0.9em; text-transform: uppercase;">Due Date:</h3>
-                        <p style="margin: 0; font-size: 1.1em; font-weight: bold; color: ${balance > 0 ? '#ef4444' : '#22c55e'}">${order.due_date ? new Date(order.due_date).toLocaleDateString() : 'Upon Receipt'}</p>
-                    </div>
-                </div>
-
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-                    <thead>
-                        <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
-                            <th style="padding: 12px; text-align: left; font-weight: bold; color: #475569;">Description</th>
-                            <th style="padding: 12px; text-align: right; font-weight: bold; color: #475569;">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="padding: 15px 12px; border-bottom: 1px solid #e2e8f0;">Bespoke Tailoring: ${order.garment_type}</td>
-                            <td style="padding: 15px 12px; border-bottom: 1px solid #e2e8f0; text-align: right;">${formatCurrency(totalCost)}</td>
-                        </tr>
-                        ${order.customer_preferences ? `
-                        <tr>
-                            <td colspan="2" style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-style: italic; color: #64748b; font-size: 0.9em;">
-                                Notes: ${order.customer_preferences}
-                            </td>
-                        </tr>
-                        ` : ''}
-                    </tbody>
-                </table>
-
-                <div style="display: flex; justify-content: flex-end;">
-                    <table style="width: 300px; border-collapse: collapse;">
-                        <tr>
-                            <td style="padding: 8px 12px; font-weight: bold; color: #64748b;">Subtotal:</td>
-                            <td style="padding: 8px 12px; text-align: right;">${formatCurrency(totalCost)}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 12px; font-weight: bold; color: #64748b; border-bottom: 1px solid #e2e8f0;">Payments Made:</td>
-                            <td style="padding: 8px 12px; text-align: right; border-bottom: 1px solid #e2e8f0; color: #22c55e;">-${formatCurrency(paid)}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 15px 12px; font-weight: bold; font-size: 1.2em; color: #0f172a;">Balance Due:</td>
-                            <td style="padding: 15px 12px; text-align: right; font-weight: bold; font-size: 1.2em; color: ${balance > 0 ? '#ef4444' : '#22c55e'};">${formatCurrency(Math.max(0, balance))}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.9em;">
-                    <p style="margin: 0;">Thank you for your business.</p>
-                </div>
-            </div>
-        `;
-
-        // 3. Inject temporarily into DOM to print
+        // Inject temporarily into DOM to print
         const wrapper = document.createElement('div');
         wrapper.innerHTML = invoiceHTML;
-        // Hide it visually but keep it in DOM for html2pdf
         wrapper.style.position = 'absolute';
         wrapper.style.left = '-9999px';
         document.body.appendChild(wrapper);
@@ -4075,16 +4078,15 @@ window.downloadInvoicePDF = async function (orderId) {
         let cName = (order.customer_name || 'Customer').replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
         const opt = {
-            margin: 0.5,
+            margin: [0.5, 0.5],
             filename: `Invoice_${cName}_${String(order.id).slice(0, 6)}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            html2canvas: { scale: 2, useCORS: true, logging: false, width: 680 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        // 4. Download and cleanup (requires html2pdf library)
-        if (typeof html2canvas === 'undefined' || typeof html2pdf === 'undefined') {
-            await window.loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+        if (typeof html2pdf === 'undefined') {
             await window.loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
         }
 

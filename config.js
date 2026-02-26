@@ -10,8 +10,9 @@ const APP_CONFIG = {
 
     // === 2. PAYMENT & SUPPORT DETAILS (For the Lock Screen) ===
     billing: {
-        mpesaNumber: "0745806488",
-        tillNumber: "4056724",
+        paybill: "600100",
+        account: "200800",
+        accountName: "TWO MILLION WAYS LTD",
         supportPhone: "0745806488"
     },
 
