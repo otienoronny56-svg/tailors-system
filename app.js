@@ -3840,6 +3840,11 @@ function generateModernInvoiceHTML(options) {
         companyLocation = "Nairobi, Kenya"
     } = options;
 
+    const isExpense = title.toUpperCase().includes("EXPENSE");
+    const containerPadding = isExpense ? "15px 30px" : "30px";
+    const sectionMargin = isExpense ? "20px" : "30px";
+    const billToPadding = isExpense ? "15px" : "20px";
+
     const logo = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.logoPath : "logo.png";
 
     let itemsHtml = items.map(item => `
@@ -3852,9 +3857,9 @@ function generateModernInvoiceHTML(options) {
     `).join('');
 
     return `
-        <div style="font-family: 'Inter', -apple-system, sans-serif; width: 680px; margin: 0 auto; padding: 30px; color: #1e293b; background: #fff; line-height: 1.4; box-sizing: border-box; overflow: hidden;">
+        <div style="font-family: 'Inter', -apple-system, sans-serif; width: 680px; margin: 0 auto; padding: ${containerPadding}; color: #1e293b; background: #fff; line-height: 1.4; box-sizing: border-box; overflow: hidden;">
             <!-- Header Section -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; page-break-inside: avoid;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: ${sectionMargin}; page-break-inside: avoid;">
                 <div style="display: flex; gap: 15px; align-items: center; max-width: 65%;">
                     <img src="${logo}" style="height: 60px; width: auto; object-fit: contain; border-radius: 6px;" alt="Logo">
                     <div>
@@ -3877,8 +3882,8 @@ function generateModernInvoiceHTML(options) {
             </div>
 
             <!-- "Bill To" Box -->
-            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 20px; margin-bottom: 30px; page-break-inside: avoid;">
-                <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">Bill To:</p>
+            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: ${billToPadding}; margin-bottom: ${sectionMargin}; page-break-inside: avoid;">
+                <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">${isExpense ? 'Requested By:' : 'Bill To:'}</p>
                 <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a; text-transform: uppercase;">${billToName}</h3>
                 <p style="margin: 3px 0 0 0; font-size: 14px; color: #475569; font-weight: 500;">${billToPhone}</p>
             </div>
