@@ -90,37 +90,40 @@
 
                 <form id="order-form">
                     <fieldset>
-                        <legend>Customer</legend>
+                        <legend>Customer & Garment</legend>
                         <input type="text" id="customer_name" placeholder="Customer Name (Required)" required>
                         <input type="tel" id="customer_phone" placeholder="Phone Number (Required)" required>
+
+                        <select id="garment-type-select" required onchange="generateMeasurementFieldsManager()">
+                            <option value="">-- Select Garment Type (Required) --</option>
+                            <option value="Suit">Suit</option>
+                            <option value="Kaunda/Senator Suit">Kaunda/Senator Suit</option>
+                            <option value="Trouser">Trouser</option>
+                            <option value="Dress">Dress</option>
+                            <option value="Shirt">Shirt</option>
+                            <option value="Coat">Coat</option>
+                            <option value="Half Coat">Half Coat</option>
+                            <option value="Alteration">Alteration</option>
+                        </select>
+
                         <label for="due_date" style="display: block; margin-top: 10px;">Due Date:</label>
                         <input type="date" id="due_date" required>
                     </fieldset>
 
-                    <fieldset>
-                        <legend><i class="fas fa-list"></i> Order Items</legend>
-
-                        <div id="line-items-container"></div>
-
-                        <button type="button" id="add-item-btn"
-                            style="margin-top: 14px; padding: 9px 18px; background: #0f172a; color: #f59e0b; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.9em; display: inline-flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-plus-circle"></i> Add Another Item
-                        </button>
-
-                        <div
-                            style="margin-top: 18px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 700; color: #166534; font-size: 1em;"><i class="fas fa-calculator"
-                                    style="margin-right: 6px;"></i>Order Total</span>
-                            <span id="order-total-display"
-                                style="font-weight: 900; color: #166534; font-size: 1.4em;">Ksh 0.00</span>
-                        </div>
-
-                        <div style="margin-top: 14px;">
-                            <input type="number" id="deposit_paid"
-                                placeholder="Initial Deposit Paid (Optional, default 0)" step="0.01" value="0">
-                        </div>
+                    <fieldset id="measurement-fieldset" style="display: none;">
+                        <legend>Measurements (Inches)</legend>
+                        <div id="measurement-fields-container"></div>
+                        <textarea id="customer_preferences" placeholder="Customer Preferences or Special Notes" rows="3"
+                            style="margin-top: 15px;"></textarea>
                     </fieldset>
 
+                    <fieldset>
+                        <legend>Financials (Ksh)</legend>
+                        <input type="number" id="price" placeholder="Total Price (Required)" step="0.01" min="1"
+                            required>
+                        <input type="number" id="deposit_paid" placeholder="Initial Deposit Paid (Optional, default 0)"
+                            step="0.01" value="0">
+                    </fieldset>
 
                     <fieldset>
                         <legend>Team Assignment</legend>
