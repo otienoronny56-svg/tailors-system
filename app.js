@@ -3841,9 +3841,9 @@ function generateModernInvoiceHTML(options) {
     } = options;
 
     const isExpense = title.toUpperCase().includes("EXPENSE");
-    const containerPadding = isExpense ? "15px 30px" : "30px";
-    const sectionMargin = isExpense ? "20px" : "30px";
-    const billToPadding = isExpense ? "15px" : "20px";
+    const containerPadding = isExpense ? "10px 30px" : "30px";
+    const sectionMargin = isExpense ? "15px" : "30px";
+    const billToPadding = isExpense ? "12px" : "20px";
 
     const logo = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.logoPath : "logo.png";
 
@@ -3857,13 +3857,13 @@ function generateModernInvoiceHTML(options) {
     `).join('');
 
     return `
-        <div style="font-family: 'Inter', -apple-system, sans-serif; width: 680px; margin: 0 auto; padding: ${containerPadding}; color: #1e293b; background: #fff; line-height: 1.4; box-sizing: border-box; overflow: hidden;">
+        <div style="font-family: 'Inter', -apple-system, sans-serif; width: 680px; margin: 0 auto; padding: ${containerPadding}; color: #1e293b; background: #fff; line-height: 1.4; box-sizing: border-box; overflow: hidden; -webkit-print-color-adjust: exact;">
             <!-- Header Section -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: ${sectionMargin}; page-break-inside: avoid;">
                 <div style="display: flex; gap: 15px; align-items: center; max-width: 65%;">
-                    <img src="${logo}" style="height: 60px; width: auto; object-fit: contain; border-radius: 6px;" alt="Logo">
+                    <img src="${logo}" style="height: 60px; width: auto; object-fit: contain; border-radius: 6px;" alt="Logo" id="invoice-logo-img">
                     <div>
-                        <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a;">${companyName}</h1>
+                        <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a; font-family: 'Inter', sans-serif;">${companyName}</h1>
                         <p style="margin: 1px 0 0 0; color: #64748b; font-size: 12px; font-weight: 500;">${subtitle}</p>
                         <div style="margin: 10px 0 0 0; font-size: 11px; color: #64748b; line-height: 1.3;">
                             Phone: ${companyPhone}<br>
@@ -3997,10 +3997,16 @@ window.generateExpenseInvoice = async function (expenseId) {
         let cName = (expense.category || 'Expense').replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
         const opt = {
-            margin: [0.5, 0.5],
+            margin: [0.3, 0.3], // Tighter margin
             filename: `Requisition_${cName}_${String(expense.id).slice(0, 6)}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false, width: 680 },
+            html2canvas: {
+                scale: 3, // Premium quality
+                useCORS: true,
+                logging: false,
+                width: 680,
+                windowWidth: 700
+            },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
@@ -4008,6 +4014,21 @@ window.generateExpenseInvoice = async function (expenseId) {
         if (typeof html2pdf === 'undefined') {
             await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
         }
+
+        // NUCLEAR FIX: Wait for assets
+        try {
+            if (document.fonts) await document.fonts.ready;
+            const logoImg = element.querySelector('#invoice-logo-img');
+            if (logoImg && !logoImg.complete) {
+                await new Promise(resolve => {
+                    logoImg.onload = resolve;
+                    logoImg.onerror = resolve;
+                    setTimeout(resolve, 2000); // Fail-safe
+                });
+            }
+            // Small layout settle delay
+            await new Promise(r => setTimeout(r, 400));
+        } catch (e) { console.error("Asset wait error", e); }
 
         await html2pdf().set(opt).from(element).save();
         document.body.removeChild(wrapper);
@@ -7405,10 +7426,15 @@ window.generateCustomInvoice = async function () {
         let cName = billedTo.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
         const opt = {
-            margin: 0.5,
+            margin: 0.3,
             filename: `Invoice_${cName}_${invoiceId}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: {
+                scale: 3,
+                useCORS: true,
+                width: 680,
+                windowWidth: 700
+            },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
 
@@ -7422,6 +7448,13 @@ window.generateCustomInvoice = async function () {
         const origText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
         btn.disabled = true;
+
+        // NUCLEAR FIX: Wait for assets
+        try {
+            if (document.fonts) await document.fonts.ready;
+            // Small layout settle delay
+            await new Promise(r => setTimeout(r, 400));
+        } catch (e) { console.error("Asset wait error", e); }
 
         await html2pdf().set(opt).from(element).save();
 
