@@ -1037,18 +1037,139 @@ async function loadWorkersDropdown() {
 }
 
 // ==========================================
+// 🛒 SHARED LINE-ITEM BUILDER
+// Used by both manager and admin order forms
+// ==========================================
+
+const GARMENT_OPTIONS = [
+    'Suit', 'Kaunda/Senator Suit', 'Trouser', 'Dress',
+    'Shirt', 'Coat', 'Half Coat', 'Alteration', 'Other'
+];
+
+function formatKsh(n) {
+    return 'Ksh ' + (parseFloat(n) || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function buildGarmentOptions(selected = '') {
+    return GARMENT_OPTIONS.map(g =>
+        `<option value="${g}" ${g === selected ? 'selected' : ''}>${g}</option>`
+    ).join('');
+}
+
+function makeLineItemRow(index, isFirst) {
+    const removeBtn = isFirst ? '' :
+        `<button type="button" class="li-remove-btn" data-idx="${index}" title="Remove item"
+            style="background:#fee2e2;border:none;color:#dc2626;border-radius:6px;padding:8px 12px;cursor:pointer;font-size:1em;flex-shrink:0;">
+            <i class="fas fa-trash-alt"></i>
+        </button>`;
+
+    return `
+    <div class="line-item-row" data-idx="${index}" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:12px;flex-wrap:wrap;">
+        <div style="flex:2;min-width:140px;">
+            <label style="display:block;margin-bottom:4px;font-size:0.85em;font-weight:600;color:#475569;">Garment Type</label>
+            <select class="li-type" data-idx="${index}" onchange="onLineItemChange()"
+                style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.95em;background:#fff;">
+                <option value="">-- Select --</option>
+                ${buildGarmentOptions()}
+            </select>
+        </div>
+        <div style="flex:3;min-width:160px;">
+            <label style="display:block;margin-bottom:4px;font-size:0.85em;font-weight:600;color:#475569;">Description <span style="font-weight:400;color:#94a3b8;">(optional)</span></label>
+            <input type="text" class="li-desc" data-idx="${index}" onchange="onLineItemChange()"
+                placeholder="e.g. Blue Italian wool, slim fit"
+                style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
+        </div>
+        <div style="flex:1;min-width:110px;">
+            <label style="display:block;margin-bottom:4px;font-size:0.85em;font-weight:600;color:#475569;">Price (Ksh)</label>
+            <input type="number" class="li-price" data-idx="${index}" oninput="onLineItemChange()"
+                placeholder="0.00" step="0.01" min="0"
+                style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
+        </div>
+        ${removeBtn}
+    </div>`;
+}
+
+function onLineItemChange() {
+    const total = Array.from(document.querySelectorAll('.li-price'))
+        .reduce((sum, el) => sum + (parseFloat(el.value) || 0), 0);
+    const display = document.getElementById('order-total-display');
+    if (display) display.textContent = formatKsh(total);
+
+    // Drive measurements fieldset from first row's garment type
+    const firstType = document.querySelector('.li-type');
+    if (firstType) {
+        // Synthesize a garment-type-select value for measurement generation
+        let synth = document.getElementById('garment-type-select');
+        if (!synth) {
+            synth = document.createElement('select');
+            synth.id = 'garment-type-select';
+            synth.style.display = 'none';
+            document.body.appendChild(synth);
+        }
+        synth.innerHTML = `<option value="${firstType.value}" selected>${firstType.value}</option>`;
+        if (firstType.value) {
+            // Trigger measurement field generation
+            if (typeof generateMeasurementFieldsManager === 'function') generateMeasurementFieldsManager();
+            else if (typeof generateAdminOrderFormMeasurements === 'function') generateAdminOrderFormMeasurements();
+        }
+    }
+}
+
+function initLineItemBuilder() {
+    const container = document.getElementById('line-items-container');
+    const addBtn = document.getElementById('add-item-btn');
+    if (!container || !addBtn) return;
+
+    // Start with one item row
+    container.innerHTML = makeLineItemRow(0, true);
+
+    addBtn.addEventListener('click', () => {
+        const rows = container.querySelectorAll('.line-item-row');
+        const newIdx = rows.length;
+        const div = document.createElement('div');
+        div.innerHTML = makeLineItemRow(newIdx, false);
+        container.appendChild(div.firstElementChild);
+
+        // Wire remove button
+        container.querySelector(`.li-remove-btn[data-idx="${newIdx}"]`)
+            ?.addEventListener('click', (e) => {
+                e.currentTarget.closest('.line-item-row').remove();
+                onLineItemChange();
+            });
+    });
+}
+
+/**
+ * Reads all line item rows from the form.
+ * Returns { lineItems, garmentType, totalPrice }
+ */
+function collectLineItems() {
+    const lineItems = [];
+    document.querySelectorAll('.line-item-row').forEach(row => {
+        const type = row.querySelector('.li-type')?.value || '';
+        const desc = row.querySelector('.li-desc')?.value || '';
+        const price = parseFloat(row.querySelector('.li-price')?.value) || 0;
+        lineItems.push({ garment_type: type, description: desc, price });
+    });
+    const garmentType = lineItems.map(i => i.garment_type).filter(Boolean).join(', ') || 'Garment';
+    const totalPrice = lineItems.reduce((s, i) => s + i.price, 0);
+    return { lineItems, garmentType, totalPrice };
+}
+
+// ==========================================
 // 👔 MANAGER MODULE - ORDER FORM
 // ==========================================
+
 
 function initOrderForm() {
     loadWorkersDropdown();
     loadWorkersForSquad(USER_PROFILE.shop_id); // [NEW] Load checkboxes
 
-    const garmentSelect = document.getElementById('garment-type-select');
-    if (garmentSelect) garmentSelect.addEventListener('change', generateMeasurementFieldsManager);
-
     // Setup Client Search
     setupClientSearch('customer_phone');
+
+    // Init multi-item line builder
+    initLineItemBuilder();
 
     const orderForm = document.getElementById('order-form');
     if (orderForm) {
@@ -1058,12 +1179,16 @@ function initOrderForm() {
             submitBtn.disabled = true;
 
             try {
-                const measurements = {};
-                document.querySelectorAll('#measurement-fields-container input').forEach(input => {
-                    const comp = input.dataset.component; const meas = input.dataset.measurement;
-                    if (!measurements[comp]) measurements[comp] = {};
-                    if (input.value) measurements[comp][meas] = parseFloat(input.value);
-                });
+                // Collect line items
+                const { lineItems, garmentType, totalPrice } = collectLineItems();
+                if (lineItems.length === 0 || !lineItems[0].garment_type) {
+                    alert('Please select a garment type for at least the first item.');
+                    submitBtn.disabled = false; return;
+                }
+                if (totalPrice <= 0) {
+                    alert('Please enter a price for at least one item.');
+                    submitBtn.disabled = false; return;
+                }
 
                 // [NEW] Capture Squad
                 const squad = Array.from(document.querySelectorAll('.squad-checkbox:checked')).map(cb => cb.value);
@@ -1073,13 +1198,14 @@ function initOrderForm() {
                     manager_id: USER_PROFILE.id,
                     customer_name: document.getElementById('customer_name').value,
                     customer_phone: document.getElementById('customer_phone').value,
-                    garment_type: document.getElementById('garment-type-select').value,
-                    price: parseFloat(document.getElementById('price').value) || 0,
+                    garment_type: garmentType,
+                    price: totalPrice,
+                    line_items: lineItems,
                     due_date: document.getElementById('due_date').value,
                     worker_id: document.getElementById('worker-select').value || null,
-                    additional_workers: JSON.stringify(squad), // [NEW] Save Squad
+                    additional_workers: JSON.stringify(squad),
                     status: 1,
-                    customer_preferences: document.getElementById('customer_preferences').value || '',
+                    customer_preferences: document.getElementById('customer_preferences')?.value || '',
                     measurements_details: JSON.stringify(measurements),
                     created_at: new Date().toISOString()
                 };
@@ -2864,14 +2990,11 @@ function initAdminOrderForm() {
         });
     }
 
-    // 3. Setup Garment Type Changes
-    const garmentSelect = document.getElementById('garment-type-select');
-    if (garmentSelect) {
-        garmentSelect.addEventListener('change', generateAdminOrderFormMeasurements);
-    }
-
     // Setup Client Search
     setupClientSearch('customer_phone');
+
+    // Init multi-item line builder
+    initLineItemBuilder();
 
     // 4. Handle Form Submission
     const orderForm = document.getElementById('order-form');
@@ -2880,6 +3003,11 @@ function initAdminOrderForm() {
             e.preventDefault();
             const shopId = document.getElementById('shop-select').value;
             if (!shopId) return alert("Select a shop");
+
+            // Collect line items
+            const { lineItems, garmentType, totalPrice } = collectLineItems();
+            if (!lineItems[0]?.garment_type) return alert('Please select a garment type for at least the first item.');
+            if (totalPrice <= 0) return alert('Please enter a price for at least one item.');
 
             // Collect measurements
             const measurements = {};
@@ -2897,8 +3025,9 @@ function initAdminOrderForm() {
                 shop_id: shopId,
                 customer_name: document.getElementById('customer_name').value,
                 customer_phone: document.getElementById('customer_phone').value,
-                garment_type: document.getElementById('garment-type-select').value,
-                price: parseFloat(document.getElementById('price').value) || 0,
+                garment_type: garmentType,
+                price: totalPrice,
+                line_items: lineItems,
                 due_date: document.getElementById('due_date').value,
                 worker_id: document.getElementById('worker-select').value || null,
                 additional_workers: JSON.stringify(squad),
@@ -2909,6 +3038,7 @@ function initAdminOrderForm() {
 
             const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
             if (error) return alert(error.message);
+
 
             // [NEW] Upsert Client Data
             try {
@@ -4146,17 +4276,22 @@ window.downloadInvoicePDF = async function (orderId) {
             billToLabel: "Bill To:",
             billToName: order.customer_name,
             billToSub: order.customer_phone || order.phone_number || '',
-            items: [{
-                description: `Bespoke Tailoring: ${order.garment_type}`,
-                qty: 1,
-                unitPrice: totalCost,
-                total: totalCost
-            }],
+            items: (order.line_items && order.line_items.length > 0)
+                // Multi-item order → show each garment as its own line
+                ? order.line_items.map(item => ({
+                    description: [item.garment_type, item.description].filter(Boolean).join(' — '),
+                    qty: 1,
+                    unitPrice: parseFloat(item.price) || 0,
+                    total: parseFloat(item.price) || 0
+                }))
+                // Legacy single-item order → fallback
+                : [{ description: `Bespoke Tailoring: ${order.garment_type}`, qty: 1, unitPrice: totalCost, total: totalCost }],
             totals: { subtotal: totalCost, paid: paid, balance: Math.max(0, balance) },
             showPaymentDetails: true,
             paybill: customPaybill,
             account: customAccount
         });
+
 
         openInvoicePrintWindow(doc, `Invoice_${(order.customer_name || 'customer').replace(/\s+/g, '_')}`);
 
