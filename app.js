@@ -7002,44 +7002,57 @@ async function editClientMeasurement(clientId, historyIndex) {
             try { measurementsObj = JSON.parse(measurementsObj); } catch (e) { measurementsObj = {}; }
         }
 
+        const garmentType = historyItem.garment || 'Suit'; // Fallback to Suit if unknown
+        const standardFields = GARMENT_MEASUREMENTS[garmentType] || {};
+
         let formHtml = '<div style="margin-top: 15px;">';
 
-        // Check if history is empty or measurements are missing
-        if (!measurementsObj || Object.keys(measurementsObj).length === 0) {
+        // Combine standard fields with existing measurements to ensure all inputs show up
+        // If measurementsObj is empty, we iterate through standardFields to show blank inputs
+        const categories = (measurementsObj && Object.keys(measurementsObj).length > 0)
+            ? Object.keys({ ...standardFields, ...measurementsObj })
+            : Object.keys(standardFields);
+
+        categories.forEach(cat => {
+            formHtml += `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; color: var(--brand-navy); font-size: 0.9em; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${cat} Details</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;">
+            `;
+
+            // Fields for this category
+            const stdFieldsForCat = standardFields[cat] || [];
+            const existingFieldsForCat = (measurementsObj && measurementsObj[cat]) ? Object.keys(measurementsObj[cat]) : [];
+
+            // Unique keys from both
+            const allKeys = [...new Set([...stdFieldsForCat, ...existingFieldsForCat])];
+
+            allKeys.forEach(key => {
+                const val = (measurementsObj && measurementsObj[cat] && measurementsObj[cat][key]) ? measurementsObj[cat][key] : '';
+                formHtml += `
+                    <div style="display: flex; flex-direction: column;">
+                        <label style="font-size: 0.75em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">${key}</label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <input type="text" value="${val}" class="edit-meas-input" 
+                                   data-cat="${cat}" data-key="${key}"
+                                   style="width: 100%; padding: 8px; padding-right: 25px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; font-weight: 500;">
+                            <span style="position: absolute; right: 8px; color: #94a3b8; font-size: 0.8em; font-weight: bold;">"</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            formHtml += '</div></div>';
+        });
+
+        if (categories.length === 0) {
             formHtml += `
                 <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 15px; margin-bottom: 15px; text-align: center;">
-                    <p style="margin: 0; color: #856404; font-size: 0.9em;">No measurement details to edit yet.</p>
+                    <p style="margin: 0; color: #856404; font-size: 0.9em;">No predefined measurement fields for "${garmentType}".</p>
                 </div>
             `;
-        } else {
-            // Iterate through categories and measurements
-            for (const cat in measurementsObj) {
-                formHtml += `
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 10px 0; color: var(--brand-navy); font-size: 0.9em; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${cat} Details</h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;">
-                `;
-
-                const fields = measurementsObj[cat];
-                if (fields && typeof fields === 'object') {
-                    for (const key in fields) {
-                        const val = fields[key];
-                        formHtml += `
-                            <div style="display: flex; flex-direction: column;">
-                                <label style="font-size: 0.75em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">${key}</label>
-                                <div style="position: relative; display: flex; align-items: center;">
-                                    <input type="text" value="${val}" class="edit-meas-input" 
-                                           data-cat="${cat}" data-key="${key}"
-                                           style="width: 100%; padding: 8px; padding-right: 25px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; font-weight: 500;">
-                                    <span style="position: absolute; right: 8px; color: #94a3b8; font-size: 0.8em; font-weight: bold;">"</span>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-                formHtml += '</div></div>';
-            }
         }
+
         formHtml += '</div>';
         formHtml += `
             <div style="margin-top: 15px; display: flex; gap: 10px;">
