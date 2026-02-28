@@ -6939,6 +6939,7 @@ window.openNewClientModal = function () {
     const modal = document.getElementById('new-client-modal');
     if (modal) {
         document.getElementById('new-client-form').reset();
+        document.getElementById('new-client-measurements-container').innerHTML = '';
         modal.style.display = 'block';
     }
 };
@@ -6948,23 +6949,87 @@ window.closeNewClientModal = function () {
     if (modal) modal.style.display = 'none';
 };
 
+window.generateNewClientMeasurementFields = function () {
+    const type = document.getElementById('new-client-garment-type').value;
+    const container = document.getElementById('new-client-measurements-container');
+    if (!container) return;
+
+    if (!type) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const measurements = GARMENT_MEASUREMENTS[type];
+    if (!measurements) {
+        container.innerHTML = '<p style="color: #64748b; font-style: italic; padding: 10px;">No specific measurements defined for this garment.</p>';
+        return;
+    }
+
+    let h = '<div style="margin-top: 20px; border-top: 2px dashed #e2e8f0; padding-top: 20px;">';
+    h += `<h3 style="font-size: 1.1em; color: var(--brand-navy); margin-bottom: 15px;">Initial Measurements for ${type}</h3>`;
+
+    for (const cat in measurements) {
+        h += `
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--brand-navy); font-size: 0.9em; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${cat}</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;">
+        `;
+        measurements[cat].forEach(key => {
+            h += `
+                <div style="display: flex; flex-direction: column;">
+                    <label style="font-size: 0.75em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">${key}</label>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="text" class="new-client-meas-input" data-cat="${cat}" data-key="${key}"
+                               style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9em; box-sizing: border-box;">
+                        <span style="position: absolute; right: 8px; color: #94a3b8; font-size: 0.8em; font-weight: bold;">"</span>
+                    </div>
+                </div>
+            `;
+        });
+        h += '</div></div>';
+    }
+    h += '</div>';
+    container.innerHTML = h;
+};
+
 window.saveNewClient = async function (e) {
     if (e) e.preventDefault();
 
     const name = document.getElementById('new-client-name').value.trim();
     const phone = document.getElementById('new-client-phone').value.trim();
     const notes = document.getElementById('new-client-notes').value.trim();
+    const garmentType = document.getElementById('new-client-garment-type').value;
 
     if (!name || !phone) return alert("Name and Phone are required.");
 
     try {
+        const measurements = {};
+        document.querySelectorAll('.new-client-meas-input').forEach(input => {
+            const cat = input.dataset.cat;
+            const key = input.dataset.key;
+            if (input.value) {
+                if (!measurements[cat]) measurements[cat] = {};
+                measurements[cat][key] = input.value;
+            }
+        });
+
+        const history = [];
+        if (garmentType && Object.keys(measurements).length > 0) {
+            history.push({
+                date: new Date().toISOString(),
+                garment: garmentType,
+                measurements: measurements
+            });
+        }
+
         const { error } = await supabaseClient
             .from('clients')
             .insert([{
                 name,
                 phone,
                 notes,
-                measurements_history: [],
+                measurements_history: history,
+                last_garment_type: garmentType || null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             }]);
@@ -6979,6 +7044,87 @@ window.saveNewClient = async function (e) {
         alert("Error: " + error.message);
     }
 };
+
+// Helper function to generate measurement fields HTML
+function generateFieldsAreaHTML(garmentType, measurementsObj) {
+    const standardFields = GARMENT_MEASUREMENTS[garmentType] || {};
+    let html = '<div style="margin-top: 15px;">';
+
+    const categories = (measurementsObj && Object.keys(measurementsObj).length > 0)
+        ? Object.keys({ ...standardFields, ...measurementsObj })
+        : Object.keys(standardFields);
+
+    if (categories.length === 0) {
+        html += `
+            <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 15px; margin-bottom: 15px; text-align: center;">
+                <p style="margin: 0; color: #856404; font-size: 0.9em;">No predefined measurement fields for "${garmentType}".</p>
+            </div>
+        `;
+    } else {
+        categories.forEach(cat => {
+            html += `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; color: var(--brand-navy); font-size: 0.9em; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${cat} Details</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;">
+            `;
+
+            const stdFieldsForCat = standardFields[cat] || [];
+            const existingFieldsForCat = (measurementsObj && measurementsObj[cat]) ? Object.keys(measurementsObj[cat]) : [];
+            const allKeys = [...new Set([...stdFieldsForCat, ...existingFieldsForCat])];
+
+            allKeys.forEach(key => {
+                const val = (measurementsObj && measurementsObj[cat] && measurementsObj[cat][key]) ? measurementsObj[cat][key] : '';
+                html += `
+                    <div style="display: flex; flex-direction: column;">
+                        <label style="font-size: 0.75em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">${key}</label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <input type="text" value="${val}" class="edit-meas-input" 
+                                   data-cat="${cat}" data-key="${key}"
+                                   style="width: 100%; padding: 8px; padding-right: 25px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; font-weight: 500;">
+                            <span style="position: absolute; right: 8px; color: #94a3b8; font-size: 0.8em; font-weight: bold;">"</span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+        });
+    }
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Updates the measurement fields in the edit modal when the garment type is changed.
+ */
+window.updateEditGarmentFields = function (clientId, historyIndex) {
+    const selectElement = document.getElementById('edit-client-garment-select');
+    const newGarmentType = selectElement.value;
+    const fieldsArea = document.getElementById('edit-measurements-fields-area');
+
+    // For now, we'll just regenerate the fields based on the new garment type,
+    // but keep the existing values if they match a field in the new type.
+    // This requires re-fetching the original measurements or passing them around.
+    // For simplicity, we'll assume a fresh start for the fields,
+    // but a more robust solution would merge existing values.
+    // For this change, we'll just pass an empty object for measurementsObj
+    // to generate blank fields for the new garment type.
+    // A full implementation would involve fetching the current measurements
+    // and merging them with the new garment type's standard fields.
+    // However, the instruction implies just generating the fields based on the new type.
+
+    // To preserve existing values, we need to collect them first.
+    const currentMeasurements = {};
+    document.querySelectorAll(`#history-item-${historyIndex} .edit-meas-input`).forEach(input => {
+        const cat = input.dataset.cat;
+        const key = input.dataset.key;
+        if (!currentMeasurements[cat]) currentMeasurements[cat] = {};
+        currentMeasurements[cat][key] = input.value;
+    });
+
+    // Now, generate HTML for the new garment type, attempting to pre-fill with currentMeasurements
+    fieldsArea.innerHTML = generateFieldsAreaHTML(newGarmentType, currentMeasurements);
+};
+
 
 /**
  * Replaces a history item view with an edit form
@@ -7002,63 +7148,28 @@ async function editClientMeasurement(clientId, historyIndex) {
             try { measurementsObj = JSON.parse(measurementsObj); } catch (e) { measurementsObj = {}; }
         }
 
-        const garmentType = historyItem.garment || 'Suit'; // Fallback to Suit if unknown
-        const standardFields = GARMENT_MEASUREMENTS[garmentType] || {};
+        const garmentType = historyItem.garment || 'Suit';
 
-        let formHtml = '<div style="margin-top: 15px;">';
+        let formHtml = `
+            <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--brand-navy); font-size: 0.9em;">Change Garment Type:</label>
+                <select id="edit-client-garment-select" onchange="updateEditGarmentFields('${clientId}', ${historyIndex})"
+                    style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600;">
+                    ${Object.keys(GARMENT_MEASUREMENTS).map(type => `
+                        <option value="${type}" ${type === garmentType ? 'selected' : ''}>${type}</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div id="edit-measurements-fields-area">
+        `;
 
-        // Combine standard fields with existing measurements to ensure all inputs show up
-        // If measurementsObj is empty, we iterate through standardFields to show blank inputs
-        const categories = (measurementsObj && Object.keys(measurementsObj).length > 0)
-            ? Object.keys({ ...standardFields, ...measurementsObj })
-            : Object.keys(standardFields);
-
-        categories.forEach(cat => {
-            formHtml += `
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: var(--brand-navy); font-size: 0.9em; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${cat} Details</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;">
-            `;
-
-            // Fields for this category
-            const stdFieldsForCat = standardFields[cat] || [];
-            const existingFieldsForCat = (measurementsObj && measurementsObj[cat]) ? Object.keys(measurementsObj[cat]) : [];
-
-            // Unique keys from both
-            const allKeys = [...new Set([...stdFieldsForCat, ...existingFieldsForCat])];
-
-            allKeys.forEach(key => {
-                const val = (measurementsObj && measurementsObj[cat] && measurementsObj[cat][key]) ? measurementsObj[cat][key] : '';
-                formHtml += `
-                    <div style="display: flex; flex-direction: column;">
-                        <label style="font-size: 0.75em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">${key}</label>
-                        <div style="position: relative; display: flex; align-items: center;">
-                            <input type="text" value="${val}" class="edit-meas-input" 
-                                   data-cat="${cat}" data-key="${key}"
-                                   style="width: 100%; padding: 8px; padding-right: 25px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; font-weight: 500;">
-                            <span style="position: absolute; right: 8px; color: #94a3b8; font-size: 0.8em; font-weight: bold;">"</span>
-                        </div>
-                    </div>
-                `;
-            });
-
-            formHtml += '</div></div>';
-        });
-
-        if (categories.length === 0) {
-            formHtml += `
-                <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 15px; margin-bottom: 15px; text-align: center;">
-                    <p style="margin: 0; color: #856404; font-size: 0.9em;">No predefined measurement fields for "${garmentType}".</p>
-                </div>
-            `;
-        }
-
+        formHtml += generateFieldsAreaHTML(garmentType, measurementsObj);
         formHtml += '</div>';
         formHtml += `
             <div style="margin-top: 15px; display: flex; gap: 10px;">
                 <button class="small-btn" style="background: var(--brand-navy); color: var(--brand-gold);" 
                         onclick="saveClientMeasurement('${clientId}', ${historyIndex})">
-                    <i class="fas fa-save"></i> Save
+                    <i class="fas fa-save"></i> Save Changes
                 </button>
                 <button class="small-btn" style="background: #e2e8f0; color: #475569;" 
                         onclick="viewClientDetails('${clientId}')">
@@ -7076,11 +7187,64 @@ async function editClientMeasurement(clientId, historyIndex) {
 }
 
 /**
+ * Generates the HTML for measurement fields based on garment type
+ */
+function generateFieldsAreaHTML(garmentType, existingData = {}) {
+    const standardFields = GARMENT_MEASUREMENTS[garmentType] || {};
+    let html = '';
+
+    const categories = Object.keys({ ...standardFields, ...existingData });
+
+    categories.forEach(cat => {
+        html += `
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--brand-navy); font-size: 0.9em; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${cat} Details</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;">
+        `;
+
+        const stdFieldsForCat = standardFields[cat] || [];
+        const existingFieldsForCat = (existingData && existingData[cat]) ? Object.keys(existingData[cat]) : [];
+        const allKeys = [...new Set([...stdFieldsForCat, ...existingFieldsForCat])];
+
+        allKeys.forEach(key => {
+            const val = (existingData && existingData[cat] && existingData[cat][key]) ? existingData[cat][key] : '';
+            html += `
+                <div style="display: flex; flex-direction: column;">
+                    <label style="font-size: 0.75em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">${key}</label>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="text" value="${val}" class="edit-meas-input" 
+                               data-cat="${cat}" data-key="${key}"
+                               style="width: 100%; padding: 8px; padding-right: 25px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; font-weight: 500;">
+                        <span style="position: absolute; right: 8px; color: #94a3b8; font-size: 0.8em; font-weight: bold;">"</span>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div></div>';
+    });
+
+    if (categories.length === 0) {
+        html = `<p style="text-align: center; color: #64748b; font-style: italic;">No specific fields for "${garmentType}"</p>`;
+    }
+    return html;
+}
+
+/**
+ * Dynamically updates fields when garment type is changed in edit mode
+ */
+window.updateEditGarmentFields = function (clientId, index) {
+    const type = document.getElementById('edit-client-garment-select').value;
+    const area = document.getElementById('edit-measurements-fields-area');
+    if (area) {
+        area.innerHTML = generateFieldsAreaHTML(type);
+    }
+};
+
+/**
  * Saves updated measurements back to the client record
  */
 async function saveClientMeasurement(clientId, historyIndex) {
     try {
-        // Fetch current history
         const { data: client, error: fetchError } = await supabaseClient
             .from('clients')
             .select('measurements_history')
@@ -7092,39 +7256,36 @@ async function saveClientMeasurement(clientId, historyIndex) {
         const history = [...client.measurements_history];
         const item = history[historyIndex];
 
-        let measurementsObj = item.measurements;
-        if (typeof measurementsObj === 'string') {
-            try { measurementsObj = JSON.parse(measurementsObj); } catch (e) { measurementsObj = {}; }
-        }
+        // Capture updated garment type
+        const newGarmentType = document.getElementById('edit-client-garment-select').value;
+        item.garment = newGarmentType;
 
-        // Collect new values
+        const measurementsObj = {};
         const container = document.getElementById(`history-item-${historyIndex}`);
         const inputs = container.querySelectorAll('.edit-meas-input');
 
         inputs.forEach(input => {
             const cat = input.dataset.cat;
             const key = input.dataset.key;
-            if (!measurementsObj[cat]) measurementsObj[cat] = {};
-            measurementsObj[cat][key] = input.value;
+            if (input.value) {
+                if (!measurementsObj[cat]) measurementsObj[cat] = {};
+                measurementsObj[cat][key] = input.value;
+            }
         });
 
-        // Upgrade legacy strings to objects on save to fix them permanently
         item.measurements = measurementsObj;
 
-        // Update database
         const { error: updateError } = await supabaseClient
             .from('clients')
             .update({
                 measurements_history: history,
+                last_garment_type: newGarmentType,
                 updated_at: new Date().toISOString()
             })
             .eq('id', clientId);
 
         if (updateError) throw updateError;
-
-        // Refresh view
         viewClientDetails(clientId);
-
     } catch (error) {
         logDebug("Error saving measurement:", error, 'error');
         alert("Error saving measurement changes");
