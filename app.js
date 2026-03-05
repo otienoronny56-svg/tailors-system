@@ -1166,8 +1166,12 @@ function generateMeasurementFieldsManager() {
 
         html += '</div></div>';
     }
-
     container.innerHTML = html;
+
+    // [NEW] Intelligently auto-fill measurements if there's a selected client with history for this garment
+    if (window.CURRENT_SELECTED_CLIENT) {
+        autoFillMeasurementsIfAvailable('measurement-fields-container', garmentType);
+    }
 }
 
 // ==========================================
@@ -2999,6 +3003,11 @@ function generateAdminOrderFormMeasurements() {
     }
 
     container.innerHTML = html;
+
+    // [NEW] Intelligently auto-fill measurements if there's a selected client with history for this garment
+    if (window.CURRENT_SELECTED_CLIENT) {
+        autoFillMeasurementsIfAvailable('measurement-fields-container', garmentType);
+    }
 }
 
 async function loadKPIMetrics(shopId) {
@@ -6824,6 +6833,9 @@ function setupClientSearch(inputId) {
     }
 
     const handleSearch = async (val) => {
+        // [NEW] Clear global selected client if they start typing to avoid wrong auto-fills later
+        window.CURRENT_SELECTED_CLIENT = null;
+
         if (val.length > 0 && val.length < 3) {
             resultsDiv.style.display = 'none';
             return;
@@ -6870,9 +6882,17 @@ function setupClientSearch(inputId) {
 }
 
 /**
+ * Global State to remember the selected client across garment type changes
+ */
+window.CURRENT_SELECTED_CLIENT = null;
+
+/**
  * Handles selection of a client from search results
  */
 window.selectClient = function (inputId, client) {
+    // Save to global state immediately
+    window.CURRENT_SELECTED_CLIENT = client;
+
     const isEdit = inputId.includes('edit');
     const phoneInputId = isEdit ? 'edit-customer-phone' : 'customer_phone';
     const nameInputId = isEdit ? 'edit-customer-name' : 'customer_name';
@@ -6888,40 +6908,48 @@ window.selectClient = function (inputId, client) {
     if (nameInput) nameInput.value = client.name;
     if (notesArea) notesArea.value = client.notes || '';
 
-    // Auto-select last garment type if available
+    // Trigger garment change to let the generator auto-fill measurements
     if (garmentSelect && client.last_garment_type) {
         garmentSelect.value = client.last_garment_type;
-        // Trigger change to generate measurement fields
         garmentSelect.dispatchEvent(new Event('change'));
-
-        // Populate measurements if history exists
-        setTimeout(() => {
-            if (client.measurements_history && client.measurements_history.length > 0) {
-                let latest = client.measurements_history[0].measurements;
-                if (typeof latest === 'string') {
-                    try { latest = JSON.parse(latest); } catch (e) { latest = null; }
-                }
-
-                if (latest) {
-                    const containerId = isEdit ? 'admin-measurement-fields-container' : 'measurement-fields-container';
-                    const container = document.getElementById(containerId);
-                    if (container) {
-                        container.querySelectorAll('input').forEach(input => {
-                            const comp = input.dataset.component || input.dataset.c;
-                            const meas = input.dataset.measurement || input.dataset.m;
-                            if (latest[comp] && latest[comp][meas]) {
-                                input.value = latest[comp][meas];
-                            }
-                        });
-                    }
-                }
-            }
-        }, 100);
     }
 
     const resultsDiv = document.getElementById(`${inputId}-results`);
     if (resultsDiv) resultsDiv.style.display = 'none';
 };
+
+/**
+ * Helper to auto-fill measurements based on global state and selected garment.
+ */
+function autoFillMeasurementsIfAvailable(containerId, targetGarmentType) {
+    const client = window.CURRENT_SELECTED_CLIENT;
+    if (!client || !client.measurements_history) return;
+
+    // Find the most recent history entry for this EXACT garment type
+    const historyEntry = client.measurements_history.find(h => h.garment === targetGarmentType);
+    if (!historyEntry) return;
+
+    let latest = historyEntry.measurements;
+    if (typeof latest === 'string') {
+        try { latest = JSON.parse(latest); } catch (e) { latest = null; }
+    }
+
+    if (!latest) return;
+
+    // Give DOM a tiny moment to render the new inputs before filling them
+    setTimeout(() => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.querySelectorAll('input').forEach(input => {
+                const comp = input.dataset.component || input.dataset.c;
+                const meas = input.dataset.measurement || input.dataset.m;
+                if (latest[comp] && latest[comp][meas]) {
+                    input.value = latest[comp][meas];
+                }
+            });
+        }
+    }, 50);
+}
 
 /**
  * Loads the list of clients for the management page
