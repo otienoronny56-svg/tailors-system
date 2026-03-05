@@ -4694,6 +4694,11 @@ function generateAdminOrderFormMeasurements() {
     }
 
     container.innerHTML = html;
+
+    // [NEW] Intelligently auto-fill measurements if there's a selected client with history for this garment
+    if (window.CURRENT_SELECTED_CLIENT) {
+        autoFillMeasurementsIfAvailable('measurement-fields-container', garmentType);
+    }
 }
 
 // ==========================================
@@ -6909,8 +6914,10 @@ window.selectClient = function (inputId, client) {
     if (notesArea) notesArea.value = client.notes || '';
 
     // Trigger garment change to let the generator auto-fill measurements
-    if (garmentSelect && client.last_garment_type) {
-        garmentSelect.value = client.last_garment_type;
+    if (garmentSelect) {
+        if (client.last_garment_type) {
+            garmentSelect.value = client.last_garment_type;
+        }
         garmentSelect.dispatchEvent(new Event('change'));
     }
 
@@ -6943,7 +6950,7 @@ function autoFillMeasurementsIfAvailable(containerId, targetGarmentType) {
             container.querySelectorAll('input').forEach(input => {
                 const comp = input.dataset.component || input.dataset.c;
                 const meas = input.dataset.measurement || input.dataset.m;
-                if (latest[comp] && latest[comp][meas]) {
+                if (latest[comp] && latest[comp][meas] !== undefined && latest[comp][meas] !== null) {
                     input.value = latest[comp][meas];
                 }
             });
@@ -7010,20 +7017,30 @@ async function viewClientDetails(clientId) {
         const modal = document.getElementById('order-modal');
         const content = modal.querySelector('.modal-content');
 
-        let historyHtml = '<p>No measurement history found.</p>';
+        // Extract unique garments for badges
+        const uniqueGarments = [...new Set((client.measurements_history || []).map(h => h.garment))].filter(Boolean);
+        const garmentBadges = uniqueGarments.map(g => `
+            <span style="background: var(--brand-navy); color: var(--brand-gold); padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600; margin-right: 5px; display: inline-block;">
+                ${g}
+            </span>
+        `).join('');
+
+        let historyHtml = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">No measurement history found.</p>';
         if (client.measurements_history && client.measurements_history.length > 0) {
             historyHtml = client.measurements_history.map((h, index) => `
-                <div class="history-item" id="history-item-${index}" style="border: 1px solid #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-                        <span style="font-weight: 600;">${h.garment}</span>
+                <div class="history-item" id="history-item-${index}" style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 12px; align-items: center;">
+                        <span style="font-weight: 800; color: var(--brand-navy); font-size: 1.1em; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="fas fa-cut" style="margin-right: 8px; color: var(--brand-gold);"></i>${h.garment}
+                        </span>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <span style="color: #64748b; font-size: 0.85em;">${formatDate(h.date)}</span>
-                            <button class="small-btn" onclick="editClientMeasurement('${client.id}', ${index})">
-                                <i class="fas fa-edit"></i> Edit
+                            <span style="color: #64748b; font-size: 0.85em; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">${formatDate(h.date)}</span>
+                            <button class="small-btn" onclick="editClientMeasurement('${client.id}', ${index})" style="background: #f1f5f9; color: var(--brand-navy); border: none;">
+                                <i class="fas fa-edit"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="history-measurements" style="font-size: 0.9em; line-height: 1.6;">
+                    <div class="history-measurements" style="font-size: 0.95em; line-height: 1.6; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         ${formatMeasurements(JSON.stringify(h.measurements))}
                     </div>
                 </div>
@@ -7032,21 +7049,27 @@ async function viewClientDetails(clientId) {
 
         content.innerHTML = `
             <span class="close-btn" onclick="document.getElementById('order-modal').style.display='none'">&times;</span>
-            <div style="padding: 10px;">
-                <h2 style="color: var(--brand-navy); margin-bottom: 5px;">${client.name}</h2>
-                <p style="color: #64748b; margin-bottom: 20px;">${client.phone}</p>
+            <div style="padding: 15px;">
+                <div style="margin-bottom: 25px;">
+                    <h2 style="color: var(--brand-navy); margin: 0 0 5px 0; font-size: 1.8em;">${client.name}</h2>
+                    <p style="color: #64748b; margin: 0 0 15px 0; font-weight: 500;"><i class="fas fa-phone" style="margin-right: 8px;"></i>${client.phone}</p>
+                    <div style="margin-top: 10px;">
+                        <span style="font-size: 0.85em; color: #94a3b8; display: block; margin-bottom: 5px; font-weight: 600; text-transform: uppercase;">Known Garments</span>
+                        ${garmentBadges || '<span style="color: #cbd5e1; font-style: italic; font-size: 0.9em;">None yet</span>'}
+                    </div>
+                </div>
                 
-                <div class="tabs" style="margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1em; border-bottom: 2px solid var(--brand-gold); display: inline-block; padding-bottom: 5px; margin-bottom: 15px;">Measurement History</h3>
-                    <div style="max-height: 400px; overflow-y: auto;">
+                <div style="margin-bottom: 25px;">
+                    <h3 style="font-size: 1.1em; color: var(--brand-navy); border-bottom: 2px solid var(--brand-gold); display: inline-block; padding-bottom: 5px; margin-bottom: 20px; font-weight: 700;">Measurement History</h3>
+                    <div style="max-height: 450px; overflow-y: auto; padding-right: 5px;">
                         ${historyHtml}
                     </div>
                 </div>
 
                 ${client.notes ? `
-                    <div style="background: #fff8e1; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
-                        <strong style="display: block; margin-bottom: 5px;">Client Notes:</strong>
-                        <p style="margin: 0; font-size: 0.9em;">${client.notes}</p>
+                    <div style="background: #fff8e1; padding: 20px; border-radius: 12px; border-left: 6px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <strong style="display: flex; align-items: center; margin-bottom: 8px; color: #856404;"><i class="fas fa-sticky-note" style="margin-right: 10px;"></i>Client Preferences</strong>
+                        <p style="margin: 0; font-size: 0.95em; color: #856404; line-height: 1.5;">${client.notes}</p>
                     </div>
                 ` : ''}
             </div>
