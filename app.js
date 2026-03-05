@@ -7050,12 +7050,21 @@ async function viewClientDetails(clientId) {
         content.innerHTML = `
             <span class="close-btn" onclick="document.getElementById('order-modal').style.display='none'">&times;</span>
             <div style="padding: 15px;">
-                <div style="margin-bottom: 25px;">
-                    <h2 style="color: var(--brand-navy); margin: 0 0 5px 0; font-size: 1.8em;">${client.name}</h2>
-                    <p style="color: #64748b; margin: 0 0 15px 0; font-weight: 500;"><i class="fas fa-phone" style="margin-right: 8px;"></i>${client.phone}</p>
-                    <div style="margin-top: 10px;">
-                        <span style="font-size: 0.85em; color: #94a3b8; display: block; margin-bottom: 5px; font-weight: 600; text-transform: uppercase;">Known Garments</span>
-                        ${garmentBadges || '<span style="color: #cbd5e1; font-style: italic; font-size: 0.9em;">None yet</span>'}
+                <div id="client-info-header" style="margin-bottom: 25px; position: relative;">
+                    <div id="client-info-view">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h2 style="color: var(--brand-navy); margin: 0 0 5px 0; font-size: 1.8em;">${client.name}</h2>
+                                <p style="color: #64748b; margin: 0 0 15px 0; font-weight: 500;"><i class="fas fa-phone" style="margin-right: 8px;"></i>${client.phone}</p>
+                            </div>
+                            <button class="small-btn" onclick="editClientInfo('${client.id}')" style="background: #f1f5f9; color: var(--brand-navy); border: none;">
+                                <i class="fas fa-user-edit"></i> Edit Info
+                            </button>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <span style="font-size: 0.85em; color: #94a3b8; display: block; margin-bottom: 5px; font-weight: 600; text-transform: uppercase;">Known Garments</span>
+                            ${garmentBadges || '<span style="color: #cbd5e1; font-style: italic; font-size: 0.9em;">None yet</span>'}
+                        </div>
                     </div>
                 </div>
                 
@@ -7066,12 +7075,14 @@ async function viewClientDetails(clientId) {
                     </div>
                 </div>
 
-                ${client.notes ? `
-                    <div style="background: #fff8e1; padding: 20px; border-radius: 12px; border-left: 6px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                        <strong style="display: flex; align-items: center; margin-bottom: 8px; color: #856404;"><i class="fas fa-sticky-note" style="margin-right: 10px;"></i>Client Preferences</strong>
-                        <p style="margin: 0; font-size: 0.95em; color: #856404; line-height: 1.5;">${client.notes}</p>
-                    </div>
-                ` : ''}
+                <div id="client-notes-container">
+                    ${client.notes ? `
+                        <div style="background: #fff8e1; padding: 20px; border-radius: 12px; border-left: 6px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <strong style="display: flex; align-items: center; margin-bottom: 8px; color: #856404;"><i class="fas fa-sticky-note" style="margin-right: 10px;"></i>Client Preferences</strong>
+                            <p style="margin: 0; font-size: 0.95em; color: #856404; line-height: 1.5;">${client.notes}</p>
+                        </div>
+                    ` : ''}
+                </div>
             </div>
         `;
 
@@ -7082,6 +7093,80 @@ async function viewClientDetails(clientId) {
         alert("Error loading client details");
     }
 }
+
+/**
+ * Toggles the client info section to edit mode
+ */
+window.editClientInfo = async function (clientId) {
+    try {
+        const { data: client, error } = await supabaseClient
+            .from('clients')
+            .select('*')
+            .eq('id', clientId)
+            .single();
+
+        if (error) throw error;
+
+        const header = document.getElementById('client-info-header');
+        header.innerHTML = `
+            <div id="client-info-edit" style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 0.8em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">Client Name</label>
+                    <input type="text" id="edit-client-name" value="${client.name}" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 0.8em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">Phone Number</label>
+                    <input type="text" id="edit-client-phone" value="${client.phone}" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 0.8em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">General Notes / Preferences</label>
+                    <textarea id="edit-client-notes" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; min-height: 60px;">${client.notes || ''}</textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="small-btn" onclick="saveClientInfo('${clientId}')" style="background: var(--brand-navy); color: var(--brand-gold);">
+                        <i class="fas fa-save"></i> Save Info
+                    </button>
+                    <button class="small-btn" onclick="viewClientDetails('${clientId}')" style="background: #e2e8f0; color: #475569;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+};
+
+/**
+ * Saves the updated client info to the database
+ */
+window.saveClientInfo = async function (clientId) {
+    const name = document.getElementById('edit-client-name').value.trim();
+    const phone = document.getElementById('edit-client-phone').value.trim();
+    const notes = document.getElementById('edit-client-notes').value.trim();
+
+    if (!name || !phone) return alert("Name and Phone are required.");
+
+    try {
+        const { error } = await supabaseClient
+            .from('clients')
+            .update({
+                name,
+                phone,
+                notes,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', clientId);
+
+        if (error) throw error;
+
+        alert("Client info updated!");
+        viewClientDetails(clientId);
+        if (typeof loadClients === 'function') loadClients();
+    } catch (error) {
+        alert("Error saving: " + error.message);
+    }
+};
 
 window.openNewClientModal = function () {
     const modal = document.getElementById('new-client-modal');
