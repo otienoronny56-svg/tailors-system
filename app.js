@@ -1049,6 +1049,7 @@ function initOrderForm() {
 
     // Setup Client Search
     setupClientSearch('customer_phone');
+    setupClientSearch('customer_name');
 
     const orderForm = document.getElementById('order-form');
     if (orderForm) {
@@ -2872,6 +2873,7 @@ function initAdminOrderForm() {
 
     // Setup Client Search
     setupClientSearch('customer_phone');
+    setupClientSearch('customer_name');
 
     // 4. Handle Form Submission
     const orderForm = document.getElementById('order-form');
@@ -4557,6 +4559,7 @@ function initAdminOrderForm() {
 
     // Setup Client Search
     setupClientSearch('customer_phone');
+    setupClientSearch('customer_name');
 
     // 4. Handle Form Submission
     const orderForm = document.getElementById('order-form');
@@ -6804,38 +6807,45 @@ async function exportTransactionsCSV() {
  * Attaches a search dropdown listener to the phone number field
  * @param {string} phoneInputId - The ID of the phone input field
  */
-function setupClientSearch(phoneInputId) {
-    const phoneInput = document.getElementById(phoneInputId);
-    if (!phoneInput) return;
+function setupClientSearch(inputId) {
+    const inputField = document.getElementById(inputId);
+    if (!inputField) return;
 
     // Create a results container if it doesn't exist
-    let resultsDiv = document.getElementById(`${phoneInputId}-results`);
+    let resultsDiv = document.getElementById(`${inputId}-results`);
     if (!resultsDiv) {
         resultsDiv = document.createElement('div');
-        resultsDiv.id = `${phoneInputId}-results`;
+        resultsDiv.id = `${inputId}-results`;
         resultsDiv.className = 'search-results-popover';
-        phoneInput.parentNode.appendChild(resultsDiv);
+        // Add some max height and scroll to handle more items comfortably
+        resultsDiv.style.maxHeight = '250px';
+        resultsDiv.style.overflowY = 'auto';
+        inputField.parentNode.appendChild(resultsDiv);
     }
 
-    phoneInput.addEventListener('input', async (e) => {
-        const val = e.target.value.trim();
-        if (val.length < 3) {
+    const handleSearch = async (val) => {
+        if (val.length > 0 && val.length < 3) {
             resultsDiv.style.display = 'none';
             return;
         }
 
         try {
-            const { data: clients, error } = await supabaseClient
-                .from('clients')
-                .select('*')
-                .ilike('phone', `%${val}%`)
-                .limit(5);
+            let query = supabaseClient.from('clients').select('*');
+
+            if (val.length >= 3) {
+                query = query.or(`name.ilike.%${val}%,phone.ilike.%${val}%`).limit(5);
+            } else {
+                // Fetch recent clients if empty input (val.length === 0)
+                query = query.order('updated_at', { ascending: false }).limit(10);
+            }
+
+            const { data: clients, error } = await query;
 
             if (error) throw error;
 
             if (clients && clients.length > 0) {
                 resultsDiv.innerHTML = clients.map(c => `
-                    <div class="search-result-item" onclick="selectClient('${phoneInputId}', ${JSON.stringify(c).replace(/"/g, '&quot;')})">
+                    <div class="search-result-item" onclick="selectClient('${inputId}', ${JSON.stringify(c).replace(/"/g, '&quot;')})">
                         <strong>${c.phone}</strong> - ${c.name}
                     </div>
                 `).join('');
@@ -6846,11 +6856,14 @@ function setupClientSearch(phoneInputId) {
         } catch (err) {
             console.error("Client search error:", err);
         }
-    });
+    };
+
+    inputField.addEventListener('input', (e) => handleSearch(e.target.value.trim()));
+    inputField.addEventListener('focus', (e) => handleSearch(e.target.value.trim()));
 
     // Close results when clicking outside
     document.addEventListener('click', (e) => {
-        if (e.target !== phoneInput && e.target !== resultsDiv) {
+        if (e.target !== inputField && e.target !== resultsDiv) {
             resultsDiv.style.display = 'none';
         }
     });
@@ -6859,11 +6872,17 @@ function setupClientSearch(phoneInputId) {
 /**
  * Handles selection of a client from search results
  */
-window.selectClient = function (phoneInputId, client) {
+window.selectClient = function (inputId, client) {
+    const isEdit = inputId.includes('edit');
+    const phoneInputId = isEdit ? 'edit-customer-phone' : 'customer_phone';
+    const nameInputId = isEdit ? 'edit-customer-name' : 'customer_name';
+    const garmentSelectId = isEdit ? 'edit-garment-type' : 'garment-type-select';
+    const notesAreaId = isEdit ? 'edit-preferences' : 'customer_preferences';
+
     const phoneInput = document.getElementById(phoneInputId);
-    const nameInput = document.getElementById(phoneInputId === 'customer_phone' ? 'customer_name' : 'edit-customer-name');
-    const garmentSelect = document.getElementById(phoneInputId === 'customer_phone' ? 'garment-type-select' : 'edit-garment-type');
-    const notesArea = document.getElementById(phoneInputId === 'customer_phone' ? 'customer_preferences' : 'edit-preferences');
+    const nameInput = document.getElementById(nameInputId);
+    const garmentSelect = document.getElementById(garmentSelectId);
+    const notesArea = document.getElementById(notesAreaId);
 
     if (phoneInput) phoneInput.value = client.phone;
     if (nameInput) nameInput.value = client.name;
@@ -6884,7 +6903,7 @@ window.selectClient = function (phoneInputId, client) {
                 }
 
                 if (latest) {
-                    const containerId = phoneInputId === 'customer_phone' ? 'measurement-fields-container' : 'admin-measurement-fields-container';
+                    const containerId = isEdit ? 'admin-measurement-fields-container' : 'measurement-fields-container';
                     const container = document.getElementById(containerId);
                     if (container) {
                         container.querySelectorAll('input').forEach(input => {
@@ -6900,7 +6919,7 @@ window.selectClient = function (phoneInputId, client) {
         }, 100);
     }
 
-    const resultsDiv = document.getElementById(`${phoneInputId}-results`);
+    const resultsDiv = document.getElementById(`${inputId}-results`);
     if (resultsDiv) resultsDiv.style.display = 'none';
 };
 
