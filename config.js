@@ -10,14 +10,14 @@ const APP_CONFIG = {
 
     // === 2. PAYMENT & SUPPORT DETAILS (For the Lock Screen) ===
     billing: {
-        paybill: "600100",
-        account: "200800",
-        accountName: "TWO MILLION WAYS LTD",
-        supportPhone: "0745806488"
+        paybill: "coming soon",
+        account: "coming soon",
+        accountName: "coming soon",
+        supportPhone: "coming soon"
     },
 
     // === 3. BRANDING IDENTITY ===
-    appName: "OTIMA FASHION HOUSE",
+    appName: "GENTLEMAN STANDARD",
     appSubtitle: "BY RONNY",
     logoPath: "logo.png",
 
@@ -26,7 +26,7 @@ const APP_CONFIG = {
     currencySymbol: "Ksh",
 
     // === 5. BACKEND CONNECTION (Supabase) ===
-    supabaseUrl: "https://jgvpwdlmxujeappsgxlw.supabase.co",
-    supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnB3ZGxteHVqZWFwcHNneGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0ODIyMDQsImV4cCI6MjA4MjA1ODIwNH0.vWYixKfxq6PxsxEvfLgIZRmNsXmKdvxdG-I6YaRYV-4",
-    serviceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnB3ZGxteHVqZWFwcHNneGx3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjQ4MjIwNCwiZXhwIjoyMDgyMDU4MjA0fQ.UvndP35SqHwHBwpaaAmNVM9uK4AJW6NTtKu5mDSoszs"
+    supabaseUrl: "https://nbksbimxyssfbgfxzcnc.supabase.co",
+    supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ia3NiaW14eXNzZmJnZnh6Y25jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0ODAxMDIsImV4cCI6MjA4MjA1NjEwMn0.l2xwq7uVCFy9SWlYoKnlm11uotTNJxhi_1Z1dZYtxHg",
+    serviceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ia3NiaW14eXNzZmJnZnh6Y25jIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjQ4MDEwMiwiZXhwIjoyMDgyMDU2MTAyfQ.K0ZYLQ5lMstENBkfO3jOKDSuTqReGaRJybinr_17CTE"
 };

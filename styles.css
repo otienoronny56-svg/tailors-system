@@ -1264,3 +1264,55 @@ body.dark-mode .close-btn {
 body.dark-mode .close-btn:hover {
     color: #f8fafc;
 }
+
+/* --- Search Results Popover (Floating Dropdown) --- */
+.form-group {
+    position: relative;
+}
+
+.search-results-popover {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1050; /* Above most elements */
+    margin-top: -15px; /* Adjust to sit tightly against the inputs */
+    display: none;
+}
+
+.search-result-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #334155;
+    transition: background 0.2s;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background: #f8fafc;
+}
+
+/* Dark Mode Dropdown Support */
+body.dark-mode .search-results-popover {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .search-result-item {
+    color: #cbd5e1;
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .search-result-item:hover {
+    background: #0f172a;
+}

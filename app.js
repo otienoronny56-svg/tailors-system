@@ -1037,139 +1037,19 @@ async function loadWorkersDropdown() {
 }
 
 // ==========================================
-// 🛒 SHARED LINE-ITEM BUILDER
-// Used by both manager and admin order forms
-// ==========================================
-
-const GARMENT_OPTIONS = [
-    'Suit', 'Kaunda/Senator Suit', 'Trouser', 'Dress',
-    'Shirt', 'Coat', 'Half Coat', 'Alteration', 'Other'
-];
-
-function formatKsh(n) {
-    return 'Ksh ' + (parseFloat(n) || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function buildGarmentOptions(selected = '') {
-    return GARMENT_OPTIONS.map(g =>
-        `<option value="${g}" ${g === selected ? 'selected' : ''}>${g}</option>`
-    ).join('');
-}
-
-function makeLineItemRow(index, isFirst) {
-    const removeBtn = isFirst ? '' :
-        `<button type="button" class="li-remove-btn" data-idx="${index}" title="Remove item"
-            style="background:#fee2e2;border:none;color:#dc2626;border-radius:6px;padding:8px 12px;cursor:pointer;font-size:1em;flex-shrink:0;">
-            <i class="fas fa-trash-alt"></i>
-        </button>`;
-
-    return `
-    <div class="line-item-row" data-idx="${index}" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:12px;flex-wrap:wrap;">
-        <div style="flex:2;min-width:140px;">
-            <label style="display:block;margin-bottom:4px;font-size:0.85em;font-weight:600;color:#475569;">Garment Type</label>
-            <select class="li-type" data-idx="${index}" onchange="onLineItemChange()"
-                style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.95em;background:#fff;">
-                <option value="">-- Select --</option>
-                ${buildGarmentOptions()}
-            </select>
-        </div>
-        <div style="flex:3;min-width:160px;">
-            <label style="display:block;margin-bottom:4px;font-size:0.85em;font-weight:600;color:#475569;">Description <span style="font-weight:400;color:#94a3b8;">(optional)</span></label>
-            <input type="text" class="li-desc" data-idx="${index}" onchange="onLineItemChange()"
-                placeholder="e.g. Blue Italian wool, slim fit"
-                style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
-        </div>
-        <div style="flex:1;min-width:110px;">
-            <label style="display:block;margin-bottom:4px;font-size:0.85em;font-weight:600;color:#475569;">Price (Ksh)</label>
-            <input type="number" class="li-price" data-idx="${index}" oninput="onLineItemChange()"
-                placeholder="0.00" step="0.01" min="0"
-                style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.95em;box-sizing:border-box;">
-        </div>
-        ${removeBtn}
-    </div>`;
-}
-
-function onLineItemChange() {
-    const total = Array.from(document.querySelectorAll('.li-price'))
-        .reduce((sum, el) => sum + (parseFloat(el.value) || 0), 0);
-    const display = document.getElementById('order-total-display');
-    if (display) display.textContent = formatKsh(total);
-
-    // Drive measurements fieldset from first row's garment type
-    const firstType = document.querySelector('.li-type');
-    if (firstType) {
-        // Synthesize a garment-type-select value for measurement generation
-        let synth = document.getElementById('garment-type-select');
-        if (!synth) {
-            synth = document.createElement('select');
-            synth.id = 'garment-type-select';
-            synth.style.display = 'none';
-            document.body.appendChild(synth);
-        }
-        synth.innerHTML = `<option value="${firstType.value}" selected>${firstType.value}</option>`;
-        if (firstType.value) {
-            // Trigger measurement field generation
-            if (typeof generateMeasurementFieldsManager === 'function') generateMeasurementFieldsManager();
-            else if (typeof generateAdminOrderFormMeasurements === 'function') generateAdminOrderFormMeasurements();
-        }
-    }
-}
-
-function initLineItemBuilder() {
-    const container = document.getElementById('line-items-container');
-    const addBtn = document.getElementById('add-item-btn');
-    if (!container || !addBtn) return;
-
-    // Start with one item row
-    container.innerHTML = makeLineItemRow(0, true);
-
-    addBtn.addEventListener('click', () => {
-        const rows = container.querySelectorAll('.line-item-row');
-        const newIdx = rows.length;
-        const div = document.createElement('div');
-        div.innerHTML = makeLineItemRow(newIdx, false);
-        container.appendChild(div.firstElementChild);
-
-        // Wire remove button
-        container.querySelector(`.li-remove-btn[data-idx="${newIdx}"]`)
-            ?.addEventListener('click', (e) => {
-                e.currentTarget.closest('.line-item-row').remove();
-                onLineItemChange();
-            });
-    });
-}
-
-/**
- * Reads all line item rows from the form.
- * Returns { lineItems, garmentType, totalPrice }
- */
-function collectLineItems() {
-    const lineItems = [];
-    document.querySelectorAll('.line-item-row').forEach(row => {
-        const type = row.querySelector('.li-type')?.value || '';
-        const desc = row.querySelector('.li-desc')?.value || '';
-        const price = parseFloat(row.querySelector('.li-price')?.value) || 0;
-        lineItems.push({ garment_type: type, description: desc, price });
-    });
-    const garmentType = lineItems.map(i => i.garment_type).filter(Boolean).join(', ') || 'Garment';
-    const totalPrice = lineItems.reduce((s, i) => s + i.price, 0);
-    return { lineItems, garmentType, totalPrice };
-}
-
-// ==========================================
 // 👔 MANAGER MODULE - ORDER FORM
 // ==========================================
-
 
 function initOrderForm() {
     loadWorkersDropdown();
     loadWorkersForSquad(USER_PROFILE.shop_id); // [NEW] Load checkboxes
 
+    const garmentSelect = document.getElementById('garment-type-select');
+    if (garmentSelect) garmentSelect.addEventListener('change', generateMeasurementFieldsManager);
+
     // Setup Client Search
     setupClientSearch('customer_phone');
-
-    // Init multi-item line builder
-    initLineItemBuilder();
+    setupClientSearch('customer_name');
 
     const orderForm = document.getElementById('order-form');
     if (orderForm) {
@@ -1179,16 +1059,12 @@ function initOrderForm() {
             submitBtn.disabled = true;
 
             try {
-                // Collect line items
-                const { lineItems, garmentType, totalPrice } = collectLineItems();
-                if (lineItems.length === 0 || !lineItems[0].garment_type) {
-                    alert('Please select a garment type for at least the first item.');
-                    submitBtn.disabled = false; return;
-                }
-                if (totalPrice <= 0) {
-                    alert('Please enter a price for at least one item.');
-                    submitBtn.disabled = false; return;
-                }
+                const measurements = {};
+                document.querySelectorAll('#measurement-fields-container input').forEach(input => {
+                    const comp = input.dataset.component; const meas = input.dataset.measurement;
+                    if (!measurements[comp]) measurements[comp] = {};
+                    if (input.value) measurements[comp][meas] = parseFloat(input.value);
+                });
 
                 // [NEW] Capture Squad
                 const squad = Array.from(document.querySelectorAll('.squad-checkbox:checked')).map(cb => cb.value);
@@ -1198,14 +1074,13 @@ function initOrderForm() {
                     manager_id: USER_PROFILE.id,
                     customer_name: document.getElementById('customer_name').value,
                     customer_phone: document.getElementById('customer_phone').value,
-                    garment_type: garmentType,
-                    price: totalPrice,
-                    line_items: lineItems,
+                    garment_type: document.getElementById('garment-type-select').value,
+                    price: parseFloat(document.getElementById('price').value) || 0,
                     due_date: document.getElementById('due_date').value,
                     worker_id: document.getElementById('worker-select').value || null,
-                    additional_workers: JSON.stringify(squad),
+                    additional_workers: JSON.stringify(squad), // [NEW] Save Squad
                     status: 1,
-                    customer_preferences: document.getElementById('customer_preferences')?.value || '',
+                    customer_preferences: document.getElementById('customer_preferences').value || '',
                     measurements_details: JSON.stringify(measurements),
                     created_at: new Date().toISOString()
                 };
@@ -1291,8 +1166,12 @@ function generateMeasurementFieldsManager() {
 
         html += '</div></div>';
     }
-
     container.innerHTML = html;
+
+    // [NEW] Intelligently auto-fill measurements if there's a selected client with history for this garment
+    if (window.CURRENT_SELECTED_CLIENT) {
+        autoFillMeasurementsIfAvailable('measurement-fields-container', garmentType);
+    }
 }
 
 // ==========================================
@@ -2990,11 +2869,15 @@ function initAdminOrderForm() {
         });
     }
 
+    // 3. Setup Garment Type Changes
+    const garmentSelect = document.getElementById('garment-type-select');
+    if (garmentSelect) {
+        garmentSelect.addEventListener('change', generateAdminOrderFormMeasurements);
+    }
+
     // Setup Client Search
     setupClientSearch('customer_phone');
-
-    // Init multi-item line builder
-    initLineItemBuilder();
+    setupClientSearch('customer_name');
 
     // 4. Handle Form Submission
     const orderForm = document.getElementById('order-form');
@@ -3003,11 +2886,6 @@ function initAdminOrderForm() {
             e.preventDefault();
             const shopId = document.getElementById('shop-select').value;
             if (!shopId) return alert("Select a shop");
-
-            // Collect line items
-            const { lineItems, garmentType, totalPrice } = collectLineItems();
-            if (!lineItems[0]?.garment_type) return alert('Please select a garment type for at least the first item.');
-            if (totalPrice <= 0) return alert('Please enter a price for at least one item.');
 
             // Collect measurements
             const measurements = {};
@@ -3025,9 +2903,8 @@ function initAdminOrderForm() {
                 shop_id: shopId,
                 customer_name: document.getElementById('customer_name').value,
                 customer_phone: document.getElementById('customer_phone').value,
-                garment_type: garmentType,
-                price: totalPrice,
-                line_items: lineItems,
+                garment_type: document.getElementById('garment-type-select').value,
+                price: parseFloat(document.getElementById('price').value) || 0,
                 due_date: document.getElementById('due_date').value,
                 worker_id: document.getElementById('worker-select').value || null,
                 additional_workers: JSON.stringify(squad),
@@ -3038,7 +2915,6 @@ function initAdminOrderForm() {
 
             const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
             if (error) return alert(error.message);
-
 
             // [NEW] Upsert Client Data
             try {
@@ -3127,6 +3003,11 @@ function generateAdminOrderFormMeasurements() {
     }
 
     container.innerHTML = html;
+
+    // [NEW] Intelligently auto-fill measurements if there's a selected client with history for this garment
+    if (window.CURRENT_SELECTED_CLIENT) {
+        autoFillMeasurementsIfAvailable('measurement-fields-container', garmentType);
+    }
 }
 
 async function loadKPIMetrics(shopId) {
@@ -4276,22 +4157,17 @@ window.downloadInvoicePDF = async function (orderId) {
             billToLabel: "Bill To:",
             billToName: order.customer_name,
             billToSub: order.customer_phone || order.phone_number || '',
-            items: (order.line_items && order.line_items.length > 0)
-                // Multi-item order → show each garment as its own line
-                ? order.line_items.map(item => ({
-                    description: [item.garment_type, item.description].filter(Boolean).join(' — '),
-                    qty: 1,
-                    unitPrice: parseFloat(item.price) || 0,
-                    total: parseFloat(item.price) || 0
-                }))
-                // Legacy single-item order → fallback
-                : [{ description: `Bespoke Tailoring: ${order.garment_type}`, qty: 1, unitPrice: totalCost, total: totalCost }],
+            items: [{
+                description: `Bespoke Tailoring: ${order.garment_type}`,
+                qty: 1,
+                unitPrice: totalCost,
+                total: totalCost
+            }],
             totals: { subtotal: totalCost, paid: paid, balance: Math.max(0, balance) },
             showPaymentDetails: true,
             paybill: customPaybill,
             account: customAccount
         });
-
 
         openInvoicePrintWindow(doc, `Invoice_${(order.customer_name || 'customer').replace(/\s+/g, '_')}`);
 
@@ -4692,6 +4568,7 @@ function initAdminOrderForm() {
 
     // Setup Client Search
     setupClientSearch('customer_phone');
+    setupClientSearch('customer_name');
 
     // 4. Handle Form Submission
     const orderForm = document.getElementById('order-form');
@@ -4817,6 +4694,11 @@ function generateAdminOrderFormMeasurements() {
     }
 
     container.innerHTML = html;
+
+    // [NEW] Intelligently auto-fill measurements if there's a selected client with history for this garment
+    if (window.CURRENT_SELECTED_CLIENT) {
+        autoFillMeasurementsIfAvailable('measurement-fields-container', garmentType);
+    }
 }
 
 // ==========================================
@@ -6939,38 +6821,48 @@ async function exportTransactionsCSV() {
  * Attaches a search dropdown listener to the phone number field
  * @param {string} phoneInputId - The ID of the phone input field
  */
-function setupClientSearch(phoneInputId) {
-    const phoneInput = document.getElementById(phoneInputId);
-    if (!phoneInput) return;
+function setupClientSearch(inputId) {
+    const inputField = document.getElementById(inputId);
+    if (!inputField) return;
 
     // Create a results container if it doesn't exist
-    let resultsDiv = document.getElementById(`${phoneInputId}-results`);
+    let resultsDiv = document.getElementById(`${inputId}-results`);
     if (!resultsDiv) {
         resultsDiv = document.createElement('div');
-        resultsDiv.id = `${phoneInputId}-results`;
+        resultsDiv.id = `${inputId}-results`;
         resultsDiv.className = 'search-results-popover';
-        phoneInput.parentNode.appendChild(resultsDiv);
+        // Add some max height and scroll to handle more items comfortably
+        resultsDiv.style.maxHeight = '250px';
+        resultsDiv.style.overflowY = 'auto';
+        inputField.parentNode.appendChild(resultsDiv);
     }
 
-    phoneInput.addEventListener('input', async (e) => {
-        const val = e.target.value.trim();
-        if (val.length < 3) {
+    const handleSearch = async (val) => {
+        // [NEW] Clear global selected client if they start typing to avoid wrong auto-fills later
+        window.CURRENT_SELECTED_CLIENT = null;
+
+        if (val.length > 0 && val.length < 3) {
             resultsDiv.style.display = 'none';
             return;
         }
 
         try {
-            const { data: clients, error } = await supabaseClient
-                .from('clients')
-                .select('*')
-                .ilike('phone', `%${val}%`)
-                .limit(5);
+            let query = supabaseClient.from('clients').select('*');
+
+            if (val.length >= 3) {
+                query = query.or(`name.ilike.%${val}%,phone.ilike.%${val}%`).limit(5);
+            } else {
+                // Fetch recent clients if empty input (val.length === 0)
+                query = query.order('updated_at', { ascending: false }).limit(10);
+            }
+
+            const { data: clients, error } = await query;
 
             if (error) throw error;
 
             if (clients && clients.length > 0) {
                 resultsDiv.innerHTML = clients.map(c => `
-                    <div class="search-result-item" onclick="selectClient('${phoneInputId}', ${JSON.stringify(c).replace(/"/g, '&quot;')})">
+                    <div class="search-result-item" onclick="selectClient('${inputId}', ${JSON.stringify(c).replace(/"/g, '&quot;')})">
                         <strong>${c.phone}</strong> - ${c.name}
                     </div>
                 `).join('');
@@ -6981,63 +6873,90 @@ function setupClientSearch(phoneInputId) {
         } catch (err) {
             console.error("Client search error:", err);
         }
-    });
+    };
+
+    inputField.addEventListener('input', (e) => handleSearch(e.target.value.trim()));
+    inputField.addEventListener('focus', (e) => handleSearch(e.target.value.trim()));
 
     // Close results when clicking outside
     document.addEventListener('click', (e) => {
-        if (e.target !== phoneInput && e.target !== resultsDiv) {
+        if (e.target !== inputField && e.target !== resultsDiv) {
             resultsDiv.style.display = 'none';
         }
     });
 }
 
 /**
+ * Global State to remember the selected client across garment type changes
+ */
+window.CURRENT_SELECTED_CLIENT = null;
+
+/**
  * Handles selection of a client from search results
  */
-window.selectClient = function (phoneInputId, client) {
+window.selectClient = function (inputId, client) {
+    // Save to global state immediately
+    window.CURRENT_SELECTED_CLIENT = client;
+
+    const isEdit = inputId.includes('edit');
+    const phoneInputId = isEdit ? 'edit-customer-phone' : 'customer_phone';
+    const nameInputId = isEdit ? 'edit-customer-name' : 'customer_name';
+    const garmentSelectId = isEdit ? 'edit-garment-type' : 'garment-type-select';
+    const notesAreaId = isEdit ? 'edit-preferences' : 'customer_preferences';
+
     const phoneInput = document.getElementById(phoneInputId);
-    const nameInput = document.getElementById(phoneInputId === 'customer_phone' ? 'customer_name' : 'edit-customer-name');
-    const garmentSelect = document.getElementById(phoneInputId === 'customer_phone' ? 'garment-type-select' : 'edit-garment-type');
-    const notesArea = document.getElementById(phoneInputId === 'customer_phone' ? 'customer_preferences' : 'edit-preferences');
+    const nameInput = document.getElementById(nameInputId);
+    const garmentSelect = document.getElementById(garmentSelectId);
+    const notesArea = document.getElementById(notesAreaId);
 
     if (phoneInput) phoneInput.value = client.phone;
     if (nameInput) nameInput.value = client.name;
     if (notesArea) notesArea.value = client.notes || '';
 
-    // Auto-select last garment type if available
-    if (garmentSelect && client.last_garment_type) {
-        garmentSelect.value = client.last_garment_type;
-        // Trigger change to generate measurement fields
+    // Trigger garment change to let the generator auto-fill measurements
+    if (garmentSelect) {
+        if (client.last_garment_type) {
+            garmentSelect.value = client.last_garment_type;
+        }
         garmentSelect.dispatchEvent(new Event('change'));
-
-        // Populate measurements if history exists
-        setTimeout(() => {
-            if (client.measurements_history && client.measurements_history.length > 0) {
-                let latest = client.measurements_history[0].measurements;
-                if (typeof latest === 'string') {
-                    try { latest = JSON.parse(latest); } catch (e) { latest = null; }
-                }
-
-                if (latest) {
-                    const containerId = phoneInputId === 'customer_phone' ? 'measurement-fields-container' : 'admin-measurement-fields-container';
-                    const container = document.getElementById(containerId);
-                    if (container) {
-                        container.querySelectorAll('input').forEach(input => {
-                            const comp = input.dataset.component || input.dataset.c;
-                            const meas = input.dataset.measurement || input.dataset.m;
-                            if (latest[comp] && latest[comp][meas]) {
-                                input.value = latest[comp][meas];
-                            }
-                        });
-                    }
-                }
-            }
-        }, 100);
     }
 
-    const resultsDiv = document.getElementById(`${phoneInputId}-results`);
+    const resultsDiv = document.getElementById(`${inputId}-results`);
     if (resultsDiv) resultsDiv.style.display = 'none';
 };
+
+/**
+ * Helper to auto-fill measurements based on global state and selected garment.
+ */
+function autoFillMeasurementsIfAvailable(containerId, targetGarmentType) {
+    const client = window.CURRENT_SELECTED_CLIENT;
+    if (!client || !client.measurements_history) return;
+
+    // Find the most recent history entry for this EXACT garment type
+    const historyEntry = client.measurements_history.find(h => h.garment === targetGarmentType);
+    if (!historyEntry) return;
+
+    let latest = historyEntry.measurements;
+    if (typeof latest === 'string') {
+        try { latest = JSON.parse(latest); } catch (e) { latest = null; }
+    }
+
+    if (!latest) return;
+
+    // Give DOM a tiny moment to render the new inputs before filling them
+    setTimeout(() => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.querySelectorAll('input').forEach(input => {
+                const comp = input.dataset.component || input.dataset.c;
+                const meas = input.dataset.measurement || input.dataset.m;
+                if (latest[comp] && latest[comp][meas] !== undefined && latest[comp][meas] !== null) {
+                    input.value = latest[comp][meas];
+                }
+            });
+        }
+    }, 50);
+}
 
 /**
  * Loads the list of clients for the management page
@@ -7098,20 +7017,30 @@ async function viewClientDetails(clientId) {
         const modal = document.getElementById('order-modal');
         const content = modal.querySelector('.modal-content');
 
-        let historyHtml = '<p>No measurement history found.</p>';
+        // Extract unique garments for badges
+        const uniqueGarments = [...new Set((client.measurements_history || []).map(h => h.garment))].filter(Boolean);
+        const garmentBadges = uniqueGarments.map(g => `
+            <span style="background: var(--brand-navy); color: var(--brand-gold); padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600; margin-right: 5px; display: inline-block;">
+                ${g}
+            </span>
+        `).join('');
+
+        let historyHtml = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">No measurement history found.</p>';
         if (client.measurements_history && client.measurements_history.length > 0) {
             historyHtml = client.measurements_history.map((h, index) => `
-                <div class="history-item" id="history-item-${index}" style="border: 1px solid #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-                        <span style="font-weight: 600;">${h.garment}</span>
+                <div class="history-item" id="history-item-${index}" style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 12px; align-items: center;">
+                        <span style="font-weight: 800; color: var(--brand-navy); font-size: 1.1em; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="fas fa-cut" style="margin-right: 8px; color: var(--brand-gold);"></i>${h.garment}
+                        </span>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <span style="color: #64748b; font-size: 0.85em;">${formatDate(h.date)}</span>
-                            <button class="small-btn" onclick="editClientMeasurement('${client.id}', ${index})">
-                                <i class="fas fa-edit"></i> Edit
+                            <span style="color: #64748b; font-size: 0.85em; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">${formatDate(h.date)}</span>
+                            <button class="small-btn" onclick="editClientMeasurement('${client.id}', ${index})" style="background: #f1f5f9; color: var(--brand-navy); border: none;">
+                                <i class="fas fa-edit"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="history-measurements" style="font-size: 0.9em; line-height: 1.6;">
+                    <div class="history-measurements" style="font-size: 0.95em; line-height: 1.6; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         ${formatMeasurements(JSON.stringify(h.measurements))}
                     </div>
                 </div>
@@ -7120,23 +7049,40 @@ async function viewClientDetails(clientId) {
 
         content.innerHTML = `
             <span class="close-btn" onclick="document.getElementById('order-modal').style.display='none'">&times;</span>
-            <div style="padding: 10px;">
-                <h2 style="color: var(--brand-navy); margin-bottom: 5px;">${client.name}</h2>
-                <p style="color: #64748b; margin-bottom: 20px;">${client.phone}</p>
+            <div style="padding: 15px;">
+                <div id="client-info-header" style="margin-bottom: 25px; position: relative;">
+                    <div id="client-info-view">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h2 style="color: var(--brand-navy); margin: 0 0 5px 0; font-size: 1.8em;">${client.name}</h2>
+                                <p style="color: #64748b; margin: 0 0 15px 0; font-weight: 500;"><i class="fas fa-phone" style="margin-right: 8px;"></i>${client.phone}</p>
+                            </div>
+                            <button class="small-btn" onclick="editClientInfo('${client.id}')" style="background: #f1f5f9; color: var(--brand-navy); border: none;">
+                                <i class="fas fa-user-edit"></i> Edit Info
+                            </button>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <span style="font-size: 0.85em; color: #94a3b8; display: block; margin-bottom: 5px; font-weight: 600; text-transform: uppercase;">Known Garments</span>
+                            ${garmentBadges || '<span style="color: #cbd5e1; font-style: italic; font-size: 0.9em;">None yet</span>'}
+                        </div>
+                    </div>
+                </div>
                 
-                <div class="tabs" style="margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1em; border-bottom: 2px solid var(--brand-gold); display: inline-block; padding-bottom: 5px; margin-bottom: 15px;">Measurement History</h3>
-                    <div style="max-height: 400px; overflow-y: auto;">
+                <div style="margin-bottom: 25px;">
+                    <h3 style="font-size: 1.1em; color: var(--brand-navy); border-bottom: 2px solid var(--brand-gold); display: inline-block; padding-bottom: 5px; margin-bottom: 20px; font-weight: 700;">Measurement History</h3>
+                    <div style="max-height: 450px; overflow-y: auto; padding-right: 5px;">
                         ${historyHtml}
                     </div>
                 </div>
 
-                ${client.notes ? `
-                    <div style="background: #fff8e1; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
-                        <strong style="display: block; margin-bottom: 5px;">Client Notes:</strong>
-                        <p style="margin: 0; font-size: 0.9em;">${client.notes}</p>
-                    </div>
-                ` : ''}
+                <div id="client-notes-container">
+                    ${client.notes ? `
+                        <div style="background: #fff8e1; padding: 20px; border-radius: 12px; border-left: 6px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <strong style="display: flex; align-items: center; margin-bottom: 8px; color: #856404;"><i class="fas fa-sticky-note" style="margin-right: 10px;"></i>Client Preferences</strong>
+                            <p style="margin: 0; font-size: 0.95em; color: #856404; line-height: 1.5;">${client.notes}</p>
+                        </div>
+                    ` : ''}
+                </div>
             </div>
         `;
 
@@ -7147,6 +7093,80 @@ async function viewClientDetails(clientId) {
         alert("Error loading client details");
     }
 }
+
+/**
+ * Toggles the client info section to edit mode
+ */
+window.editClientInfo = async function (clientId) {
+    try {
+        const { data: client, error } = await supabaseClient
+            .from('clients')
+            .select('*')
+            .eq('id', clientId)
+            .single();
+
+        if (error) throw error;
+
+        const header = document.getElementById('client-info-header');
+        header.innerHTML = `
+            <div id="client-info-edit" style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 0.8em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">Client Name</label>
+                    <input type="text" id="edit-client-name" value="${client.name}" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 0.8em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">Phone Number</label>
+                    <input type="text" id="edit-client-phone" value="${client.phone}" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 0.8em; font-weight: 700; color: var(--brand-navy); margin-bottom: 4px;">General Notes / Preferences</label>
+                    <textarea id="edit-client-notes" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; min-height: 60px;">${client.notes || ''}</textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="small-btn" onclick="saveClientInfo('${clientId}')" style="background: var(--brand-navy); color: var(--brand-gold);">
+                        <i class="fas fa-save"></i> Save Info
+                    </button>
+                    <button class="small-btn" onclick="viewClientDetails('${clientId}')" style="background: #e2e8f0; color: #475569;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+};
+
+/**
+ * Saves the updated client info to the database
+ */
+window.saveClientInfo = async function (clientId) {
+    const name = document.getElementById('edit-client-name').value.trim();
+    const phone = document.getElementById('edit-client-phone').value.trim();
+    const notes = document.getElementById('edit-client-notes').value.trim();
+
+    if (!name || !phone) return alert("Name and Phone are required.");
+
+    try {
+        const { error } = await supabaseClient
+            .from('clients')
+            .update({
+                name,
+                phone,
+                notes,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', clientId);
+
+        if (error) throw error;
+
+        alert("Client info updated!");
+        viewClientDetails(clientId);
+        if (typeof loadClients === 'function') loadClients();
+    } catch (error) {
+        alert("Error saving: " + error.message);
+    }
+};
 
 window.openNewClientModal = function () {
     const modal = document.getElementById('new-client-modal');
