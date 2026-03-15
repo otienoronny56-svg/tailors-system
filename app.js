@@ -1,4 +1,4 @@
-﻿
+
 window.logDebug = (msg, data = null, type = 'info') => {
     // Simple console log only - No visual box
     const timestamp = new Date().toLocaleTimeString();
@@ -79,48 +79,29 @@ try {
 
     // --- 4. BILLING STATUS ENFORCEMENT ---
     if (APP_CONFIG.SYSTEM_STATUS === 'SUSPENDED') {
-        const payNum = APP_CONFIG.billing.mpesaNumber;
-        const payTill = APP_CONFIG.billing.tillNumber;
-        const support = APP_CONFIG.billing.supportPhone;
-
-        // Overwrite the entire screen with the Payment Lock
         document.body.innerHTML = `
             <style>
                 body { margin: 0; background-color: #0d0d0d; color: #fff; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; }
                 .lock-box { text-align: center; max-width: 450px; padding: 40px; border: 1px solid #D4AF37; border-radius: 12px; background: #1a1a1a; box-shadow: 0 0 30px rgba(212, 175, 55, 0.15); }
-                h1 { color: #e74c3c; margin-top: 0; letter-spacing: 1px; font-size: 24px; }
-                .details-box { background: #252525; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: left; border-left: 4px solid #D4AF37; }
-                .pay-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; }
-                .pay-val { color: #D4AF37; font-weight: bold; font-family: monospace; font-size: 18px; }
-                .btn-call { display: inline-block; background: #D4AF37; color: #000; text-decoration: none; padding: 12px 30px; border-radius: 5px; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-                .btn-call:hover { background: #fff; }
+                h1 { color: #f39c12; margin-top: 0; letter-spacing: 1px; font-size: 24px; }
+                .details-box { background: #252525; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center; border-left: 4px solid #D4AF37; }
             </style>
             
             <div class="lock-box">
-                <div style="font-size: 50px; margin-bottom: 10px;">🔒</div>
-                <h1>ACCESS PAUSED</h1>
-                <p style="color: #aaa; margin-bottom: 20px;">The subscription for <strong>${APP_CONFIG.appName}</strong> is currently inactive.</p>
-                
-                <p>To restore access immediately, please complete your payment:</p>
+                <div style="font-size: 50px; margin-bottom: 20px;">⚙️</div>
+                <h1>SYSTEM MAINTENANCE</h1>
+                <p style="color: #aaa; margin-bottom: 20px;">We are currently performing scheduled maintenance and database updates for <strong>${APP_CONFIG.appName}</strong>.</p>
                 
                 <div class="details-box">
-                    <div class="pay-row">
-                        <span>Send Money:</span>
-                        <span class="pay-val">${payNum}</span>
-                    </div>
-                    <div class="pay-row" style="margin-bottom: 0;">
-                        <span>Buy Goods Till:</span>
-                        <span class="pay-val">${payTill}</span>
-                    </div>
+                    <p style="color: #fff; margin: 0;">This dashboard is temporarily offline to ensure data safety. Normal service will resume shortly.</p>
                 </div>
                 
-                <p style="font-size: 14px; color: #888;">Once paid, contact support to reactivate:</p>
-                <a href="tel:${support}" class="btn-call">📞 Call Support</a>
+                <p style="font-size: 14px; color: #888;">Expected Downtime: 1-2 Hours</p>
+                <p style="font-size: 12px; color: #555;">(You can refresh the page in a bit)</p>
             </div>
         `;
 
-        // Stop the app from loading further
-        throw new Error("❌ SYSTEM LOCKED: PAYMENT REQUIRED");
+        throw new Error("❌ SYSTEM OFFLINE: MAINTENANCE");
     }
     window.appInitialized = true;
     console.log("✅ System Initialized Successfully");
