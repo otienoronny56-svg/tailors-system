@@ -1042,30 +1042,7 @@ function initOrderForm() {
     loadWorkersDropdown();
     loadWorkersForSquad(USER_PROFILE.shop_id); // [NEW] Load checkboxes
 
-    // --- [NEW] Accessories Individual Recalculator Builder ---
-    function updateAccessoriesTotal() {
-        const shirtQty = parseFloat(document.getElementById('acc_shirt_qty')?.value) || 0;
-        const shirtPrice = parseFloat(document.getElementById('acc_shirt_price')?.value) || 0;
-        
-        const tieQty = parseFloat(document.getElementById('acc_tie_qty')?.value) || 0;
-        const tiePrice = parseFloat(document.getElementById('acc_tie_price')?.value) || 0;
-        
-        const shoesQty = parseFloat(document.getElementById('acc_shoes_qty')?.value) || 0;
-        const shoesPrice = parseFloat(document.getElementById('acc_shoes_price')?.value) || 0;
-        
-        const notesPrice = parseFloat(document.getElementById('acc_notes_price')?.value) || 0;
 
-        const total = (shirtQty * shirtPrice) + (tieQty * tiePrice) + (shoesQty * shoesPrice) + notesPrice;
-        
-        const accTotalInput = document.getElementById('acc_total_price');
-        if (accTotalInput) accTotalInput.value = total > 0 ? total.toFixed(2) : '0';
-    }
-
-    // Add listeners to all pricing & quantities
-    ['acc_shirt_qty', 'acc_shirt_price', 'acc_tie_qty', 'acc_tie_price', 'acc_shoes_qty', 'acc_shoes_price', 'acc_notes_price'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', updateAccessoriesTotal);
-    });
     const garmentSelect = document.getElementById('garment-type-select');
     if (garmentSelect) garmentSelect.addEventListener('change', generateMeasurementFieldsManager);
 
@@ -3049,25 +3026,7 @@ function initAdminOrderForm() {
     // Setup Client Search
     setupClientSearch('customer_phone');
     setupClientSearch('customer_name');
-    // --- [NEW] Accessories Individual Recalculator Builder (Admin) ---
-    function updateAdminAccessoriesTotal() {
-        const shirtQty = parseFloat(document.getElementById('acc_shirt_qty')?.value) || 0;
-        const shirtPrice = parseFloat(document.getElementById('acc_shirt_price')?.value) || 0;
-        const tieQty = parseFloat(document.getElementById('acc_tie_qty')?.value) || 0;
-        const tiePrice = parseFloat(document.getElementById('acc_tie_price')?.value) || 0;
-        const shoesQty = parseFloat(document.getElementById('acc_shoes_qty')?.value) || 0;
-        const shoesPrice = parseFloat(document.getElementById('acc_shoes_price')?.value) || 0;
-        const notesPrice = parseFloat(document.getElementById('acc_notes_price')?.value) || 0;
 
-        const total = (shirtQty * shirtPrice) + (tieQty * tiePrice) + (shoesQty * shoesPrice) + notesPrice;
-        const accTotalInput = document.getElementById('acc_total_price');
-        if (accTotalInput) accTotalInput.value = total > 0 ? total.toFixed(2) : '0';
-    }
-
-    ['acc_shirt_qty', 'acc_shirt_price', 'acc_tie_qty', 'acc_tie_price', 'acc_shoes_qty', 'acc_shoes_price', 'acc_notes_price'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', updateAdminAccessoriesTotal);
-    });
 
     // 4. Handle Form Submission
     const orderForm = document.getElementById('order-form');
@@ -3106,22 +3065,7 @@ function initAdminOrderForm() {
             const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
             if (error) return alert(error.message);
 
-            // --- [NEW] Save Accessories (Admin Form) ---
-            const accessories = [];
-            const shirtQty = parseInt(document.getElementById('acc_shirt_qty')?.value) || 0;
-            const tieQty = parseInt(document.getElementById('acc_tie_qty')?.value) || 0;
-            const shoesQty = parseInt(document.getElementById('acc_shoes_qty')?.value) || 0;
-            const notesText = document.getElementById('acc_notes')?.value.trim() || '';
 
-            if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty, price: parseFloat(document.getElementById('acc_shirt_price')?.value) || 0 });
-            if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty, price: parseFloat(document.getElementById('acc_tie_price')?.value) || 0 });
-            if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty, price: parseFloat(document.getElementById('acc_shoes_price')?.value) || 0 });
-            if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1, price: parseFloat(document.getElementById('acc_notes_price')?.value) || 0 });
-
-            if (accessories.length > 0) {
-                const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
-                if (accError) console.error("Error saving accessories Admin:", accError);
-            }
             // [NEW] Upsert Client Data
             try {
                 const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).single();
