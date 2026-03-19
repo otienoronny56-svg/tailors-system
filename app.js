@@ -1066,7 +1066,6 @@ function initOrderForm() {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', updateAccessoriesTotal);
     });
-
     const garmentSelect = document.getElementById('garment-type-select');
     if (garmentSelect) garmentSelect.addEventListener('change', generateMeasurementFieldsManager);
 
@@ -3050,7 +3049,6 @@ function initAdminOrderForm() {
     // Setup Client Search
     setupClientSearch('customer_phone');
     setupClientSearch('customer_name');
-
     // --- [NEW] Accessories Individual Recalculator Builder (Admin) ---
     function updateAdminAccessoriesTotal() {
         const shirtQty = parseFloat(document.getElementById('acc_shirt_qty')?.value) || 0;
@@ -3124,7 +3122,6 @@ function initAdminOrderForm() {
                 const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
                 if (accError) console.error("Error saving accessories Admin:", accError);
             }
-
             // [NEW] Upsert Client Data
             try {
                 const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).single();
