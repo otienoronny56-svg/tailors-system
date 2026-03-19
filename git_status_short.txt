@@ -1,0 +1,11 @@
+﻿ M admin-order-form.html
+ M app.js
+ M config.js
+ M order-form.html
+ M styles.css
+?? git_status_output.txt
+?? git_status_short.txt
+origin	https://github.com/otienoronny56-svg/tailors-system.git (fetch)
+origin	https://github.com/otienoronny56-svg/tailors-system.git (push)
+pos	https://github.com/otienoronny56-svg/tailors-system-pos.git (fetch)
+pos	https://github.com/otienoronny56-svg/tailors-system-pos.git (push)

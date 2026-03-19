@@ -21,7 +21,7 @@ const APP_CONFIG = {
     logoPath: "logo.png",
 
     // === 4. CONTACT DETAILS (For Receipts) ===
-    shopPhone: "0721401495",
+    shopPhone: "0713044564",
     currencySymbol: "Ksh",
 
     // === 5. BACKEND CONNECTION (Supabase) ===

@@ -666,8 +666,22 @@ async function loadOrders(mode = 'open') {
         }
 
         const orderIds = orders.map(o => o.id);
-        const { data: payments } = await supabaseClient.from('payments').select('*').in('order_id', orderIds);
+        const [{ data: payments }, { data: accessories }] = await Promise.all([
+            supabaseClient.from('payments').select('*').in('order_id', orderIds),
+            supabaseClient.from('order_accessories').select('*').in('order_id', orderIds)
+        ]);
+
         const paymentsByOrder = {};
+        payments?.forEach(p => {
+            if (!paymentsByOrder[p.order_id]) paymentsByOrder[p.order_id] = [];
+            paymentsByOrder[p.order_id].push(p);
+        });
+
+        const accessoriesByOrder = {};
+        accessories?.forEach(a => {
+            if (!accessoriesByOrder[a.order_id]) accessoriesByOrder[a.order_id] = [];
+            accessoriesByOrder[a.order_id].push(a);
+        });
         payments?.forEach(p => {
             if (!paymentsByOrder[p.order_id]) paymentsByOrder[p.order_id] = [];
             paymentsByOrder[p.order_id].push(p);
@@ -685,7 +699,10 @@ async function loadOrders(mode = 'open') {
             const orderPaymentList = (paymentsByOrder[order.id] || []);
             const activePayments = orderPaymentList; // Exclude soft-deleted - done by RLS now
             const paid = activePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-            const balance = (order.price || 0) - paid;
+            const orderAccessories = accessoriesByOrder[order.id] || [];
+            const accTotal = orderAccessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
+            const grandTotal = (order.price || 0) + accTotal;
+            const balance = grandTotal - paid;
 
             // Traffic Light Date Logic
             const diffDays = Math.ceil((new Date(order.due_date) - new Date()) / (86400000));
@@ -1025,21 +1042,30 @@ function initOrderForm() {
     loadWorkersDropdown();
     loadWorkersForSquad(USER_PROFILE.shop_id); // [NEW] Load checkboxes
 
-    // --- [NEW] Accessories Auto-Calculation Helper ---
-    const accTotalInput = document.getElementById('acc_total_price');
-    const mainPriceInput = document.getElementById('price');
-    
-    if (accTotalInput && mainPriceInput) {
-        let lastAccCost = 0;
-        accTotalInput.addEventListener('input', () => {
-            const currentAccCost = parseFloat(accTotalInput.value) || 0;
-            const currentTotal = parseFloat(mainPriceInput.value) || 0;
-            const delta = currentAccCost - lastAccCost;
-            
-            mainPriceInput.value = Math.max(0, currentTotal + delta);
-            lastAccCost = currentAccCost;
-        });
+    // --- [NEW] Accessories Individual Recalculator Builder ---
+    function updateAccessoriesTotal() {
+        const shirtQty = parseFloat(document.getElementById('acc_shirt_qty')?.value) || 0;
+        const shirtPrice = parseFloat(document.getElementById('acc_shirt_price')?.value) || 0;
+        
+        const tieQty = parseFloat(document.getElementById('acc_tie_qty')?.value) || 0;
+        const tiePrice = parseFloat(document.getElementById('acc_tie_price')?.value) || 0;
+        
+        const shoesQty = parseFloat(document.getElementById('acc_shoes_qty')?.value) || 0;
+        const shoesPrice = parseFloat(document.getElementById('acc_shoes_price')?.value) || 0;
+        
+        const notesPrice = parseFloat(document.getElementById('acc_notes_price')?.value) || 0;
+
+        const total = (shirtQty * shirtPrice) + (tieQty * tiePrice) + (shoesQty * shoesPrice) + notesPrice;
+        
+        const accTotalInput = document.getElementById('acc_total_price');
+        if (accTotalInput) accTotalInput.value = total > 0 ? total.toFixed(2) : '0';
     }
+
+    // Add listeners to all pricing & quantities
+    ['acc_shirt_qty', 'acc_shirt_price', 'acc_tie_qty', 'acc_tie_price', 'acc_shoes_qty', 'acc_shoes_price', 'acc_notes_price'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateAccessoriesTotal);
+    });
 
     const garmentSelect = document.getElementById('garment-type-select');
     if (garmentSelect) garmentSelect.addEventListener('change', generateMeasurementFieldsManager);
@@ -1087,15 +1113,15 @@ function initOrderForm() {
 
                 // --- [NEW] Save Accessories ---
                 const accessories = [];
-                const shirtQty = parseInt(document.getElementById('acc_shirt_qty').value) || 0;
-                const tieQty = parseInt(document.getElementById('acc_tie_qty').value) || 0;
-                const shoesQty = parseInt(document.getElementById('acc_shoes_qty').value) || 0;
-                const notesText = document.getElementById('acc_notes').value.trim();
+                const shirtQty = parseInt(document.getElementById('acc_shirt_qty')?.value) || 0;
+                const tieQty = parseInt(document.getElementById('acc_tie_qty')?.value) || 0;
+                const shoesQty = parseInt(document.getElementById('acc_shoes_qty')?.value) || 0;
+                const notesText = document.getElementById('acc_notes')?.value.trim() || '';
 
-                if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty });
-                if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty });
-                if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty });
-                if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1 });
+                if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty, price: parseFloat(document.getElementById('acc_shirt_price')?.value) || 0 });
+                if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty, price: parseFloat(document.getElementById('acc_tie_price')?.value) || 0 });
+                if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty, price: parseFloat(document.getElementById('acc_shoes_price')?.value) || 0 });
+                if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1, price: parseFloat(document.getElementById('acc_notes_price')?.value) || 0 });
 
                 if (accessories.length > 0) {
                     const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
@@ -1424,7 +1450,8 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
     const dateStr = new Date().toLocaleDateString();
 
     // --- ☢️ NUCLEAR ARITHMETIC (Do not touch) ☢️ ---
-    const totalCost = parseFloat(order.price) || 0;
+    const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
+    const totalCost = (parseFloat(order.price) || 0) + accTotal;
     const existingPaid = parseFloat(order.amount_paid) || 0;
     const payingNow = parseFloat(paymentAmount) || 0;
 
@@ -1492,7 +1519,7 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
 
                     ${accessories && accessories.length > 0 ? `
                     <span style="font-size: 0.9em; color: #777; font-weight: 500;">Extras:</span>
-                    <span style="font-size: 1em; color: #333; font-weight: 400;">${accessories.map(a => `${a.item_name} (x${a.quantity})`).join(', ')}</span>
+                    <span style="font-size: 1em; color: #333; font-weight: 400;">${accessories.map(a => `${a.item_name} (x${a.quantity})${parseFloat(a.price) > 0 ? ` - Ksh ${parseFloat(a.price).toLocaleString()}` : ''}`).join(', ')}</span>
                     ` : ''}
                 </div>
             </div>
@@ -1539,7 +1566,8 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
 
 function generateTextReceipt(order, payments, paymentAmount = 0, accessories = []) {
     // --- Robust Math Logic (match generateSimpleReceiptHTML) ---
-    const totalCost = parseFloat(order.price) || 0;
+    const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
+    const totalCost = (parseFloat(order.price) || 0) + accTotal;
     const existingPaid = payments ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) : 0;
     const payingNow = parseFloat(paymentAmount) || 0;
     let realTotalPaid = 0;
@@ -1569,7 +1597,7 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     if (order.customer_phone) lines.push(`Phone: ${order.customer_phone}`);
     if (order.garment_type) lines.push(`Garment: ${order.garment_type}`);
     if (accessories && accessories.length > 0) {
-        lines.push(`Accessories: ${accessories.map(a => `${a.item_name} (x${a.quantity})`).join(', ')}`);
+        lines.push(`Accessories: ${accessories.map(a => `${a.item_name} (x${a.quantity})${parseFloat(a.price) > 0 ? ` - Ksh ${parseFloat(a.price).toLocaleString()}` : ''}`).join(', ')}`);
     }
     lines.push('');
     lines.push(`Total Cost: Ksh ${totalCost.toLocaleString()}`);
@@ -1821,8 +1849,17 @@ async function loadMetrics() {
     try {
         const [{ data: shops }, { data: orders }] = await Promise.all([
             supabaseClient.from('shops').select('id, name'),
-            supabaseClient.from('orders').select('shop_id, price, amount_paid, status, due_date')
+            supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date')
         ]);
+
+        if (!orders) return;
+
+        const { data: accessories } = await supabaseClient.from('order_accessories').select('*').in('order_id', orders.map(o => o.id));
+        const accessoriesByOrder = {};
+        accessories?.forEach(a => {
+            if (!accessoriesByOrder[a.order_id]) accessoriesByOrder[a.order_id] = [];
+            accessoriesByOrder[a.order_id].push(a);
+        });
 
         if (!orders) return;
 
@@ -1847,7 +1884,10 @@ async function loadMetrics() {
         orders.forEach(o => {
             const paid = parseFloat(o.amount_paid) || 0;
             const price = parseFloat(o.price) || 0;
-            const unpaid = price - paid;
+            const orderAccessories = accessoriesByOrder[o.id] || [];
+            const accTotal = orderAccessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
+            const totalPrice = price + accTotal;
+            const unpaid = totalPrice - paid;
 
             totalRevenue += paid;
             totalUnpaid += unpaid;
@@ -2169,10 +2209,11 @@ async function loadAdminOrders(mode = 'current') {
         const workerIds = [...new Set(orders.map(o => o.worker_id).filter(id => id))];
         const orderIds = orders.map(o => o.id);
 
-        const [{ data: shops }, { data: workers }, { data: payments }] = await Promise.all([
+        const [{ data: shops }, { data: workers }, { data: payments }, { data: accessories }] = await Promise.all([
             shopIds.length > 0 ? supabaseClient.from('shops').select('id, name').in('id', shopIds) : Promise.resolve({ data: [] }),
             workerIds.length > 0 ? supabaseClient.from('workers').select('id, name').in('id', workerIds) : Promise.resolve({ data: [] }),
-            supabaseClient.from('payments').select('*').in('order_id', orderIds)
+            supabaseClient.from('payments').select('*').in('order_id', orderIds),
+            supabaseClient.from('order_accessories').select('*').in('order_id', orderIds)
         ]);
 
         const shopMap = {}; shops?.forEach(s => shopMap[s.id] = s.name);
@@ -2181,12 +2222,19 @@ async function loadAdminOrders(mode = 'current') {
             if (!paymentsByOrder[p.order_id]) paymentsByOrder[p.order_id] = [];
             paymentsByOrder[p.order_id].push(p);
         });
+        const accessoriesByOrder = {}; accessories?.forEach(a => {
+            if (!accessoriesByOrder[a.order_id]) accessoriesByOrder[a.order_id] = [];
+            accessoriesByOrder[a.order_id].push(a);
+        });
 
         tbody.innerHTML = orders.map(order => {
             const orderPaymentList = (paymentsByOrder[order.id] || []);
             const activePayments = orderPaymentList.filter(p => !p.deleted_at); // Exclude soft-deleted
             const paid = activePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-            const balance = (order.price || 0) - paid;
+            const orderAccessories = accessoriesByOrder[order.id] || [];
+            const accTotal = orderAccessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
+            const grandTotal = (order.price || 0) + accTotal;
+            const balance = grandTotal - paid;
             const orderIdStr = String(order.id);
             const shortId = orderIdStr.slice(-6);
             const statusText = STATUS_MAP[order.status] || `Status ${order.status}`;
@@ -2312,7 +2360,9 @@ async function openAdminOrderView(orderId) {
 
         const activePayments = payments ? payments.filter(p => !p.deleted_at) : [];
         const paid = activePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-        const balance = (order.price || 0) - paid;
+        const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
+        const totalOrderPrice = (order.price || 0) + accTotal;
+        const balance = totalOrderPrice - paid;
         const orderIdStr = String(order.id);
         const shortId = orderIdStr.slice(-6);
 
@@ -2338,7 +2388,7 @@ async function openAdminOrderView(orderId) {
                     <div style="flex: 1; background: #000; color: white; padding: 15px; border-radius: 5px; text-align: center;">
                         <small>Total Price</small>
                         <p style="margin: 5px 0; font-size: 1.2em; color: #d4af37; font-weight: bold;">
-                            Ksh ${(order.price || 0).toLocaleString()}
+                            Ksh ${totalOrderPrice.toLocaleString()}
                         </p>
                     </div>
                     <div style="flex: 1; background: #007bff; color: white; padding: 15px; border-radius: 5px; text-align: center;">
@@ -2375,7 +2425,7 @@ async function openAdminOrderView(orderId) {
                 <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
                     <h3 style="color: #d4af37;"><i class="fas fa-shopping-bag"></i> Accessories / Extras</h3>
                     <ul style="padding-left: 20px; margin-bottom: 10px;">
-                        ${accessories.map(a => `<li><strong>${a.item_name}</strong> (Qty: ${a.quantity})</li>`).join('')}
+                        ${accessories.map(a => `<li><strong>${a.item_name}</strong> (Qty: ${a.quantity})${parseFloat(a.price) > 0 ? ` - Ksh ${parseFloat(a.price).toLocaleString()}` : ''}</li>`).join('')}
                     </ul>
                 </div>
                 ` : ''}
@@ -2580,26 +2630,67 @@ async function loadAdminOrderDetails() {
         if (accessories && accessories.length > 0) {
             accessories.forEach(a => {
                 const name = a.item_name ? a.item_name.toLowerCase() : '';
-                if (name.includes('shirt')) document.getElementById('edit_acc_shirt_qty').value = a.quantity;
-                else if (name.includes('tie')) document.getElementById('edit_acc_tie_qty').value = a.quantity;
-                else if (name.includes('shoes')) document.getElementById('edit_acc_shoes_qty').value = a.quantity;
-                else document.getElementById('edit_acc_notes').value = a.item_name; 
+                if (name.includes('shirt')) {
+                    const qtyEl = document.getElementById('edit_acc_shirt_qty');
+                    const prcEl = document.getElementById('edit_acc_shirt_price');
+                    if (qtyEl) qtyEl.value = a.quantity;
+                    if (prcEl) prcEl.value = a.price || 0;
+                } else if (name.includes('tie')) {
+                    const qtyEl = document.getElementById('edit_acc_tie_qty');
+                    const prcEl = document.getElementById('edit_acc_tie_price');
+                    if (qtyEl) qtyEl.value = a.quantity;
+                    if (prcEl) prcEl.value = a.price || 0;
+                } else if (name.includes('shoes')) {
+                    const qtyEl = document.getElementById('edit_acc_shoes_qty');
+                    const prcEl = document.getElementById('edit_acc_shoes_price');
+                    if (qtyEl) qtyEl.value = a.quantity;
+                    if (prcEl) prcEl.value = a.price || 0;
+                } else {
+                    const notesEl = document.getElementById('edit_acc_notes');
+                    const prcEl = document.getElementById('edit_acc_notes_price');
+                    if (notesEl) notesEl.value = a.item_name;
+                    if (prcEl) prcEl.value = a.price || 0;
+                }
             });
         }
 
-        // Add Auto-Calculation for Edit form too
-        const editAccTotalInput = document.getElementById('edit_acc_total_price');
-        const editMainPriceInput = document.getElementById('edit-price');
-        if (editAccTotalInput && editMainPriceInput) {
-            let lastEditAccCost = 0;
-            editAccTotalInput.addEventListener('input', () => {
-                const currentAccCost = parseFloat(editAccTotalInput.value) || 0;
-                const currentTotal = parseFloat(editMainPriceInput.value) || 0;
-                const delta = currentAccCost - lastEditAccCost;
-                editMainPriceInput.value = Math.max(0, currentTotal + delta);
-                lastEditAccCost = currentAccCost;
-            });
+        // --- [NEW] Accessories Individual Recalculator Builder (Edit) ---
+        function updateEditAccessoriesTotal() {
+            const shirtQty = parseFloat(document.getElementById('edit_acc_shirt_qty')?.value) || 0;
+            const shirtPrice = parseFloat(document.getElementById('edit_acc_shirt_price')?.value) || 0;
+            const tieQty = parseFloat(document.getElementById('edit_acc_tie_qty')?.value) || 0;
+            const tiePrice = parseFloat(document.getElementById('edit_acc_tie_price')?.value) || 0;
+            const shoesQty = parseFloat(document.getElementById('edit_acc_shoes_qty')?.value) || 0;
+            const shoesPrice = parseFloat(document.getElementById('edit_acc_shoes_price')?.value) || 0;
+            const notesPrice = parseFloat(document.getElementById('edit_acc_notes_price')?.value) || 0;
+
+            const total = (shirtQty * shirtPrice) + (tieQty * tiePrice) + (shoesQty * shoesPrice) + notesPrice;
+            const editAccTotalInput = document.getElementById('edit_acc_total_price');
+            if (editAccTotalInput) editAccTotalInput.value = total > 0 ? total.toFixed(2) : '0';
+
+            // DYNAMIC UPDATE FOR TOP SUMMARY CARDS
+            const basePrice = parseFloat(document.getElementById('edit-price')?.value) || 0;
+            const grandTotal = basePrice + total;
+            
+            // Recalculate Balance
+            const paymentsStr = document.getElementById('display-total-paid')?.textContent || '0';
+            const paid = parseFloat(paymentsStr.replace(/[^0-9.]/g, '')) || 0;
+            const balance = grandTotal - paid;
+
+            if (document.getElementById('display-total-price')) document.getElementById('display-total-price').textContent = `Ksh ${grandTotal.toLocaleString()}`;
+            if (document.getElementById('display-balance-due')) document.getElementById('display-balance-due').textContent = `Ksh ${balance.toLocaleString()}`;
         }
+
+        ['edit_acc_shirt_qty', 'edit_acc_shirt_price', 'edit_acc_tie_qty', 'edit_acc_tie_price', 'edit_acc_shoes_qty', 'edit_acc_shoes_price', 'edit_acc_notes_price'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', updateEditAccessoriesTotal);
+        });
+        
+        const editMainPriceInput = document.getElementById('edit-price');
+        if (editMainPriceInput) editMainPriceInput.addEventListener('input', updateEditAccessoriesTotal);
+        
+        // Initial Calculation Trigger
+        updateEditAccessoriesTotal();
 
         // Populate Worker Dropdown
         const { data: workers } = await supabaseClient.from('workers').select('*').eq('shop_id', order.shop_id).order('name');
@@ -2750,21 +2841,21 @@ async function saveAdminOrder() {
 
         if (error) throw error;
 
-        // --- [NEW] Sync Accessories ---
+        // --- [NEW] Sync Accessories (Edit Mode) ---
         // 1. Delete previous accessories for this order
         await supabaseClient.from('order_accessories').delete().eq('order_id', CURRENT_ORDER_ID);
 
-        // 2. Collect current form accessories inputs
+        // 2. Collect current form accessories inputs with individual pricing
         const accessories = [];
         const shirtQty = parseInt(document.getElementById('edit_acc_shirt_qty')?.value) || 0;
         const tieQty = parseInt(document.getElementById('edit_acc_tie_qty')?.value) || 0;
         const shoesQty = parseInt(document.getElementById('edit_acc_shoes_qty')?.value) || 0;
-        const notesText = document.getElementById('edit_acc_notes')?.value.trim();
+        const notesText = document.getElementById('edit_acc_notes')?.value.trim() || '';
 
-        if (shirtQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Ready-made Shirt', quantity: shirtQty });
-        if (tieQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Premium Tie', quantity: tieQty });
-        if (shoesQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Shoes', quantity: shoesQty });
-        if (notesText && notesText.length > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: notesText, quantity: 1 });
+        if (shirtQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Ready-made Shirt', quantity: shirtQty, price: parseFloat(document.getElementById('edit_acc_shirt_price')?.value) || 0 });
+        if (tieQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Premium Tie', quantity: tieQty, price: parseFloat(document.getElementById('edit_acc_tie_price')?.value) || 0 });
+        if (shoesQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Shoes', quantity: shoesQty, price: parseFloat(document.getElementById('edit_acc_shoes_price')?.value) || 0 });
+        if (notesText.length > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: notesText, quantity: 1, price: parseFloat(document.getElementById('edit_acc_notes_price')?.value) || 0 });
 
         if (accessories.length > 0) {
             const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
@@ -2960,6 +3051,26 @@ function initAdminOrderForm() {
     setupClientSearch('customer_phone');
     setupClientSearch('customer_name');
 
+    // --- [NEW] Accessories Individual Recalculator Builder (Admin) ---
+    function updateAdminAccessoriesTotal() {
+        const shirtQty = parseFloat(document.getElementById('acc_shirt_qty')?.value) || 0;
+        const shirtPrice = parseFloat(document.getElementById('acc_shirt_price')?.value) || 0;
+        const tieQty = parseFloat(document.getElementById('acc_tie_qty')?.value) || 0;
+        const tiePrice = parseFloat(document.getElementById('acc_tie_price')?.value) || 0;
+        const shoesQty = parseFloat(document.getElementById('acc_shoes_qty')?.value) || 0;
+        const shoesPrice = parseFloat(document.getElementById('acc_shoes_price')?.value) || 0;
+        const notesPrice = parseFloat(document.getElementById('acc_notes_price')?.value) || 0;
+
+        const total = (shirtQty * shirtPrice) + (tieQty * tiePrice) + (shoesQty * shoesPrice) + notesPrice;
+        const accTotalInput = document.getElementById('acc_total_price');
+        if (accTotalInput) accTotalInput.value = total > 0 ? total.toFixed(2) : '0';
+    }
+
+    ['acc_shirt_qty', 'acc_shirt_price', 'acc_tie_qty', 'acc_tie_price', 'acc_shoes_qty', 'acc_shoes_price', 'acc_notes_price'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateAdminAccessoriesTotal);
+    });
+
     // 4. Handle Form Submission
     const orderForm = document.getElementById('order-form');
     if (orderForm) {
@@ -3004,10 +3115,10 @@ function initAdminOrderForm() {
             const shoesQty = parseInt(document.getElementById('acc_shoes_qty')?.value) || 0;
             const notesText = document.getElementById('acc_notes')?.value.trim() || '';
 
-            if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty });
-            if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty });
-            if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty });
-            if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1 });
+            if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty, price: parseFloat(document.getElementById('acc_shirt_price')?.value) || 0 });
+            if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty, price: parseFloat(document.getElementById('acc_tie_price')?.value) || 0 });
+            if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty, price: parseFloat(document.getElementById('acc_shoes_price')?.value) || 0 });
+            if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1, price: parseFloat(document.getElementById('acc_notes_price')?.value) || 0 });
 
             if (accessories.length > 0) {
                 const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
@@ -3115,6 +3226,7 @@ async function loadKPIMetrics(shopId) {
         let paymentsQuery = supabaseClient.from('payments').select('amount');
         let ordersQuery = supabaseClient.from('orders').select('id, price, status');
         let expensesQuery = supabaseClient.from('expenses').select('amount');
+        let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity');
 
         if (shopId !== 'all') {
             paymentsQuery = paymentsQuery.eq('orders.shop_id', shopId);
@@ -3123,20 +3235,23 @@ async function loadKPIMetrics(shopId) {
         }
 
         // Execute queries
-        const [paymentsRes, ordersRes, expensesRes] = await Promise.all([
+        const [paymentsRes, ordersRes, expensesRes, accRes] = await Promise.all([
             paymentsQuery,
             ordersQuery,
-            expensesQuery
+            expensesQuery,
+            accessoriesQuery
         ]);
 
         const payments = paymentsRes.data || [];
         const orders = ordersRes.data || [];
         const expenses = expensesRes.data || [];
+        const accessories = accRes.data || [];
 
         // Calculate metrics
         const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
         const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-        const totalOrderValue = orders.reduce((sum, o) => sum + (o.price || 0), 0);
+        const accTotal = accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
+        const totalOrderValue = orders.reduce((sum, o) => sum + (o.price || 0), 0) + accTotal;
 
         const netProfit = totalRevenue - totalExpenses;
         const outstandingBalance = totalOrderValue - totalRevenue;
@@ -4241,7 +4356,8 @@ window.downloadInvoicePDF = async function (orderId) {
         ]);
         if (!order) throw new Error("Order not found");
 
-        const totalCost = parseFloat(order.price) || 0;
+        const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
+        const totalCost = (parseFloat(order.price) || 0) + accTotal;
         const paid = payments ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) : 0;
         const balance = totalCost - paid;
         const year = new Date(order.created_at || new Date()).getFullYear();
@@ -4255,11 +4371,12 @@ window.downloadInvoicePDF = async function (orderId) {
 
         if (accessories && accessories.length > 0) {
             accessories.forEach(a => {
+                const itemPrice = parseFloat(a.price) || 0;
                 invoiceItems.push({
                     description: `Accessory: ${a.item_name}`,
-                    qty: a.quantity,
-                    unitPrice: 0,
-                    total: 0
+                    qty: a.quantity || 1,
+                    unitPrice: itemPrice,
+                    total: (a.quantity || 1) * itemPrice
                 });
             });
         }
@@ -4726,10 +4843,10 @@ function initAdminOrderForm() {
             const shoesQty = parseInt(document.getElementById('acc_shoes_qty')?.value) || 0;
             const notesText = document.getElementById('acc_notes')?.value.trim() || '';
 
-            if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty });
-            if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty });
-            if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty });
-            if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1 });
+            if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty, price: parseFloat(document.getElementById('acc_shirt_price')?.value) || 0 });
+            if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty, price: parseFloat(document.getElementById('acc_tie_price')?.value) || 0 });
+            if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty, price: parseFloat(document.getElementById('acc_shoes_price')?.value) || 0 });
+            if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1, price: parseFloat(document.getElementById('acc_notes_price')?.value) || 0 });
 
             if (accessories.length > 0) {
                 const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
@@ -5473,6 +5590,7 @@ async function loadKPIMetrics(shopId) {
         let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at');
         let ordersQuery = supabaseClient.from('orders').select('id, price, status, created_at');
         let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at');
+        let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity');
 
         if (shopId !== 'all') {
             paymentsQuery = paymentsQuery.eq('orders.shop_id', shopId);
@@ -5481,20 +5599,23 @@ async function loadKPIMetrics(shopId) {
         }
 
         // Execute queries
-        const [paymentsRes, ordersRes, expensesRes] = await Promise.all([
+        const [paymentsRes, ordersRes, expensesRes, accRes] = await Promise.all([
             paymentsQuery,
             ordersQuery,
-            expensesQuery
+            expensesQuery,
+            accessoriesQuery
         ]);
 
         const payments = paymentsRes.data || [];
         const orders = ordersRes.data || [];
         const expenses = expensesRes.data || [];
+        const accessories = accRes.data || [];
 
         // Calculate metrics
         const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
         const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-        const totalOrderValue = orders.reduce((sum, o) => sum + (o.price || 0), 0);
+        const accTotal = accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
+        const totalOrderValue = orders.reduce((sum, o) => sum + (o.price || 0), 0) + accTotal;
 
         const netProfit = totalRevenue - totalExpenses;
         const outstandingBalance = totalOrderValue - totalRevenue;
@@ -6777,14 +6898,17 @@ async function loadTransactionKPIs() {
     try {
         let paymentsQuery = supabaseClient.from('payments').select('amount');
         let ordersQuery = supabaseClient.from('orders').select('price');
+        let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity');
 
-        const [paymentsRes, ordersRes] = await Promise.all([paymentsQuery, ordersQuery]);
+        const [paymentsRes, ordersRes, accRes] = await Promise.all([paymentsQuery, ordersQuery, accessoriesQuery]);
 
         const payments = paymentsRes.data || [];
         const orders = ordersRes.data || [];
+        const accessories = accRes.data || [];
 
         const totalOrdersCount = orders.length;
-        const expectedValue = orders.reduce((sum, o) => sum + (o.price || 0), 0);
+        const accTotal = accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
+        const expectedValue = orders.reduce((sum, o) => sum + (o.price || 0), 0) + accTotal;
         const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
         const expectedBalance = expectedValue - totalRevenue;
 
