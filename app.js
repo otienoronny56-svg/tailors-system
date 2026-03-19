@@ -1025,6 +1025,22 @@ function initOrderForm() {
     loadWorkersDropdown();
     loadWorkersForSquad(USER_PROFILE.shop_id); // [NEW] Load checkboxes
 
+    // --- [NEW] Accessories Auto-Calculation Helper ---
+    const accTotalInput = document.getElementById('acc_total_price');
+    const mainPriceInput = document.getElementById('price');
+    
+    if (accTotalInput && mainPriceInput) {
+        let lastAccCost = 0;
+        accTotalInput.addEventListener('input', () => {
+            const currentAccCost = parseFloat(accTotalInput.value) || 0;
+            const currentTotal = parseFloat(mainPriceInput.value) || 0;
+            const delta = currentAccCost - lastAccCost;
+            
+            mainPriceInput.value = Math.max(0, currentTotal + delta);
+            lastAccCost = currentAccCost;
+        });
+    }
+
     const garmentSelect = document.getElementById('garment-type-select');
     if (garmentSelect) garmentSelect.addEventListener('change', generateMeasurementFieldsManager);
 
@@ -1404,7 +1420,7 @@ async function loadOrderDetailsScreen() {
 // 📄 RECEIPT SYSTEM (CORE LOGIC FOR GENERATE RECEIPT FIX)
 // ==========================================
 
-function generateSimpleReceiptHTML(order, paymentAmount) {
+function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
     const dateStr = new Date().toLocaleDateString();
 
     // --- ☢️ NUCLEAR ARITHMETIC (Do not touch) ☢️ ---
@@ -1473,6 +1489,11 @@ function generateSimpleReceiptHTML(order, paymentAmount) {
                     
                     <span style="font-size: 0.9em; color: #777; font-weight: 500;">Garment:</span>
                     <span style="font-size: 1em; color: #333; font-weight: 400;">${order.garment_type}</span>
+
+                    ${accessories && accessories.length > 0 ? `
+                    <span style="font-size: 0.9em; color: #777; font-weight: 500;">Extras:</span>
+                    <span style="font-size: 1em; color: #333; font-weight: 400;">${accessories.map(a => `${a.item_name} (x${a.quantity})`).join(', ')}</span>
+                    ` : ''}
                 </div>
             </div>
 
@@ -1516,7 +1537,7 @@ function generateSimpleReceiptHTML(order, paymentAmount) {
     `;
 }
 
-function generateTextReceipt(order, payments, paymentAmount = 0) {
+function generateTextReceipt(order, payments, paymentAmount = 0, accessories = []) {
     // --- Robust Math Logic (match generateSimpleReceiptHTML) ---
     const totalCost = parseFloat(order.price) || 0;
     const existingPaid = payments ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) : 0;
@@ -1547,6 +1568,9 @@ function generateTextReceipt(order, payments, paymentAmount = 0) {
     lines.push(`Customer: ${order.customer_name || 'Unknown'}`);
     if (order.customer_phone) lines.push(`Phone: ${order.customer_phone}`);
     if (order.garment_type) lines.push(`Garment: ${order.garment_type}`);
+    if (accessories && accessories.length > 0) {
+        lines.push(`Accessories: ${accessories.map(a => `${a.item_name} (x${a.quantity})`).join(', ')}`);
+    }
     lines.push('');
     lines.push(`Total Cost: Ksh ${totalCost.toLocaleString()}`);
     if (payingNow > 0) lines.push(`Paid Now: Ksh ${payingNow.toLocaleString()}`);
@@ -1563,9 +1587,10 @@ window.generateAndShareReceipt = async function (orderId) {
     logDebug("Generating receipt for order:", orderId, 'info');
 
     try {
-        const [{ data: order }, { data: payments }] = await Promise.all([
+        const [{ data: order }, { data: payments }, { data: accessories }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
-            supabaseClient.from('payments').select('*').eq('order_id', orderId)
+            supabaseClient.from('payments').select('*').eq('order_id', orderId),
+            supabaseClient.from('order_accessories').select('*').eq('order_id', orderId)
         ]);
 
         if (!order) {
@@ -1573,8 +1598,8 @@ window.generateAndShareReceipt = async function (orderId) {
             return;
         }
 
-        const receiptHTML = generateSimpleReceiptHTML(order, payments);
-        const receiptText = generateTextReceipt(order, payments);
+        const receiptHTML = generateSimpleReceiptHTML(order, payments, accessories);
+        const receiptText = generateTextReceipt(order, payments, 0, accessories);
 
         showNuclearSharingModal(receiptHTML, receiptText, order.customer_name, order.customer_phone);
 
@@ -2252,9 +2277,10 @@ async function openAdminOrderView(orderId) {
     logDebug("Opening admin order view:", orderId, 'info');
 
     try {
-        const [{ data: order }, { data: payments }] = await Promise.all([
+        const [{ data: order }, { data: payments }, { data: accessories }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
-            supabaseClient.from('payments').select('*').eq('order_id', orderId).order('recorded_at', { ascending: false })
+            supabaseClient.from('payments').select('*').eq('order_id', orderId).order('recorded_at', { ascending: false }),
+            supabaseClient.from('order_accessories').select('*').eq('order_id', orderId)
         ]);
 
         if (!order) {
@@ -2344,6 +2370,16 @@ async function openAdminOrderView(orderId) {
                     </button>
                 </div>
                 
+                <!-- [NEW] Accessories List View -->
+                ${accessories && accessories.length > 0 ? `
+                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+                    <h3 style="color: #d4af37;"><i class="fas fa-shopping-bag"></i> Accessories / Extras</h3>
+                    <ul style="padding-left: 20px; margin-bottom: 10px;">
+                        ${accessories.map(a => `<li><strong>${a.item_name}</strong> (Qty: ${a.quantity})</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+
                 <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
                     <h3>Payment History</h3>
                     ${payments && payments.length > 0 ?
@@ -2478,9 +2514,10 @@ async function loadAdminOrderDetails() {
     CURRENT_ORDER_ID = orderId;
 
     try {
-        const [{ data: order }, { data: payments }] = await Promise.all([
+        const [{ data: order }, { data: payments }, { data: accessories }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
-            supabaseClient.from('payments').select('*').eq('order_id', orderId).order('recorded_at', { ascending: false })
+            supabaseClient.from('payments').select('*').eq('order_id', orderId).order('recorded_at', { ascending: false }),
+            supabaseClient.from('order_accessories').select('*').eq('order_id', orderId)
         ]);
 
         if (!order) {
@@ -2538,6 +2575,31 @@ async function loadAdminOrderDetails() {
         if (order.due_date) document.getElementById('edit-due-date').value = order.due_date.split('T')[0];
         document.getElementById('edit-preferences').value = order.customer_preferences || '';
         document.getElementById('edit-status').value = order.status;
+
+        // --- [NEW] Pre-fill Accessories ---
+        if (accessories && accessories.length > 0) {
+            accessories.forEach(a => {
+                const name = a.item_name ? a.item_name.toLowerCase() : '';
+                if (name.includes('shirt')) document.getElementById('edit_acc_shirt_qty').value = a.quantity;
+                else if (name.includes('tie')) document.getElementById('edit_acc_tie_qty').value = a.quantity;
+                else if (name.includes('shoes')) document.getElementById('edit_acc_shoes_qty').value = a.quantity;
+                else document.getElementById('edit_acc_notes').value = a.item_name; 
+            });
+        }
+
+        // Add Auto-Calculation for Edit form too
+        const editAccTotalInput = document.getElementById('edit_acc_total_price');
+        const editMainPriceInput = document.getElementById('edit-price');
+        if (editAccTotalInput && editMainPriceInput) {
+            let lastEditAccCost = 0;
+            editAccTotalInput.addEventListener('input', () => {
+                const currentAccCost = parseFloat(editAccTotalInput.value) || 0;
+                const currentTotal = parseFloat(editMainPriceInput.value) || 0;
+                const delta = currentAccCost - lastEditAccCost;
+                editMainPriceInput.value = Math.max(0, currentTotal + delta);
+                lastEditAccCost = currentAccCost;
+            });
+        }
 
         // Populate Worker Dropdown
         const { data: workers } = await supabaseClient.from('workers').select('*').eq('shop_id', order.shop_id).order('name');
@@ -2687,6 +2749,27 @@ async function saveAdminOrder() {
             .eq('id', CURRENT_ORDER_ID);
 
         if (error) throw error;
+
+        // --- [NEW] Sync Accessories ---
+        // 1. Delete previous accessories for this order
+        await supabaseClient.from('order_accessories').delete().eq('order_id', CURRENT_ORDER_ID);
+
+        // 2. Collect current form accessories inputs
+        const accessories = [];
+        const shirtQty = parseInt(document.getElementById('edit_acc_shirt_qty')?.value) || 0;
+        const tieQty = parseInt(document.getElementById('edit_acc_tie_qty')?.value) || 0;
+        const shoesQty = parseInt(document.getElementById('edit_acc_shoes_qty')?.value) || 0;
+        const notesText = document.getElementById('edit_acc_notes')?.value.trim();
+
+        if (shirtQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Ready-made Shirt', quantity: shirtQty });
+        if (tieQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Premium Tie', quantity: tieQty });
+        if (shoesQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Shoes', quantity: shoesQty });
+        if (notesText && notesText.length > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: notesText, quantity: 1 });
+
+        if (accessories.length > 0) {
+            const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
+            if (accError) console.error("Error saving accessories on edit:", accError);
+        }
 
         alert("Order saved successfully!");
         window.location.href = 'admin-current-orders.html';
@@ -4134,9 +4217,10 @@ window.downloadInvoicePDF = async function (orderId) {
             customAccount = document.getElementById('custom-account')?.value;
         }
 
-        const [{ data: order }, { data: payments }] = await Promise.all([
+        const [{ data: order }, { data: payments }, { data: accessories }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
-            supabaseClient.from('payments').select('*').eq('order_id', orderId)
+            supabaseClient.from('payments').select('*').eq('order_id', orderId),
+            supabaseClient.from('order_accessories').select('*').eq('order_id', orderId)
         ]);
         if (!order) throw new Error("Order not found");
 
@@ -4144,6 +4228,24 @@ window.downloadInvoicePDF = async function (orderId) {
         const paid = payments ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) : 0;
         const balance = totalCost - paid;
         const year = new Date(order.created_at || new Date()).getFullYear();
+
+        const invoiceItems = [{
+            description: `Bespoke Tailoring: ${order.garment_type}`,
+            qty: 1,
+            unitPrice: totalCost,
+            total: totalCost
+        }];
+
+        if (accessories && accessories.length > 0) {
+            accessories.forEach(a => {
+                invoiceItems.push({
+                    description: `Accessory: ${a.item_name}`,
+                    qty: a.quantity,
+                    unitPrice: 0,
+                    total: 0
+                });
+            });
+        }
 
         const doc = buildInvoiceDocument({
             title: "INVOICE",
@@ -4155,12 +4257,7 @@ window.downloadInvoicePDF = async function (orderId) {
             billToLabel: "Bill To:",
             billToName: order.customer_name,
             billToSub: order.customer_phone || order.phone_number || '',
-            items: [{
-                description: `Bespoke Tailoring: ${order.garment_type}`,
-                qty: 1,
-                unitPrice: totalCost,
-                total: totalCost
-            }],
+            items: invoiceItems,
             totals: { subtotal: totalCost, paid: paid, balance: Math.max(0, balance) },
             showPaymentDetails: true,
             paybill: customPaybill,
