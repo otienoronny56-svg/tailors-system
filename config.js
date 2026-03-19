@@ -6,7 +6,7 @@
 const APP_CONFIG = {
     // === 1. CONTROL SWITCH (THE KILL SWITCH) ===
     // Options: "ACTIVE" (App works) or "SUSPENDED" (Shows Payment Screen)
-    SYSTEM_STATUS: "SUSPENDED",
+    SYSTEM_STATUS: "ACTIVE",
 
     // === 2. PAYMENT & SUPPORT DETAILS (For the Lock Screen) ===
     billing: {
