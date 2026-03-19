@@ -2997,6 +2997,23 @@ function initAdminOrderForm() {
             const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
             if (error) return alert(error.message);
 
+            // --- [NEW] Save Accessories (Admin Form) ---
+            const accessories = [];
+            const shirtQty = parseInt(document.getElementById('acc_shirt_qty')?.value) || 0;
+            const tieQty = parseInt(document.getElementById('acc_tie_qty')?.value) || 0;
+            const shoesQty = parseInt(document.getElementById('acc_shoes_qty')?.value) || 0;
+            const notesText = document.getElementById('acc_notes')?.value.trim() || '';
+
+            if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty });
+            if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty });
+            if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty });
+            if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1 });
+
+            if (accessories.length > 0) {
+                const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
+                if (accError) console.error("Error saving accessories Admin:", accError);
+            }
+
             // [NEW] Upsert Client Data
             try {
                 const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).single();
@@ -4701,6 +4718,23 @@ function initAdminOrderForm() {
 
             const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
             if (error) return alert(error.message);
+
+            // --- [NEW] Save Accessories (Admin Form 2) ---
+            const accessories = [];
+            const shirtQty = parseInt(document.getElementById('acc_shirt_qty')?.value) || 0;
+            const tieQty = parseInt(document.getElementById('acc_tie_qty')?.value) || 0;
+            const shoesQty = parseInt(document.getElementById('acc_shoes_qty')?.value) || 0;
+            const notesText = document.getElementById('acc_notes')?.value.trim() || '';
+
+            if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty });
+            if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty });
+            if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty });
+            if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1 });
+
+            if (accessories.length > 0) {
+                const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
+                if (accError) console.error("Error saving accessories Admin 2:", accError);
+            }
 
             // [NEW] Upsert Client Data
             try {
