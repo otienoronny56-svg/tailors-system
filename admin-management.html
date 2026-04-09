@@ -345,6 +345,7 @@
                     Transactions</a>
                 <a href="admin-analytics.html"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics
                     & AI</a>
+                <a href="admin-inventory.html"><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Inventory</a>
                 <a href="admin-management.html" class="active"><i class="fas fa-cog" style="margin-right: 8px;"></i>
                     Management &
                     Setup</a>
@@ -442,6 +443,70 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Edit Shop Details Modal -->
+    <div id="edit-shop-modal" class="modal">
+        <div class="modal-content" style="max-width: 550px; padding: 30px; background: white; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
+                <h2 style="color: var(--brand-navy); margin: 0; font-family: 'Playfair Display', serif;"><i class="fas fa-store" style="color: #10b981; margin-right: 10px;"></i> Edit Shop Configuration</h2>
+                <span class="close-btn" onclick="closeEditShopModal()" style="font-size: 1.5em; cursor: pointer; color: #94a3b8;">&times;</span>
+            </div>
+
+            <form onsubmit="saveShopDetails(event)">
+                <input type="hidden" id="edit-shop-id">
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 0.85em; font-weight: 700; color: #475569; margin-bottom: 5px;">Shop Name *</label>
+                    <i class="fas fa-signature" style="top: 38px;"></i>
+                    <input type="text" id="edit-shop-name" placeholder="Shop Name" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 0.85em; font-weight: 700; color: #475569; margin-bottom: 5px;">Upload Shop Logo (Image)</label>
+                    <i class="fas fa-image" style="top: 38px;"></i>
+                    <input type="file" id="edit-shop-logo-file" accept="image/*" style="padding-left: 40px; padding-top: 8px;">
+                    <img id="edit-shop-logo-preview" src="" style="display:none; max-height: 60px; margin-top: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <small style="display: block; margin-top: 5px; color: #94a3b8;">Recommended size: Transparent PNG, under 2MB.</small>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="font-size: 0.85em; color: #666; font-weight: 600; margin-bottom: 8px; display: block;">M-Pesa Paybill / Till Number</label>
+                        <i class="fas fa-mobile-alt" style="position: absolute; left: 15px; top: 40px; color: #d4af37;"></i>
+                        <input type="text" id="edit-shop-paybill" placeholder="e.g. 247247" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em;">
+                    </div>
+
+                    <div style="margin-bottom: 20px; position: relative;">
+                        <label style="font-size: 0.85em; color: #666; font-weight: 600; margin-bottom: 8px; display: block;">Shop Contact Phone</label>
+                        <i class="fas fa-phone" style="position: absolute; left: 15px; top: 40px; color: #d4af37;"></i>
+                        <input type="text" id="edit-shop-phone" placeholder="e.g. 0722 000 000" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.85em; font-weight: 700; color: #475569; margin-bottom: 5px;">M-Pesa Account Number</label>
+                        <i class="fas fa-hashtag" style="top: 38px;"></i>
+                        <input type="text" id="edit-shop-account" placeholder="e.g. 0110001234">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 0.85em; font-weight: 700; color: #475569; margin-bottom: 5px;">Bank Details / Alternative Payment</label>
+                    <i class="fas fa-university" style="top: 38px;"></i>
+                    <input type="text" id="edit-shop-bank" placeholder="e.g. KCB Bank, Account 1234...">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label style="display: block; font-size: 0.85em; font-weight: 700; color: #475569; margin-bottom: 5px;">Receipt Header Text / Slogan</label>
+                    <i class="fas fa-align-center" style="top: 38px;"></i>
+                    <input type="text" id="edit-shop-receipt" placeholder="e.g. The Best Suits in Town">
+                </div>
+
+                <button type="submit" id="save-shop-btn" class="btn-modern btn-success" style="font-size: 1.1em; margin-top: 10px;">
+                    <i class="fas fa-save"></i> Save Configuration
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Password Reset Modal -->

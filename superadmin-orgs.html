@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Organizations | SaaS Control</title>
+    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="sidebar-logo">SaaS<span class="sidebar-n"> Control</span></h1>
+            </div>
+            <nav>
+                <a href="superadmin-dashboard.html"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Overview</a>
+                <a href="superadmin-orgs.html" class="active"><i class="fas fa-building" style="margin-right: 8px;"></i> Organizations</a>
+                <a href="superadmin-users.html"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
+                <a href="superadmin-users-list.html"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header style="margin-bottom: 30px;">
+                <h1 style="color: var(--brand-navy);">Organization Management</h1>
+            </header>
+
+            <section class="order-form-container" style="max-width: 600px; margin-bottom: 40px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                <h2 style="margin-top: 0;">Create New Tenant</h2>
+                <form id="create-org-form">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 700;">Organization Name</label>
+                        <input type="text" id="new-org-name" placeholder="e.g. Elegant Fashion" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    </div>
+                    <button type="submit" class="small-btn" style="width: 100%; background: var(--brand-navy); color: var(--brand-gold); padding: 12px; font-weight: bold;">
+                        <i class="fas fa-plus"></i> Initialize Organization
+                    </button>
+                    <div id="org-message" style="margin-top: 10px; text-align: center;"></div>
+                </form>
+            </section>
+
+            <section class="order-list">
+                <h2>All Tenants</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Shops</th>
+                            <th>Created At</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orgs-tbody">
+                        <tr><td colspan="4" style="text-align:center; padding:20px;">Loading tenants...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             // Logic handled by app.js
+        });
+    </script>
+</body>
+</html>

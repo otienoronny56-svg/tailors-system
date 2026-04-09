@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -230,15 +230,6 @@
             <div class="edit-card">
                 <h2 class="edit-card-title"><i class="fas fa-plus-circle"></i> New Global Order</h2>
 
-                <div style="display: flex; gap: 10px; margin-bottom: 25px; background: #f1f5f9; padding: 6px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <button type="button" id="type-custom" class="toggle-btn active" style="flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: var(--brand-navy); color: var(--brand-gold);">
-                        <i class="fas fa-cut"></i> Custom Tailoring
-                    </button>
-                    <button type="button" id="type-retail" class="toggle-btn" style="flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: transparent; color: #64748b;">
-                        <i class="fas fa-shopping-bag"></i> Retail / Accessory Sale
-                    </button>
-                </div>
-
                 <form id="order-form">
                     <fieldset>
                         <legend><i class="fas fa-store-alt"></i> Assign Shop</legend>
@@ -263,7 +254,7 @@
                             </div>
                         </div>
 
-                        <div class="form-row" id="garment-type-row">
+                        <div class="form-row">
                             <div class="form-group">
                                 <label>Garment Type</label>
                                 <select id="garment-type-select" required>
@@ -278,7 +269,7 @@
                                     <option value="Alteration">Alteration</option>
                                 </select>
                             </div>
-                                <div class="form-group" id="due-date-group">
+                            <div class="form-group">
                                 <label>Agreed Due Date</label>
                                 <input type="date" id="due_date" required>
                             </div>
@@ -296,11 +287,65 @@
                     </fieldset>
 
                     <fieldset>
+<<<<<<< HEAD
+                        <legend><i class="fas fa-shopping-bag"></i> Accessories / Extras</legend>
+                        <!-- [NEW] Double grid row for Qty + Price -->
+                        <div class="form-row">
+                            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label>Shirt (Qty)</label>
+                                    <input type="number" id="acc_shirt_qty" placeholder="0" min="0" value="0">
+                                </div>
+                                <div>
+                                    <label>Price (Ksh)</label>
+                                    <input type="number" id="acc_shirt_price" placeholder="Rate" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label>Tie (Qty)</label>
+                                    <input type="number" id="acc_tie_qty" placeholder="0" min="0" value="0">
+                                </div>
+                                <div>
+                                    <label>Price (Ksh)</label>
+                                    <input type="number" id="acc_tie_price" placeholder="Rate" min="0" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label>Shoes (Qty)</label>
+                                    <input type="number" id="acc_shoes_qty" placeholder="0" min="0" value="0">
+                                </div>
+                                <div>
+                                    <label>Price (Ksh)</label>
+                                    <input type="number" id="acc_shoes_price" placeholder="Rate" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label>Other Items Notes</label>
+                                    <input type="text" id="acc_notes" placeholder="e.g. Cufflinks">
+                                </div>
+                                <div>
+                                    <label>Price (Ksh)</label>
+                                    <input type="number" id="acc_notes_price" placeholder="Rate" min="0" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label>Total Accessories Price (Ksh) <span style="font-size: 0.8em; color: #94a3b8;">(Must be included in Order Total Price)</span></label>
+                            <input type="number" id="acc_total_price" placeholder="0.00" min="0" step="0.01" value="0">
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
                         <legend><i class="fas fa-money-bill-wave"></i> Financials (Ksh)</legend>
                         <div class="form-row">
-                                <div class="form-group" id="base-price-group">
-                                <label>Garment Cost / Base Price (Excl. Extras)</label>
-                                <input type="number" id="price" placeholder="0.00" step="0.01" min="1" required oninput="updateExtrasSubtotal()">
+                            <div class="form-group">
+                                <label>Total Agreed Price</label>
+                                <input type="number" id="price" placeholder="0.00" step="0.01" min="1" required>
                             </div>
                             <div class="form-group">
                                 <label>Initial Deposit Paid</label>
@@ -309,7 +354,22 @@
                         </div>
                     </fieldset>
 
-                    <fieldset id="team-assignment-fieldset">
+=======
+                        <legend><i class="fas fa-money-bill-wave"></i> Financials (Ksh)</legend>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Total Agreed Price</label>
+                                <input type="number" id="price" placeholder="0.00" step="0.01" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Initial Deposit Paid</label>
+                                <input type="number" id="deposit_paid" placeholder="0.00" step="0.01" value="0">
+                            </div>
+                        </div>
+                    </fieldset>
+
+>>>>>>> c6d5b318e73f02134b488ed7d81b0a059a4d8236
+                    <fieldset>
                         <legend><i class="fas fa-users"></i> Team Assignment</legend>
                         <div class="form-group">
                             <label><i class="fas fa-star" style="color: var(--brand-gold); margin-right: 4px;"></i> Team
@@ -327,22 +387,6 @@
                                     style="font-size: 0.9em; color: #94a3b8; text-align: center; margin: 0; font-style: italic;">
                                     Select a shop first to load available workers.</p>
                             </div>
-                        </div>
-                    </fieldset>
-
-                    <fieldset id="extras-fieldset">
-                        <legend><i class="fas fa-shopping-bag"></i> Accessories & Extras (Optional)</legend>
-                        <p style="font-size: 0.85em; color: #64748b; margin-top: 0;">Add ready-made items or accessories from your inventory.</p>
-                        <div id="extras-list-container" style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc;">
-                            <p style="text-align:center; color:#94a3b8; font-style:italic; margin:0;">Select a shop above to see available extras.</p>
-                        </div>
-                        <div style="display: flex; justify-content: flex-end; margin-top: 10px; padding: 8px 12px; background: #f1f5f9; border-radius: 8px;">
-                            <span style="font-weight: 600; color: #475569;">Extras Subtotal: </span>
-                            <span id="extras-subtotal" style="font-weight: 700; color: var(--brand-navy); margin-left: 8px;">Ksh 0.00</span>
-                        </div>
-                        <div style="display: flex; justify-content: flex-end; margin-top: 5px; padding: 8px 12px; background: #e0f2fe; border-radius: 8px; border: 1px solid #bae6fd;">
-                            <span style="font-weight: 600; color: #0369a1;">Grand Total: </span>
-                            <span id="grand-total-display" style="font-weight: 700; color: #0c4a6e; margin-left: 8px;">Ksh 0.00</span>
                         </div>
                     </fieldset>
 

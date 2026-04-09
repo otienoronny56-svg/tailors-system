@@ -167,6 +167,18 @@
                             order.</small>
                     </fieldset>
 
+                    <fieldset id="extras-fieldset">
+                        <legend>Accessories & Extras (Optional)</legend>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 0;">Add ready-made items or accessories from your inventory.</p>
+                        <div id="extras-list-container" style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #fafafa; border-radius: 4px;">
+                            <p style="text-align:center; color:#999; font-style:italic; margin:0;">Loading available extras...</p>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 10px; padding: 8px 12px; background: #f1f5f9; border-radius: 4px;">
+                            <span style="font-weight: 600; color: #475569;">Extras Subtotal: </span>
+                            <span id="extras-subtotal" style="font-weight: 700; color: var(--brand-navy); margin-left: 8px;">Ksh 0.00</span>
+                        </div>
+                    </fieldset>
+
                     <button type="submit" id="submit-order-btn">Create Order</button>
                 </form>
                 <button onclick="window.location.href='manager-dashboard.html'"

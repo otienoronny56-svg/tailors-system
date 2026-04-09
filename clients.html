@@ -8,9 +8,33 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: var(--brand-navy);
+            color: var(--brand-gold);
+            border: 1px solid var(--brand-gold);
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; position: fixed; z-index: 999; height: 100%; width: 260px; }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { padding: 20px; padding-top: 60px; }
+        }
+    </style>
 </head>
 
-<body>
+<body>`n    <div class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+    <div class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></div>
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -71,12 +95,13 @@
 
     <script src="config.js"></script>
     <script src="app.js"></script>
+    <script src="mobile-nav.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof initApp === 'function') initApp();
             loadClients();
         });
     </script>
-</body>
+    <script src="mobile-nav.js"></script>`n</body>
 
 </html>

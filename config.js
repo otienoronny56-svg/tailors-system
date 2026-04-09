@@ -17,7 +17,7 @@ const APP_CONFIG = {
     },
 
     // === 3. BRANDING IDENTITY ===
-    appName: "OTIMA FASHION HOUSE",
+    appName: "Tailors Management System",
     appSubtitle: "BY RONNY",
     logoPath: "logo.png",
 
@@ -26,7 +26,7 @@ const APP_CONFIG = {
     currencySymbol: "Ksh",
 
     // === 5. BACKEND CONNECTION (Supabase) ===
-    supabaseUrl: "https://jgvpwdlmxujeappsgxlw.supabase.co",
-    supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnB3ZGxteHVqZWFwcHNneGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0ODIyMDQsImV4cCI6MjA4MjA1ODIwNH0.vWYixKfxq6PxsxEvfLgIZRmNsXmKdvxdG-I6YaRYV-4",
-    serviceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnB3ZGxteHVqZWFwcHNneGx3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjQ4MjIwNCwiZXhwIjoyMDgyMDU4MjA0fQ.UvndP35SqHwHBwpaaAmNVM9uK4AJW6NTtKu5mDSoszs"
+    supabaseUrl: "https://ouuhirckiavcvgqlpriw.supabase.co",
+    supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91dWhpcmNraWF2Y3ZncWxwcml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYyNDUsImV4cCI6MjA4OTQ5MjI0NX0.l5diE9bfcRQo8ZSMsAx-alG89GFifGA11hA059zDhXM",
+    serviceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91dWhpcmNraWF2Y3ZncWxwcml3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzkxNjI0NSwiZXhwIjoyMDg5NDkyMjQ1fQ.yC10d9Lu9cNB0JALqr5WCLuWBblw_6at8vuy0MXSyWA"
 };

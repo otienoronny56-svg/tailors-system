@@ -45,8 +45,22 @@
             }
 
             .main-content {
-                padding: 20px;
-                padding-top: 60px;
+                padding: 15px !important;
+                padding-top: 75px !important;
+            }
+
+            .detail-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 15px !important;
+            }
+            /*.detail-header > div[style*="align-items: flex-end"]*/
+            .detail-header > div:last-child {
+                align-items: flex-start !important;
+                width: 100% !important;
+            }
+            .detail-header div {
+                flex-wrap: wrap;
             }
 
             .detail-layout {
@@ -301,7 +315,7 @@
                     </div>
                     <div style="display: flex; gap: 10px;">
                         <button class="btn-modern btn-export" onclick="downloadOrderPDF()">
-                            <i class="fas fa-file-pdf"></i> Download Receipt
+                            <i class="fas fa-file-pdf"></i> Download Production Details
                         </button>
                         <button class="btn-modern btn-export" style="background: #3b82f6;"
                             onclick="downloadInvoicePDF()">
@@ -389,59 +403,7 @@
                                 </div>
                             </fieldset>
 
-                            <!-- [NEW] Accessories Grid -->
-                            <fieldset>
-                                <legend><i class="fas fa-shopping-bag"></i> Accessories / Extras</legend>
-                                <!-- [NEW] Double grid row for Edit Qty + Price -->
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                        <div>
-                                            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#555;">Shirt (Qty)</label>
-                                            <input type="number" id="edit_acc_shirt_qty" placeholder="0" min="0" value="0">
-                                        </div>
-                                        <div>
-                                            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#555;">Price (Ksh)</label>
-                                            <input type="number" id="edit_acc_shirt_price" placeholder="Rate" min="0" value="0">
-                                        </div>
-                                    </div>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                        <div>
-                                            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#555;">Tie (Qty)</label>
-                                            <input type="number" id="edit_acc_tie_qty" placeholder="0" min="0" value="0">
-                                        </div>
-                                        <div>
-                                            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#555;">Price (Ksh)</label>
-                                            <input type="number" id="edit_acc_tie_price" placeholder="Rate" min="0" value="0">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                        <div>
-                                            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#555;">Shoes (Qty)</label>
-                                            <input type="number" id="edit_acc_shoes_qty" placeholder="0" min="0" value="0">
-                                        </div>
-                                        <div>
-                                            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#555;">Price (Ksh)</label>
-                                            <input type="number" id="edit_acc_shoes_price" placeholder="Rate" min="0" value="0">
-                                        </div>
-                                    </div>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                        <div>
-                                            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#555;">Notes</label>
-                                            <input type="text" id="edit_acc_notes" placeholder="Cufflinks">
-                                        </div>
-                                        <div>
-                                            <label style="display:block; margin-bottom:5px; font-weight:bold; color:#555;">Price (Ksh)</label>
-                                            <input type="number" id="edit_acc_notes_price" placeholder="Rate" min="0" value="0">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style="margin-top: 15px;">
-                                    <label style="display:block; margin-bottom:5px; font-weight:bold; color:#555;">Total Accessories Price (Ksh) <span style="font-size: 0.8em; color: #999;">(Must be included in Order Total Price)</span></label>
-                                    <input type="number" id="edit_acc_total_price" placeholder="0.00" min="0" step="0.01" value="0">
-                                </div>
-                            </fieldset>
+
 
                             <fieldset>
                                 <legend><i class="fas fa-file-invoice-dollar"></i> Financials</legend>
@@ -478,7 +440,7 @@
                     <div id="pdf-export-content" class="pdf-section edit-card"
                         style="margin-top: 0; position: relative;">
 
-                        <img src="logo.png" alt="Logo"
+                        <img id="pdf-logo" src="logo.png" alt="Logo"
                             style="position: absolute; top: 25px; right: 25px; height: 50px; width: auto; object-fit: contain;">
 
                         <div
@@ -499,9 +461,7 @@
                                     id="admin-detail-shop">Loading...</span></div>
                             <div class="info-row"><span class="info-label">Customer Name</span><span class="info-val"
                                     id="summary-customer-name">...</span></div>
-                            <div class="info-row"><span class="info-label">Phone</span><span class="info-val"><a
-                                        id="summary-customer-phone" href="#"
-                                        style="color: #3b82f6; text-decoration: none;">...</a></span></div>
+
                             <div class="info-row"><span class="info-label">Garment Type</span><span class="info-val"
                                     id="summary-garment-type">...</span></div>
                             <div class="info-row"><span class="info-label">Due Date</span><span class="info-val"

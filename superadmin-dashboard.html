@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superadmin Dashboard | SaaS Control</title>
+    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .super-metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border-bottom: 4px solid var(--brand-navy);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .super-metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        .org-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-premium { background: rgba(212, 175, 55, 0.1); color: #b8860b; border: 1px solid rgba(212, 175, 55, 0.2); }
+        .badge-basic { background: rgba(100, 116, 139, 0.1); color: #475569; border: 1px solid rgba(100, 116, 139, 0.2); }
+        .badge-active { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-top: 30px;
+            border: 1px solid #f1f5f9;
+        }
+        .pulse-label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">SaaS<span class="sidebar-n"> Control</span></h1>
+                    <span class="sidebar-subtitle">PLATFORM ADMIN</span>
+                </div>
+            </div>
+            <p id="user-info">Logged in as: Superadmin</p>
+            <nav>
+                <a href="superadmin-dashboard.html" class="active"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Overview</a>
+                <a href="superadmin-orgs.html"><i class="fas fa-building" style="margin-right: 8px;"></i> Organizations</a>
+                <a href="superadmin-users.html"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
+                <a href="superadmin-users-list.html"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <div>
+                        <h1 style="color: var(--brand-navy); margin-bottom: 5px;">SaaS Control Centre</h1>
+                        <p style="color: #64748b; font-size: 0.9em; font-weight: 500;">Platform Health & Growth Monitoring</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="location.reload()" class="small-btn" style="background: white; border: 1px solid #e2e8f0; color: var(--brand-navy);"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        <button onclick="handleLogout()" class="small-btn" style="background: var(--brand-red); color: white; border: none;">Logout</button>
+                    </div>
+                </div>
+
+                <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                    <div class="super-metric-card">
+                        <span style="font-size: 0.8em; color: #64748b; font-weight: 700;">TOTAL ORGANIZATIONS</span>
+                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-navy); margin: 5px 0;" id="total-orgs">...</div>
+                        <div style="font-size: 0.75em; color: #10b981; font-weight: 600;"><i class="fas fa-arrow-up"></i> <span id="org-growth-text">...</span> from last month</div>
+                    </div>
+                    <div class="super-metric-card" style="border-bottom-color: #f59e0b;">
+                        <span style="font-size: 0.8em; color: #64748b; font-weight: 700;">PROJECTED MRR</span>
+                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-navy); margin: 5px 0;" id="projected-mrr">...</div>
+                        <div style="font-size: 0.75em; color: #64748b; font-weight: 600;">Monthly Recurring Revenue</div>
+                    </div>
+                    <div class="super-metric-card" style="border-bottom-color: #10b981;">
+                        <span style="font-size: 0.8em; color: #64748b; font-weight: 700;">ACTIVE PLATFORM USERS</span>
+                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-navy); margin: 5px 0;" id="total-users">...</div>
+                        <div style="font-size: 0.75em; color: #64748b; font-weight: 600;">Across all tenants</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SaaS Growth Pulse -->
+            <div class="chart-container">
+                <span class="pulse-label">SaaS Growth Pulse (Organization Sign-ups)</span>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="growthPulseChart"></canvas>
+                </div>
+            </div>
+
+            <section class="order-list" style="margin-top: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Registered Organizations</h2>
+                    <button onclick="location.href='superadmin-orgs.html'" class="small-btn" style="background: var(--brand-navy); color: var(--brand-gold);">Management View</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                             <th>Name</th>
+                             <th>Setup Date</th>
+                             <th>Tier</th>
+                             <th>Expires In</th>
+                             <th>Status</th>
+                             <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="org-list-tbody">
+                        <tr><td colspan="6" style="text-align:center; padding:20px;">Loading organizations...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             // Logic will be handled by app.js checkSession and routing
+        });
+    </script>
+</body>
+</html>

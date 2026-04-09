@@ -317,11 +317,11 @@ function formatMeasurements(json) {
 
         let h = '';
         for (let k in m) {
-            h += `<b>${k} Details:</b><br>`;
+            h += `<div style="break-inside: avoid; margin-bottom: 15px;"><b>${k} Details:</b><br>`;
             for (let s in m[k]) {
                 h += `<span style="display:inline-block; min-width:80px; color:#475569;">${s}:</span> <b>${m[k][s]}"</b><br>`;
             }
-            h += '<br>';
+            h += '</div>';
         }
         return h || 'No measurements';
     } catch (e) {
@@ -379,6 +379,10 @@ function refreshCurrentView() {
         loadAnalyticsDashboard();
     } else if (path.includes('admin-management')) {
         loadAdminManagementScreen();
+    } else if (path.includes('admin-clients')) {
+        loadClients();
+    } else if (path.includes('admin-inventory')) {
+        loadInventoryScreen();
     } else if (path.includes('worker-management')) {
         loadWorkerScreen();
     } else if (path.includes('admin-expenses')) {
@@ -427,6 +431,10 @@ async function checkSession() {
             .single();
 
         if (profileError || !profile) {
+            if (profileError && profileError.code !== 'PGRST116') {
+                logDebug("Profile lookup error", profileError, 'error');
+                throw new Error("Profile Lookup Error: " + profileError.message);
+            }
             // Fallback to workers table
             const { data: workerProfile, error: workerError } = await supabaseClient
                 .from('workers')
@@ -435,26 +443,47 @@ async function checkSession() {
                 .single();
 
             if (workerError || !workerProfile) {
-                // NEW: Just alert and stop the loading spinner
+                if (workerError && workerError.code !== 'PGRST116') {
+                    logDebug("Worker lookup error", workerError, 'error');
+                    throw new Error("Worker Lookup Error: " + workerError.message);
+                }
                 logDebug("Profile not found in either table", null, 'error');
                 alert("Error: Your account is authenticated but no Profile was found. Contact Support.");
-                // Reset the login button if we are on the login page
                 const loginBtn = document.getElementById('login-button');
                 if (loginBtn) {
                     loginBtn.disabled = false;
-                    loginBtn.textContent = 'Sign In';
+                    loginBtn.textContent = 'Login to Dashboard';
                 }
                 return;
             }
-
             USER_PROFILE = {
-                id: workerProfile.id,
+                ...workerProfile,
                 full_name: workerProfile.name,
-                role: 'manager',
-                shop_id: workerProfile.shop_id
+                role: 'manager'
             };
         } else {
             USER_PROFILE = profile;
+        }
+
+        // 🛑 NEW: Check for suspension (Enforcement)
+        if (USER_PROFILE.status === 'Suspended') {
+            document.body.innerHTML = `
+                <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #f8fafc; font-family: 'Inter', sans-serif;">
+                    <div style="text-align: center; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-width: 450px;">
+                        <div style="font-size: 50px; color: #ef4444; margin-bottom: 20px;"><i class="fas fa-lock"></i></div>
+                        <h1 style="color: #1e293b; margin-bottom: 15px;">Account Suspended</h1>
+                        <p style="color: #64748b; line-height: 1.6; margin-bottom: 25px;">
+                            Your access to the platform has been temporarily paused. This could be due to billing issues or a policy violation.
+                        </p>
+                        <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                            <strong style="color: #334155;">Need help?</strong><br>
+                            <a href="mailto:support@otima.com" style="color: var(--brand-navy); font-weight: 700;">support@otima.com</a>
+                        </div>
+                        <button onclick="supabaseClient.auth.signOut().then(() => location.href='index.html')" class="small-btn" style="width: 100%; background: #ef4444; color: white;">Logout</button>
+                    </div>
+                </div>
+            `;
+            return;
         }
 
         logDebug(`User authenticated: ${USER_PROFILE.full_name} (${USER_PROFILE.role})`, USER_PROFILE, 'success');
@@ -469,13 +498,24 @@ async function checkSession() {
         const path = window.location.pathname;
         // [FIX] Check for 'index.html' OR if the path is just '/' (root)
         if (path.includes('index.html') || path === '/' || path.endsWith('/')) {
-            const redirectTo = USER_PROFILE.role === 'owner' ? 'admin-dashboard.html' : 'manager-dashboard.html';
+            let redirectTo = 'manager-dashboard.html';
+            if (USER_PROFILE.role === 'superadmin') redirectTo = 'superadmin-dashboard.html';
+            else if (USER_PROFILE.role === 'owner') redirectTo = 'admin-dashboard.html';
+            
             window.location.href = redirectTo;
             return;
         }
 
         // Route based on role and page
         await routeToPage(path);
+        
+        // Update user activity status (Heartbeat)
+        if (USER_PROFILE) {
+            updateLastSeen();
+        }
+
+        // Final UI Updates
+        updateSidebarBranding();
 
     } catch (error) {
         logDebug("Session check error:", error, 'error');
@@ -486,9 +526,23 @@ async function checkSession() {
 async function routeToPage(path) {
     if (!USER_PROFILE) return;
 
+    // Superadmin pages
+    if (USER_PROFILE.role === 'superadmin') {
+        if (path.includes('superadmin-dashboard')) {
+            await loadSuperadminDashboard();
+        } else if (path.includes('superadmin-orgs')) {
+            await loadOrganizations();
+        } else if (path.includes('superadmin-users-list')) {
+            await loadPlatformUsers();
+        } else if (path.includes('superadmin-users')) {
+            await loadAdminAccountScreen();
+        }
+        return;
+    }
+
     // Owner pages
     if (USER_PROFILE.role === 'owner') {
-        if (path.includes('manager')) {
+        if (path.includes('manager') || path.includes('superadmin')) {
             window.location.href = 'admin-dashboard.html';
             return;
         }
@@ -503,6 +557,10 @@ async function routeToPage(path) {
             await loadAdminOrders('all');
         } else if (path.includes('admin-expenses')) {
             await loadAdminExpensesScreen();
+        } else if (path.includes('admin-inventory')) {
+            await loadInventoryScreen();
+        } else if (path.includes('admin-clients')) {
+            loadClients();
         } else if (path.includes('admin-management')) {
             await loadAdminManagementScreen();
         } else if (path.includes('admin-order-details')) {
@@ -610,6 +668,452 @@ async function handleLogout() {
 }
 
 // ==========================================
+// 👑 SUPERADMIN MODULE
+// ==========================================
+
+async function loadSuperadminDashboard() {
+    try {
+        let authUsersCount = 0;
+        try {
+            const adminClient = getAdminClient();
+            if (adminClient) {
+                const { data } = await adminClient.auth.admin.listUsers();
+                if (data && data.users) authUsersCount = data.users.length;
+            }
+        } catch(e) {
+            console.warn("Could not fetch exact auth users, falling back to profiles.");
+        }
+
+        const [{ data: orgs }, { data: profiles }] = await Promise.all([
+            supabaseClient.from('organizations').select('*').order('created_at', { ascending: true }),
+            supabaseClient.from('user_profiles').select('*')
+        ]);
+
+        const totalOrgs = orgs?.length || 0;
+        const totalUsers = authUsersCount || profiles?.length || 0;
+        
+        // Calculate Online Now (within 5 mins)
+        const onlineNow = profiles?.filter(p => {
+            if (!p.last_seen_at) return false;
+            return (new Date() - new Date(p.last_seen_at)) < 5 * 60 * 1000;
+        }).length || 0;
+
+        // Calculate SaaS Metrics
+        const projectedMRR = totalOrgs * 500;
+        
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const recentOrgs = orgs?.filter(o => new Date(o.created_at) > thirtyDaysAgo).length || 0;
+
+        // Update KPI Cards
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setEl('total-orgs', totalOrgs);
+        setEl('total-users', totalUsers);
+        setEl('projected-mrr', `Ksh ${projectedMRR.toLocaleString()}`);
+        setEl('org-growth-text', `+${recentOrgs}`);
+
+        // --- Growth Pulse Chart ---
+        const canvas = document.getElementById('growthPulseChart');
+        if (canvas && orgs) {
+            const ctx = canvas.getContext('2d');
+            
+            // Prepare data: Cumulative count over time
+            let cumulative = 0;
+            const labels = [];
+            const dataPoints = [];
+
+            // Sort by date (already done in query, but defensive)
+            orgs.forEach(org => {
+                cumulative++;
+                labels.push(new Date(org.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+                dataPoints.push(cumulative);
+            });
+
+            if (window.superadminCharts && window.superadminCharts.growthPulse) {
+                window.superadminCharts.growthPulse.destroy();
+            }
+            if (!window.superadminCharts) window.superadminCharts = {};
+
+            window.superadminCharts.growthPulse = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Organizations',
+                        data: dataPoints,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            type: 'category',
+                            grid: { display: false },
+                            ticks: { 
+                                autoSkip: true, 
+                                maxRotation: 0,
+                                font: { size: 10 }
+                            }
+                        },
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: '#f1f5f9' },
+                            ticks: { stepSize: 1, precision: 0 }
+                        }
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            backgroundColor: 'rgba(30, 41, 59, 0.9)'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Organization Table
+        const tbody = document.getElementById('org-list-tbody');
+        if (tbody) {
+            if (!orgs || orgs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No organizations found</td></tr>';
+                return;
+            }
+
+            // Show latest 10
+            const latestOrgs = [...orgs].reverse().slice(0, 10);
+            tbody.innerHTML = latestOrgs.map(org => {
+                const setupDate = new Date(org.created_at);
+                const today = new Date();
+                const diffTime = today - setupDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                const billingDays = org.billing_cycle === '3 Months' ? 90 : 30;
+                const daysLeft = billingDays - diffDays;
+                
+                const badgeClass = daysLeft <= 0 ? 'badge-danger' : (daysLeft < 7 ? 'badge-warning' : 'badge-active');
+                const badgeText = daysLeft <= 0 ? 'Expired' : `${daysLeft} Days Left`;
+                // Inline color support for alerts
+                let inlineStyle = "";
+                if (daysLeft <= 0) inlineStyle = "background: #ef4444; color: white;";
+                else if (daysLeft < 7) inlineStyle = "background: #f59e0b; color: white;";
+
+                return `
+                <tr>
+                    <td><strong>${org.name}</strong></td>
+                    <td>${formatDate(org.created_at)}</td>
+                    <td>
+                        <span class="org-badge badge-${(org.subscription_tier || 'basic').toLowerCase()}">
+                            ${org.subscription_tier || 'Basic'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="org-badge ${badgeClass}" style="${inlineStyle}">${badgeText}</span>
+                    </td>
+                    <td>
+                        <span class="org-badge badge-active">${org.subscription_status || 'Active'}</span>
+                    </td>
+                    <td><button class="small-btn" onclick="location.href='superadmin-orgs.html'">Manage</button></td>
+                </tr>
+                `;
+            }).join('');
+        }
+    } catch (err) {
+        console.error("Superadmin Dashboard Error:", err);
+    }
+}
+
+async function loadOrganizations() {
+    try {
+        const { data: orgs, error } = await supabaseClient
+            .from('organizations')
+            .select('*, shops(count)')
+            .order('name');
+
+        if (error) throw error;
+
+        const tbody = document.getElementById('orgs-tbody');
+        if (tbody) {
+            if (!orgs || orgs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No organizations found</td></tr>';
+            } else {
+                tbody.innerHTML = orgs.map(org => {
+                    const shopCount = (org.shops && org.shops[0] && org.shops[0].count !== undefined) ? org.shops[0].count : (Array.isArray(org.shops) ? org.shops.length : 0);
+                    return `
+                    <tr>
+                        <td><small>${org.id.slice(-8)}</small></td>
+                        <td><strong>${org.name}</strong></td>
+                        <td><span style="background:var(--brand-gold); color:black; padding:3px 10px; border-radius:12px; font-weight:bold; font-size:0.85em;">${shopCount}</span></td>
+                        <td>${formatDate(org.created_at)}</td>
+                        <td><button class="small-btn" onclick="deleteOrganization('${org.id}')" style="background:#ef4444; color:white;">Delete</button></td>
+                    </tr>
+                `}).join('');
+            }
+        }
+
+        // Setup Create Form
+        const createForm = document.getElementById('create-org-form');
+        if (createForm) {
+            createForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const nameInput = document.getElementById('new-org-name');
+                const msg = document.getElementById('org-message');
+
+                try {
+                    const { error } = await supabaseClient.from('organizations').insert([{ name: nameInput.value.trim() }]);
+                    if (error) throw error;
+                    msg.innerHTML = '<span style="color:green;">✅ Organization Created!</span>';
+                    nameInput.value = '';
+                    loadOrganizations();
+                } catch (err) {
+                    msg.innerHTML = `<span style="color:red;">❌ Error: ${err.message}</span>`;
+                }
+            };
+        }
+    } catch (err) {
+        console.error("Load Orgs Error:", err);
+    }
+}
+
+async function updateLastSeen() {
+    if (!USER_PROFILE || !USER_PROFILE.id) return;
+
+    // Throttle: Only update if last update was more than 1 minute ago
+    const lastUpdate = localStorage.getItem('last_seen_update');
+    const now = Date.now();
+    if (lastUpdate && (now - parseInt(lastUpdate)) < 60000) return;
+
+    try {
+        await supabaseClient
+            .from('user_profiles')
+            .update({ last_seen_at: new Date().toISOString() })
+            .eq('id', USER_PROFILE.id);
+        
+        localStorage.setItem('last_seen_update', now.toString());
+    } catch (err) {
+        console.error("Heartbeat error:", err);
+    }
+}
+
+async function loadPlatformUsers() {
+    const tbody = document.getElementById('platform-users-tbody');
+    if (!tbody) return;
+
+    try {
+        const adminClient = getAdminClient();
+        if (!adminClient) throw new Error("Superadmin access restricted");
+
+        // 1. Fetch data in parallel
+        const [{ data: { users: authUsers }, error: authError }, { data: profiles }, { data: orgs }] = await Promise.all([
+            adminClient.auth.admin.listUsers(),
+            supabaseClient.from('user_profiles').select('*'),
+            supabaseClient.from('organizations').select('id, name')
+        ]);
+
+        if (authError) throw authError;
+
+        // 2. Map data
+        const orgMap = Object.fromEntries(orgs.map(o => [o.id, o.name]));
+        const profileMap = Object.fromEntries(profiles.map(p => [p.id, p]));
+
+        // 3. Render
+        if (authUsers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">No platform users found</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = authUsers.map(user => {
+            const profile = profileMap[user.id] || {};
+            const orgName = orgMap[profile.organization_id] || 'Platform Level';
+            
+            // Priority: Use last_seen_at from database (manually tracked Heartbeat)
+            // Fallback: Use last_sign_in_at from auth (only updates on login)
+            const lastActive = profile.last_seen_at ? new Date(profile.last_seen_at) : 
+                              (user.last_sign_in_at ? new Date(user.last_sign_in_at) : null);
+            
+            // Check if online (active in last 5 minutes)
+            const isOnline = lastActive && (new Date() - lastActive < 5 * 60 * 1000);
+
+            return `
+                <tr>
+                    <td>
+                        <div style="font-weight:700;">${profile.full_name || 'Anonymous User'}</div>
+                        <div style="font-size:0.85em; color:#64748b;">${user.email}</div>
+                    </td>
+                    <td><span class="org-badge badge-basic">${orgName}</span></td>
+                    <td><span style="text-transform:capitalize;">${profile.role || 'user'}</span></td>
+                    <td>${lastActive ? getRelativeTime(lastActive) : 'Never'}</td>
+                    <td>
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <span class="status-badge ${isOnline ? 'status-online' : 'status-offline'}">
+                                ${isOnline ? 'Online' : 'Offline'}
+                            </span>
+                            <span class="status-badge ${profile.status === 'Suspended' ? 'badge-premium' : 'status-online'}" style="background: ${profile.status === 'Suspended' ? '#fee2e2' : '#dcfce7'}; color: ${profile.status === 'Suspended' ? '#991b1b' : '#15803d'};">
+                                ${profile.status || 'Active'}
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <button onclick="toggleUserStatus('${user.id}', '${profile.status || 'Active'}')" class="small-btn" style="background: ${profile.status === 'Suspended' ? '#10b981' : '#ef4444'}; color: white; border: none; padding: 5px 10px; font-size: 0.8em;">
+                            <i class="fas ${profile.status === 'Suspended' ? 'fa-play' : 'fa-pause'}"></i> 
+                            ${profile.status === 'Suspended' ? 'Activate' : 'Suspend'}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Setup search
+        const searchInput = document.getElementById('user-search');
+        if (searchInput) {
+            searchInput.oninput = (e) => {
+                const term = e.target.value.toLowerCase();
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(term) ? '' : 'none';
+                });
+            };
+        }
+
+    } catch (err) {
+        console.error("Platform Users Error:", err);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red; padding:40px;">⚠️ Error: ${err.message}</td></tr>`;
+    }
+}
+
+function getRelativeTime(date) {
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+    return date.toLocaleDateString();
+}
+
+async function loadAdminAccountScreen() {
+    try {
+        // Load orgs for the dropdown
+        const { data: orgs } = await supabaseClient.from('organizations').select('id, name').order('name');
+        const select = document.getElementById('admin-org-select');
+        if (select && orgs) {
+            select.innerHTML = '<option value="">Select Organization...</option>' + 
+                orgs.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+        }
+
+        const form = document.getElementById('create-admin-form');
+        if (form) {
+            form.onsubmit = handleCreateAdminAccount;
+        }
+    } catch (err) {
+        console.error("Admin screen error:", err);
+    }
+}
+
+async function handleCreateAdminAccount(e) {
+    if (e) e.preventDefault();
+    
+    const fullNameStatus = document.getElementById('admin-fullname').value.trim();
+    const email = document.getElementById('admin-email').value.trim();
+    const password = document.getElementById('admin-password').value.trim();
+    const orgId = document.getElementById('admin-org-select').value;
+    const btn = document.getElementById('create-admin-btn');
+    const msg = document.getElementById('admin-message');
+
+    if (!fullNameStatus || !email || !password || !orgId) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Provisioning...';
+
+    try {
+        const adminClient = getAdminClient();
+        if (!adminClient) return;
+
+        // 1. Create User in Auth
+        const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: { full_name: fullNameStatus }
+        });
+
+        if (authError) throw authError;
+
+        // 2. Create User Profile
+        const { error: profileError } = await supabaseClient.from('user_profiles').insert([{
+            id: authUser.user.id,
+            organization_id: orgId,
+            full_name: fullNameStatus,
+            role: 'owner' // Organization Admin
+        }]);
+
+        if (profileError) throw profileError;
+
+        msg.innerHTML = `
+            <div style="margin-bottom: 10px;">
+                <span style="color:green; display:block; margin-bottom: 15px; font-weight: bold;">✅ Admin Account Created Successfully!</span>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button type="button" onclick="copyAdminCredentials('${email}', '${password}', '${fullNameStatus}')" style="background: #f1f5f9; color: var(--brand-navy); border: 1px solid #cbd5e1; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                        <i class="fas fa-copy"></i> Copy Details
+                    </button>
+                    <button type="button" onclick="shareAdminWhatsApp('${email}', '${password}', '${fullNameStatus}')" style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s;" onmouseover="this.style.background='#1da851'" onmouseout="this.style.background='#25D366'">
+                        <i class="fab fa-whatsapp"></i> Send via WhatsApp
+                    </button>
+                </div>
+            </div>
+        `;
+        document.getElementById('create-admin-form').reset();
+    } catch (err) {
+        msg.innerHTML = `<span style="color:red;">❌ Error: ${err.message}</span>`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Admin Account';
+    }
+}
+
+window.copyAdminCredentials = function(email, password, name) {
+    const loginUrl = window.location.origin + '/index.html';
+    const text = `*Welcome to Sir's 'n' Suits, ${name}!* 👔\n\nYour Administrator account has been securely provisioned.\n\n*Login Portal:* ${loginUrl}\n*Email:* ${email}\n*Password:* ${password}\n\n_Please log in to manage your organization orders._`;
+    navigator.clipboard.writeText(text).then(() => {
+        alert("Credentials copied to clipboard!");
+    }).catch(err => {
+        alert("Failed to copy text: " + err);
+    });
+};
+
+window.shareAdminWhatsApp = function(email, password, name) {
+    const loginUrl = window.location.origin + '/index.html';
+    const text = `*Welcome to Sir's 'n' Suits, ${name}!* 👔\n\nYour Administrator account has been securely provisioned.\n\n*Login Portal:* ${loginUrl}\n*Email:* ${email}\n*Password:* ${password}\n\n_Please log in to manage your organization orders._`;
+    const waUrl = "https://wa.me/?text=" + encodeURIComponent(text);
+    window.open(waUrl, "_blank");
+};
+
+window.deleteOrganization = async function(id) {
+    if (!confirm("Are you sure? This will delete all data related to this organization!")) return;
+    try {
+        const { error } = await supabaseClient.from('organizations').delete().eq('id', id);
+        if (error) throw error;
+        loadOrganizations();
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
+};
+
+// ==========================================
 // 👔 MANAGER MODULE - ORDERS
 // ==========================================
 
@@ -701,7 +1205,7 @@ async function loadOrders(mode = 'open') {
             const paid = activePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
             const orderAccessories = accessoriesByOrder[order.id] || [];
             const accTotal = orderAccessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
-            const grandTotal = (order.price || 0) + accTotal;
+            const grandTotal = (order.price || 0);
             const balance = grandTotal - paid;
 
             // Traffic Light Date Logic
@@ -1041,6 +1545,7 @@ async function loadWorkersDropdown() {
 function initOrderForm() {
     loadWorkersDropdown();
     loadWorkersForSquad(USER_PROFILE.shop_id); // [NEW] Load checkboxes
+    loadExtrasForShop(USER_PROFILE.shop_id); // [NEW] Load inventory extras
 
 
     const garmentSelect = document.getElementById('garment-type-select');
@@ -1068,13 +1573,20 @@ function initOrderForm() {
                 // [NEW] Capture Squad
                 const squad = Array.from(document.querySelectorAll('.squad-checkbox:checked')).map(cb => cb.value);
 
+                // [NEW] Calculate Extras Subtotal Total
+                const extras = collectSelectedExtras();
+                const extrasTotal = extras.reduce((sum, e) => sum + (e.price * e.quantity), 0);
+                const basePrice = parseFloat(document.getElementById('price').value) || 0;
+                const finalPrice = basePrice + extrasTotal;
+
                 const orderData = {
+                    organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safety
                     shop_id: USER_PROFILE.shop_id,
                     manager_id: USER_PROFILE.id,
                     customer_name: document.getElementById('customer_name').value,
                     customer_phone: document.getElementById('customer_phone').value,
                     garment_type: document.getElementById('garment-type-select').value,
-                    price: parseFloat(document.getElementById('price').value) || 0,
+                    price: finalPrice,
                     due_date: document.getElementById('due_date').value,
                     worker_id: document.getElementById('worker-select').value || null,
                     additional_workers: JSON.stringify(squad), // [NEW] Save Squad
@@ -1087,22 +1599,9 @@ function initOrderForm() {
                 const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
                 if (error) throw error;
 
-                // --- [NEW] Save Accessories ---
-                const accessories = [];
-                const shirtQty = parseInt(document.getElementById('acc_shirt_qty')?.value) || 0;
-                const tieQty = parseInt(document.getElementById('acc_tie_qty')?.value) || 0;
-                const shoesQty = parseInt(document.getElementById('acc_shoes_qty')?.value) || 0;
-                const notesText = document.getElementById('acc_notes')?.value.trim() || '';
+                // --- [NEW] Save Inventory-backed Extras with Stock Deduction ---
+                await saveOrderExtrasWithStock(order.id, USER_PROFILE.shop_id);
 
-                if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty, price: parseFloat(document.getElementById('acc_shirt_price')?.value) || 0 });
-                if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty, price: parseFloat(document.getElementById('acc_tie_price')?.value) || 0 });
-                if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty, price: parseFloat(document.getElementById('acc_shoes_price')?.value) || 0 });
-                if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1, price: parseFloat(document.getElementById('acc_notes_price')?.value) || 0 });
-
-                if (accessories.length > 0) {
-                    const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
-                    if (accError) console.error("Error saving accessories:", accError);
-                }
 
                 // [NEW] Upsert Client Data
                 try {
@@ -1116,13 +1615,15 @@ function initOrderForm() {
                     history = history.slice(0, 10); // Keep last 10
 
                     await supabaseClient.from('clients').upsert({
+                        organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
+                        shop_id: orderData.shop_id, // 👈 RLS safe
                         name: orderData.customer_name,
                         phone: orderData.customer_phone,
                         measurements_history: history,
                         last_garment_type: orderData.garment_type,
                         notes: orderData.customer_preferences,
                         updated_at: new Date().toISOString()
-                    }, { onConflict: 'phone' });
+                    }, { onConflict: 'organization_id,phone' }); // 👈 Updated Conflict target
                 } catch (e) {
                     console.error("Error upserting client:", e);
                 }
@@ -1130,6 +1631,7 @@ function initOrderForm() {
                 const deposit = parseFloat(document.getElementById('deposit_paid').value) || 0;
                 if (deposit > 0) {
                     await supabaseClient.from('payments').insert([{
+                        organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
                         order_id: order.id,
                         manager_id: USER_PROFILE.id,
                         amount: deposit,
@@ -1206,6 +1708,7 @@ async function loadExpensesScreen() {
 
                 try {
                     const expenseData = {
+                        organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
                         shop_id: USER_PROFILE.shop_id,
                         manager_id: USER_PROFILE.id,
                         item_name: document.getElementById('ex-name').value || 'General',
@@ -1427,7 +1930,8 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
 
     // --- ☢️ NUCLEAR ARITHMETIC (Do not touch) ☢️ ---
     const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
-    const totalCost = (parseFloat(order.price) || 0) + accTotal;
+    const totalCost = parseFloat(order.price) || 0; // [NEW] order.price is now the absolute total cost
+    const garmentCost = Math.max(0, totalCost - accTotal); // Back-calculate garment cost
     const existingPaid = parseFloat(order.amount_paid) || 0;
     const payingNow = parseFloat(paymentAmount) || 0;
 
@@ -1439,33 +1943,27 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
     }
     const remainingBalance = totalCost - realTotalPaid;
 
-    // --- BRANDING ---
-    const receiptShopName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName)
-        ? APP_CONFIG.appName.toUpperCase()
-        : "FASHION HOUSE";
-
-    const receiptPhone = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.shopPhone)
-        ? APP_CONFIG.shopPhone
-        : "";
+    const shopConfig = order.shops || {};
+    const receiptShopName = shopConfig.name ? shopConfig.name.toUpperCase() : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName) ? APP_CONFIG.appName.toUpperCase() : "FASHION HOUSE");
+    const receiptPhone = shopConfig.phone_number || (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.shopPhone ? APP_CONFIG.shopPhone : "");
+    const receiptLogo = shopConfig.logo_url ? `<img src="${shopConfig.logo_url}" style="height: 60px; margin-bottom: 10px;" />` : '';
+    const receiptHeader = shopConfig.receipt_header_text ? `<p style="margin: 5px 0 0 0; font-size: 0.8em; font-weight: 600; color: #555;">${shopConfig.receipt_header_text}</p>` : '';
 
     // --- 🎨 ULTIMATE MODERN DESIGN ---
     const orderIdStr = (order.id !== undefined && order.id !== null) ? String(order.id) : '';
-    // Prefer order.phone_number, fallback to order.customer_phone, else N/A
     let clientPhone = '';
-    if (order.phone_number && String(order.phone_number).trim() !== '') {
-        clientPhone = order.phone_number;
-    } else if (order.customer_phone && String(order.customer_phone).trim() !== '') {
-        clientPhone = order.customer_phone;
-    } else {
-        clientPhone = 'N/A';
-    }
-    // Check if paid in full
+    if (order.phone_number && String(order.phone_number).trim() !== '') clientPhone = order.phone_number;
+    else if (order.customer_phone && String(order.customer_phone).trim() !== '') clientPhone = order.customer_phone;
+    else clientPhone = 'N/A';
+
     const paidInFull = remainingBalance <= 0;
     return `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; width: 320px; padding: 40px 35px; background: #ffffff; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-radius: 12px; margin: auto;">
             
             <div style="text-align: center; margin-bottom: 40px;">
+                ${receiptLogo}
                 <h2 style="font-size: 1.6em; margin: 0; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; color: #000;">${receiptShopName}</h2>
+                ${receiptHeader}
                 ${receiptPhone ? `<p style=\"margin: 10px 0 0 0; font-size: 0.8em; letter-spacing: 2px; color: #888;\">${receiptPhone}</p>` : ''}
             </div>
             
@@ -1482,20 +1980,31 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
 
             <div style="margin-bottom: 35px;">
                 <p style="margin: 0 0 15px 0; font-size: 0.7em; text-transform: uppercase; color: #999; letter-spacing: 1px; font-weight: 600;">Client Details</p>
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 20px; align-items: baseline;">
-                    
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 20px; align-items: baseline; border-bottom: 1px dashed #f0f0f0; padding-bottom: 15px; margin-bottom: 15px;">
                     <span style="font-size: 0.9em; color: #777; font-weight: 500;">Name:</span>
                     <span style="font-size: 1.1em; color: #000; font-weight: 400;">${order.customer_name}</span>
 
                     <span style="font-size: 0.9em; color: #777; font-weight: 500;">Phone:</span>
                     <span style="font-size: 1em; color: #333; font-weight: 400;">${clientPhone}</span>
-                    
-                    <span style="font-size: 0.9em; color: #777; font-weight: 500;">Garment:</span>
-                    <span style="font-size: 1em; color: #333; font-weight: 400;">${order.garment_type}</span>
+                </div>
 
+                <p style="margin: 0 0 10px 0; font-size: 0.7em; text-transform: uppercase; color: #999; letter-spacing: 1px; font-weight: 600;">Order Breakdown</p>
+                <div style="background: #fafaf9; padding: 12px; border-radius: 8px; border: 1px solid #f3f3f2;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.95em; color: #000; font-weight: 600; margin-bottom: 5px;">
+                        <span>${order.garment_type}</span>
+                        <span>${formatCurrency(garmentCost)}</span>
+                    </div>
+                    
                     ${accessories && accessories.length > 0 ? `
-                    <span style="font-size: 0.9em; color: #777; font-weight: 500;">Extras:</span>
-                    <span style="font-size: 1em; color: #333; font-weight: 400;">${accessories.map(a => `${a.item_name} (x${a.quantity})${parseFloat(a.price) > 0 ? ` - Ksh ${parseFloat(a.price).toLocaleString()}` : ''}`).join(', ')}</span>
+                        <div style="border-top: 1px solid #e7e7e6; margin-top: 8px; padding-top: 8px;">
+                            <p style="margin: 0 0 4px 0; font-size: 0.7em; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing:0.5px;">Extras / Accessories</p>
+                            ${accessories.map(a => `
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85em; color: #444; margin-bottom: 3px;">
+                                    <span>• ${a.name || a.item_name} (x${a.quantity || 1})</span>
+                                    <span>${formatCurrency((a.quantity || 1) * (a.price || 0))}</span>
+                                </div>
+                            `).join('')}
+                        </div>
                     ` : ''}
                 </div>
             </div>
@@ -1534,6 +2043,8 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
             </table>
 
             <div style="text-align: center;">
+                ${shopConfig.paybill_number ? `<p style="margin: 10px 0 5px 0; font-size: 0.85em; color: #333; font-weight: 600;">Paybill: ${shopConfig.paybill_number}</p>` : ''}
+                ${shopConfig.paybill_account ? `<p style="margin: 0 0 10px 0; font-size: 0.85em; color: #333;">Account: ${shopConfig.paybill_account}</p>` : ''}
                 <p style="margin: 0; font-size: 0.8em; color: #999; font-style: italic; letter-spacing: 0.5px;">Thank you for your business.</p>
             </div>
         </div>
@@ -1543,7 +2054,8 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
 function generateTextReceipt(order, payments, paymentAmount = 0, accessories = []) {
     // --- Robust Math Logic (match generateSimpleReceiptHTML) ---
     const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
-    const totalCost = (parseFloat(order.price) || 0) + accTotal;
+    const totalCost = parseFloat(order.price) || 0; // [NEW] Now absolute total
+    const garmentCost = Math.max(0, totalCost - accTotal);
     const existingPaid = payments ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) : 0;
     const payingNow = parseFloat(paymentAmount) || 0;
     let realTotalPaid = 0;
@@ -1555,12 +2067,11 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     const remainingBalance = totalCost - realTotalPaid;
 
     // --- Dynamic Branding ---
-    const receiptShopName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName)
-        ? APP_CONFIG.appName.toUpperCase()
-        : "FASHION HOUSE";
-    const receiptPhone = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.shopPhone)
-        ? APP_CONFIG.shopPhone
-        : "";
+    const shopConfig = order.shops || {};
+    const receiptShopName = shopConfig.name 
+        ? shopConfig.name.toUpperCase() 
+        : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName) ? APP_CONFIG.appName.toUpperCase() : "FASHION HOUSE");
+    const receiptPhone = shopConfig.phone_number || (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.shopPhone ? APP_CONFIG.shopPhone : "");
     const dateStr = new Date().toLocaleDateString('en-US');
 
     let lines = [];
@@ -1571,9 +2082,15 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     lines.push(`Order: #${order.id.slice(0, 8)}`);
     lines.push(`Customer: ${order.customer_name || 'Unknown'}`);
     if (order.customer_phone) lines.push(`Phone: ${order.customer_phone}`);
-    if (order.garment_type) lines.push(`Garment: ${order.garment_type}`);
+    if (order.garment_type) lines.push(`Garment: ${order.garment_type} (Ksh ${garmentCost.toLocaleString()})`);
     if (accessories && accessories.length > 0) {
-        lines.push(`Accessories: ${accessories.map(a => `${a.item_name} (x${a.quantity})${parseFloat(a.price) > 0 ? ` - Ksh ${parseFloat(a.price).toLocaleString()}` : ''}`).join(', ')}`);
+        lines.push('');
+        lines.push('--- EXTRAS & ACCESSORIES ---');
+        accessories.forEach(a => {
+            const price = parseFloat(a.price) || 0;
+            const aName = a.name || a.item_name || 'Accessory';
+            lines.push(`• ${aName} (x${a.quantity || 1}): Ksh ${(price * (a.quantity || 1)).toLocaleString()}`);
+        });
     }
     lines.push('');
     lines.push(`Total Cost: Ksh ${totalCost.toLocaleString()}`);
@@ -1581,6 +2098,8 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     lines.push(`Total Paid: Ksh ${realTotalPaid.toLocaleString()}`);
     lines.push(`Balance Due: Ksh ${remainingBalance.toLocaleString()}`);
     lines.push('-----------------------------');
+    if (shopConfig.paybill_number) lines.push(`Paybill: ${shopConfig.paybill_number}`);
+    if (shopConfig.paybill_account) lines.push(`Account: ${shopConfig.paybill_account}`);
     lines.push(remainingBalance > 0 ? 'Balance Due' : '✅ PAID IN FULL');
     lines.push('');
     lines.push('Thank you for your business!');
@@ -1600,6 +2119,12 @@ window.generateAndShareReceipt = async function (orderId) {
         if (!order) {
             alert("Order not found!");
             return;
+        }
+
+        // Fetch shop details separately
+        if (order.shop_id) {
+            const { data: shop } = await supabaseClient.from('shops').select('*').eq('id', order.shop_id).single();
+            order.shops = shop;
         }
 
         const receiptHTML = generateSimpleReceiptHTML(order, payments, accessories);
@@ -1823,12 +2348,21 @@ async function loadAdminDashboard() {
 
 async function loadMetrics() {
     try {
-        const [{ data: shops }, { data: orders }] = await Promise.all([
+        const [{ data: shops }, { data: orders }, { data: allPayments }] = await Promise.all([
             supabaseClient.from('shops').select('id, name'),
-            supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date')
+            supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date'),
+            supabaseClient.from('payments').select('order_id, amount')
         ]);
 
         if (!orders) return;
+
+        const paymentsByOrder = {};
+        if (allPayments) {
+            allPayments.forEach(p => {
+                if (!paymentsByOrder[p.order_id]) paymentsByOrder[p.order_id] = 0;
+                paymentsByOrder[p.order_id] += parseFloat(p.amount) || 0;
+            });
+        }
 
         const { data: accessories } = await supabaseClient.from('order_accessories').select('*').in('order_id', orders.map(o => o.id));
         const accessoriesByOrder = {};
@@ -1858,7 +2392,7 @@ async function loadMetrics() {
         today.setHours(0, 0, 0, 0);
 
         orders.forEach(o => {
-            const paid = parseFloat(o.amount_paid) || 0;
+            const paid = paymentsByOrder[o.id] || 0; // True dynamic revenue summing
             const price = parseFloat(o.price) || 0;
             const orderAccessories = accessoriesByOrder[o.id] || [];
             const accTotal = orderAccessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
@@ -2209,7 +2743,7 @@ async function loadAdminOrders(mode = 'current') {
             const paid = activePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
             const orderAccessories = accessoriesByOrder[order.id] || [];
             const accTotal = orderAccessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0);
-            const grandTotal = (order.price || 0) + accTotal;
+            const grandTotal = (order.price || 0);
             const balance = grandTotal - paid;
             const orderIdStr = String(order.id);
             const shortId = orderIdStr.slice(-6);
@@ -2337,7 +2871,7 @@ async function openAdminOrderView(orderId) {
         const activePayments = payments ? payments.filter(p => !p.deleted_at) : [];
         const paid = activePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
         const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
-        const totalOrderPrice = (order.price || 0) + accTotal;
+        const totalOrderPrice = (order.price || 0);
         const balance = totalOrderPrice - paid;
         const orderIdStr = String(order.id);
         const shortId = orderIdStr.slice(-6);
@@ -2401,7 +2935,7 @@ async function openAdminOrderView(orderId) {
                 <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
                     <h3 style="color: #d4af37;"><i class="fas fa-shopping-bag"></i> Accessories / Extras</h3>
                     <ul style="padding-left: 20px; margin-bottom: 10px;">
-                        ${accessories.map(a => `<li><strong>${a.item_name}</strong> (Qty: ${a.quantity})${parseFloat(a.price) > 0 ? ` - Ksh ${parseFloat(a.price).toLocaleString()}` : ''}</li>`).join('')}
+                        ${accessories.map(a => `<li><strong>${a.name || a.item_name || 'Accessory'}</strong> (Qty: ${a.quantity})${parseFloat(a.price) > 0 ? ` - Ksh ${parseFloat(a.price).toLocaleString()}` : ''}</li>`).join('')}
                     </ul>
                 </div>
                 ` : ''}
@@ -2605,7 +3139,7 @@ async function loadAdminOrderDetails() {
         // --- [NEW] Pre-fill Accessories ---
         if (accessories && accessories.length > 0) {
             accessories.forEach(a => {
-                const name = a.item_name ? a.item_name.toLowerCase() : '';
+                const name = (a.name || a.item_name || '').toLowerCase();
                 if (name.includes('shirt')) {
                     const qtyEl = document.getElementById('edit_acc_shirt_qty');
                     const prcEl = document.getElementById('edit_acc_shirt_price');
@@ -2624,7 +3158,7 @@ async function loadAdminOrderDetails() {
                 } else {
                     const notesEl = document.getElementById('edit_acc_notes');
                     const prcEl = document.getElementById('edit_acc_notes_price');
-                    if (notesEl) notesEl.value = a.item_name;
+                    if (notesEl) notesEl.value = a.name || a.item_name || '';
                     if (prcEl) prcEl.value = a.price || 0;
                 }
             });
@@ -2686,8 +3220,11 @@ async function loadAdminOrderDetails() {
         // Update Top Summary Card
         if (document.getElementById('summary-customer-name')) {
             document.getElementById('summary-customer-name').textContent = order.customer_name;
-            document.getElementById('summary-customer-phone').textContent = order.customer_phone;
-            document.getElementById('summary-customer-phone').href = `tel:${order.customer_phone}`;
+            const phoneEl = document.getElementById('summary-customer-phone');
+            if (phoneEl) {
+                phoneEl.textContent = order.customer_phone;
+                phoneEl.href = `tel:${order.customer_phone}`;
+            }
             document.getElementById('summary-garment-type').textContent = order.garment_type;
             document.getElementById('summary-due-date').textContent = formatDate(order.due_date);
             document.getElementById('summary-status').textContent = STATUS_MAP[order.status] || order.status;
@@ -2697,8 +3234,16 @@ async function loadAdminOrderDetails() {
             if (document.getElementById('admin-detail-shop')) {
                 // We need to fetch shop name if not already loaded (it's not in the main select)
                 if (order.shop_id) {
-                    supabaseClient.from('shops').select('name').eq('id', order.shop_id).single()
-                        .then(({ data }) => { if (data) document.getElementById('admin-detail-shop').textContent = data.name; });
+                    supabaseClient.from('shops').select('name, logo_url').eq('id', order.shop_id).single()
+                        .then(({ data }) => { 
+                            if (data) {
+                                if (document.getElementById('admin-detail-shop')) document.getElementById('admin-detail-shop').textContent = data.name; 
+                                if (data.logo_url) {
+                                    const logoEl = document.getElementById('pdf-logo');
+                                    if (logoEl) logoEl.src = data.logo_url;
+                                }
+                            }
+                        });
                 }
             }
 
@@ -2794,19 +3339,23 @@ async function saveAdminOrder() {
         // Capture squad selection
         const squad = Array.from(document.querySelectorAll('.squad-checkbox:checked')).map(cb => cb.value);
 
-        // Prepare update data
+        // [NEW] Calculate Extras Subtotal Total for update
+        const extras = collectSelectedExtras();
+        const extrasTotal = extras.reduce((sum, e) => sum + (e.price * e.quantity), 0);
+        const basePrice = parseFloat(document.getElementById('edit-price').value) || 0;
+        const finalPrice = basePrice + extrasTotal;
+
         const updateData = {
             customer_name: document.getElementById('edit-customer-name').value,
             customer_phone: document.getElementById('edit-customer-phone').value,
             garment_type: document.getElementById('edit-garment-type').value,
-            price: parseFloat(document.getElementById('edit-price').value) || 0,
+            price: finalPrice,
             due_date: document.getElementById('edit-due-date').value,
             customer_preferences: document.getElementById('edit-preferences').value || '',
             status: parseInt(document.getElementById('edit-status').value) || 1,
             worker_id: document.getElementById('edit-worker-select').value || null,
             additional_workers: JSON.stringify(squad),
-            measurements_details: JSON.stringify(measurements),
-            updated_at: new Date().toISOString()
+            measurements_details: JSON.stringify(measurements)
         };
 
         // Save to database
@@ -2817,25 +3366,23 @@ async function saveAdminOrder() {
 
         if (error) throw error;
 
-        // --- [NEW] Sync Accessories (Edit Mode) ---
-        // 1. Delete previous accessories for this order
-        await supabaseClient.from('order_accessories').delete().eq('order_id', CURRENT_ORDER_ID);
-
-        // 2. Collect current form accessories inputs with individual pricing
-        const accessories = [];
-        const shirtQty = parseInt(document.getElementById('edit_acc_shirt_qty')?.value) || 0;
-        const tieQty = parseInt(document.getElementById('edit_acc_tie_qty')?.value) || 0;
-        const shoesQty = parseInt(document.getElementById('edit_acc_shoes_qty')?.value) || 0;
-        const notesText = document.getElementById('edit_acc_notes')?.value.trim() || '';
-
-        if (shirtQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Ready-made Shirt', quantity: shirtQty, price: parseFloat(document.getElementById('edit_acc_shirt_price')?.value) || 0 });
-        if (tieQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Premium Tie', quantity: tieQty, price: parseFloat(document.getElementById('edit_acc_tie_price')?.value) || 0 });
-        if (shoesQty > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: 'Shoes', quantity: shoesQty, price: parseFloat(document.getElementById('edit_acc_shoes_price')?.value) || 0 });
-        if (notesText.length > 0) accessories.push({ order_id: CURRENT_ORDER_ID, item_name: notesText, quantity: 1, price: parseFloat(document.getElementById('edit_acc_notes_price')?.value) || 0 });
-
-        if (accessories.length > 0) {
-            const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
-            if (accError) console.error("Error saving accessories on edit:", accError);
+        // --- [NEW] Sync Accessories with Stock Management (Edit Mode) ---
+        const { data: oDetails } = await supabaseClient.from('orders').select('shop_id').eq('id', CURRENT_ORDER_ID).single();
+        if (oDetails && oDetails.shop_id) {
+             const { data: oldAcc } = await supabaseClient.from('order_accessories').select('*').eq('order_id', CURRENT_ORDER_ID);
+             if (oldAcc && oldAcc.length > 0) {
+                  for (const item of oldAcc) {
+                       if (item.inventory_item_id) {
+                            const { data: cur } = await supabaseClient.from('inventory_items').select('stock_quantity').eq('id', item.inventory_item_id).single();
+                            if (cur) {
+                                 const newQty = (cur.stock_quantity || 0) + (item.quantity || 0);
+                                 await supabaseClient.from('inventory_items').update({ stock_quantity: newQty }).eq('id', item.inventory_item_id);
+                            }
+                       }
+                  }
+             }
+             await supabaseClient.from('order_accessories').delete().eq('order_id', CURRENT_ORDER_ID);
+             await saveOrderExtrasWithStock(CURRENT_ORDER_ID, oDetails.shop_id);
         }
 
         alert("Order saved successfully!");
@@ -2843,7 +3390,8 @@ async function saveAdminOrder() {
 
     } catch (error) {
         logDebug("Error saving admin order:", error, 'error');
-        alert("Error saving order: " + error.message);
+        console.error("FULL SAVE ERROR:", error); // Log full error object
+        alert("Error saving order! " + (error.message || JSON.stringify(error)));
     }
 }
 
@@ -2885,6 +3433,7 @@ async function loadAdminManagementScreen() {
                     const { error } = await supabaseClient
                         .from('workers')
                         .insert([{
+                            organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
                             shop_id: shopId,
                             name: name.trim(),
                             phone_number: phone.trim() || null,
@@ -3014,6 +3563,9 @@ function initAdminOrderForm() {
             // B. Load Squad Workers (Checkboxes) - THIS WAS THE MISSING PART
             logDebug("Loading squad for shop:", shopId);
             await loadWorkersForSquad(shopId);
+
+            // C. Load Inventory Extras for this shop
+            await loadExtrasForShop(shopId);
         });
     }
 
@@ -3048,12 +3600,19 @@ function initAdminOrderForm() {
             // Capture Squad
             const squad = Array.from(document.querySelectorAll('.squad-checkbox:checked')).map(cb => cb.value);
 
+            // [NEW] Calculate Extras Subtotal Total
+            const extras = collectSelectedExtras();
+            const extrasTotal = extras.reduce((sum, e) => sum + (e.price * e.quantity), 0);
+            const basePrice = parseFloat(document.getElementById('price').value) || 0;
+            const finalPrice = basePrice + extrasTotal;
+
             const orderData = {
+                organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
                 shop_id: shopId,
                 customer_name: document.getElementById('customer_name').value,
                 customer_phone: document.getElementById('customer_phone').value,
                 garment_type: document.getElementById('garment-type-select').value,
-                price: parseFloat(document.getElementById('price').value) || 0,
+                price: finalPrice,
                 due_date: document.getElementById('due_date').value,
                 worker_id: document.getElementById('worker-select').value || null,
                 additional_workers: JSON.stringify(squad),
@@ -3064,6 +3623,9 @@ function initAdminOrderForm() {
 
             const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
             if (error) return alert(error.message);
+
+            // --- [NEW] Save Inventory-backed Extras with Stock Deduction ---
+            await saveOrderExtrasWithStock(order.id, shopId);
 
 
             // [NEW] Upsert Client Data
@@ -3078,19 +3640,30 @@ function initAdminOrderForm() {
                 history = history.slice(0, 10); // Keep last 10
 
                 await supabaseClient.from('clients').upsert({
+                    organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
+                    shop_id: orderData.shop_id, // 👈 RLS safe
                     name: orderData.customer_name,
                     phone: orderData.customer_phone,
                     measurements_history: history,
                     last_garment_type: orderData.garment_type,
                     notes: orderData.customer_preferences || '',
                     updated_at: new Date().toISOString()
-                }, { onConflict: 'phone' });
+                }, { onConflict: 'organization_id,phone' }); // 👈 Updated Conflict target
             } catch (e) {
                 console.error("Error upserting client:", e);
             }
 
             const deposit = parseFloat(document.getElementById('deposit_paid').value) || 0;
-            if (deposit > 0) await supabaseClient.from('payments').insert([{ order_id: order.id, amount: deposit }]);
+            if (deposit > 0) {
+                const { error: depErr } = await supabaseClient.from('payments').insert([{ 
+                    organization_id: USER_PROFILE.organization_id,
+                    shop_id: USER_PROFILE.shop_id,
+                    manager_id: USER_PROFILE.id,
+                    order_id: order.id, 
+                    amount: deposit 
+                }]);
+                if (depErr) console.error("Deposit error:", depErr);
+            }
 
             window.location.href = 'admin-current-orders.html';
         };
@@ -3463,7 +4036,8 @@ async function loadExpenseChart(shopId) {
     try {
         let expensesQuery = supabaseClient
             .from('expenses')
-            .select('category, amount');
+            .select('category, amount')
+            .eq('organization_id', USER_PROFILE.organization_id);
 
         if (shopId !== 'all') {
             expensesQuery = expensesQuery.eq('shop_id', shopId);
@@ -3645,42 +4219,62 @@ function exportDashboardData() {
 // ==========================================
 
 window.quickPay = async function (orderId, balance) {
-    const amountStr = prompt(`Enter payment amount (Balance: Ksh ${balance.toLocaleString()}):`, balance.toString());
-
-    if (!amountStr || isNaN(parseFloat(amountStr))) {
-        alert("Please enter a valid amount");
-        return;
+    let modal = document.getElementById('quickpay-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'quickpay-modal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:99999;';
+        document.body.appendChild(modal);
     }
+    
+    modal.innerHTML = `
+        <div style="background:white;padding:30px;border-radius:12px;width:90%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,0.3);text-align:center;">
+            <h3 style="margin-top:0;font-family:'Playfair Display', serif;color:#1e293b;">Record Payment</h3>
+            <p style="color:#64748b;margin-bottom:20px;">Current Balance: <strong>Ksh ${balance.toLocaleString()}</strong></p>
+            <div style="text-align:left;margin-bottom:20px;">
+                <label style="display:block;margin-bottom:8px;font-weight:600;color:#334155;">Amount Receiving (Ksh):</label>
+                <input type="number" id="quickpay-amount" value="${balance}" max="${balance}" style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1.1em;box-sizing:border-box;">
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button id="quickpay-cancel" style="flex:1;padding:12px;background:#f1f5f9;color:#64748b;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Cancel</button>
+                <button id="quickpay-confirm" style="flex:1;padding:12px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Submit Payment</button>
+            </div>
+        </div>
+    `;
+    modal.style.display = 'flex';
 
-    const amount = parseFloat(amountStr);
-    if (amount <= 0) {
-        alert("Amount must be greater than 0");
-        return;
-    }
+    document.getElementById('quickpay-cancel').onclick = () => { modal.style.display = 'none'; };
+    document.getElementById('quickpay-confirm').onclick = async () => {
+        const amountStr = document.getElementById('quickpay-amount').value;
+        const amount = parseFloat(amountStr);
+        if (!amountStr || isNaN(amount) || amount <= 0) { alert("Please enter a valid amount greater than 0."); return; }
+        if (amount > balance) { alert(`Amount cannot exceed balance of Ksh ${balance.toLocaleString()}`); return; }
 
-    if (amount > balance) {
-        alert(`Amount cannot exceed balance of Ksh ${balance.toLocaleString()}`);
-        return;
-    }
+        modal.innerHTML = '<div style="background:white;padding:30px;border-radius:12px;"><h3 style="margin:0;">Processing Payment...</h3></div>';
 
-    try {
-        const { error } = await supabaseClient
-            .from('payments')
-            .insert([{
+        try {
+            const { data: ord } = await supabaseClient.from('orders').select('shop_id').eq('id', orderId).single();
+            const { error } = await supabaseClient.from('payments').insert([{
+                organization_id: USER_PROFILE.organization_id,
+                shop_id: ord ? ord.shop_id : USER_PROFILE.shop_id,
                 order_id: orderId,
                 manager_id: USER_PROFILE?.id,
-                amount: amount,
-                recorded_at: new Date().toISOString()
+                amount: amount
             }]);
 
-        if (error) throw error;
-
-        alert(`Payment of Ksh ${amount.toLocaleString()} recorded successfully!`);
-        refreshCurrentView();
-
-    } catch (error) {
-        alert("Error recording payment: " + error.message);
-    }
+            if (error) throw error;
+            modal.style.display = 'none';
+            alert(`Payment of Ksh ${amount.toLocaleString()} recorded successfully!`);
+            if (typeof refreshCurrentView === 'function') refreshCurrentView();
+            
+            // Automatically safely close the stale modal to reveal the freshly updated background table
+            const parentModal = document.getElementById('order-modal');
+            if (parentModal) parentModal.remove();
+        } catch (error) {
+            modal.style.display = 'none';
+            alert("Error recording payment: " + error.message);
+        }
+    };
 };
 
 window.updateStatus = async function (orderId) {
@@ -3803,8 +4397,11 @@ async function loadAdminOrderDetails() {
         // Update Top Summary Card
         if (document.getElementById('summary-customer-name')) {
             document.getElementById('summary-customer-name').textContent = order.customer_name;
-            document.getElementById('summary-customer-phone').textContent = order.customer_phone;
-            document.getElementById('summary-customer-phone').href = `tel:${order.customer_phone}`;
+            const phoneEl = document.getElementById('summary-customer-phone');
+            if (phoneEl) {
+                phoneEl.textContent = order.customer_phone;
+                phoneEl.href = `tel:${order.customer_phone}`;
+            }
             document.getElementById('summary-garment-type').textContent = order.garment_type;
             document.getElementById('summary-due-date').textContent = formatDate(order.due_date);
             document.getElementById('summary-status').textContent = STATUS_MAP[order.status] || order.status;
@@ -3814,8 +4411,16 @@ async function loadAdminOrderDetails() {
             if (document.getElementById('admin-detail-shop')) {
                 // We need to fetch shop name if not already loaded (it's not in the main select)
                 if (order.shop_id) {
-                    supabaseClient.from('shops').select('name').eq('id', order.shop_id).single()
-                        .then(({ data }) => { if (data) document.getElementById('admin-detail-shop').textContent = data.name; });
+                    supabaseClient.from('shops').select('name, logo_url').eq('id', order.shop_id).single()
+                        .then(({ data }) => { 
+                            if (data) {
+                                if (document.getElementById('admin-detail-shop')) document.getElementById('admin-detail-shop').textContent = data.name; 
+                                if (data.logo_url) {
+                                    const logoEl = document.getElementById('pdf-logo');
+                                    if (logoEl) logoEl.src = data.logo_url;
+                                }
+                            }
+                        });
                 }
             }
 
@@ -3909,53 +4514,7 @@ function generateAdminMeasurementFields(type, currentJson) {
     container.innerHTML = html;
 }
 
-async function saveAdminOrder() {
-    if (!CURRENT_ORDER_ID) return;
 
-    try {
-        // Collect measurements
-        const measurements = {};
-        document.querySelectorAll('#admin-measurement-fields-container input').forEach(input => {
-            const comp = input.dataset.c;
-            const meas = input.dataset.m;
-            if (!measurements[comp]) measurements[comp] = {};
-            if (input.value) measurements[comp][meas] = parseFloat(input.value);
-        });
-
-        // Capture squad selection
-        const squad = Array.from(document.querySelectorAll('.squad-checkbox:checked')).map(cb => cb.value);
-
-        // Prepare update data
-        const updateData = {
-            customer_name: document.getElementById('edit-customer-name').value,
-            customer_phone: document.getElementById('edit-customer-phone').value,
-            garment_type: document.getElementById('edit-garment-type').value,
-            price: parseFloat(document.getElementById('edit-price').value) || 0,
-            due_date: document.getElementById('edit-due-date').value,
-            customer_preferences: document.getElementById('edit-preferences').value || '',
-            status: parseInt(document.getElementById('edit-status').value) || 1,
-            worker_id: document.getElementById('edit-worker-select').value || null,
-            additional_workers: JSON.stringify(squad),
-            measurements_details: JSON.stringify(measurements),
-            updated_at: new Date().toISOString()
-        };
-
-        // Save to database
-        const { error } = await supabaseClient
-            .from('orders')
-            .update(updateData)
-            .eq('id', CURRENT_ORDER_ID);
-
-        if (error) throw error;
-
-        alert("Order saved successfully!");
-        window.location.href = 'admin-current-orders.html';
-
-    } catch (error) {
-        logDebug("Error saving admin order:", error, 'error');
-        alert("Error saving order: " + error.message);
-    }
-}
 
 function downloadOrderPDF() {
     const element = document.getElementById('pdf-export-content');
@@ -4009,10 +4568,10 @@ function buildInvoiceDocument(options) {
         paybill = APP_CONFIG?.billing?.paybill || "",
         account = APP_CONFIG?.billing?.account || "",
         accountName = APP_CONFIG?.billing?.accountName || "",
+        logoUrl = null
     } = options;
 
-    // Use absolute URL for logo so the new window (different origin) can load it
-    const logoAbsUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + (APP_CONFIG?.logoPath || 'logo.png');
+    const logoAbsUrl = logoUrl || window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + (APP_CONFIG?.logoPath || 'logo.png');
 
     const itemRows = items.map(item => `
         <tr>
@@ -4141,7 +4700,7 @@ function buildInvoiceDocument(options) {
       <div class="brand-cell">
         <div class="brand-name">${companyName}</div>
         <div class="brand-sub">${companySubtitle}</div>
-        <div class="brand-contact">Phone: ${companyPhone}<br>Location: ${companyLocation}</div>
+        <div class="brand-contact">Phone: ${companyPhone}</div>
       </div>
     </div>
   </div>
@@ -4178,9 +4737,21 @@ function buildInvoiceDocument(options) {
 <div class="totals-wrap">
   <div class="totals-spacer"></div>
   <div class="totals-box">
+    ${totals.garmentSubtotal !== undefined ? `
     <div class="totals-row">
-      <span class="totals-label">Total:</span>
-      <span class="totals-value">${formatCurrency(totals.subtotal)}</span>
+      <span class="totals-label">Garment Cost:</span>
+      <span class="totals-value">${formatCurrency(totals.garmentSubtotal)}</span>
+    </div>
+    ` : ''}
+    ${totals.extrasSubtotal !== undefined && totals.extrasSubtotal > 0 ? `
+    <div class="totals-row">
+      <span class="totals-label">Extras / Accessories:</span>
+      <span class="totals-value">${formatCurrency(totals.extrasSubtotal)}</span>
+    </div>
+    ` : ''}
+    <div class="totals-row" style="border-top: 1px dotted #e2e8f0; margin-top: 4px; padding-top: 4px;">
+      <span class="totals-label" style="font-weight:700;">Grand Total:</span>
+      <span class="totals-value" style="font-weight:800; color: #000;">${formatCurrency(totals.subtotal)}</span>
     </div>
     <div class="totals-row separator">
       <span class="totals-label">Paid:</span>
@@ -4243,14 +4814,26 @@ window.generateExpenseInvoice = async function (expenseId) {
         ]);
         if (!expense) throw new Error("Expense not found");
 
+        // Fetch shop details separately
+        if (expense.shop_id) {
+            const { data: shop } = await supabaseClient.from('shops').select('*').eq('id', expense.shop_id).single();
+            expense.shops = shop;
+        }
+
         const amount = parseFloat(expense.amount) || 0;
         const recordedBy = profile?.full_name || USER_PROFILE?.full_name || 'Administrator';
         const year = new Date(expense.incurred_at || expense.created_at).getFullYear();
+        const shop = expense.shops || {};
 
         const doc = buildInvoiceDocument({
             title: "EXPENSE REQUISITION",
-            subtitle: "Authorized Internal Request",
-            companySubtitle: "Authorized Internal Request",
+            subtitle: shop.receipt_header_text || "Authorized Internal Request",
+            companyName: shop.name || APP_CONFIG?.companyName || "Sir's 'n' Suits",
+            companySubtitle: shop.receipt_header_text || "Authorized Internal Request",
+            companyPhone: shop.phone_number || APP_CONFIG?.shopPhone || "",
+            logoUrl: shop.logo_url || null,
+            paybill: shop.paybill_number || APP_CONFIG?.billing?.paybill,
+            account: shop.paybill_account || APP_CONFIG?.billing?.account,
             invoiceNumber: `EXP-${year}-${String(expense.id).slice(-6).toUpperCase()}`,
             date: formatDate(expense.incurred_at || expense.created_at),
             dueDate: "Immediate",
@@ -4264,7 +4847,8 @@ window.generateExpenseInvoice = async function (expenseId) {
                 total: amount
             }],
             totals: { subtotal: amount, paid: 0, balance: amount },
-            showPaymentDetails: false
+            showPaymentDetails: false,
+            accountName: shop.name || APP_CONFIG?.billing?.accountName
         });
 
         openInvoicePrintWindow(doc, `Requisition_${String(expense.id).slice(0, 6)}`);
@@ -4297,8 +4881,15 @@ window.downloadInvoicePDF = async function (orderId) {
         ]);
         if (!order) throw new Error("Order not found");
 
+        // Fetch shop details separately
+        if (order.shop_id) {
+            const { data: shop } = await supabaseClient.from('shops').select('*').eq('id', order.shop_id).single();
+            order.shops = shop;
+        }
+
         const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
-        const totalCost = (parseFloat(order.price) || 0) + accTotal;
+        const totalCost = parseFloat(order.price) || 0; // [NEW] order.price is already absolute total
+        const garmentCost = Math.max(0, totalCost - accTotal);
         const paid = payments ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) : 0;
         const balance = totalCost - paid;
         const year = new Date(order.created_at || new Date()).getFullYear();
@@ -4306,26 +4897,30 @@ window.downloadInvoicePDF = async function (orderId) {
         const invoiceItems = [{
             description: `Bespoke Tailoring: ${order.garment_type}`,
             qty: 1,
-            unitPrice: totalCost,
-            total: totalCost
+            unitPrice: garmentCost,
+            total: garmentCost
         }];
 
         if (accessories && accessories.length > 0) {
             accessories.forEach(a => {
                 const itemPrice = parseFloat(a.price) || 0;
                 invoiceItems.push({
-                    description: `Accessory: ${a.item_name}`,
+                    description: `Accessory: ${a.name || a.item_name}`,
                     qty: a.quantity || 1,
                     unitPrice: itemPrice,
                     total: (a.quantity || 1) * itemPrice
                 });
             });
         }
+        const shop = order.shops || {};
 
         const doc = buildInvoiceDocument({
             title: "INVOICE",
-            subtitle: "Quality Tailoring Services",
-            companySubtitle: "Quality Tailoring Services",
+            companyName: shop.name || APP_CONFIG?.companyName || "Sir's 'n' Suits",
+            subtitle: shop.receipt_header_text || "Quality Tailoring Services",
+            companySubtitle: shop.receipt_header_text || "Quality Tailoring Services",
+            companyPhone: shop.phone_number || APP_CONFIG?.shopPhone || "",
+            logoUrl: shop.logo_url || null,
             invoiceNumber: `INV-${year}-${String(order.id).slice(-4).toUpperCase()}`,
             date: formatDate(new Date().toISOString()),
             dueDate: order.due_date ? formatDate(order.due_date) : "Upon Receipt",
@@ -4333,10 +4928,17 @@ window.downloadInvoicePDF = async function (orderId) {
             billToName: order.customer_name,
             billToSub: order.customer_phone || order.phone_number || '',
             items: invoiceItems,
-            totals: { subtotal: totalCost, paid: paid, balance: Math.max(0, balance) },
+            totals: { 
+                garmentSubtotal: garmentCost,
+                extrasSubtotal: accTotal,
+                subtotal: totalCost, 
+                paid: paid, 
+                balance: Math.max(0, balance) 
+            },
             showPaymentDetails: true,
-            paybill: customPaybill,
-            account: customAccount
+            paybill: customPaybill || shop.paybill_number || APP_CONFIG?.billing?.paybill,
+            account: customAccount || shop.paybill_account || APP_CONFIG?.billing?.account,
+            accountName: shop.name || APP_CONFIG?.billing?.accountName
         });
 
         openInvoicePrintWindow(doc, `Invoice_${(order.customer_name || 'customer').replace(/\s+/g, '_')}`);
@@ -4727,6 +5329,9 @@ function initAdminOrderForm() {
             // B. Load Squad Workers (Checkboxes) - THIS WAS THE MISSING PART
             logDebug("Loading squad for shop:", shopId);
             await loadWorkersForSquad(shopId);
+
+            // C. Load Inventory Extras for this shop
+            await loadExtrasForShop(shopId);
         });
     }
 
@@ -4740,7 +5345,46 @@ function initAdminOrderForm() {
     setupClientSearch('customer_phone');
     setupClientSearch('customer_name');
 
-    // 4. Handle Form Submission
+    // --- 4. Handle Order Type Toggle (Custom vs Retail) ---
+    let orderType = 'custom';
+    const btnCustom = document.getElementById('type-custom');
+    const btnRetail = document.getElementById('type-retail');
+
+    const updateOrderTypeUI = (type) => {
+        orderType = type;
+        if (btnCustom && btnRetail) {
+            btnCustom.classList.toggle('active', type === 'custom');
+            btnRetail.classList.toggle('active', type === 'retail');
+
+            btnCustom.style.background = type === 'custom' ? 'var(--brand-navy)' : 'transparent';
+            btnCustom.style.color = type === 'custom' ? 'var(--brand-gold)' : '#64748b';
+            btnRetail.style.background = type === 'retail' ? 'var(--brand-navy)' : 'transparent';
+            btnRetail.style.color = type === 'retail' ? 'var(--brand-gold)' : '#64748b';
+        }
+
+        const garmentRow = document.getElementById('garment-type-row');
+        const basePriceGroup = document.getElementById('base-price-group');
+        const teamGroup = document.getElementById('team-assignment-fieldset');
+        const measGroup = document.getElementById('measurement-fieldset');
+        
+        if (garmentRow) garmentRow.style.display = type === 'custom' ? 'grid' : 'none';
+        if (basePriceGroup) basePriceGroup.style.display = type === 'custom' ? 'block' : 'none';
+        if (teamGroup) teamGroup.style.display = type === 'custom' ? 'block' : 'none';
+        if (measGroup) measGroup.style.display = type === 'custom' ? 'block' : 'none';
+
+        const workerSelect = document.getElementById('worker-select');
+        const garmentSelect = document.getElementById('garment-type-select');
+        const priceInput = document.getElementById('price');
+        
+        if (workerSelect) workerSelect.required = type === 'custom';
+        if (garmentSelect) garmentSelect.required = type === 'custom';
+        if (priceInput) priceInput.required = type === 'custom';
+    };
+
+    if (btnCustom) btnCustom.addEventListener('click', () => updateOrderTypeUI('custom'));
+    if (btnRetail) btnRetail.addEventListener('click', () => updateOrderTypeUI('retail'));
+
+    // 5. Handle Form Submission
     const orderForm = document.getElementById('order-form');
     if (orderForm) {
         orderForm.onsubmit = async (e) => {
@@ -4760,39 +5404,32 @@ function initAdminOrderForm() {
             // Capture Squad
             const squad = Array.from(document.querySelectorAll('.squad-checkbox:checked')).map(cb => cb.value);
 
+            // [NEW] Calculate Extras Subtotal Total
+            const extras = collectSelectedExtras();
+            const extrasTotal = extras.reduce((sum, e) => sum + (e.price * e.quantity), 0);
+            const basePrice = parseFloat(document.getElementById('price').value) || 0;
+            const finalPrice = basePrice + extrasTotal;
+
             const orderData = {
+                organization_id: USER_PROFILE.organization_id,
                 shop_id: shopId,
                 customer_name: document.getElementById('customer_name').value,
                 customer_phone: document.getElementById('customer_phone').value,
-                garment_type: document.getElementById('garment-type-select').value,
-                price: parseFloat(document.getElementById('price').value) || 0,
-                due_date: document.getElementById('due_date').value,
-                worker_id: document.getElementById('worker-select').value || null,
-                additional_workers: JSON.stringify(squad),
-                status: 1,
-                measurements_details: JSON.stringify(measurements),
+                garment_type: orderType === 'retail' ? 'Retail Sale' : document.getElementById('garment-type-select').value,
+                price: finalPrice,
+                due_date: orderType === 'retail' ? new Date().toISOString().split('T')[0] : document.getElementById('due_date').value,
+                worker_id: orderType === 'retail' ? null : (document.getElementById('worker-select').value || null),
+                additional_workers: orderType === 'retail' ? '[]' : JSON.stringify(squad),
+                status: orderType === 'retail' ? 5 : 1, // 5 = Collected
+                measurements_details: orderType === 'retail' ? '{}' : JSON.stringify(measurements),
                 created_at: new Date().toISOString()
             };
 
             const { data: order, error } = await supabaseClient.from('orders').insert([orderData]).select().single();
             if (error) return alert(error.message);
 
-            // --- [NEW] Save Accessories (Admin Form 2) ---
-            const accessories = [];
-            const shirtQty = parseInt(document.getElementById('acc_shirt_qty')?.value) || 0;
-            const tieQty = parseInt(document.getElementById('acc_tie_qty')?.value) || 0;
-            const shoesQty = parseInt(document.getElementById('acc_shoes_qty')?.value) || 0;
-            const notesText = document.getElementById('acc_notes')?.value.trim() || '';
-
-            if (shirtQty > 0) accessories.push({ order_id: order.id, item_name: 'Ready-made Shirt', quantity: shirtQty, price: parseFloat(document.getElementById('acc_shirt_price')?.value) || 0 });
-            if (tieQty > 0) accessories.push({ order_id: order.id, item_name: 'Premium Tie', quantity: tieQty, price: parseFloat(document.getElementById('acc_tie_price')?.value) || 0 });
-            if (shoesQty > 0) accessories.push({ order_id: order.id, item_name: 'Shoes', quantity: shoesQty, price: parseFloat(document.getElementById('acc_shoes_price')?.value) || 0 });
-            if (notesText.length > 0) accessories.push({ order_id: order.id, item_name: notesText, quantity: 1, price: parseFloat(document.getElementById('acc_notes_price')?.value) || 0 });
-
-            if (accessories.length > 0) {
-                const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
-                if (accError) console.error("Error saving accessories Admin 2:", accError);
-            }
+            // --- [NEW] Save Inventory-backed Extras with Stock Deduction (Admin Form) ---
+            await saveOrderExtrasWithStock(order.id, shopId);
 
             // [NEW] Upsert Client Data
             try {
@@ -4806,19 +5443,31 @@ function initAdminOrderForm() {
                 history = history.slice(0, 10); // Keep last 10
 
                 await supabaseClient.from('clients').upsert({
+                    organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
+                    shop_id: orderData.shop_id, // 👈 RLS safe
                     name: orderData.customer_name,
                     phone: orderData.customer_phone,
                     measurements_history: history,
                     last_garment_type: orderData.garment_type,
                     notes: orderData.customer_preferences || '',
                     updated_at: new Date().toISOString()
-                }, { onConflict: 'phone' });
+                }, { onConflict: 'organization_id,phone' }); // 👈 Updated Conflict target
             } catch (e) {
                 console.error("Error upserting client:", e);
             }
 
             const deposit = parseFloat(document.getElementById('deposit_paid').value) || 0;
-            if (deposit > 0) await supabaseClient.from('payments').insert([{ order_id: order.id, amount: deposit }]);
+            if (deposit > 0) {
+                const adminShopId = document.getElementById('shop-select').value;
+                const { error: depErr } = await supabaseClient.from('payments').insert([{
+                    organization_id: USER_PROFILE.organization_id,
+                    shop_id: adminShopId,
+                    manager_id: USER_PROFILE.id,
+                    order_id: order.id, 
+                    amount: deposit 
+                }]);
+                if (depErr) console.error("Admin deposit error:", depErr);
+            }
 
             window.location.href = 'admin-current-orders.html';
         };
@@ -4909,6 +5558,7 @@ async function loadAdminExpensesScreen() {
                     const shopId = document.getElementById('admin-ex-shop').value || null;
 
                     const expenseData = {
+                        organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
                         shop_id: shopId,
                         manager_id: USER_PROFILE.id, // Admin who recorded it
                         item_name: document.getElementById('admin-ex-name').value || 'Global Expense',
@@ -5184,12 +5834,12 @@ async function loadBIAnalytics() {
     analyticsCharts = {};
 
     try {
-        let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at, orders(garment_type, shop_id, customer_name, customer_phone)');
-        let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at, shop_id');
-        let ordersQuery = supabaseClient.from('orders').select('id, price, status, created_at, garment_type, shop_id, customer_name, customer_phone');
+        let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at, shop_id').eq('organization_id', USER_PROFILE.organization_id);
+        let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at, shop_id').eq('organization_id', USER_PROFILE.organization_id);
+        let ordersQuery = supabaseClient.from('orders').select('id, price, status, created_at, garment_type, shop_id, customer_name, customer_phone').eq('organization_id', USER_PROFILE.organization_id);
 
         if (shopId !== 'all') {
-            paymentsQuery = paymentsQuery.eq('orders.shop_id', shopId);
+            paymentsQuery = paymentsQuery.eq('shop_id', shopId);
             expensesQuery = expensesQuery.eq('shop_id', shopId);
             ordersQuery = ordersQuery.eq('shop_id', shopId);
         }
@@ -5229,7 +5879,9 @@ async function loadBIAnalytics() {
         setVal('bi-revenue', `Ksh ${totalRevenue.toLocaleString()}`);
         setVal('bi-margin', `${netMargin.toFixed(1)}%`);
         setVal('bi-clients', totalClients.toString());
-        setVal('bi-speed', '4.2'); // Mocked speed metric for now until status timeline logic exists
+        setVal('bi-speed', '4.2'); 
+
+        let sortedGarments = [];
 
         // 2. Health Trajectory Area Chart (Revenue vs Expenses by Month)
         const healthCtx = document.getElementById('healthAreaChart')?.getContext('2d');
@@ -5297,7 +5949,7 @@ async function loadBIAnalytics() {
                 const type = o.garment_type || 'Other';
                 garmentCounts[type] = (garmentCounts[type] || 0) + 1;
             });
-            const sortedGarments = Object.entries(garmentCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            sortedGarments = Object.entries(garmentCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
             analyticsCharts.polarChart = new Chart(polarCtx, {
                 type: 'polarArea',
@@ -5322,7 +5974,7 @@ async function loadBIAnalytics() {
         const radarCtx = document.getElementById('shopRadarChart')?.getContext('2d');
         if (radarCtx && shopId === 'all') { // Only show global radar if 'all' is selected
             const shopStats = {};
-            const { data: shops } = await supabaseClient.from('shops').select('id, name');
+            const { data: shops } = await supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id);
             const shopMap = {};
             shops?.forEach(s => { shopMap[s.id] = s.name; shopStats[s.name] = { orders: 0, revenue: 0, clients: new Set() }; });
 
@@ -5488,6 +6140,7 @@ async function loadExpenseAuditTable(shopId) {
         let query = supabaseClient
             .from('expenses')
             .select('*')
+            .eq('organization_id', USER_PROFILE.organization_id)
             .order('incurred_at', { ascending: false })
             .limit(50);
 
@@ -5528,10 +6181,10 @@ async function loadExpenseAuditTable(shopId) {
 
 async function loadKPIMetrics(shopId) {
     try {
-        let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at');
-        let ordersQuery = supabaseClient.from('orders').select('id, price, status, created_at');
-        let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at');
-        let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity');
+        let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at').eq('organization_id', USER_PROFILE.organization_id);
+        let ordersQuery = supabaseClient.from('orders').select('id, price, status, created_at').eq('organization_id', USER_PROFILE.organization_id);
+        let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at').eq('organization_id', USER_PROFILE.organization_id);
+        let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity').eq('organization_id', USER_PROFILE.organization_id);
 
         if (shopId !== 'all') {
             paymentsQuery = paymentsQuery.eq('orders.shop_id', shopId);
@@ -5654,6 +6307,7 @@ async function loadRevenueTrend(daysStr) {
         let paymentsQuery = supabaseClient
             .from('payments')
             .select('amount, recorded_at')
+            .eq('organization_id', USER_PROFILE.organization_id)
             .order('recorded_at');
 
         // Apply Date Filter
@@ -5873,9 +6527,9 @@ async function loadProductMixChart(shopId, daysStr) {
 async function loadShopPerformanceChart() {
     try {
         const [{ data: shops }, { data: orders }, { data: expenses }] = await Promise.all([
-            supabaseClient.from('shops').select('id, name').order('name'),
-            supabaseClient.from('orders').select('id, shop_id, price'),
-            supabaseClient.from('expenses').select('shop_id, amount')
+            supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id).order('name'),
+            supabaseClient.from('orders').select('id, shop_id, price').eq('organization_id', USER_PROFILE.organization_id),
+            supabaseClient.from('expenses').select('shop_id, amount').eq('organization_id', USER_PROFILE.organization_id)
         ]);
 
         if (!shops) return;
@@ -5971,7 +6625,8 @@ async function loadExpenseChart(shopId) {
     try {
         let expensesQuery = supabaseClient
             .from('expenses')
-            .select('category, amount');
+            .select('category, amount')
+            .eq('organization_id', USER_PROFILE.organization_id);
 
         if (shopId !== 'all') {
             expensesQuery = expensesQuery.eq('shop_id', shopId);
@@ -6058,7 +6713,7 @@ async function loadExpenseChart(shopId) {
 
 async function loadPerformanceTables(shopId) {
     try {
-        let ordersQuery = supabaseClient.from('orders').select('garment_type, price, worker_id, workers(name)');
+        let ordersQuery = supabaseClient.from('orders').select('garment_type, price, worker_id, workers(name)').eq('organization_id', USER_PROFILE.organization_id);
 
         if (shopId !== 'all') {
             ordersQuery = ordersQuery.eq('shop_id', shopId);
@@ -6160,9 +6815,9 @@ async function generateAIInsights(shopId) {
     try {
         // Get data
         const [{ data: orders }, { data: payments }, { data: expenses }] = await Promise.all([
-            supabaseClient.from('orders').select('garment_type, price, status'),
-            supabaseClient.from('payments').select('amount'),
-            supabaseClient.from('expenses').select('category, amount')
+            supabaseClient.from('orders').select('garment_type, price, status').eq('organization_id', USER_PROFILE.organization_id),
+            supabaseClient.from('payments').select('amount').eq('organization_id', USER_PROFILE.organization_id),
+            supabaseClient.from('expenses').select('category, amount').eq('organization_id', USER_PROFILE.organization_id)
         ]);
 
         // Calculate insights
@@ -6231,42 +6886,62 @@ function exportDashboardData() {
 // ==========================================
 
 window.quickPay = async function (orderId, balance) {
-    const amountStr = prompt(`Enter payment amount (Balance: Ksh ${balance.toLocaleString()}):`, balance.toString());
-
-    if (!amountStr || isNaN(parseFloat(amountStr))) {
-        alert("Please enter a valid amount");
-        return;
+    let modal = document.getElementById('quickpay-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'quickpay-modal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:99999;';
+        document.body.appendChild(modal);
     }
+    
+    modal.innerHTML = `
+        <div style="background:white;padding:30px;border-radius:12px;width:90%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,0.3);text-align:center;">
+            <h3 style="margin-top:0;font-family:'Playfair Display', serif;color:#1e293b;">Record Payment</h3>
+            <p style="color:#64748b;margin-bottom:20px;">Current Balance: <strong>Ksh ${balance.toLocaleString()}</strong></p>
+            <div style="text-align:left;margin-bottom:20px;">
+                <label style="display:block;margin-bottom:8px;font-weight:600;color:#334155;">Amount Receiving (Ksh):</label>
+                <input type="number" id="quickpay-amount" value="${balance}" max="${balance}" style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1.1em;box-sizing:border-box;">
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button id="quickpay-cancel" style="flex:1;padding:12px;background:#f1f5f9;color:#64748b;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Cancel</button>
+                <button id="quickpay-confirm" style="flex:1;padding:12px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Submit Payment</button>
+            </div>
+        </div>
+    `;
+    modal.style.display = 'flex';
 
-    const amount = parseFloat(amountStr);
-    if (amount <= 0) {
-        alert("Amount must be greater than 0");
-        return;
-    }
+    document.getElementById('quickpay-cancel').onclick = () => { modal.style.display = 'none'; };
+    document.getElementById('quickpay-confirm').onclick = async () => {
+        const amountStr = document.getElementById('quickpay-amount').value;
+        const amount = parseFloat(amountStr);
+        if (!amountStr || isNaN(amount) || amount <= 0) { alert("Please enter a valid amount greater than 0."); return; }
+        if (amount > balance) { alert(`Amount cannot exceed balance of Ksh ${balance.toLocaleString()}`); return; }
 
-    if (amount > balance) {
-        alert(`Amount cannot exceed balance of Ksh ${balance.toLocaleString()}`);
-        return;
-    }
+        modal.innerHTML = '<div style="background:white;padding:30px;border-radius:12px;"><h3 style="margin:0;">Processing Payment...</h3></div>';
 
-    try {
-        const { error } = await supabaseClient
-            .from('payments')
-            .insert([{
+        try {
+            const { data: ord } = await supabaseClient.from('orders').select('shop_id').eq('id', orderId).single();
+            const { error } = await supabaseClient.from('payments').insert([{
+                organization_id: USER_PROFILE.organization_id,
+                shop_id: ord ? ord.shop_id : null,
                 order_id: orderId,
                 manager_id: USER_PROFILE?.id,
-                amount: amount,
-                recorded_at: new Date().toISOString()
+                amount: amount
             }]);
 
-        if (error) throw error;
-
-        alert(`Payment of Ksh ${amount.toLocaleString()} recorded successfully!`);
-        refreshCurrentView();
-
-    } catch (error) {
-        alert("Error recording payment: " + error.message);
-    }
+            if (error) throw error;
+            modal.style.display = 'none';
+            alert(`Payment of Ksh ${amount.toLocaleString()} recorded successfully!`);
+            if (typeof refreshCurrentView === 'function') refreshCurrentView();
+            
+            // Automatically safely close the stale modal to reveal the freshly updated background table
+            const parentModal = document.getElementById('order-modal');
+            if (parentModal) parentModal.remove();
+        } catch (error) {
+            modal.style.display = 'none';
+            alert("Error recording payment: " + error.message);
+        }
+    };
 };
 
 window.updateStatus = async function (orderId) {
@@ -6303,6 +6978,62 @@ window.updateStatus = async function (orderId) {
 // 🏁 APPLICATION INITIALIZATION
 // ==========================================
 
+/**
+ * Dynamically updates sidebar branding based on Shop assignment.
+ * If user is restricted to a shop, shows Shop Name. 
+ * Defaults to APP_CONFIG.appName for owners/global users.
+ */
+async function updateSidebarBranding(forcedName = null) {
+    const sidebarLogo = document.querySelector('.sidebar-logo');
+    const sidebarSub = document.querySelector('.sidebar-subtitle');
+
+    if (!sidebarLogo && !sidebarSub) return;
+
+    let mainTitle = forcedName || (typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.appName : "OTIMA HOUSE");
+    let subTitle = "BY RONNY";
+
+    // If no forced name, try to fetch from user profile
+    if (!forcedName && typeof USER_PROFILE !== 'undefined' && USER_PROFILE) {
+        try {
+            // Case A: User is assigned to a specific shop (Manager)
+            if (USER_PROFILE.shop_id) {
+                const { data: shop } = await supabaseClient
+                    .from('shops')
+                    .select('name')
+                    .eq('id', USER_PROFILE.shop_id)
+                    .maybeSingle();
+                if (shop && shop.name) mainTitle = shop.name;
+            } 
+            // Case B: User is an Owner (Global) - fetch Organization Name or Smart Default
+            else if (USER_PROFILE.role === 'owner') {
+                // If organization_id is NULL, try to guess the primary org
+                let org = null;
+                if (USER_PROFILE.organization_id) {
+                    const { data } = await supabaseClient.from('organizations').select('id, name').eq('id', USER_PROFILE.organization_id).maybeSingle();
+                    org = data;
+                } else {
+                    const { data } = await supabaseClient.from('organizations').select('id, name').order('created_at', { ascending: true }).limit(1).maybeSingle();
+                    org = data;
+                }
+
+                if (org) {
+                    mainTitle = org.name;
+                    // Smart Default: If there's only ONE shop in this org, use that name instead
+                    const { data: shops } = await supabaseClient.from('shops').select('name').eq('organization_id', org.id);
+                    if (shops && shops.length === 1) {
+                        mainTitle = shops[0].name;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("Sidebar branding fetch error:", e);
+        }
+    }
+
+    if (sidebarLogo) sidebarLogo.textContent = mainTitle;
+    if (sidebarSub) sidebarSub.textContent = subTitle;
+}
+
 window.addEventListener('DOMContentLoaded', function () {
     // --- 🎨 AUTO-BRANDING (Master Template Feature) ---
     if (typeof APP_CONFIG !== 'undefined') {
@@ -6312,18 +7043,13 @@ window.addEventListener('DOMContentLoaded', function () {
             document.title = `${pageName} | ${APP_CONFIG.appName}`;
         }
 
-        // B. Update Dashboard Sidebar (If logged in)
-        const sidebarLogo = document.querySelector('.sidebar-logo');
-        if (sidebarLogo) sidebarLogo.innerHTML = APP_CONFIG.appName;
-
-        const sidebarSub = document.querySelector('.sidebar-subtitle');
-        if (sidebarSub) sidebarSub.textContent = APP_CONFIG.appSubtitle;
+        // B. Update Dashboard Sidebar (Initial guess from config)
+        updateSidebarBranding();
 
         // C. Update Login Screen (If on login page) [NEW FIX]
         const loginName = document.getElementById('dynamic-login-name');
         if (loginName) {
             loginName.textContent = APP_CONFIG.appName;
-            // Optional: Add specific styling for the login header if needed
             loginName.style.fontSize = "1.8em";
         }
 
@@ -6346,7 +7072,7 @@ window.addEventListener('DOMContentLoaded', function () {
     const loginBtn = document.getElementById('login-button');
     if (loginBtn) {
         loginBtn.disabled = false;
-        loginBtn.textContent = 'Sign In'; // [Change 14] NEW TEXT
+        loginBtn.textContent = 'Sign In';
     }
 
     // Setup logout button
@@ -6381,6 +7107,15 @@ window.addEventListener('DOMContentLoaded', function () {
                     loadAnalyticsDashboard();
                 }
                 else if (id.includes('admin')) {
+                    if (id === 'admin-shop-filter') {
+                        const shopSelect = document.getElementById('admin-shop-filter');
+                        const selectedText = shopSelect.options[shopSelect.selectedIndex]?.text;
+                        if (selectedText && !selectedText.includes('All')) {
+                            updateSidebarBranding(selectedText);
+                        } else {
+                            updateSidebarBranding(); // Reset to default
+                        }
+                    }
                     if (path.includes('current-orders')) {
                         loadAdminOrders('current');
                     } else if (path.includes('all-orders')) {
@@ -6408,9 +7143,6 @@ window.addEventListener('DOMContentLoaded', function () {
     // FIX 2: Explicitly attach core functions to window to prevent "ReferenceError: XXX is not defined"
     window.refreshCurrentView = refreshCurrentView;
     window.generateAndShareReceipt = generateAndShareReceipt;
-    window.quickPay = quickPay;
-    window.updateStatus = updateStatus;
-    window.updateAdminStatus = updateAdminStatus;
     window.saveAdminOrder = saveAdminOrder;
     window.downloadOrderPDF = downloadOrderPDF;
     window.deleteOrder = deleteOrder;
@@ -6630,7 +7362,6 @@ async function enhancePaymentDisplay() {
 // Override the original loadAdminOrderDetails to call our enhancement
 const originalLoadAdminOrderDetails = loadAdminOrderDetails;
 loadAdminOrderDetails = async function () {
-    // Store the order being loaded for use in enhancement
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('id');
 
@@ -6639,6 +7370,26 @@ loadAdminOrderDetails = async function () {
 
     // After original function completes, enhance the payment display
     enhancePaymentDisplay();
+
+    // [NEW] Load accessories/extras for edit form
+    if (orderId) {
+        const { data: order } = await supabaseClient.from('orders').select('shop_id').eq('id', orderId).single();
+        if (order && order.shop_id) {
+            await loadExtrasForShop(order.shop_id);
+            // Pre-check currently selected items
+            const { data: savedAcc } = await supabaseClient.from('order_accessories').select('*').eq('order_id', orderId);
+            if (savedAcc && savedAcc.length > 0) {
+                savedAcc.forEach(a => {
+                    const selector = `input[name="extra_qty_${a.inventory_item_id}"]`;
+                    const input = document.querySelector(selector);
+                    if (input) {
+                        input.value = a.quantity || 0;
+                    }
+                });
+                updateExtrasSubtotal(); // Ensure subtotal up to date
+            }
+        }
+    }
 };
 
 // ==========================================
@@ -6647,7 +7398,7 @@ loadAdminOrderDetails = async function () {
 
 async function loadOrderVolumeChart(shopId) {
     try {
-        let ordersQuery = supabaseClient.from('orders').select('status');
+        let ordersQuery = supabaseClient.from('orders').select('status').eq('organization_id', USER_PROFILE.organization_id);
         if (shopId !== 'all') {
             ordersQuery = ordersQuery.eq('shop_id', shopId);
         }
@@ -6775,14 +7526,19 @@ async function loadRecentActivities(shopId) {
     if (!container) return;
 
     try {
-        let orderQuery = supabaseClient.from('orders').select('garment_type, customer_name, created_at').order('created_at', { ascending: false }).limit(5);
-        let paymentQuery = supabaseClient.from('payments').select('amount, payment_method, recorded_at, orders(customer_name)').order('recorded_at', { ascending: false }).limit(5);
+        let orderQuery = supabaseClient.from('orders').select('id, garment_type, customer_name, created_at').eq('organization_id', USER_PROFILE.organization_id).order('created_at', { ascending: false }).limit(5);
+        let paymentQuery = supabaseClient.from('payments').select('amount, payment_method, recorded_at, order_id').eq('organization_id', USER_PROFILE.organization_id).order('recorded_at', { ascending: false }).limit(5);
 
         if (shopId !== 'all') {
             orderQuery = orderQuery.eq('shop_id', shopId);
         }
 
         const [{ data: orders }, { data: payments }] = await Promise.all([orderQuery, paymentQuery]);
+
+        const orderMap = {};
+        if (orders) {
+            orders.forEach(o => orderMap[o.id] = o);
+        }
 
         let activities = [];
         if (orders) {
@@ -6796,14 +7552,17 @@ async function loadRecentActivities(shopId) {
             }));
         }
         if (payments) {
-            payments.forEach(p => activities.push({
-                title: `Payment Received`,
-                desc: `Ksh ${p.amount.toLocaleString()} via ${p.payment_method} from ${p.orders?.customer_name || 'Customer'}`,
-                time: p.recorded_at,
-                icon: 'fa-money-bill-wave',
-                color: '#10b981',
-                bg: 'rgba(16, 185, 129, 0.1)'
-            }));
+            payments.forEach(p => {
+                const relatedOrder = orderMap[p.order_id] || {};
+                activities.push({
+                    title: `Payment Received`,
+                    desc: `Ksh ${p.amount.toLocaleString()} via ${p.payment_method || 'Cash'} from ${relatedOrder.customer_name || 'Customer'}`,
+                    time: p.recorded_at,
+                    icon: 'fa-money-bill-wave',
+                    color: '#10b981',
+                    bg: 'rgba(16, 185, 129, 0.1)'
+                });
+            });
         }
 
         activities.sort((a, b) => new Date(b.time) - new Date(a.time));
@@ -6837,9 +7596,9 @@ async function loadRecentActivities(shopId) {
 
 async function loadTransactionKPIs() {
     try {
-        let paymentsQuery = supabaseClient.from('payments').select('amount');
-        let ordersQuery = supabaseClient.from('orders').select('price');
-        let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity');
+        let paymentsQuery = supabaseClient.from('payments').select('amount').eq('organization_id', USER_PROFILE.organization_id);
+        let ordersQuery = supabaseClient.from('orders').select('price').eq('organization_id', USER_PROFILE.organization_id);
+        let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity').eq('organization_id', USER_PROFILE.organization_id);
 
         const [paymentsRes, ordersRes, accRes] = await Promise.all([paymentsQuery, ordersQuery, accessoriesQuery]);
 
@@ -6880,11 +7639,22 @@ async function loadAllTransactions() {
         const typeFilter = document.getElementById('transaction-type-filter')?.value || 'all';
 
         let orderQuery = supabaseClient.from('orders').select('id, garment_type, customer_name, price, created_at, status').order('created_at', { ascending: false }).limit(250);
-        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, orders(customer_name, garment_type)').order('recorded_at', { ascending: false }).limit(250);
+        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, order_id').order('recorded_at', { ascending: false }).limit(250);
+        let expenseQuery = supabaseClient.from('expenses').select('id, amount, item_name, category, incurred_at').order('incurred_at', { ascending: false }).limit(250);
 
-        const [ordersData, paymentsData] = await Promise.all([orderQuery, paymentQuery]);
+        const [ordersData, paymentsData, expensesData] = await Promise.all([orderQuery, paymentQuery, expenseQuery]);
+
+        if (ordersData.error) logDebug("Orders Query Error", ordersData.error, "error");
+        if (paymentsData.error) logDebug("Payments Query Error", paymentsData.error, "error");
+        if (expensesData.error) logDebug("Expenses Query Error", expensesData.error, "error");
 
         let transactions = [];
+        
+        // Manual client-side mapping to avoid any PostgREST Foreign Key join issues
+        const orderMap = {};
+        if (ordersData.data) {
+            ordersData.data.forEach(o => orderMap[o.id] = o);
+        }
 
         if ((typeFilter === 'all' || typeFilter === 'order') && ordersData.data) {
             ordersData.data.forEach(o => transactions.push({
@@ -6900,15 +7670,31 @@ async function loadAllTransactions() {
         }
 
         if ((typeFilter === 'all' || typeFilter === 'payment') && paymentsData.data) {
-            paymentsData.data.forEach(p => transactions.push({
-                type: 'Payment',
-                time: p.recorded_at,
-                customer: p.orders?.customer_name || 'Unknown',
-                details: `Method: ${p.payment_method} ${p.orders && p.orders.garment_type ? '(' + p.orders.garment_type + ')' : ''}`,
-                amount: p.amount || 0,
-                color: '#10b981',
-                bg: 'rgba(16, 185, 129, 0.1)',
-                icon: 'fa-money-bill-wave'
+            paymentsData.data.forEach(p => {
+                const relatedOrder = orderMap[p.order_id] || {};
+                transactions.push({
+                    type: 'Payment',
+                    time: p.recorded_at,
+                    customer: relatedOrder.customer_name || 'Unknown',
+                    details: `Method: ${p.payment_method || 'Cash'} ${relatedOrder.garment_type ? '(' + relatedOrder.garment_type + ')' : ''}`,
+                    amount: p.amount || 0,
+                    color: '#10b981',
+                    bg: 'rgba(16, 185, 129, 0.1)',
+                    icon: 'fa-money-bill-wave'
+                });
+            });
+        }
+
+        if ((typeFilter === 'all' || typeFilter === 'expense') && expensesData.data) {
+            expensesData.data.forEach(e => transactions.push({
+                type: 'Expense',
+                time: e.incurred_at,
+                customer: 'Business Expense',
+                details: `Item: ${e.item_name || 'Unnamed'} (${e.category || 'General'})`,
+                amount: e.amount || 0,
+                color: '#ef4444',
+                bg: 'rgba(239, 68, 68, 0.1)',
+                icon: 'fa-file-invoice-dollar'
             }));
         }
 
@@ -6935,8 +7721,8 @@ async function loadAllTransactions() {
                 <td style="padding: 15px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-size: 0.9em;">
                     ${t.details}
                 </td>
-                <td style="padding: 15px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: ${t.type === 'Payment' ? '#10b981' : 'var(--brand-navy)'};">
-                    Ksh ${t.amount.toLocaleString()}
+                <td style="padding: 15px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: ${t.type === 'Expense' ? '#ef4444' : t.type === 'Payment' ? '#10b981' : 'var(--brand-navy)'};">
+                    ${t.type === 'Expense' ? '-' : ''}Ksh ${Math.abs(t.amount).toLocaleString()}
                 </td>
             </tr>
         `).join('');
@@ -6952,11 +7738,18 @@ async function exportTransactionsCSV() {
         const typeFilter = document.getElementById('transaction-type-filter')?.value || 'all';
 
         let orderQuery = supabaseClient.from('orders').select('id, garment_type, customer_name, price, created_at, status').order('created_at', { ascending: false }).limit(250);
-        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, orders(customer_name, garment_type)').order('recorded_at', { ascending: false }).limit(250);
+        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, order_id').order('recorded_at', { ascending: false }).limit(250);
+        let expenseQuery = supabaseClient.from('expenses').select('id, amount, item_name, category, incurred_at').order('incurred_at', { ascending: false }).limit(250);
 
-        const [ordersData, paymentsData] = await Promise.all([orderQuery, paymentQuery]);
+        const [ordersData, paymentsData, expensesData] = await Promise.all([orderQuery, paymentQuery, expenseQuery]);
 
         let rawTransactions = [];
+        
+        const orderMap = {};
+        if (ordersData.data) {
+            ordersData.data.forEach(o => orderMap[o.id] = o);
+        }
+
         if ((typeFilter === 'all' || typeFilter === 'order') && ordersData.data) {
             ordersData.data.forEach(o => rawTransactions.push({
                 type: 'Order',
@@ -6966,13 +7759,27 @@ async function exportTransactionsCSV() {
                 amount: o.price || 0
             }));
         }
+
         if ((typeFilter === 'all' || typeFilter === 'payment') && paymentsData.data) {
-            paymentsData.data.forEach(p => rawTransactions.push({
-                type: 'Payment',
-                time: p.recorded_at,
-                customer: p.orders?.customer_name || 'Unknown',
-                details: `Method: ${p.payment_method} ${p.orders && p.orders.garment_type ? '(' + p.orders.garment_type + ')' : ''}`,
-                amount: p.amount || 0
+            paymentsData.data.forEach(p => {
+                const relatedOrder = orderMap[p.order_id] || {};
+                rawTransactions.push({
+                    type: 'Payment',
+                    time: p.recorded_at,
+                    customer: relatedOrder.customer_name || 'Unknown',
+                    details: `Method: ${p.payment_method || 'Cash'} ${relatedOrder.garment_type ? '(' + relatedOrder.garment_type + ')' : ''}`,
+                    amount: p.amount || 0
+                });
+            });
+        }
+        
+        if ((typeFilter === 'all' || typeFilter === 'expense') && expensesData.data) {
+            expensesData.data.forEach(e => rawTransactions.push({
+                type: 'Expense',
+                time: e.incurred_at,
+                customer: 'Business Expense',
+                details: `Item: ${e.item_name || 'Unnamed'} (${e.category || 'General'})`,
+                amount: -(e.amount || 0)
             }));
         }
 
@@ -7161,7 +7968,7 @@ async function loadClients() {
 
     try {
         const searchVal = document.getElementById('client-search')?.value.trim() || '';
-        let query = supabaseClient.from('clients').select('*').order('name');
+        let query = supabaseClient.from('clients').select('*').eq('organization_id', USER_PROFILE.organization_id).order('name');
 
         if (searchVal) {
             query = query.or(`name.ilike.%${searchVal}%,phone.ilike.%${searchVal}%`);
@@ -7180,7 +7987,7 @@ async function loadClients() {
                 <td style="font-weight:bold;">${c.name}</td>
                 <td>${c.phone}</td>
                 <td>${c.last_garment_type || '-'}</td>
-                <td>${formatDate(c.updated_at)}</td>
+                <td>${formatDate(c.last_visit || c.created_at)}</td>
                 <td>
                     <button class="small-btn" onclick="viewClientDetails('${c.id}')">
                         <i class="fas fa-eye"></i> View Details
@@ -7263,7 +8070,12 @@ async function viewClientDetails(clientId) {
                 </div>
                 
                 <div style="margin-bottom: 25px;">
-                    <h3 style="font-size: 1.1em; color: var(--brand-navy); border-bottom: 2px solid var(--brand-gold); display: inline-block; padding-bottom: 5px; margin-bottom: 20px; font-weight: 700;">Measurement History</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; margin-bottom: 20px;">
+                        <h3 style="font-size: 1.1em; color: var(--brand-navy); font-weight: 700; margin: 0;">Measurement History</h3>
+                        <button class="small-btn" onclick="addNewMeasurementProfile('${client.id}')" style="background: var(--brand-navy); color: var(--brand-gold); border: none;">
+                            <i class="fas fa-plus"></i> Add Garment
+                        </button>
+                    </div>
                     <div style="max-height: 450px; overflow-y: auto; padding-right: 5px;">
                         ${historyHtml}
                     </div>
@@ -7452,13 +8264,15 @@ window.saveNewClient = async function (e) {
         const { error } = await supabaseClient
             .from('clients')
             .insert([{
+                organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
+                shop_id: USER_PROFILE.shop_id || null, // 👈 Enforced for isolated viewing
                 name,
                 phone,
                 notes,
                 measurements_history: history,
                 last_garment_type: garmentType || null,
                 created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
+                last_visit: new Date().toISOString()
             }]);
 
         if (error) throw error;
@@ -7614,6 +8428,51 @@ async function editClientMeasurement(clientId, historyIndex) {
 }
 
 /**
+ * Creates a brand new empty measurement profile for a client and opens it in edit mode
+ */
+window.addNewMeasurementProfile = async function(clientId) {
+    try {
+        const { data: client, error } = await supabaseClient
+            .from('clients')
+            .select('*')
+            .eq('id', clientId)
+            .single();
+
+        if (error) throw error;
+
+        let history = client.measurements_history || [];
+        
+        // Insert a completely fresh blank measurement profile
+        history.unshift({
+            date: new Date().toISOString(),
+            garment: 'Suit',
+            measurements: {}
+        });
+
+        // Commit new profile skeleton immediately
+        const { error: updateError } = await supabaseClient
+            .from('clients')
+            .update({
+                measurements_history: history,
+                last_garment_type: 'Suit',
+                last_visit: new Date().toISOString()
+            })
+            .eq('id', clientId);
+
+        if (updateError) throw updateError;
+        
+        // Refresh UI and instantly throw the new item into the Edit mode
+        await viewClientDetails(clientId);
+        setTimeout(() => {
+            editClientMeasurement(clientId, 0); 
+        }, 150);
+
+    } catch (e) {
+        alert("Error adding garment profile: " + e.message);
+    }
+}
+
+/**
  * Generates the HTML for measurement fields based on garment type
  */
 function generateFieldsAreaHTML(garmentType, existingData = {}) {
@@ -7707,7 +8566,7 @@ async function saveClientMeasurement(clientId, historyIndex) {
             .update({
                 measurements_history: history,
                 last_garment_type: newGarmentType,
-                updated_at: new Date().toISOString()
+                last_visit: new Date().toISOString()
             })
             .eq('id', clientId);
 
@@ -7880,3 +8739,891 @@ window.generateCustomInvoice = async function () {
         }
     }
 };
+
+// ==========================================
+// 👔 OWNER MODULE - MANAGEMENT & SETUP
+// ==========================================
+
+async function loadAdminManagementScreen() {
+    logDebug("Loading Admin Management Setup", null, 'info');
+
+    try {
+        await Promise.all([
+            loadShopsForDropdown('admin-shop-select'),
+            loadShopCommandCenter()
+        ]);
+        
+        const addShopForm = document.getElementById('add-shop-form');
+        if (addShopForm) addShopForm.onsubmit = handleAddShopAndManager;
+
+        const addWorkerForm = document.getElementById('admin-add-worker-form');
+        if (addWorkerForm) addWorkerForm.onsubmit = handleAdminAddWorker;
+
+    } catch (error) {
+        logDebug("Error loading management screen:", error, 'error');
+    }
+}
+
+async function handleAddShopAndManager(e) {
+    if (e) e.preventDefault();
+    if (!USER_PROFILE || !USER_PROFILE.organization_id) {
+        alert("You must be logged in as an Owner.");
+        return;
+    }
+
+    const shopName = document.getElementById('new-shop-name').value.trim();
+    const mgrName = document.getElementById('new-manager-name').value.trim();
+    const mgrEmail = document.getElementById('new-manager-email').value.trim();
+    const mgrPass = document.getElementById('new-manager-password').value;
+    const msg = document.getElementById('shop-message');
+    const submitBtn = document.querySelector('#add-shop-form button[type="submit"]');
+
+    if (!shopName || !mgrName || !mgrEmail || !mgrPass) {
+        msg.innerHTML = '<span style="color:red;">Please fill all fields</span>';
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Provisioning...';
+    msg.innerHTML = '';
+
+    try {
+        // 1. Create the Shop
+        const { data: newShop, error: shopErr } = await supabaseClient.from('shops').insert([{
+            organization_id: USER_PROFILE.organization_id,
+            name: shopName
+        }]).select().single();
+
+        if (shopErr) throw shopErr;
+
+        // 2. Provision Manager Auth User using Admin Client
+        const adminClient = getAdminClient();
+        if (!adminClient) throw new Error("Admin privileges missing. Cannot create login for manager.");
+
+        const { data: authUser, error: authErr } = await adminClient.auth.admin.createUser({
+            email: mgrEmail,
+            password: mgrPass,
+            email_confirm: true,
+            user_metadata: { full_name: mgrName }
+        });
+
+        if (authErr) throw authErr;
+
+        // 3. Create Manager User Profile
+        const { error: profileErr } = await supabaseClient.from('user_profiles').insert([{
+            id: authUser.user.id,
+            organization_id: USER_PROFILE.organization_id,
+            shop_id: newShop.id,
+            full_name: mgrName,
+            role: 'manager'
+        }]);
+
+        if (profileErr) throw profileErr;
+
+        msg.innerHTML = `<span style="color:green;">✅ Shop '${shopName}' and Manager '${mgrName}' created!</span>`;
+        document.getElementById('add-shop-form').reset();
+        await loadAdminManagementScreen(); // Refresh
+        await loadShopsForDropdown('shop-filter'); // Refresh global dropdowns if any
+
+    } catch (error) {
+        msg.innerHTML = `<span style="color:red;">❌ Error: ${error.message}</span>`;
+        logDebug("Create Shop/Manager Error", error, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Create Shop & Manager';
+    }
+}
+
+async function handleAdminAddWorker(e) {
+    if (e) e.preventDefault();
+    if (!USER_PROFILE || !USER_PROFILE.organization_id) return;
+
+    const shopId = document.getElementById('admin-shop-select').value;
+    const workerName = document.getElementById('admin-new-worker-name').value.trim();
+    const phone = document.getElementById('admin-new-worker-phone').value.trim();
+    const btn = document.querySelector('#admin-add-worker-form button[type="submit"]');
+
+    if (!shopId || !workerName) {
+        alert("Shop and Worker Name are required");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Assigning...';
+
+    try {
+        // Insert into workers table
+        const { error } = await supabaseClient.from('workers').insert([{
+            organization_id: USER_PROFILE.organization_id,
+            shop_id: shopId,
+            name: workerName,
+            phone_number: phone,
+            role: 'tailor'
+        }]);
+
+        if (error) throw error;
+
+        alert(`✅ Crew member ${workerName} assigned successfully!`);
+        document.getElementById('admin-add-worker-form').reset();
+        await loadAdminManagementScreen();
+
+    } catch (error) {
+        alert("Error: " + error.message);
+        logDebug("Add Worker Error", error, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> Assign Worker';
+    }
+}
+
+async function loadShopCommandCenter() {
+    const container = document.getElementById('shop-command-center');
+    if (!container || !USER_PROFILE || !USER_PROFILE.organization_id) return;
+
+    try {
+        // Fetch all shops for this org
+        const { data: shops, error: shopErr } = await supabaseClient.from('shops')
+            .select('*')
+            .eq('organization_id', USER_PROFILE.organization_id)
+            .order('created_at', { ascending: true });
+
+        if (shopErr) throw shopErr;
+
+        if (!shops || shops.length === 0) {
+            container.innerHTML = '<p style="color:#64748b; font-style:italic; padding:20px;">No shops launched yet. Create your first shop above.</p>';
+            return;
+        }
+
+        // Fetch managers for these shops
+        const { data: managers } = await supabaseClient.from('user_profiles')
+            .select('id, full_name, role, shop_id')
+            .eq('organization_id', USER_PROFILE.organization_id)
+            .eq('role', 'manager');
+
+        // Fetch workers
+        const { data: allWorkers } = await supabaseClient.from('workers')
+            .select('*')
+            .eq('organization_id', USER_PROFILE.organization_id)
+            .order('name');
+
+        const managerMap = {};
+        managers?.forEach(m => managerMap[m.shop_id] = m);
+
+        const workerMap = {};
+        allWorkers?.forEach(w => {
+            if (!workerMap[w.shop_id]) workerMap[w.shop_id] = [];
+            workerMap[w.shop_id].push(w);
+        });
+
+        container.innerHTML = shops.map(shop => {
+            const manager = managerMap[shop.id];
+            const workers = workerMap[shop.id] || [];
+
+            let managerHtml = '<div style="color:#94a3b8; font-style:italic;">No active manager</div>';
+            if (manager) {
+                const initials = manager.full_name ? manager.full_name.substring(0, 2).toUpperCase() : 'MGR';
+                managerHtml = `
+                    <div class="manager-info">
+                        <div class="manager-avatar">${initials}</div>
+                        <div>
+                            <div style="font-weight:600; color:var(--brand-navy);">${manager.full_name}</div>
+                            <div style="font-size:0.8em; color:#64748b;text-transform:uppercase;">Shop Manager <i class="fas fa-shield-check" style="color:#10b981; margin-left:4px;"></i></div>
+                        </div>
+                    </div>`;
+            }
+
+            let workersHtml = '<tr><td colspan="2" style="text-align:center; padding:10px; color:#94a3b8;">No crew members added.</td></tr>';
+            if (workers.length > 0) {
+                workersHtml = workers.map(w => `
+                    <li class="worker-item">
+                        <span><i class="fas fa-user-tag" style="color:#cbd5e1; margin-right:8px;"></i>${w.name}</span>
+                        <div>
+                            <span style="font-size:0.85em; background:#f1f5f9; padding:2px 6px; border-radius:4px; margin-right:8px;">${w.role || 'Tailor'}</span>
+                            <button onclick="deleteWorker('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="small-btn" style="background:transparent; color:#ef4444; border:none; padding:4px; font-size:1em; cursor:pointer;" title="Remove Crew Member">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </li>
+                `).join('');
+            }
+
+            return `
+                <div class="entity-card">
+                    <div class="entity-header">
+                        <div class="shop-name"><i class="fas fa-store-alt" style="color:var(--brand-gold);"></i> ${shop.name}</div>
+                        <div>
+                            <span style="font-size:0.7em; background:#e0e7ff; color:#4f46e5; padding:4px 8px; border-radius:12px; font-weight:700; margin-right:5px;">${workers.length} CREW</span>
+                            <button onclick="openEditShopModal('${shop.id}')" class="small-btn" style="background:#f1f5f9; color:var(--brand-navy); border:none; padding:4px 8px; font-size:0.85em; border-radius: 6px; cursor:pointer;" title="Edit Shop Configuration">
+                                <i class="fas fa-cog"></i> Config
+                            </button>
+                        </div>
+                    </div>
+                    <div class="entity-body">
+                        ${managerHtml}
+                        <div style="margin-top:20px;">
+                            <h4 style="font-size:0.85em; color:#64748b; border-bottom:1px solid #e2e8f0; padding-bottom:5px; margin-bottom:10px; text-transform:uppercase;">Crew Members</h4>
+                            <ul class="worker-list">
+                                ${workersHtml}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="entity-actions">
+                        <button class="action-btn" onclick="openResetPasswordModal('${manager?.id || ''}', '${manager?.full_name?.replace(/'/g, "\\'") || ''}')" ${!manager ? 'disabled style="opacity:0.5; pointer-events:none;"' : ''} title="Reset Manager Password">
+                            <i class="fas fa-key"></i> Key Reset
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        logDebug("Error loading command center", error, 'error');
+        container.innerHTML = '<p style="color:#dc3545;">Failed to load Active Directory</p>';
+    }
+}
+
+function openResetPasswordModal(userId, userName) {
+    if (!userId) return;
+    document.getElementById('reset-user-id').value = userId;
+    document.getElementById('reset-user-name').textContent = userName;
+    document.getElementById('new-reset-password').value = '';
+    document.getElementById('password-reset-modal').style.display = 'flex';
+}
+
+async function handlePasswordReset() {
+    const userId = document.getElementById('reset-user-id').value;
+    const newPass = document.getElementById('new-reset-password').value;
+
+    if (!userId || newPass.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return;
+    }
+
+    try {
+        const adminClient = getAdminClient();
+        if (!adminClient) throw new Error("Missing Admin Privileges.");
+
+        const { data, error } = await adminClient.auth.admin.updateUserById(userId, { password: newPass });
+        if (error) throw error;
+
+        alert("✅ Password updated successfully! The manager can now log in with the new password.");
+        document.getElementById('password-reset-modal').style.display = 'none';
+    } catch (error) {
+        alert("❌ Error: " + error.message);
+    }
+}
+
+window.deleteWorker = async function(id, name) {
+    if (!confirm(`Are you sure you want to permanently remove ${name} from the crew?`)) return;
+    try {
+        const { error } = await supabaseClient.from('workers').delete().eq('id', id);
+        if (error) throw error;
+        alert(`✅ Crew member ${name} removed.`);
+        loadShopCommandCenter();
+    } catch (err) {
+        alert("Error removing crew member: " + err.message);
+    }
+}
+
+window.openEditShopModal = async function(shopId) {
+    try {
+        const { data: shop, error } = await supabaseClient.from('shops').select('*').eq('id', shopId).single();
+        if (error) throw error;
+        
+        document.getElementById('edit-shop-id').value = shop.id;
+        document.getElementById('edit-shop-name').value = shop.name || '';
+        document.getElementById('edit-shop-paybill').value = shop.paybill_number || '';
+        document.getElementById('edit-shop-account').value = shop.paybill_account || '';
+        document.getElementById('edit-shop-phone').value = shop.phone_number || '';
+        document.getElementById('edit-shop-receipt').value = shop.receipt_header_text || '';
+        document.getElementById('edit-shop-bank').value = shop.bank_details || '';
+        
+        const preview = document.getElementById('edit-shop-logo-preview');
+        const fileInput = document.getElementById('edit-shop-logo-file');
+        fileInput.value = ''; // clear any old selection
+        
+        if (shop.logo_url) {
+            preview.src = shop.logo_url;
+            preview.style.display = 'block';
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+        
+        document.getElementById('edit-shop-modal').style.display = 'flex';
+    } catch (e) {
+        alert("Error loading shop details: " + e.message);
+    }
+}
+
+window.closeEditShopModal = function() {
+    document.getElementById('edit-shop-modal').style.display = 'none';
+}
+
+window.saveShopDetails = async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('save-shop-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    
+    try {
+        const shopId = document.getElementById('edit-shop-id').value;
+        const name = document.getElementById('edit-shop-name').value.trim();
+        const paybill_number = document.getElementById('edit-shop-paybill').value.trim();
+        const paybill_account = document.getElementById('edit-shop-account').value.trim();
+        const phone_number = document.getElementById('edit-shop-phone').value.trim();
+        const receipt_header_text = document.getElementById('edit-shop-receipt').value.trim();
+        const bank_details = document.getElementById('edit-shop-bank').value.trim();
+        
+        const fileInput = document.getElementById('edit-shop-logo-file');
+        const file = fileInput.files[0];
+        
+        let updatePayload = {
+            name,
+            paybill_number,
+            paybill_account,
+            phone_number,
+            receipt_header_text,
+            bank_details
+        };
+        
+        if (file) {
+            // Upload to Supabase Storage
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${shopId}_logo_${Date.now()}.${fileExt}`;
+            const filePath = `${fileName}`;
+            
+            const { error: uploadError } = await supabaseClient.storage
+                .from('shop_logos')
+                .upload(filePath, file, { upsert: true });
+                
+            if (uploadError) throw uploadError;
+            
+            // Get public URL
+            const { data } = supabaseClient.storage
+                .from('shop_logos')
+                .getPublicUrl(filePath);
+                
+            updatePayload.logo_url = data.publicUrl;
+        }
+
+        const { error: updateError } = await supabaseClient.from('shops').update(updatePayload).eq('id', shopId);
+        if (updateError) throw updateError;
+        
+        alert("✅ Shop configuration updated safely!");
+        closeEditShopModal();
+        loadShopCommandCenter();
+        
+    } catch (err) {
+        alert("❌ Error saving shop config: " + err.message);
+        logDebug("Shop Update Error:", err, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Save Configuration';
+    }
+}
+
+// ==========================================
+// 🛒 ORDER EXTRAS HELPERS
+// ==========================================
+
+async function loadExtrasForShop(shopId) {
+    const container = document.getElementById('extras-list-container');
+    if (!container) return;
+
+    if (!shopId) {
+        container.innerHTML = '<p style="text-align:center; color:#94a3b8; font-style:italic; margin:0;">Select a shop to see available extras.</p>';
+        return;
+    }
+
+    try {
+        const { data: items, error } = await supabaseClient
+            .from('inventory_items')
+            .select('*')
+            .eq('shop_id', shopId)
+            .eq('is_active', true)
+            .gt('stock_quantity', 0)
+            .order('category')
+            .order('name');
+
+        if (error) throw error;
+
+        if (!items || items.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#94a3b8; font-style:italic; margin:0;">No items in stock for this shop. Add items via Inventory Management.</p>';
+            return;
+        }
+
+        container.innerHTML = items.map(item => `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-bottom:1px solid #e2e8f0; gap:10px;" data-extra-id="${item.id}">
+                <div style="flex:1;">
+                    <strong style="color:#334155; font-size:0.9em;">${item.name}</strong>
+                    <span style="font-size:0.75em; background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:4px; margin-left:6px;">${item.category}</span>
+                    <div style="font-size:0.8em; color:#64748b; margin-top:2px;">${formatCurrency(item.price)} each · ${item.stock_quantity} in stock</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="number" min="0" max="${item.stock_quantity}" value="0" class="extra-qty-input" data-item-id="${item.id}" data-item-name="${item.name}" data-item-price="${item.price}" data-max-stock="${item.stock_quantity}"
+                        style="width:60px; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; text-align:center; font-size:0.9em;"
+                        onchange="updateExtrasSubtotal()" oninput="updateExtrasSubtotal()">
+                </div>
+            </div>
+        `).join('');
+
+        updateExtrasSubtotal();
+    } catch (err) {
+        container.innerHTML = `<p style="text-align:center; color:#ef4444; margin:0;">Error loading items: ${err.message}</p>`;
+    }
+}
+
+function updateExtrasSubtotal() {
+    const inputs = document.querySelectorAll('.extra-qty-input');
+    let subtotal = 0;
+    let listHTML = '';
+
+    inputs.forEach(input => {
+        const qty = parseInt(input.value) || 0;
+        const price = parseFloat(input.dataset.itemPrice) || 0;
+        subtotal += qty * price;
+
+        if (qty > 0) {
+            listHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.95em; color:#334155;">
+                            <span>• ${input.dataset.itemName} (x${qty})</span>
+                            <span style="font-weight:600;">${formatCurrency(price * qty)}</span>
+                         </div>`;
+        }
+    });
+
+    const el = document.getElementById('extras-subtotal');
+    if (el) el.textContent = formatCurrency(subtotal);
+
+    // [NEW] Update Grand Total Display for Creation Form
+    const priceInput = document.getElementById('price');
+    const grandTotalEl = document.getElementById('grand-total-display');
+    if (priceInput && grandTotalEl) {
+        const base = parseFloat(priceInput.value) || 0;
+        grandTotalEl.textContent = formatCurrency(base + subtotal);
+    }
+
+    // [NEW] Update accessories list in the PDF Export summary target
+    const pdfList = document.getElementById('summary-accessories');
+    const pdfBox = document.getElementById('summary-accessories-container');
+    if (pdfList && pdfBox) {
+        if (listHTML === '') {
+            pdfBox.style.display = 'none';
+        } else {
+            pdfBox.style.display = 'block';
+            pdfList.innerHTML = listHTML;
+        }
+    }
+
+    // [NEW] Update Balance and Order Total VISUALLY for Edit Order Details view
+    const editPriceInput = document.getElementById('edit-price');
+    if (editPriceInput) {
+        const basePrice = parseFloat(editPriceInput.value) || 0;
+        const finalPrice = basePrice + subtotal;
+        
+        const totalDisplay = document.getElementById('display-total-price');
+        const balanceDisplay = document.getElementById('display-balance-due');
+        const paidDisplay = document.getElementById('display-total-paid');
+        
+        if (totalDisplay) totalDisplay.textContent = formatCurrency(finalPrice);
+        if (balanceDisplay && paidDisplay) {
+            const paid = parseFloat(paidDisplay.textContent.replace(/[^0-9.-]/g, '')) || 0;
+            balanceDisplay.textContent = formatCurrency(finalPrice - paid);
+        }
+    }
+}
+
+function collectSelectedExtras() {
+    const extras = [];
+    const inputs = document.querySelectorAll('.extra-qty-input');
+    inputs.forEach(input => {
+        const qty = parseInt(input.value) || 0;
+        if (qty > 0) {
+            extras.push({
+                inventory_item_id: input.dataset.itemId,
+                item_name: input.dataset.itemName,
+                price: parseFloat(input.dataset.itemPrice) || 0,
+                quantity: qty
+            });
+        }
+    });
+    return extras;
+}
+
+async function saveOrderExtrasWithStock(orderId, shopId) {
+    const extras = collectSelectedExtras();
+    if (extras.length === 0) return;
+
+    const accessories = extras.map(e => ({
+        order_id: orderId,
+        inventory_item_id: e.inventory_item_id,
+        name: e.item_name,
+        price: e.price,
+        quantity: e.quantity,
+        organization_id: USER_PROFILE.organization_id,
+        shop_id: shopId
+    }));
+
+    // Insert accessories
+    const { error: accError } = await supabaseClient.from('order_accessories').insert(accessories);
+    if (accError) {
+        console.error("Error saving accessories:", accError);
+        throw accError;
+    }
+
+    // Deduct stock for each item
+    for (const extra of extras) {
+        const { data: currentItem } = await supabaseClient
+            .from('inventory_items')
+            .select('stock_quantity')
+            .eq('id', extra.inventory_item_id)
+            .single();
+
+        if (currentItem) {
+            const newQty = Math.max(0, currentItem.stock_quantity - extra.quantity);
+            await supabaseClient.from('inventory_items').update({
+                stock_quantity: newQty,
+                updated_at: new Date().toISOString()
+            }).eq('id', extra.inventory_item_id);
+        }
+    }
+
+    logDebug(`Saved ${extras.length} extras and updated stock levels`, null, 'success');
+}
+
+// ==========================================
+// 📦 INVENTORY MANAGEMENT SYSTEM
+// ==========================================
+
+let ALL_INVENTORY = [];
+
+async function loadInventoryScreen() {
+    logDebug("Loading Inventory Screen...", null, 'info');
+    
+    try {
+        // Load shops for the dropdown
+        const { data: shops } = await supabaseClient
+            .from('shops')
+            .select('id, name')
+            .eq('organization_id', USER_PROFILE.organization_id);
+        
+        const shopSelect = document.getElementById('inv-shop-select');
+        if (shopSelect && shops) {
+            shopSelect.innerHTML = '<option value="">-- Select Shop --</option>';
+            shops.forEach(s => {
+                shopSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+            });
+            // Auto-select if only one shop
+            if (shops.length === 1) {
+                shopSelect.value = shops[0].id;
+            }
+        }
+
+        // Load inventory items
+        const { data: items, error } = await supabaseClient
+            .from('inventory_items')
+            .select('*')
+            .eq('organization_id', USER_PROFILE.organization_id)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        ALL_INVENTORY = items || [];
+
+        // Build a shop name map
+        const shopMap = {};
+        if (shops) shops.forEach(s => shopMap[s.id] = s.name);
+
+        // Update stats
+        const totalItems = ALL_INVENTORY.length;
+        const inStock = ALL_INVENTORY.filter(i => i.stock_quantity > i.low_stock_threshold).length;
+        const lowStock = ALL_INVENTORY.filter(i => i.stock_quantity > 0 && i.stock_quantity <= i.low_stock_threshold).length;
+        const totalValue = ALL_INVENTORY.reduce((sum, i) => sum + (i.price * i.stock_quantity), 0);
+
+        const elTotal = document.getElementById('stat-total-items');
+        const elInStock = document.getElementById('stat-in-stock');
+        const elLowStock = document.getElementById('stat-low-stock');
+        const elValue = document.getElementById('stat-total-value');
+        
+        if (elTotal) elTotal.textContent = totalItems;
+        if (elInStock) elInStock.textContent = inStock;
+        if (elLowStock) elLowStock.textContent = lowStock;
+        if (elValue) elValue.textContent = formatCurrency(totalValue);
+
+        // Render table
+        renderInventoryTable(ALL_INVENTORY, shopMap);
+
+        // Setup form handler
+        const addForm = document.getElementById('inv-add-form');
+        if (addForm) {
+            addForm.onsubmit = async (e) => {
+                e.preventDefault();
+                await addInventoryItem();
+            };
+        }
+
+    } catch (err) {
+        logDebug("Inventory load error:", err, 'error');
+        const tbody = document.getElementById('inv-table-body');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#ef4444;">Error loading inventory: ${err.message}</td></tr>`;
+        }
+    }
+}
+
+function renderInventoryTable(items, shopMap) {
+    const tbody = document.getElementById('inv-table-body');
+    if (!tbody) return;
+
+    if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#94a3b8;">
+            <i class="fas fa-box-open" style="font-size:2em; margin-bottom:10px; display:block;"></i>
+            No inventory items yet. Add your first item above!
+        </td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = items.map(item => {
+        let stockClass = 'in-stock';
+        let stockLabel = 'In Stock';
+        if (item.stock_quantity === 0) {
+            stockClass = 'out-of-stock';
+            stockLabel = 'Out of Stock';
+        } else if (item.stock_quantity <= item.low_stock_threshold) {
+            stockClass = 'low-stock';
+            stockLabel = 'Low Stock';
+        }
+
+        return `<tr data-id="${item.id}" data-name="${item.name.toLowerCase()}" data-category="${item.category}" data-stock="${stockClass}">
+            <td><strong>${item.name}</strong></td>
+            <td><span class="category-tag">${item.category}</span></td>
+            <td>${formatCurrency(item.price)}</td>
+            <td><strong>${item.stock_quantity}</strong></td>
+            <td><span class="stock-badge ${stockClass}">${stockLabel}</span></td>
+            <td style="font-size:0.85em; color:#64748b;">${shopMap[item.shop_id] || 'N/A'}</td>
+            <td class="inv-actions">
+                <button class="btn-restock" title="Restock" onclick="openRestockModal('${item.id}', '${item.name.replace(/'/g, "\\'")}')"><i class="fas fa-plus"></i></button>
+                <button class="btn-edit" title="Edit" onclick="openEditInventoryItem('${item.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn-delete" title="Delete" onclick="deleteInventoryItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function addInventoryItem() {
+    const name = document.getElementById('inv-name').value.trim();
+    const category = document.getElementById('inv-category').value;
+    const price = parseFloat(document.getElementById('inv-price').value) || 0;
+    const qty = parseInt(document.getElementById('inv-qty').value) || 0;
+    const shopId = document.getElementById('inv-shop-select').value;
+    const msgEl = document.getElementById('inv-add-msg');
+
+    if (!name || !shopId) {
+        if (msgEl) { msgEl.textContent = '❌ Please fill in name and select a shop.'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+        return;
+    }
+
+    try {
+        const { error } = await supabaseClient.from('inventory_items').insert([{
+            organization_id: USER_PROFILE.organization_id,
+            shop_id: shopId,
+            name: name,
+            category: category,
+            price: price,
+            stock_quantity: qty
+        }]);
+
+        if (error) throw error;
+
+        if (msgEl) { msgEl.textContent = `✅ "${name}" added to inventory!`; msgEl.style.color = '#10b981'; msgEl.style.display = 'block'; }
+        
+        // Reset form
+        document.getElementById('inv-name').value = '';
+        document.getElementById('inv-price').value = '';
+        document.getElementById('inv-qty').value = '';
+
+        // Reload
+        await loadInventoryScreen();
+
+        setTimeout(() => { if (msgEl) msgEl.style.display = 'none'; }, 3000);
+
+    } catch (err) {
+        if (msgEl) { msgEl.textContent = '❌ Error: ' + err.message; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+    }
+}
+
+function openEditInventoryItem(itemId) {
+    const item = ALL_INVENTORY.find(i => i.id === itemId);
+    if (!item) return;
+
+    document.getElementById('edit-inv-id').value = item.id;
+    document.getElementById('edit-inv-name').value = item.name;
+    document.getElementById('edit-inv-category').value = item.category;
+    document.getElementById('edit-inv-price').value = item.price;
+    document.getElementById('edit-inv-qty').value = item.stock_quantity;
+    document.getElementById('edit-inv-threshold').value = item.low_stock_threshold || 5;
+
+    document.getElementById('inv-edit-modal').classList.add('active');
+}
+
+async function saveInventoryEdit() {
+    const id = document.getElementById('edit-inv-id').value;
+    const name = document.getElementById('edit-inv-name').value.trim();
+    const category = document.getElementById('edit-inv-category').value;
+    const price = parseFloat(document.getElementById('edit-inv-price').value) || 0;
+    const qty = parseInt(document.getElementById('edit-inv-qty').value) || 0;
+    const threshold = parseInt(document.getElementById('edit-inv-threshold').value) || 5;
+
+    try {
+        const { error } = await supabaseClient.from('inventory_items').update({
+            name, category, price, stock_quantity: qty, low_stock_threshold: threshold, updated_at: new Date().toISOString()
+        }).eq('id', id);
+
+        if (error) throw error;
+
+        document.getElementById('inv-edit-modal').classList.remove('active');
+        await loadInventoryScreen();
+        alert('✅ Item updated successfully!');
+    } catch (err) {
+        alert('❌ Error updating item: ' + err.message);
+    }
+}
+
+async function deleteInventoryItem(itemId, itemName) {
+    if (!confirm(`Are you sure you want to delete "${itemName}"? This cannot be undone.`)) return;
+
+    try {
+        const { error } = await supabaseClient.from('inventory_items').delete().eq('id', itemId);
+        if (error) throw error;
+        await loadInventoryScreen();
+        alert(`✅ "${itemName}" has been deleted.`);
+    } catch (err) {
+        alert('❌ Error deleting item: ' + err.message);
+    }
+}
+
+function openRestockModal(itemId, itemName) {
+    document.getElementById('restock-inv-id').value = itemId;
+    document.getElementById('restock-item-name').textContent = itemName;
+    document.getElementById('restock-qty').value = 1;
+    document.getElementById('inv-restock-modal').classList.add('active');
+}
+
+async function saveRestock() {
+    const id = document.getElementById('restock-inv-id').value;
+    const addQty = parseInt(document.getElementById('restock-qty').value) || 0;
+    if (addQty <= 0) { alert('Please enter a valid quantity.'); return; }
+
+    const item = ALL_INVENTORY.find(i => i.id === id);
+    if (!item) return;
+
+    try {
+        const newQty = item.stock_quantity + addQty;
+        const { error } = await supabaseClient.from('inventory_items').update({
+            stock_quantity: newQty,
+            updated_at: new Date().toISOString()
+        }).eq('id', id);
+
+        if (error) throw error;
+
+        document.getElementById('inv-restock-modal').classList.remove('active');
+        await loadInventoryScreen();
+        alert(`✅ Restocked! ${item.name} now has ${newQty} units.`);
+    } catch (err) {
+        alert('❌ Error restocking: ' + err.message);
+    }
+}
+
+function filterInventoryTable() {
+    const search = (document.getElementById('inv-search').value || '').toLowerCase();
+    const catFilter = document.getElementById('inv-cat-filter').value;
+    const stockFilter = document.getElementById('inv-stock-filter').value;
+
+    const rows = document.querySelectorAll('#inv-table-body tr[data-id]');
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name') || '';
+        const cat = row.getAttribute('data-category') || '';
+        const stock = row.getAttribute('data-stock') || '';
+
+        let show = true;
+        if (search && !name.includes(search)) show = false;
+        if (catFilter && cat !== catFilter) show = false;
+        if (stockFilter && stock !== stockFilter) show = false;
+
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+async function toggleUserStatus(userId, currentStatus) {
+    const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
+    const actionText = currentStatus === 'Active' ? 'SUSPEND' : 'REACTIVATE';
+    const icon = currentStatus === 'Active' ? '<i class="fas fa-user-slash text-danger"></i>' : '<i class="fas fa-user-check text-success"></i>';
+    
+    showMngModal({
+        icon: icon,
+        title: `Confirm ${actionText}?`,
+        text: `Are you sure you want to change this user's status to ${newStatus}?`,
+        buttons: [
+            { text: 'Cancel', style: 'background:#f1f5f9; color:#64748b;', action: hideMngModal },
+            { 
+                text: `Yes, ${actionText}`, 
+                style: `background:${currentStatus === 'Active' ? '#ef4444' : '#10b981'}; color:white;`,
+                action: async () => {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('user_profiles')
+                            .update({ status: newStatus })
+                            .eq('id', userId);
+
+                        if (error) throw error;
+                        
+                        // Show success modal
+                        showMngModal({
+                            icon: '<i class="fas fa-check-circle text-success"></i>',
+                            title: 'Success!',
+                            text: `User has been successfully ${newStatus.toLowerCase()}.`,
+                            buttons: [{ text: 'Great', style: 'background:var(--brand-navy); color:white;', action: loadPlatformUsers }]
+                        });
+                    } catch (err) {
+                        showMngModal({
+                            icon: '<i class="fas fa-times-circle text-danger"></i>',
+                            title: 'Error',
+                            text: err.message,
+                            buttons: [{ text: 'Close', style: 'background:#f1f5f9; color:#64748b;' }]
+                        });
+                    }
+                }
+            }
+        ]
+    });
+}
+
+function showMngModal({ icon, title, text, buttons }) {
+    const modal = document.getElementById('mng-modal');
+    if (!modal) return;
+
+    document.getElementById('mng-modal-icon').innerHTML = icon;
+    document.getElementById('mng-modal-title').textContent = title;
+    document.getElementById('mng-modal-text').textContent = text;
+    
+    const actions = document.getElementById('mng-modal-actions');
+    actions.innerHTML = '';
+    
+    buttons.forEach(btn => {
+        const b = document.createElement('button');
+        b.className = 'small-btn';
+        b.style.cssText = btn.style || '';
+        b.innerHTML = btn.text;
+        b.onclick = () => {
+            if (btn.action) btn.action();
+            if (!btn.keepOpen) hideMngModal();
+        };
+        actions.appendChild(b);
+    });
+
+    modal.classList.add('active');
+}
+
+function hideMngModal() {
+    const modal = document.getElementById('mng-modal');
+    if (modal) modal.classList.remove('active');
+}
