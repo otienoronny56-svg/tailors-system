@@ -1171,7 +1171,7 @@ async function loadOrders(mode = 'open') {
 
         const orderIds = orders.map(o => o.id);
         const [{ data: payments }, { data: accessories }] = await Promise.all([
-            supabaseClient.from('payments').select('*').in('order_id', orderIds),
+            supabaseClient.from('payments').select('*').is('deleted_at', null).in('order_id', orderIds),
             supabaseClient.from('order_accessories').select('*').in('order_id', orderIds)
         ]);
 
@@ -2112,7 +2112,7 @@ window.generateAndShareReceipt = async function (orderId) {
     try {
         const [{ data: order }, { data: payments }, { data: accessories }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
-            supabaseClient.from('payments').select('*').eq('order_id', orderId),
+            supabaseClient.from('payments').select('*').is('deleted_at', null).eq('order_id', orderId),
             supabaseClient.from('order_accessories').select('*').eq('order_id', orderId)
         ]);
 
@@ -2351,7 +2351,7 @@ async function loadMetrics() {
         const [{ data: shops }, { data: orders }, { data: allPayments }] = await Promise.all([
             supabaseClient.from('shops').select('id, name'),
             supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date'),
-            supabaseClient.from('payments').select('order_id, amount')
+            supabaseClient.from('payments').select('order_id, amount').is('deleted_at', null)
         ]);
 
         if (!orders) return;
@@ -2722,7 +2722,7 @@ async function loadAdminOrders(mode = 'current') {
         const [{ data: shops }, { data: workers }, { data: payments }, { data: accessories }] = await Promise.all([
             shopIds.length > 0 ? supabaseClient.from('shops').select('id, name').in('id', shopIds) : Promise.resolve({ data: [] }),
             workerIds.length > 0 ? supabaseClient.from('workers').select('id, name').in('id', workerIds) : Promise.resolve({ data: [] }),
-            supabaseClient.from('payments').select('*').in('order_id', orderIds),
+            supabaseClient.from('payments').select('*').is('deleted_at', null).in('order_id', orderIds),
             supabaseClient.from('order_accessories').select('*').in('order_id', orderIds)
         ]);
 
@@ -2837,7 +2837,7 @@ async function openAdminOrderView(orderId) {
     try {
         const [{ data: order }, { data: payments }, { data: accessories }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
-            supabaseClient.from('payments').select('*').eq('order_id', orderId).order('recorded_at', { ascending: false }),
+            supabaseClient.from('payments').select('*').is('deleted_at', null).eq('order_id', orderId).order('recorded_at', { ascending: false }),
             supabaseClient.from('order_accessories').select('*').eq('order_id', orderId)
         ]);
 
@@ -3076,7 +3076,7 @@ async function loadAdminOrderDetails() {
     try {
         const [{ data: order }, { data: payments }, { data: accessories }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
-            supabaseClient.from('payments').select('*').eq('order_id', orderId).order('recorded_at', { ascending: false }),
+            supabaseClient.from('payments').select('*').is('deleted_at', null).eq('order_id', orderId).order('recorded_at', { ascending: false }),
             supabaseClient.from('order_accessories').select('*').eq('order_id', orderId)
         ]);
 
@@ -3737,7 +3737,7 @@ async function loadKPIMetrics(shopId) {
     try {
         // Build queries - exclude soft-deleted payments
         // Build queries - RLS handles soft-deleted payments automatically
-        let paymentsQuery = supabaseClient.from('payments').select('amount');
+        let paymentsQuery = supabaseClient.from('payments').select('amount').is('deleted_at', null);
         let ordersQuery = supabaseClient.from('orders').select('id, price, status');
         let expensesQuery = supabaseClient.from('expenses').select('amount');
         let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity');
@@ -4167,7 +4167,7 @@ async function generateAIInsights(shopId) {
         // Get data
         const [{ data: orders }, { data: payments }, { data: expenses }] = await Promise.all([
             supabaseClient.from('orders').select('garment_type, price, status'),
-            supabaseClient.from('payments').select('amount'),
+            supabaseClient.from('payments').select('amount').is('deleted_at', null),
             supabaseClient.from('expenses').select('category, amount')
         ]);
 
@@ -4320,7 +4320,7 @@ async function loadAdminOrderDetails() {
     try {
         const [{ data: order }, { data: payments }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
-            supabaseClient.from('payments').select('*').eq('order_id', orderId).order('recorded_at', { ascending: false })
+            supabaseClient.from('payments').select('*').is('deleted_at', null).eq('order_id', orderId).order('recorded_at', { ascending: false })
         ]);
 
         if (!order) {
@@ -4876,7 +4876,7 @@ window.downloadInvoicePDF = async function (orderId) {
 
         const [{ data: order }, { data: payments }, { data: accessories }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
-            supabaseClient.from('payments').select('*').eq('order_id', orderId),
+            supabaseClient.from('payments').select('*').is('deleted_at', null).eq('order_id', orderId),
             supabaseClient.from('order_accessories').select('*').eq('order_id', orderId)
         ]);
         if (!order) throw new Error("Order not found");
@@ -4958,6 +4958,11 @@ async function deleteOrder() {
 
     try {
         logDebug("Attempting to delete order", { orderId: CURRENT_ORDER_ID }, 'info');
+
+        // [FIX] Hard delete orphaned child records to keep financials accurate
+        await supabaseClient.from('payments').delete().eq('order_id', CURRENT_ORDER_ID);
+        await supabaseClient.from('order_accessories').delete().eq('order_id', CURRENT_ORDER_ID);
+
 
         const { error } = await supabaseClient
             .from('orders')
@@ -5834,7 +5839,7 @@ async function loadBIAnalytics() {
     analyticsCharts = {};
 
     try {
-        let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at, shop_id').eq('organization_id', USER_PROFILE.organization_id);
+        let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at, shop_id').is('deleted_at', null).eq('organization_id', USER_PROFILE.organization_id);
         let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at, shop_id').eq('organization_id', USER_PROFILE.organization_id);
         let ordersQuery = supabaseClient.from('orders').select('id, price, status, created_at, garment_type, shop_id, customer_name, customer_phone').eq('organization_id', USER_PROFILE.organization_id);
 
@@ -6181,7 +6186,7 @@ async function loadExpenseAuditTable(shopId) {
 
 async function loadKPIMetrics(shopId) {
     try {
-        let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at').eq('organization_id', USER_PROFILE.organization_id);
+        let paymentsQuery = supabaseClient.from('payments').select('amount, recorded_at').is('deleted_at', null).eq('organization_id', USER_PROFILE.organization_id);
         let ordersQuery = supabaseClient.from('orders').select('id, price, status, created_at').eq('organization_id', USER_PROFILE.organization_id);
         let expensesQuery = supabaseClient.from('expenses').select('amount, incurred_at').eq('organization_id', USER_PROFILE.organization_id);
         let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity').eq('organization_id', USER_PROFILE.organization_id);
@@ -6816,7 +6821,7 @@ async function generateAIInsights(shopId) {
         // Get data
         const [{ data: orders }, { data: payments }, { data: expenses }] = await Promise.all([
             supabaseClient.from('orders').select('garment_type, price, status').eq('organization_id', USER_PROFILE.organization_id),
-            supabaseClient.from('payments').select('amount').eq('organization_id', USER_PROFILE.organization_id),
+            supabaseClient.from('payments').select('amount').is('deleted_at', null).eq('organization_id', USER_PROFILE.organization_id),
             supabaseClient.from('expenses').select('category, amount').eq('organization_id', USER_PROFILE.organization_id)
         ]);
 
@@ -7527,7 +7532,7 @@ async function loadRecentActivities(shopId) {
 
     try {
         let orderQuery = supabaseClient.from('orders').select('id, garment_type, customer_name, created_at').eq('organization_id', USER_PROFILE.organization_id).order('created_at', { ascending: false }).limit(5);
-        let paymentQuery = supabaseClient.from('payments').select('amount, payment_method, recorded_at, order_id').eq('organization_id', USER_PROFILE.organization_id).order('recorded_at', { ascending: false }).limit(5);
+        let paymentQuery = supabaseClient.from('payments').select('amount, payment_method, recorded_at, order_id').is('deleted_at', null).eq('organization_id', USER_PROFILE.organization_id).order('recorded_at', { ascending: false }).limit(5);
 
         if (shopId !== 'all') {
             orderQuery = orderQuery.eq('shop_id', shopId);
@@ -7596,7 +7601,7 @@ async function loadRecentActivities(shopId) {
 
 async function loadTransactionKPIs() {
     try {
-        let paymentsQuery = supabaseClient.from('payments').select('amount').eq('organization_id', USER_PROFILE.organization_id);
+        let paymentsQuery = supabaseClient.from('payments').select('amount').is('deleted_at', null).eq('organization_id', USER_PROFILE.organization_id);
         let ordersQuery = supabaseClient.from('orders').select('price').eq('organization_id', USER_PROFILE.organization_id);
         let accessoriesQuery = supabaseClient.from('order_accessories').select('price, quantity').eq('organization_id', USER_PROFILE.organization_id);
 
@@ -7639,7 +7644,7 @@ async function loadAllTransactions() {
         const typeFilter = document.getElementById('transaction-type-filter')?.value || 'all';
 
         let orderQuery = supabaseClient.from('orders').select('id, garment_type, customer_name, price, created_at, status').order('created_at', { ascending: false }).limit(250);
-        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, order_id').order('recorded_at', { ascending: false }).limit(250);
+        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, order_id').is('deleted_at', null).order('recorded_at', { ascending: false }).limit(250);
         let expenseQuery = supabaseClient.from('expenses').select('id, amount, item_name, category, incurred_at').order('incurred_at', { ascending: false }).limit(250);
 
         const [ordersData, paymentsData, expensesData] = await Promise.all([orderQuery, paymentQuery, expenseQuery]);
@@ -7738,7 +7743,7 @@ async function exportTransactionsCSV() {
         const typeFilter = document.getElementById('transaction-type-filter')?.value || 'all';
 
         let orderQuery = supabaseClient.from('orders').select('id, garment_type, customer_name, price, created_at, status').order('created_at', { ascending: false }).limit(250);
-        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, order_id').order('recorded_at', { ascending: false }).limit(250);
+        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, order_id').is('deleted_at', null).order('recorded_at', { ascending: false }).limit(250);
         let expenseQuery = supabaseClient.from('expenses').select('id, amount, item_name, category, incurred_at').order('incurred_at', { ascending: false }).limit(250);
 
         const [ordersData, paymentsData, expensesData] = await Promise.all([orderQuery, paymentQuery, expenseQuery]);
