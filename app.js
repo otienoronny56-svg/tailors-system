@@ -1605,7 +1605,7 @@ function initOrderForm() {
 
                 // [NEW] Upsert Client Data
                 try {
-                    const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).single();
+                    const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).maybeSingle();
                     let history = existingClient ? (existingClient.measurements_history || []) : [];
                     history.unshift({
                         date: new Date().toISOString(),
@@ -3630,7 +3630,7 @@ function initAdminOrderForm() {
 
             // [NEW] Upsert Client Data
             try {
-                const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).single();
+                const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).maybeSingle();
                 let history = existingClient ? (existingClient.measurements_history || []) : [];
                 history.unshift({
                     date: new Date().toISOString(),
@@ -5433,7 +5433,7 @@ function initAdminOrderForm() {
 
             // [NEW] Upsert Client Data
             try {
-                const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).single();
+                const { data: existingClient } = await supabaseClient.from('clients').select('*').eq('phone', orderData.customer_phone).maybeSingle();
                 let history = existingClient ? (existingClient.measurements_history || []) : [];
                 history.unshift({
                     date: new Date().toISOString(),
