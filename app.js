@@ -6995,39 +6995,16 @@ async function updateSidebarBranding(forcedName = null) {
     if (!sidebarLogo && !sidebarSub) return;
 
     let mainTitle = forcedName || (typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.appName : "OTIMA HOUSE");
-    let subTitle = "BY RONNY";
+    let subTitle = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appSubtitle) ? APP_CONFIG.appSubtitle : "BY RONNY";
 
     // If no forced name, try to fetch from user profile
     if (!forcedName && typeof USER_PROFILE !== 'undefined' && USER_PROFILE) {
         try {
-            // Case A: User is assigned to a specific shop (Manager)
-            if (USER_PROFILE.shop_id) {
-                const { data: shop } = await supabaseClient
-                    .from('shops')
-                    .select('name')
-                    .eq('id', USER_PROFILE.shop_id)
-                    .maybeSingle();
-                if (shop && shop.name) mainTitle = shop.name;
-            } 
-            // Case B: User is an Owner (Global) - fetch Organization Name or Smart Default
-            else if (USER_PROFILE.role === 'owner') {
-                // If organization_id is NULL, try to guess the primary org
-                let org = null;
-                if (USER_PROFILE.organization_id) {
-                    const { data } = await supabaseClient.from('organizations').select('id, name').eq('id', USER_PROFILE.organization_id).maybeSingle();
-                    org = data;
-                } else {
-                    const { data } = await supabaseClient.from('organizations').select('id, name').order('created_at', { ascending: true }).limit(1).maybeSingle();
-                    org = data;
-                }
-
-                if (org) {
+            // Force the name to always be the Organization name for absolute consistency across tabs
+            if (USER_PROFILE.organization_id) {
+                const { data: org } = await supabaseClient.from('organizations').select('name').eq('id', USER_PROFILE.organization_id).maybeSingle();
+                if (org && org.name) {
                     mainTitle = org.name;
-                    // Smart Default: If there's only ONE shop in this org, use that name instead
-                    const { data: shops } = await supabaseClient.from('shops').select('name').eq('organization_id', org.id);
-                    if (shops && shops.length === 1) {
-                        mainTitle = shops[0].name;
-                    }
                 }
             }
         } catch (e) {
@@ -7035,8 +7012,8 @@ async function updateSidebarBranding(forcedName = null) {
         }
     }
 
-    if (sidebarLogo) sidebarLogo.textContent = mainTitle;
-    if (sidebarSub) sidebarSub.textContent = subTitle;
+    if (sidebarLogo) sidebarLogo.textContent = mainTitle.toUpperCase();
+    if (sidebarSub) sidebarSub.textContent = subTitle.toUpperCase();
 }
 
 window.addEventListener('DOMContentLoaded', function () {
