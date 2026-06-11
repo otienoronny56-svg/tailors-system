@@ -1803,7 +1803,9 @@
             }
             container.innerHTML = listings.map(list => {
                 const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=400`;
-                const shopName = list.shops?.name || 'Bespoke Tailor';
+                // Try the joined shop name first, then look up from the already-fetched shops list, then fallback
+                const shopFromCache = allMarketplaceShops.find(s => s.id === list.shop_id);
+                const shopName = list.shops?.name || shopFromCache?.name || 'Shop';
 
                 // Calculate listing rating from reviews
                 const listingReviews = allMarketplaceReviews.filter(r => r.listing_id === list.id);
