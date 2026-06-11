@@ -3,62 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Organizations | SaaS Control</title>
+    <title>Manage Organizations</title>
     <link rel="icon" type="image/png" href="logo.png?v=2">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-navy: #0a192f;
+            --brand-navy-light: #112240;
+            --brand-gold: #D4AF37;
+            --brand-gold-hover: #f39c12;
+            --brand-white: #ffffff;
+            --brand-slate: #8892b0;
+            --bg-dark: #060c18;
+            --card-bg: rgba(17, 34, 64, 0.75);
+            --glass-border: rgba(212, 175, 55, 0.15);
+        }
+
+        body {
+            background-color: var(--bg-dark) !important;
+            color: var(--brand-white) !important;
+        }
+
+        .dashboard-container {
+            background-color: var(--bg-dark) !important;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.8) 0%, transparent 100%),
+                        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 50%) !important;
+        }
+
+        .main-content {
+            background-color: var(--bg-dark) !important;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.8) 0%, transparent 100%),
+                        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 50%) !important;
+            flex-grow: 1;
+            min-width: 0;
+            width: calc(100% - 260px) !important;
+            box-sizing: border-box;
+            padding: 20px 30px !important;
+        }
+
+        .main-content h1 {
+            color: var(--brand-gold) !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        /* Form Container glassmorphism */
+        .order-form-container {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 16px !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
+            color: var(--brand-white) !important;
+            padding: 30px !important;
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        .order-form-container h2 {
+            color: var(--brand-gold) !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6em;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        /* Inputs & Select Elements */
+        input[type="text"] {
+            background: rgba(6, 12, 24, 0.6) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: var(--brand-white) !important;
+            padding: 12px 15px !important;
+            border-radius: 8px !important;
+            font-family: inherit;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--brand-gold) !important;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+        }
+
+        /* Form Buttons */
+        .submit-btn {
+            background: var(--brand-gold) !important;
+            color: var(--brand-navy) !important;
+            padding: 14px !important;
+            font-weight: 700 !important;
+            border: none !important;
+            border-radius: 8px !important;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .submit-btn:hover {
+            background: var(--brand-gold-hover) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Table Card Container style for table list */
+        .order-list {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 16px !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
+            color: var(--brand-white) !important;
+            padding: 30px !important;
+            margin-top: 20px;
+        }
+
+        .order-list h2 {
+            color: var(--brand-gold) !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6em;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        /* Table styling overrides */
+        .order-list table {
+            width: 100%;
+            border-collapse: separate !important;
+            border-spacing: 0 12px !important;
+            background: transparent !important;
+        }
+
+        .order-list table th {
+            background: rgba(6, 12, 24, 0.6) !important;
+            color: var(--brand-gold) !important;
+            font-weight: 700;
+            border: none !important;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            padding: 12px 15px !important;
+            text-align: left;
+            white-space: normal !important;
+        }
+
+        .order-list table tbody tr {
+            background: rgba(17, 34, 64, 0.5) !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-list table tbody tr:hover {
+            background: rgba(17, 34, 64, 0.85) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Prevent parent styles.css hover-td background light override */
+        .order-list table tbody tr:hover td {
+            background-color: transparent !important;
+        }
+
+        .order-list table td {
+            padding: 12px 15px !important;
+            border: none !important;
+            color: var(--brand-slate) !important;
+            vertical-align: middle;
+            background: transparent !important;
+            white-space: normal !important;
+        }
+
+        .order-list table td:first-child {
+            border-radius: 12px 0 0 12px;
+        }
+
+        .order-list table td:last-child {
+            border-radius: 0 12px 12px 0;
+        }
+
+        /* Action buttons in tables */
+        .small-btn {
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s !important;
+            cursor: pointer;
+            padding: 8px 16px !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .small-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h1 class="sidebar-logo">SaaS<span class="sidebar-n"> Control</span></h1>
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">TAILORS.CO.KE</h1>
+                    <span class="sidebar-subtitle">SAAS CONTROL</span>
+                </div>
             </div>
-            <nav>
-                <a href="superadmin-dashboard.html"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Overview</a>
-                <a href="superadmin-orgs.html" class="active"><i class="fas fa-building" style="margin-right: 8px;"></i> Organizations</a>
-                <a href="superadmin-users.html"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
-                <a href="superadmin-users-list.html"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
+
+            <p id="user-info">Logged in as: Owner</p>
+                        <nav>
+                <a href="admin-dashboard.html" id="nav-dashboard" ><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin Dashboard</a>
+                
+                <a href="admin-orders.html" id="nav-orders"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global Orders</a>
+                
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-address-book" style="margin-right: 8px;"></i> Clients & Inbox</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="admin-clients.html" id="nav-clients"><i class="fas fa-users" style="margin-right: 8px;"></i> Client Database</a>
+                        <a href="admin-messages.html" id="nav-messages"><i class="fas fa-comments" style="margin-right: 8px;"></i> Messages Inbox</a>
+                    </div>
+                </div>
+
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Products & Stock</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="admin-inventory.html" id="nav-inventory"><i class="fas fa-box-open" style="margin-right: 8px;"></i> Inventory</a>
+                        <a href="admin-listings.html" id="nav-listings"><i class="fas fa-tags" style="margin-right: 8px;"></i> Marketplace Catalog</a>
+                    </div>
+                </div>
+
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-wallet" style="margin-right: 8px;"></i> Finance & Analytics</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="financial-overview.html" id="nav-finance"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial Overview</a>
+                        <a href="admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics & AI</a>
+                        <a href="admin-transactions.html" id="nav-transactions"><i class="fas fa-list-ul" style="margin-right: 8px;"></i> Transactions</a>
+                        <a href="admin-expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
+                    </div>
+                </div>
+
+                <a href="admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
+
                 <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
             </nav>
+            <script>
+                if (typeof window.toggleSidebarDropdown !== 'function') {
+                    window.toggleSidebarDropdown = function(button) {
+                        const event = window.event || (arguments.length > 1 ? arguments[1] : null);
+                        if (event) {
+                            event.alreadyHandledDropdown = true;
+                        }
+                        const dropdown = button.closest('.sidebar-dropdown');
+                        if (dropdown) {
+                            dropdown.classList.toggle('open');
+                        }
+                    };
+                }
+            </script>
         </aside>
 
         <main class="main-content">
             <header style="margin-bottom: 30px;">
-                <h1 style="color: var(--brand-navy);">Organization Management</h1>
+                <h1>Organization Management</h1>
             </header>
 
-            <section class="order-form-container" style="max-width: 600px; margin-bottom: 40px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-                <h2 style="margin-top: 0;">Create New Tenant</h2>
+            <section class="order-form-container">
+                <h2>Create New Tenant</h2>
                 <form id="create-org-form">
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 700;">Organization Name</label>
-                        <input type="text" id="new-org-name" placeholder="e.g. Elegant Fashion" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Organization Name</label>
+                        <input type="text" id="new-org-name" placeholder="e.g. Elegant Fashion" required>
                     </div>
-                    <button type="submit" class="small-btn" style="width: 100%; background: var(--brand-navy); color: var(--brand-gold); padding: 12px; font-weight: bold;">
+                    <button type="submit" class="submit-btn">
                         <i class="fas fa-plus"></i> Initialize Organization
                     </button>
-                    <div id="org-message" style="margin-top: 10px; text-align: center;"></div>
+                    <div id="org-message" style="margin-top: 15px; text-align: center; font-weight: 500;"></div>
                 </form>
             </section>
 
             <section class="order-list">
                 <h2>All Tenants</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Shops</th>
-                            <th>Created At</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orgs-tbody">
-                        <tr><td colspan="4" style="text-align:center; padding:20px;">Loading tenants...</td></tr>
-                    </tbody>
-                </table>
+                <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Shops</th>
+                                <th>Created At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orgs-tbody">
+                            <tr><td colspan="5" style="text-align:center; padding:20px;">Loading tenants...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </main>
     </div>

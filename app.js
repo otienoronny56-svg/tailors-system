@@ -76,6 +76,7 @@ try {
 
     // 3. Initialize Supabase (Assign to the 'let' variable above)
     supabaseClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+    window.supabaseClient = supabaseClient;
 
     // --- 4. BILLING STATUS ENFORCEMENT ---
     if (APP_CONFIG.SYSTEM_STATUS === 'SUSPENDED') {
@@ -203,6 +204,15 @@ const GARMENT_MEASUREMENTS = {
     'Half Coat': {
         Coat: ['Shoulder', 'Chest', 'Waist', 'Length']
     },
+    'Standard Size': {
+        'Standard Size': ['Top/Shirt Size (e.g. S/M/L/XL)', 'Bottom/Trouser Size (e.g. 30/32/34/36)', 'Chest Size (inches)', 'Waist Size (inches)', 'Height (feet/inches)', 'Weight (kg/lbs)']
+    },
+    'Shoes': {
+        'Shoes': ['Shoe Size (UK/US/EU)', 'Foot Length (inches)', 'Foot Width (inches/Standard/Wide)']
+    },
+    'Accessories': {
+        'Accessories': ['Wrist/Watch Size (inches)', 'Cap/Hat Size (inches or S/M/L)', 'Belt Size (inches)', 'Scarf/Neck Size (inches)', 'Preferred Tie Type (Slim/Standard)']
+    },
     'Alteration': {
         Notes: ['Description']
     }
@@ -317,9 +327,13 @@ function formatMeasurements(json) {
 
         let h = '';
         for (let k in m) {
-            h += `<div style="break-inside: avoid; margin-bottom: 15px;"><b>${k} Details:</b><br>`;
+            h += `<div style="break-inside: avoid; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%;">
+                    <b style="color: var(--brand-navy); font-size: 0.9em; text-transform: uppercase; border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; display: inline-block; margin-bottom: 12px; width: 100%;">${k} Details</b><br>`;
             for (let s in m[k]) {
-                h += `<span style="display:inline-block; min-width:80px; color:#475569;">${s}:</span> <b>${m[k][s]}"</b><br>`;
+                h += `<div style="display: flex; border-bottom: 1px dashed #cbd5e1; padding: 6px 0;">
+                        <span style="color:#64748b; font-size: 0.95em; width: 150px; display: inline-block;">${s}</span> 
+                        <b style="color:var(--brand-navy); font-size: 0.95em;">${m[k][s]}"</b>
+                      </div>`;
             }
             h += '</div>';
         }
@@ -415,9 +429,11 @@ async function checkSession() {
     logDebug("Checking session...", null, 'info');
 
     try {
+        const path = window.location.pathname;
         const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
         if (userError || !user) {
-            if (!window.location.pathname.includes('index.html')) {
+            const isPublicPage = window.location.pathname.includes('index.html') || window.location.pathname.includes('login.html') || window.location.pathname.includes('client-signup.html') || window.location.pathname.endsWith('/');
+            if (!isPublicPage && window.location.pathname !== '/') {
                 window.location.href = 'index.html';
             }
             return;
@@ -494,13 +510,12 @@ async function checkSession() {
             userInfoEl.innerHTML = `<i class="fas fa-user-circle" style="margin-right: 8px; color: var(--brand-gold);"></i> Welcome, ${USER_PROFILE.full_name}`;
         }
 
-        // Handle routing
-        const path = window.location.pathname;
-        // [FIX] Check for 'index.html' OR if the path is just '/' (root)
-        if (path.includes('index.html') || path === '/' || path.endsWith('/')) {
+        // [FIX] Check for 'index.html', 'login.html', OR if the path is just '/' (root)
+        if (path.includes('index.html') || path.includes('login.html') || path === '/' || path.endsWith('/')) {
             let redirectTo = 'manager-dashboard.html';
             if (USER_PROFILE.role === 'superadmin') redirectTo = 'superadmin-dashboard.html';
             else if (USER_PROFILE.role === 'owner') redirectTo = 'admin-dashboard.html';
+            else if (USER_PROFILE.role === 'client') redirectTo = 'client-dashboard.html';
             
             window.location.href = redirectTo;
             return;
@@ -2349,7 +2364,7 @@ async function loadAdminDashboard() {
 async function loadMetrics() {
     try {
         const [{ data: shops }, { data: orders }, { data: allPayments }] = await Promise.all([
-            supabaseClient.from('shops').select('id, name'),
+            supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id),
             supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date'),
             supabaseClient.from('payments').select('order_id, amount').is('deleted_at', null)
         ]);
@@ -3473,7 +3488,11 @@ async function loadShopsForDropdown(elId) {
     }
 
     try {
-        const { data: shops, error } = await supabaseClient.from('shops').select('id, name').order('name');
+        let query = supabaseClient.from('shops').select('id, name');
+        if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
+            query = query.eq('organization_id', USER_PROFILE.organization_id);
+        }
+        const { data: shops, error } = await query.order('name');
         if (error) {
             logDebug("Error loading shops for dropdown:", error, 'error');
             return;
@@ -3893,7 +3912,7 @@ async function loadRevenueTrend(daysStr) {
 async function loadShopPerformanceChart() {
     try {
         const [{ data: shops }, { data: orders }, { data: expenses }] = await Promise.all([
-            supabaseClient.from('shops').select('id, name').order('name'),
+            supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id).order('name'),
             supabaseClient.from('orders').select('id, shop_id, price'),
             supabaseClient.from('expenses').select('shop_id, amount')
         ]);
@@ -5062,10 +5081,20 @@ async function loadShopCommandCenter() {
             return;
         }
 
+        let shopsQuery = admin.from('shops').select('*');
+        let profilesQuery = admin.from('user_profiles').select('*').eq('role', 'manager');
+        let workersQuery = admin.from('workers').select('*');
+
+        if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
+            shopsQuery = shopsQuery.eq('organization_id', USER_PROFILE.organization_id);
+            profilesQuery = profilesQuery.eq('organization_id', USER_PROFILE.organization_id);
+            workersQuery = workersQuery.eq('organization_id', USER_PROFILE.organization_id);
+        }
+
         const [{ data: shops }, { data: profiles }, { data: workers }] = await Promise.all([
-            admin.from('shops').select('*').order('name'),
-            admin.from('user_profiles').select('*').eq('role', 'manager'),
-            admin.from('workers').select('*')
+            shopsQuery.order('name'),
+            profilesQuery,
+            workersQuery
         ]);
 
         if (!shops || shops.length === 0) {
@@ -5215,6 +5244,11 @@ async function fireManager(userId, shopId) {
     if (!confirm("Remove this manager? Account will be deleted.")) return;
     try {
         const admin = getAdminClient();
+        // Security check: Verify target profile is in this owner's organization
+        const { data: targetProfile } = await admin.from('user_profiles').select('organization_id').eq('id', userId).single();
+        if (!targetProfile || targetProfile.organization_id !== USER_PROFILE.organization_id) {
+            throw new Error("Unauthorized: This user does not belong to your organization.");
+        }
         await admin.auth.admin.deleteUser(userId);
         await admin.from('user_profiles').delete().eq('id', userId);
         loadShopCommandCenter();
@@ -5227,6 +5261,11 @@ async function deleteShop(shopId, name) {
     if (!confirm(`Delete shop "${name}" and ALL associated data (orders, workers, manager)?`)) return;
     try {
         const admin = getAdminClient();
+        // Security check: Verify shop belongs to this owner's organization
+        const { data: targetShop } = await admin.from('shops').select('organization_id').eq('id', shopId).single();
+        if (!targetShop || targetShop.organization_id !== USER_PROFILE.organization_id) {
+            throw new Error("Unauthorized: This shop does not belong to your organization.");
+        }
         const { data: mgr } = await admin.from('user_profiles').select('id').eq('shop_id', shopId).eq('role', 'manager').single();
         await admin.from('shops').delete().eq('id', shopId);
         if (mgr) await admin.auth.admin.deleteUser(mgr.id);
@@ -5244,7 +5283,11 @@ async function loadShopsForDropdown(elId) {
     }
 
     try {
-        const { data: shops, error } = await supabaseClient.from('shops').select('id, name').order('name');
+        let query = supabaseClient.from('shops').select('id, name');
+        if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
+            query = query.eq('organization_id', USER_PROFILE.organization_id);
+        }
+        const { data: shops, error } = await query.order('name');
         if (error) {
             logDebug("Error loading shops for dropdown:", error, 'error');
             return;
@@ -6991,18 +7034,39 @@ window.updateStatus = async function (orderId) {
 async function updateSidebarBranding(forcedName = null) {
     const sidebarLogo = document.querySelector('.sidebar-logo');
     const sidebarSub = document.querySelector('.sidebar-subtitle');
+    const navEl = document.querySelector('.sidebar nav');
+    const userInfoEl = document.getElementById('user-info');
 
-    if (!sidebarLogo && !sidebarSub) return;
+    // Make sure dropdown handler exists globally
+    if (typeof window.toggleSidebarDropdown !== 'function') {
+        window.toggleSidebarDropdown = function(button) {
+            const dropdown = button.closest('.sidebar-dropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('open');
+            }
+        };
+    }
 
-    let mainTitle = forcedName || (typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.appName : "OTIMA HOUSE");
-    let subTitle = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appSubtitle) ? APP_CONFIG.appSubtitle : "BY RONNY";
+    let mainTitle = forcedName || "";
+    let subTitle = "";
 
-    // If no forced name, try to fetch from user profile
-    if (!forcedName && typeof USER_PROFILE !== 'undefined' && USER_PROFILE) {
+    const pathName = window.location.pathname;
+    const isSuperadminPage = pathName.includes('superadmin-');
+
+    if (isSuperadminPage) {
+        mainTitle = "TAILORS.CO.KE";
+        subTitle = "SAAS CONTROL";
+    }
+
+    if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE) {
         try {
-            // Force the name to always be the Organization name for absolute consistency across tabs
-            if (USER_PROFILE.organization_id) {
-                const { data: org } = await supabaseClient.from('organizations').select('name').eq('id', USER_PROFILE.organization_id).maybeSingle();
+            // Fetch organization name for non-superadmins
+            if (!forcedName && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
+                const { data: org } = await supabaseClient
+                    .from('organizations')
+                    .select('name')
+                    .eq('id', USER_PROFILE.organization_id)
+                    .maybeSingle();
                 if (org && org.name) {
                     mainTitle = org.name;
                 }
@@ -7010,21 +7074,161 @@ async function updateSidebarBranding(forcedName = null) {
         } catch (e) {
             console.warn("Sidebar branding fetch error:", e);
         }
+
+        // Title and subtitle rules based on role
+        if (USER_PROFILE.role === 'superadmin') {
+            mainTitle = "TAILORS.CO.KE";
+            subTitle = "SAAS CONTROL";
+        } else if (USER_PROFILE.role === 'owner') {
+            subTitle = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appSubtitle) ? APP_CONFIG.appSubtitle : "BY RONNY";
+        } else {
+            subTitle = "STAFF PORTAL";
+        }
+
+        // Render User Info panel
+        if (userInfoEl) {
+            let roleLabel = USER_PROFILE.role === 'owner' ? 'Owner' :
+                            USER_PROFILE.role === 'superadmin' ? 'Superadmin' : 'Manager';
+            userInfoEl.innerHTML = `Logged in as: <strong>${roleLabel}</strong><br><small style="color: var(--brand-gold); font-size: 0.85em; font-weight: 500;">${USER_PROFILE.full_name}</small>`;
+        }
+
+        // Inject Navigation Menu
+        if (navEl) {
+            let navHtml = '';
+
+            if (USER_PROFILE.role === 'superadmin') {
+                navHtml = `
+                    <a href="superadmin-dashboard.html" id="nav-dashboard"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> SaaS Dashboard</a>
+                    <a href="superadmin-orgs.html" id="nav-orgs"><i class="fas fa-building" style="margin-right: 8px;"></i> Manage Tenants</a>
+                    <a href="superadmin-users-list.html" id="nav-users"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
+                    <a href="superadmin-users.html" id="nav-admins"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
+                    <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+                `;
+            } else if (USER_PROFILE.role === 'owner') {
+                navHtml = `
+                    <a href="admin-dashboard.html" id="nav-dashboard"><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin Dashboard</a>
+                    <a href="admin-orders.html" id="nav-orders"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global Orders</a>
+                    
+                    <div class="sidebar-dropdown">
+                        <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                            <span><i class="fas fa-address-book" style="margin-right: 8px;"></i> Clients & Inbox</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="admin-clients.html" id="nav-clients"><i class="fas fa-users" style="margin-right: 8px;"></i> Client Database</a>
+                            <a href="admin-messages.html" id="nav-messages"><i class="fas fa-comments" style="margin-right: 8px;"></i> Messages Inbox</a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-dropdown">
+                        <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                            <span><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Products & Stock</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="admin-inventory.html" id="nav-inventory"><i class="fas fa-box-open" style="margin-right: 8px;"></i> Inventory</a>
+                            <a href="admin-listings.html" id="nav-listings"><i class="fas fa-tags" style="margin-right: 8px;"></i> Marketplace Catalog</a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-dropdown">
+                        <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                            <span><i class="fas fa-wallet" style="margin-right: 8px;"></i> Finance & Analytics</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="financial-overview.html" id="nav-finance"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial Overview</a>
+                            <a href="admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics & AI</a>
+                            <a href="admin-transactions.html" id="nav-transactions"><i class="fas fa-list-ul" style="margin-right: 8px;"></i> Transactions</a>
+                            <a href="admin-expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
+                        </div>
+                    </div>
+
+                    <a href="admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
+
+                    <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+                `;
+            } else {
+                navHtml = `
+                    <a href="manager-dashboard.html" id="nav-dashboard"><i class="fas fa-list-check" style="margin-right: 8px;"></i> Active Orders</a>
+                    <a href="all-orders.html" id="nav-all-orders"><i class="fas fa-history" style="margin-right: 8px;"></i> All Orders</a>
+                    <a href="worker-management.html" id="nav-workers"><i class="fas fa-users" style="margin-right: 8px;"></i> Tailors Directory</a>
+                    <a href="worker-assignments.html" id="nav-assignments"><i class="fas fa-tasks" style="margin-right: 8px;"></i> Job Assignments</a>
+                    <a href="expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
+                    
+                    <a href="order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> Create Order</a>
+
+                    <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+                `;
+            }
+
+            navEl.innerHTML = navHtml;
+
+            // Highlight active navigation items
+            const pathParts = window.location.pathname.split('/');
+            const currentFile = pathParts[pathParts.length - 1] || 'index.html';
+
+            let activeLink = navEl.querySelector(`a[href="${currentFile}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+                const dropdownContent = activeLink.closest('.dropdown-content');
+                if (dropdownContent) {
+                    const dropdownContainer = dropdownContent.closest('.sidebar-dropdown');
+                    if (dropdownContainer) {
+                        dropdownContainer.classList.add('open');
+                    }
+                }
+            } else {
+                // Fallbacks for details pages or form creations
+                let fallbackId = '';
+                if (currentFile.includes('order')) {
+                    fallbackId = currentFile.includes('form') ? 'nav-new-order' : 'nav-orders';
+                }
+                else if (currentFile.includes('client')) fallbackId = 'nav-clients';
+                else if (currentFile.includes('inventory') || currentFile.includes('listing')) fallbackId = 'nav-inventory';
+                else if (currentFile.includes('finance') || currentFile.includes('analytic') || currentFile.includes('expense') || currentFile.includes('transaction')) fallbackId = 'nav-finance';
+                else if (currentFile.includes('message')) fallbackId = 'nav-messages';
+
+                if (fallbackId) {
+                    const fallbackLink = navEl.querySelector(`#${fallbackId}`);
+                    if (fallbackLink) {
+                        fallbackLink.classList.add('active');
+                        const dropdownContent = fallbackLink.closest('.dropdown-content');
+                        if (dropdownContent) {
+                            const dropdownContainer = dropdownContent.closest('.sidebar-dropdown');
+                            if (dropdownContainer) {
+                                dropdownContainer.classList.add('open');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        // While loading the session (USER_PROFILE is not yet defined)
+        if (!isSuperadminPage && !forcedName) {
+            mainTitle = ""; // Keep logo blank to prevent any visual leaks of other shops
+            subTitle = "";  // Keep subtitle blank
+        }
     }
 
-    if (sidebarLogo) sidebarLogo.textContent = mainTitle.toUpperCase();
-    if (sidebarSub) sidebarSub.textContent = subTitle.toUpperCase();
+    // Update Browser Tab Title
+    if (mainTitle) {
+        if (document.title.includes('|')) {
+            const pageName = document.title.split('|')[0].trim();
+            document.title = `${pageName} | ${mainTitle}`;
+        } else {
+            document.title = `${document.title} | ${mainTitle}`;
+        }
+    }
+
+    if (sidebarLogo) sidebarLogo.innerHTML = mainTitle ? mainTitle.toUpperCase() : "&nbsp;";
+    if (sidebarSub) sidebarSub.innerHTML = subTitle ? subTitle.toUpperCase() : "&nbsp;";
 }
 
 window.addEventListener('DOMContentLoaded', function () {
     // --- 🎨 AUTO-BRANDING (Master Template Feature) ---
     if (typeof APP_CONFIG !== 'undefined') {
-        // A. Update Browser Tab Title
-        if (document.title.includes('|')) {
-            const pageName = document.title.split('|')[0].trim();
-            document.title = `${pageName} | ${APP_CONFIG.appName}`;
-        }
-
         // B. Update Dashboard Sidebar (Initial guess from config)
         updateSidebarBranding();
 
@@ -7134,6 +7338,8 @@ window.addEventListener('DOMContentLoaded', function () {
     window.deleteShop = deleteShop;
     window.deleteWorker = deleteWorker;
     window.closeAdminModal = closeAdminModal;
+    window.handleLogin = handleLogin;
+    window.handleLogout = handleLogout;
 
     logDebug("Application initialized successfully", null, 'success');
 });
@@ -8023,7 +8229,7 @@ async function viewClientDetails(clientId) {
                             </button>
                         </div>
                     </div>
-                    <div class="history-measurements" style="font-size: 0.95em; line-height: 1.6; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="history-measurements" style="font-size: 0.95em; line-height: 1.6; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px;">
                         ${formatMeasurements(JSON.stringify(h.measurements))}
                     </div>
                 </div>
@@ -8058,7 +8264,7 @@ async function viewClientDetails(clientId) {
                             <i class="fas fa-plus"></i> Add Garment
                         </button>
                     </div>
-                    <div style="max-height: 450px; overflow-y: auto; padding-right: 5px;">
+                    <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
                         ${historyHtml}
                     </div>
                 </div>
@@ -8074,7 +8280,26 @@ async function viewClientDetails(clientId) {
             </div>
         `;
 
+        const modalContent = modal.querySelector('.modal-content');
+        if(modalContent) {
+            modalContent.style.width = '100vw';
+            modalContent.style.maxWidth = '100vw';
+            modalContent.style.height = '100vh';
+            modalContent.style.maxHeight = '100vh';
+            modalContent.style.display = 'flex';
+            modalContent.style.flexDirection = 'column';
+            modalContent.style.padding = '40px 60px'; // Generous padding for full screen
+            modalContent.style.borderRadius = '0';
+            modalContent.style.margin = '0';
+            modalContent.style.border = 'none';
+            modalContent.style.boxShadow = 'none';
+            modalContent.style.overflowY = 'auto';
+        }
+
         modal.style.display = 'block';
+        modal.style.padding = '0';
+        modal.style.background = '#f8fafc'; // Solid background to act as a full page
+        modal.style.zIndex = '99999'; // Ensure it covers everything including sidebar
 
     } catch (error) {
         logDebug("Error viewing client details:", error, 'error');
@@ -9020,6 +9245,19 @@ window.openEditShopModal = async function(shopId) {
         document.getElementById('edit-shop-receipt').value = shop.receipt_header_text || '';
         document.getElementById('edit-shop-bank').value = shop.bank_details || '';
         
+        if (document.getElementById('edit-shop-is-public')) {
+            document.getElementById('edit-shop-is-public').checked = !!shop.is_public;
+        }
+        if (document.getElementById('edit-shop-loc-name')) {
+            document.getElementById('edit-shop-loc-name').value = shop.location_name || '';
+        }
+        if (document.getElementById('edit-shop-banner-img')) {
+            document.getElementById('edit-shop-banner-img').value = shop.banner_image || '';
+        }
+        if (document.getElementById('edit-shop-desc')) {
+            document.getElementById('edit-shop-desc').value = shop.description || '';
+        }
+        
         const preview = document.getElementById('edit-shop-logo-preview');
         const fileInput = document.getElementById('edit-shop-logo-file');
         fileInput.value = ''; // clear any old selection
@@ -9068,6 +9306,19 @@ window.saveShopDetails = async function(e) {
             receipt_header_text,
             bank_details
         };
+
+        if (document.getElementById('edit-shop-is-public')) {
+            updatePayload.is_public = document.getElementById('edit-shop-is-public').checked;
+        }
+        if (document.getElementById('edit-shop-loc-name')) {
+            updatePayload.location_name = document.getElementById('edit-shop-loc-name').value.trim();
+        }
+        if (document.getElementById('edit-shop-banner-img')) {
+            updatePayload.banner_image = document.getElementById('edit-shop-banner-img').value.trim();
+        }
+        if (document.getElementById('edit-shop-desc')) {
+            updatePayload.description = document.getElementById('edit-shop-desc').value.trim();
+        }
         
         if (file) {
             // Upload to Supabase Storage

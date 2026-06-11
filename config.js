@@ -17,7 +17,7 @@ const APP_CONFIG = {
     },
 
     // === 3. BRANDING IDENTITY ===
-    appName: "Tailors Management System",
+    appName: "EPHRAIMS BESPOKE",
     appSubtitle: "BY RONNY",
     logoPath: "logo.png",
 

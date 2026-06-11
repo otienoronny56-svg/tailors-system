@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Shop Onboarding</title>
+    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --brand-navy: #0a192f;
+            --brand-navy-light: #112240;
+            --brand-gold: #D4AF37;
+            --brand-gold-hover: #f39c12;
+            --brand-gold-light: #f4e5bc;
+            --brand-white: #ffffff;
+            --brand-slate: #8892b0;
+            --brand-light-slate: #a8b2d1;
+            --bg-dark: #060c18;
+            --card-bg: rgba(17, 34, 64, 0.75);
+            --glass-border: rgba(212, 175, 55, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--brand-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.8) 0%, transparent 100%),
+                        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+        }
+
+        .onboard-card {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .brand-logo {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.8em;
+            color: var(--brand-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .brand-sub {
+            font-size: 0.7em;
+            letter-spacing: 4px;
+            color: var(--brand-white);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .instructions {
+            font-size: 0.88em;
+            color: var(--brand-light-slate);
+            line-height: 1.6;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            font-size: 0.78em;
+            font-weight: 600;
+            color: var(--brand-light-slate);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 40px;
+            color: var(--brand-gold);
+        }
+
+        .form-group input {
+            background: rgba(6, 12, 24, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 12px 15px 12px 42px;
+            color: var(--brand-white);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--brand-gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+        }
+
+        .btn-submit {
+            background: var(--brand-gold);
+            color: var(--brand-navy);
+            border: none;
+            padding: 14px 20px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: var(--brand-gold-hover);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.85em;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .logout-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.85em;
+            color: var(--brand-light-slate);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .logout-link:hover {
+            color: var(--brand-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="onboard-card">
+        <div class="logo-section">
+            <h1 class="brand-logo">Tailors.co.ke</h1>
+            <span class="brand-sub">Shop Onboarding</span>
+        </div>
+
+        <p class="instructions">
+            Welcome! To complete your registration and set up your shop workspace, please provide your business details below.
+        </p>
+
+        <form id="onboard-form" onsubmit="handleOnboarding(event)">
+            <div class="form-group">
+                <label for="shop-name">Shop Name / Business Name</label>
+                <i class="fas fa-store"></i>
+                <input type="text" id="shop-name" required placeholder="e.g. Elegant Cuts Tailors">
+            </div>
+
+            <div class="form-group">
+                <label for="owner-name">Owner Full Name</label>
+                <i class="fas fa-user"></i>
+                <input type="text" id="owner-name" required placeholder="e.g. Jane Doe">
+            </div>
+
+            <button type="submit" class="btn-submit" id="btn-submit">Complete Setup</button>
+            <p id="error-msg" class="error-message"></p>
+        </form>
+
+        <a href="#" class="logout-link" onclick="handleLogout(event)"><i class="fas fa-sign-out-alt"></i> Cancel & Logout</a>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        let supabaseClient = null;
+        let currentUser = null;
+
+        // Initialize client
+        try {
+            supabaseClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+        } catch (e) {
+            console.error("Initialization error:", e);
+        }
+
+        function getAdminClient() {
+            return window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
+                auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+            });
+        }
+
+        // On Page Load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { user }, error } = await supabaseClient.auth.getUser();
+            if (error || !user) {
+                alert("Session expired. Please log in again.");
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = user;
+
+            // Pre-fill Name if available from Google metadata
+            if (user.user_metadata && user.user_metadata.full_name) {
+                document.getElementById('owner-name').value = user.user_metadata.full_name;
+            }
+
+            // Check if profile already exists to prevent duplicate onboarding
+            const { data: profile } = await supabaseClient
+                .from('user_profiles')
+                .select('id, status')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                // Profile exists! Go to dashboard (the checkSession will catch if they're pending)
+                window.location.href = 'admin-dashboard.html';
+            }
+        });
+
+        // Form Submission
+        async function handleOnboarding(e) {
+            e.preventDefault();
+            const shopName = document.getElementById('shop-name').value.trim();
+            const fullName = document.getElementById('owner-name').value.trim();
+            const btn = document.getElementById('btn-submit');
+            const errorMsg = document.getElementById('error-msg');
+
+            errorMsg.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Setting Up Workspace...';
+
+            try {
+                if (!currentUser) throw new Error("No active user session.");
+
+                const adminClient = getAdminClient();
+
+                // 1. Create Organization
+                const { data: orgData, error: orgErr } = await adminClient
+                    .from('organizations')
+                    .insert([{ name: shopName }])
+                    .select()
+                    .single();
+
+                if (orgErr) throw orgErr;
+
+                // 2. Create Shop
+                const { data: shopData, error: shopErr } = await adminClient
+                    .from('shops')
+                    .insert([{ organization_id: orgData.id, name: shopName }])
+                    .select()
+                    .single();
+
+                if (shopErr) throw shopErr;
+
+                // 3. Create User Profile (Pending Approval)
+                const { error: profileErr } = await adminClient
+                    .from('user_profiles')
+                    .insert([{
+                        id: currentUser.id,
+                        organization_id: orgData.id,
+                        shop_id: shopData.id,
+                        full_name: fullName,
+                        role: 'owner',
+                        status: 'Pending',
+                        email: currentUser.email
+                    }]);
+
+                if (profileErr) throw profileErr;
+
+                alert("Shop setup completed successfully! Redirecting you to verify approval status.");
+                window.location.href = 'admin-dashboard.html';
+
+            } catch (err) {
+                console.error("Onboarding Error:", err);
+                errorMsg.textContent = "❌ Error: " + err.message;
+                errorMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Complete Setup';
+            }
+        }
+
+        async function handleLogout(e) {
+            e.preventDefault();
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

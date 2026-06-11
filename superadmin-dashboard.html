@@ -3,25 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Superadmin Dashboard | SaaS Control</title>
+    <title>Superadmin Dashboard</title>
     <link rel="icon" type="image/png" href="logo.png?v=2">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --brand-navy: #0a192f;
+            --brand-navy-light: #112240;
+            --brand-gold: #D4AF37;
+            --brand-gold-hover: #f39c12;
+            --brand-white: #ffffff;
+            --brand-slate: #8892b0;
+            --bg-dark: #060c18;
+            --card-bg: rgba(17, 34, 64, 0.75);
+            --glass-border: rgba(212, 175, 55, 0.15);
+        }
+
+        body {
+            background-color: var(--bg-dark) !important;
+            color: var(--brand-white) !important;
+        }
+
+        .dashboard-container {
+            background-color: var(--bg-dark) !important;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.8) 0%, transparent 100%),
+                        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 50%) !important;
+        }
+
+        .main-content {
+            background-color: var(--bg-dark) !important;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.8) 0%, transparent 100%),
+                        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 50%) !important;
+            flex-grow: 1;
+            min-width: 0;
+            width: calc(100% - 260px) !important;
+            box-sizing: border-box;
+            padding: 20px 30px !important;
+        }
+
+        .main-content h1 {
+            color: var(--brand-gold) !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
         .super-metric-card {
-            background: white;
-            padding: 25px;
+            background: var(--card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-bottom: 4px solid var(--brand-gold) !important;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            border-bottom: 4px solid var(--brand-navy);
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
         .super-metric-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4) !important;
         }
+
         .org-badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -29,76 +73,220 @@
             font-weight: 600;
             display: inline-block;
         }
-        .badge-premium { background: rgba(212, 175, 55, 0.1); color: #b8860b; border: 1px solid rgba(212, 175, 55, 0.2); }
-        .badge-basic { background: rgba(100, 116, 139, 0.1); color: #475569; border: 1px solid rgba(100, 116, 139, 0.2); }
-        .badge-active { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
-        
+        .badge-premium { background: rgba(212, 175, 55, 0.1) !important; color: var(--brand-gold) !important; border: 1px solid rgba(212, 175, 55, 0.2) !important; }
+        .badge-basic { background: rgba(136, 146, 176, 0.1) !important; color: var(--brand-slate) !important; border: 1px solid rgba(136, 146, 176, 0.2) !important; }
+        .badge-active { background: rgba(16, 185, 129, 0.1) !important; color: #10b981 !important; border: 1px solid rgba(16, 185, 129, 0.2) !important; }
+
         .chart-container {
-            background: white;
-            padding: 25px;
+            background: var(--card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3) !important;
             margin-top: 30px;
-            border: 1px solid #f1f5f9;
         }
+
         .pulse-label {
             font-size: 0.75em;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #94a3b8;
+            color: var(--brand-slate);
             font-weight: 800;
             margin-bottom: 10px;
             display: block;
+        }
+
+        /* Card Container style for table list */
+        .order-list {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 16px !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
+            color: var(--brand-white) !important;
+            padding: 30px !important;
+            margin-top: 20px;
+        }
+
+        .order-list h2 {
+            color: var(--brand-gold) !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6em;
+            margin: 0;
+        }
+
+        /* Table styling overrides */
+        .order-list table {
+            width: 100%;
+            border-collapse: separate !important;
+            border-spacing: 0 12px !important;
+            background: transparent !important;
+        }
+
+        .order-list table th {
+            background: rgba(6, 12, 24, 0.6) !important;
+            color: var(--brand-gold) !important;
+            font-weight: 700;
+            border: none !important;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            padding: 12px 15px !important;
+            text-align: left;
+            white-space: normal !important;
+        }
+
+        .order-list table tbody tr {
+            background: rgba(17, 34, 64, 0.5) !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-list table tbody tr:hover {
+            background: rgba(17, 34, 64, 0.85) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Prevent parent styles.css hover-td background light override */
+        .order-list table tbody tr:hover td {
+            background-color: transparent !important;
+        }
+
+        .order-list table td {
+            padding: 12px 15px !important;
+            border: none !important;
+            color: var(--brand-slate) !important;
+            vertical-align: middle;
+            background: transparent !important;
+            white-space: normal !important;
+        }
+
+        .order-list table td:first-child {
+            border-radius: 12px 0 0 12px;
+        }
+
+        .order-list table td:last-child {
+            border-radius: 0 12px 12px 0;
+        }
+
+        /* Small Button styling */
+        .small-btn {
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s !important;
+            cursor: pointer;
+            padding: 8px 16px !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .small-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <h1 class="sidebar-logo">SaaS<span class="sidebar-n"> Control</span></h1>
-                    <span class="sidebar-subtitle">PLATFORM ADMIN</span>
+                    <h1 class="sidebar-logo">TAILORS.CO.KE</h1>
+                    <span class="sidebar-subtitle">SAAS CONTROL</span>
                 </div>
             </div>
-            <p id="user-info">Logged in as: Superadmin</p>
-            <nav>
-                <a href="superadmin-dashboard.html" class="active"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Overview</a>
-                <a href="superadmin-orgs.html"><i class="fas fa-building" style="margin-right: 8px;"></i> Organizations</a>
-                <a href="superadmin-users.html"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
-                <a href="superadmin-users-list.html"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
+
+            <p id="user-info">Logged in as: Owner</p>
+                        <nav>
+                <a href="admin-dashboard.html" id="nav-dashboard" ><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin Dashboard</a>
+                
+                <a href="admin-orders.html" id="nav-orders"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global Orders</a>
+                
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-address-book" style="margin-right: 8px;"></i> Clients & Inbox</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="admin-clients.html" id="nav-clients"><i class="fas fa-users" style="margin-right: 8px;"></i> Client Database</a>
+                        <a href="admin-messages.html" id="nav-messages"><i class="fas fa-comments" style="margin-right: 8px;"></i> Messages Inbox</a>
+                    </div>
+                </div>
+
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Products & Stock</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="admin-inventory.html" id="nav-inventory"><i class="fas fa-box-open" style="margin-right: 8px;"></i> Inventory</a>
+                        <a href="admin-listings.html" id="nav-listings"><i class="fas fa-tags" style="margin-right: 8px;"></i> Marketplace Catalog</a>
+                    </div>
+                </div>
+
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-wallet" style="margin-right: 8px;"></i> Finance & Analytics</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="financial-overview.html" id="nav-finance"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial Overview</a>
+                        <a href="admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics & AI</a>
+                        <a href="admin-transactions.html" id="nav-transactions"><i class="fas fa-list-ul" style="margin-right: 8px;"></i> Transactions</a>
+                        <a href="admin-expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
+                    </div>
+                </div>
+
+                <a href="admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
+
                 <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
             </nav>
+            <script>
+                if (typeof window.toggleSidebarDropdown !== 'function') {
+                    window.toggleSidebarDropdown = function(button) {
+                        const event = window.event || (arguments.length > 1 ? arguments[1] : null);
+                        if (event) {
+                            event.alreadyHandledDropdown = true;
+                        }
+                        const dropdown = button.closest('.sidebar-dropdown');
+                        if (dropdown) {
+                            dropdown.classList.toggle('open');
+                        }
+                    };
+                }
+            </script>
         </aside>
 
         <main class="main-content">
             <header>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                     <div>
-                        <h1 style="color: var(--brand-navy); margin-bottom: 5px;">SaaS Control Centre</h1>
-                        <p style="color: #64748b; font-size: 0.9em; font-weight: 500;">Platform Health & Growth Monitoring</p>
+                        <h1 style="margin: 0;">SaaS Control Centre</h1>
+                        <p style="color: var(--brand-slate); font-size: 0.95em; font-weight: 500; margin-top: 5px;">Platform Health & Growth Monitoring</p>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <button onclick="location.reload()" class="small-btn" style="background: white; border: 1px solid #e2e8f0; color: var(--brand-navy);"><i class="fas fa-sync-alt"></i> Refresh</button>
-                        <button onclick="handleLogout()" class="small-btn" style="background: var(--brand-red); color: white; border: none;">Logout</button>
+                        <button onclick="location.reload()" class="small-btn" style="background: rgba(17, 34, 64, 0.75); border: 1px solid var(--glass-border); color: var(--brand-gold);"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        <button onclick="handleLogout()" class="small-btn" style="background: #e11d48; color: white; border: none;">Logout</button>
                     </div>
                 </div>
 
                 <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
                     <div class="super-metric-card">
-                        <span style="font-size: 0.8em; color: #64748b; font-weight: 700;">TOTAL ORGANIZATIONS</span>
-                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-navy); margin: 5px 0;" id="total-orgs">...</div>
+                        <span style="font-size: 0.8em; color: var(--brand-slate); font-weight: 700;">TOTAL ORGANIZATIONS</span>
+                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-white); margin: 5px 0;" id="total-orgs">...</div>
                         <div style="font-size: 0.75em; color: #10b981; font-weight: 600;"><i class="fas fa-arrow-up"></i> <span id="org-growth-text">...</span> from last month</div>
                     </div>
-                    <div class="super-metric-card" style="border-bottom-color: #f59e0b;">
-                        <span style="font-size: 0.8em; color: #64748b; font-weight: 700;">PROJECTED MRR</span>
-                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-navy); margin: 5px 0;" id="projected-mrr">...</div>
-                        <div style="font-size: 0.75em; color: #64748b; font-weight: 600;">Monthly Recurring Revenue</div>
+                    <div class="super-metric-card" style="border-bottom-color: var(--brand-gold);">
+                        <span style="font-size: 0.8em; color: var(--brand-slate); font-weight: 700;">PROJECTED MRR</span>
+                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-white); margin: 5px 0;" id="projected-mrr">...</div>
+                        <div style="font-size: 0.75em; color: var(--brand-slate); font-weight: 600;">Monthly Recurring Revenue</div>
                     </div>
                     <div class="super-metric-card" style="border-bottom-color: #10b981;">
-                        <span style="font-size: 0.8em; color: #64748b; font-weight: 700;">ACTIVE PLATFORM USERS</span>
-                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-navy); margin: 5px 0;" id="total-users">...</div>
-                        <div style="font-size: 0.75em; color: #64748b; font-weight: 600;">Across all tenants</div>
+                        <span style="font-size: 0.8em; color: var(--brand-slate); font-weight: 700;">ACTIVE PLATFORM USERS</span>
+                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-white); margin: 5px 0;" id="total-users">...</div>
+                        <div style="font-size: 0.75em; color: var(--brand-slate); font-weight: 600;">Across all tenants</div>
                     </div>
                 </div>
             </header>
@@ -114,23 +302,25 @@
             <section class="order-list" style="margin-top: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2>Registered Organizations</h2>
-                    <button onclick="location.href='superadmin-orgs.html'" class="small-btn" style="background: var(--brand-navy); color: var(--brand-gold);">Management View</button>
+                    <button onclick="location.href='superadmin-orgs.html'" class="small-btn" style="background: rgba(17, 34, 64, 0.75); border: 1px solid var(--glass-border); color: var(--brand-gold);">Management View</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                             <th>Name</th>
-                             <th>Setup Date</th>
-                             <th>Tier</th>
-                             <th>Expires In</th>
-                             <th>Status</th>
-                             <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="org-list-tbody">
-                        <tr><td colspan="6" style="text-align:center; padding:20px;">Loading organizations...</td></tr>
-                    </tbody>
-                </table>
+                <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <table>
+                        <thead>
+                            <tr>
+                                 <th>Name</th>
+                                 <th>Setup Date</th>
+                                 <th>Tier</th>
+                                 <th>Expires In</th>
+                                 <th>Status</th>
+                                 <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="org-list-tbody">
+                            <tr><td colspan="6" style="text-align:center; padding:20px;">Loading organizations...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </main>
     </div>

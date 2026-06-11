@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Access</title>
+    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --brand-navy: #0a192f;
+            --brand-navy-light: #112240;
+            --brand-gold: #D4AF37;
+            --brand-gold-hover: #f39c12;
+            --brand-gold-light: #f4e5bc;
+            --brand-white: #ffffff;
+            --brand-slate: #8892b0;
+            --brand-light-slate: #a8b2d1;
+            --bg-dark: #060c18;
+            --card-bg: rgba(17, 34, 64, 0.75);
+            --glass-border: rgba(212, 175, 55, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--brand-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.8) 0%, transparent 100%),
+                        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .brand-logo {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.8em;
+            color: var(--brand-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .brand-sub {
+            font-size: 0.7em;
+            letter-spacing: 4px;
+            color: var(--brand-white);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* --- Tabs --- */
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid rgba(255,255,255,0.05);
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: var(--brand-slate);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            text-transform: none;
+            box-shadow: none;
+        }
+
+        .tab-btn:hover {
+            color: var(--brand-white);
+            background: transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--brand-gold);
+            border-bottom-color: var(--brand-gold);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Form Styling --- */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            font-size: 0.78em;
+            font-weight: 600;
+            color: var(--brand-light-slate);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 40px;
+            color: var(--brand-gold);
+        }
+
+        .form-group input {
+            background: rgba(6, 12, 24, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 12px 15px 12px 42px;
+            color: var(--brand-white);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--brand-gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+        }
+
+        .btn-submit {
+            background: var(--brand-gold);
+            color: var(--brand-navy);
+            border: none;
+            padding: 14px 20px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: var(--brand-gold-hover);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.85em;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        /* --- Social Logins --- */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--brand-slate);
+            font-size: 0.8em;
+            margin: 25px 0;
+            text-transform: uppercase;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: 15px;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: 15px;
+        }
+
+        .social-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-social {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--brand-white);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-social:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: var(--brand-gold);
+        }
+
+        .btn-google i {
+            color: #ea4335;
+        }
+
+        .btn-facebook i {
+            color: #1877f2;
+        }
+
+        .toggle-mode {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85em;
+            color: var(--brand-slate);
+        }
+
+        .toggle-mode span {
+            color: var(--brand-gold);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .toggle-mode span:hover {
+            text-decoration: underline;
+        }
+
+        /* Back link */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.85em;
+            color: var(--brand-light-slate);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--brand-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo-section">
+            <h1 class="brand-logo">Tailors.co.ke</h1>
+            <span class="brand-sub">Tailor Shop Portal</span>
+        </div>
+
+        <!-- 🏢 STAFF / TAILOR PORTAL -->
+        <div class="tab-content active" id="tailor-tab">
+            <form id="auth-form" onsubmit="handleStaffAuth(event)">
+                <input type="hidden" id="staff-mode" value="signin">
+
+                <div class="form-group" id="staff-shop-name-group" style="display: none;">
+                    <label for="staff-shop-name">Shop Name / Business Name</label>
+                    <i class="fas fa-store"></i>
+                    <input type="text" id="staff-shop-name" placeholder="e.g. Elegant Cuts Tailors">
+                </div>
+
+                <div class="form-group" id="staff-name-group" style="display: none;">
+                    <label for="staff-fullname">Owner Full Name</label>
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="staff-fullname" placeholder="e.g. John Otieno">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" required placeholder="staff@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-submit" id="login-button">Sign In to Dashboard</button>
+                <p id="auth-message" class="error-message"></p>
+
+                <div class="toggle-mode" id="staff-mode-toggle" style="margin-top: 15px;">
+                    Want to register a new shop? <span onclick="toggleStaffMode('signup')">Register Shop</span>
+                </div>
+            </form>
+
+            <div class="divider">Or Continue With</div>
+
+            <div class="social-buttons">
+                <button class="btn-social btn-google" onclick="handleSocialLogin('google', 'owner')">
+                    <i class="fab fa-google"></i> Google
+                </button>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Marketplace</a>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Tab switching
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Auto-switch tab based on URL param (?tab=client or ?tab=signup)
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+
+            if (tab === 'client' || tab === 'signup') {
+                // Activate the Client Account tab
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                const clientBtn = document.querySelector('.tab-btn:nth-child(2)');
+                if (clientBtn) clientBtn.classList.add('active');
+                const clientTab = document.getElementById('client-tab');
+                if (clientTab) clientTab.classList.add('active');
+
+                // If signup specifically, switch to signup mode
+                if (tab === 'signup') {
+                    toggleClientMode('signup');
+                }
+            }
+        });
+
+        // Toggle signup vs signin for clients
+        function toggleClientMode(mode) {
+            const modeInput = document.getElementById('client-mode');
+            const nameGroup = document.getElementById('client-name-group');
+            const nameInput = document.getElementById('client-name');
+            const submitBtn = document.getElementById('btn-client-submit');
+            const toggleDiv = document.getElementById('client-mode-toggle');
+            const messageEl = document.getElementById('client-message');
+
+            messageEl.style.display = 'none';
+
+            if (mode === 'signup') {
+                modeInput.value = 'signup';
+                nameGroup.style.display = 'flex';
+                nameInput.required = true;
+                submitBtn.textContent = 'Create Account';
+                toggleDiv.innerHTML = 'Already have an account? <span onclick="toggleClientMode(\'signin\')">Sign In</span>';
+            } else {
+                modeInput.value = 'signin';
+                nameGroup.style.display = 'none';
+                nameInput.required = false;
+                submitBtn.textContent = 'Client Log In';
+                toggleDiv.innerHTML = 'Don\'t have an account? <span onclick="toggleClientMode(\'signup\')">Create Account</span>';
+            }
+        }
+
+        // Toggle signup vs signin for staff
+        function toggleStaffMode(mode) {
+            const modeInput = document.getElementById('staff-mode');
+            const shopNameGroup = document.getElementById('staff-shop-name-group');
+            const shopNameInput = document.getElementById('staff-shop-name');
+            const nameGroup = document.getElementById('staff-name-group');
+            const nameInput = document.getElementById('staff-fullname');
+            const submitBtn = document.getElementById('login-button');
+            const toggleDiv = document.getElementById('staff-mode-toggle');
+            const messageEl = document.getElementById('auth-message');
+
+            messageEl.style.display = 'none';
+
+            if (mode === 'signup') {
+                modeInput.value = 'signup';
+                shopNameGroup.style.display = 'flex';
+                shopNameInput.required = true;
+                nameGroup.style.display = 'flex';
+                nameInput.required = true;
+                submitBtn.textContent = 'Register Shop';
+                toggleDiv.innerHTML = 'Already have a shop account? <span onclick="toggleStaffMode(\'signin\')">Sign In</span>';
+            } else {
+                modeInput.value = 'signin';
+                shopNameGroup.style.display = 'none';
+                shopNameInput.required = false;
+                nameGroup.style.display = 'none';
+                nameInput.required = false;
+                submitBtn.textContent = 'Sign In to Dashboard';
+                toggleDiv.innerHTML = 'Want to register a new shop? <span onclick="toggleStaffMode(\'signup\')">Register Shop</span>';
+            }
+        }
+
+        // Lazy load admin client with service role privileges
+        function getAdminClient() {
+            return window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
+                auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+            });
+        }
+
+        // Handle staff authentication (signin vs signup)
+        async function handleStaffAuth(e) {
+            e.preventDefault();
+            const mode = document.getElementById('staff-mode').value;
+            const messageEl = document.getElementById('auth-message');
+            const btn = document.getElementById('login-button');
+
+            messageEl.style.display = 'none';
+
+            if (mode === 'signin') {
+                // Call global handleLogin from app.js
+                handleLogin(e);
+                return;
+            }
+
+            // Otherwise, we do tailor self-signup
+            const shopName = document.getElementById('staff-shop-name').value.trim();
+            const fullName = document.getElementById('staff-fullname').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Registering Shop...';
+
+            try {
+                // 1. Sign up auth user in Supabase
+                const { data, error: signupError } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: fullName
+                        }
+                    }
+                });
+
+                if (signupError) throw signupError;
+                if (!data.user) throw new Error("Could not complete user registration.");
+
+                const adminClient = getAdminClient();
+
+                // 2. Insert Organization (using admin client to bypass RLS)
+                const { data: orgData, error: orgError } = await adminClient
+                    .from('organizations')
+                    .insert([{ name: shopName }])
+                    .select()
+                    .single();
+
+                if (orgError) throw orgError;
+
+                // 3. Insert Shop (using admin client to bypass RLS)
+                const { data: shopData, error: shopError } = await adminClient
+                    .from('shops')
+                    .insert([{ organization_id: orgData.id, name: shopName }])
+                    .select()
+                    .single();
+
+                if (shopError) throw shopError;
+
+                // 4. Insert Profile with status 'Pending'
+                const { error: profileError } = await adminClient
+                    .from('user_profiles')
+                    .insert([{
+                        id: data.user.id,
+                        organization_id: orgData.id,
+                        shop_id: shopData.id,
+                        full_name: fullName,
+                        role: 'owner',
+                        status: 'Pending',
+                        email: email
+                    }]);
+
+                if (profileError) throw profileError;
+
+                alert("Shop registered successfully! Awaiting administrator approval.");
+                // Redirect to dashboard (app.js checkSession will block them and show pending page)
+                window.location.href = 'admin-dashboard.html';
+
+            } catch (err) {
+                console.error("Tailor Signup Error:", err);
+                messageEl.textContent = "❌ " + err.message;
+                messageEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Register Shop';
+            }
+        }
+
+        // Handle Client Login & Register via Email
+        async function handleClientAuth(e) {
+            e.preventDefault();
+            const mode = document.getElementById('client-mode').value;
+            const name = document.getElementById('client-name').value.trim();
+            const email = document.getElementById('client-email').value.trim();
+            const password = document.getElementById('client-password').value;
+            const btn = document.getElementById('btn-client-submit');
+            const messageEl = document.getElementById('client-message');
+
+            messageEl.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = mode === 'signup' ? 'Creating Account...' : 'Logging In...';
+
+            try {
+                if (mode === 'signup') {
+                    // 1. Supabase Auth Signup
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email,
+                        password,
+                        options: {
+                            data: {
+                                full_name: name
+                            }
+                        }
+                    });
+
+                    if (error) throw error;
+                    if (!data.user) throw new Error("Could not complete registration.");
+
+                    // 2. Insert Client Profile record
+                    const { error: profileError } = await supabaseClient.from('user_profiles').insert([{
+                        id: data.user.id,
+                        full_name: name,
+                        role: 'client',
+                        email: email,
+                        organization_id: null,
+                        shop_id: null
+                    }]);
+
+                    if (profileError) {
+                        console.error("Could not write profile record:", profileError);
+                        // Safe bypass: we let them log in anyway if the profile insertion fails
+                    }
+
+                    alert("Account created successfully! Redirecting you to the marketplace...");
+                    location.href = 'index.html';
+                } else {
+                    // Supabase Signin
+                    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+
+                    location.href = 'index.html';
+                }
+            } catch (err) {
+                console.error("Client Auth Error:", err);
+                messageEl.textContent = "❌ " + err.message;
+                messageEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = mode === 'signup' ? 'Create Account' : 'Client Log In';
+            }
+        }
+
+        // Handle Google / Facebook OAuth logins
+        async function handleSocialLogin(provider, role = 'client') {
+            try {
+                const redirectUrl = role === 'owner' 
+                    ? window.location.origin + '/tailor-onboarding.html'
+                    : window.location.origin + '/index.html';
+                
+                const { error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: provider,
+                    options: {
+                        redirectTo: redirectUrl
+                    }
+                });
+                if (error) throw error;
+            } catch (err) {
+                alert(`OAuth ${provider} failed: ` + err.message);
+            }
+        }
+    </script>
+</body>
+</html>
