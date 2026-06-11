@@ -245,23 +245,7 @@
             border-radius: 4px;
         }
 
-        /* Slide label badge */
-        .slide-label {
-            position: absolute;
-            bottom: 38px;
-            right: 7%;
-            z-index: 3;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.72em;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.6);
-            transition: all 0.5s;
-        }
-        .slide-label i { color: var(--gold); }
+
 
         .hero-content {
             position: relative;
@@ -492,34 +476,62 @@
             letter-spacing: 0.5px;
         }
 
-        /* ===== MARQUEE / TICKER ===== */
-        .ticker-section {
-            background: var(--gold);
-            padding: 14px 0;
+        /* ===== PREMIUM FASHION STRIP ===== */
+        .fashion-strip {
+            background: rgba(6,16,30,0.97);
+            border-top: 1px solid rgba(201,168,76,0.35);
+            border-bottom: 1px solid rgba(201,168,76,0.35);
             overflow: hidden;
+            padding: 0;
+            user-select: none;
+        }
+        .fashion-row {
+            display: flex;
+            width: max-content;
+            padding: 13px 0;
+        }
+        .fashion-row-inner {
+            display: inline-flex;
+            gap: 0;
+            animation: runLeft 35s linear infinite;
             white-space: nowrap;
         }
-        .ticker-track {
-            display: inline-flex;
-            gap: 60px;
-            animation: ticker 22s linear infinite;
+        .fashion-row.reverse .fashion-row-inner {
+            animation: runRight 40s linear infinite;
         }
-        .ticker-section:hover .ticker-track { animation-play-state: paused; }
-        @keyframes ticker {
+        .fashion-row-inner:hover { animation-play-state: paused; }
+        @keyframes runLeft {
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
         }
-        .ticker-item {
-            color: var(--navy);
-            font-size: 0.78em;
-            font-weight: 800;
-            letter-spacing: 2.5px;
-            text-transform: uppercase;
+        @keyframes runRight {
+            from { transform: translateX(-50%); }
+            to   { transform: translateX(0); }
+        }
+        .fashion-word {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 0.95em;
+            font-weight: 400;
+            color: rgba(255,255,255,0.75);
+            letter-spacing: 1px;
+            padding: 0 10px;
+            transition: color 0.3s;
+        }
+        .fashion-word:hover { color: var(--gold); }
+        .fashion-sep {
+            color: var(--gold);
+            font-size: 0.7em;
+            padding: 0 6px;
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            opacity: 0.8;
         }
-        .ticker-item i { font-size: 1em; opacity: 0.7; }
+        /* Highlight alternating words */
+        .fashion-word.highlight {
+            color: var(--gold);
+            font-weight: 600;
+        }
 
         /* ===== PROVIDER CARDS ===== */
         .providers-grid {
@@ -1042,8 +1054,7 @@
             <div class="slide-dot" onclick="goToSlide(2)"></div>
             <div class="slide-dot" onclick="goToSlide(3)"></div>
         </div>
-        <!-- Current slide label -->
-        <div class="slide-label" id="slideLabel"><i class="fas fa-tshirt"></i> Gen Z Fashion</div>
+
 
         <div class="hero-content">
             <div class="hero-eyebrow animate-fadeup delay-1">
@@ -1090,26 +1101,58 @@
         </div>
     </section>
 
-    <!-- ===== TICKER ===== -->
-    <div class="ticker-section" aria-hidden="true">
-        <div class="ticker-track">
-            <span class="ticker-item"><i class="fas fa-cut"></i> Bespoke Tailoring</span>
-            <span class="ticker-item"><i class="fas fa-tshirt"></i> Ready-Made Fashion</span>
-            <span class="ticker-item"><i class="fas fa-clock"></i> Luxury Watches</span>
-            <span class="ticker-item"><i class="fas fa-shoe-prints"></i> Premium Shoes</span>
-            <span class="ticker-item"><i class="fas fa-hat-cowboy"></i> Hats &amp; Caps</span>
-            <span class="ticker-item"><i class="fas fa-gem"></i> Accessories</span>
-            <span class="ticker-item"><i class="fas fa-user-tie"></i> Senator Wear</span>
-            <span class="ticker-item"><i class="fas fa-female"></i> Dresses &amp; Gowns</span>
-            <!-- Duplicate for seamless loop -->
-            <span class="ticker-item"><i class="fas fa-cut"></i> Bespoke Tailoring</span>
-            <span class="ticker-item"><i class="fas fa-tshirt"></i> Ready-Made Fashion</span>
-            <span class="ticker-item"><i class="fas fa-clock"></i> Luxury Watches</span>
-            <span class="ticker-item"><i class="fas fa-shoe-prints"></i> Premium Shoes</span>
-            <span class="ticker-item"><i class="fas fa-hat-cowboy"></i> Hats &amp; Caps</span>
-            <span class="ticker-item"><i class="fas fa-gem"></i> Accessories</span>
-            <span class="ticker-item"><i class="fas fa-user-tie"></i> Senator Wear</span>
-            <span class="ticker-item"><i class="fas fa-female"></i> Dresses &amp; Gowns</span>
+    <!-- ===== PREMIUM FASHION STRIP ===== -->
+    <div class="fashion-strip" aria-hidden="true">
+        <!-- Row 1: scrolls left -->
+        <div class="fashion-row">
+            <div class="fashion-row-inner">
+                <span class="fashion-word highlight">Bespoke Tailoring</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Luxury Watches</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Premium Shoes</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Ready-Made Fashion</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Hats &amp; Caps</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Accessories</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Senator Wear</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Dresses &amp; Gowns</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Sneakers</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Capes &amp; Outerwear</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Casual Wear</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Bags &amp; Leather Goods</span><span class="fashion-sep">✦</span>
+                <!-- duplicate -->
+                <span class="fashion-word highlight">Bespoke Tailoring</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Luxury Watches</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Premium Shoes</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Ready-Made Fashion</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Hats &amp; Caps</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Accessories</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Senator Wear</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Dresses &amp; Gowns</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Sneakers</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Capes &amp; Outerwear</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Casual Wear</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Bags &amp; Leather Goods</span><span class="fashion-sep">✦</span>
+            </div>
+        </div>
+        <!-- Row 2: scrolls right (opposite direction) -->
+        <div class="fashion-row reverse">
+            <div class="fashion-row-inner">
+                <span class="fashion-word">Nairobi Style</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Handcrafted in Kenya</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Your Perfect Fit</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">500+ Providers</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Bespoke &amp; Ready-Made</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Express Your Style</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Kenyan Fashion Forward</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Curated. Crafted. Delivered.</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Nairobi Style</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Handcrafted in Kenya</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Your Perfect Fit</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">500+ Providers</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Bespoke &amp; Ready-Made</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Express Your Style</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word">Kenyan Fashion Forward</span><span class="fashion-sep">✦</span>
+                <span class="fashion-word highlight">Curated. Crafted. Delivered.</span><span class="fashion-sep">✦</span>
+            </div>
         </div>
     </div>
 
