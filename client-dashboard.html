@@ -1414,6 +1414,46 @@
 
             renderChatHistory();
             scrollToBottom();
+
+            // Pre-fetch and cache the recipient (shop owner) ID for this thread
+            if (!activeThread.recipientId) {
+                try {
+                    const { data: shop } = await supabaseClient
+                        .from('shops')
+                        .select('organization_id')
+                        .eq('id', shopId)
+                        .single();
+
+                    if (shop && shop.organization_id) {
+                        // Try shop-specific manager first
+                        const { data: shopManager } = await supabaseClient
+                            .from('user_profiles')
+                            .select('id')
+                            .eq('shop_id', shopId)
+                            .in('role', ['manager', 'owner'])
+                            .limit(1);
+
+                        if (shopManager && shopManager[0]) {
+                            activeThread.recipientId = shopManager[0].id;
+                        } else {
+                            const { data: owner } = await supabaseClient
+                                .from('user_profiles')
+                                .select('id')
+                                .eq('organization_id', shop.organization_id)
+                                .eq('role', 'owner')
+                                .limit(1);
+                            activeThread.recipientId = owner && owner[0] ? owner[0].id : null;
+                        }
+                    }
+                    // Final fallback: look in previous message history
+                    if (!activeThread.recipientId && activeThread.messages && activeThread.messages.length > 0) {
+                        const tailorMsg = activeThread.messages.find(m => m.sender_id && m.sender_id !== currentUser.id);
+                        if (tailorMsg) activeThread.recipientId = tailorMsg.sender_id;
+                    }
+                } catch (e) {
+                    console.warn("Pre-fetch recipientId failed:", e);
+                }
+            }
         }
 
         function renderChatHistory() {
@@ -1514,25 +1554,29 @@
                 const inquiryId = latestInquiry.id;
 
                 // Find recipient (shop owner/manager)
+                // Strategy: resolve the shop's organization_id, then find the owner of that org
                 let recipientId = null;
                 try {
-                    let { data: profile } = await supabaseClient
-                        .from('user_profiles')
-                        .select('id')
-                        .eq('shop_id', activeThread.shopId)
-                        .in('role', ['owner', 'manager'])
-                        .limit(1);
+                    // Primary: look up shop → org → owner (most reliable, since shop_id is usually null on user_profiles)
+                    const { data: shop } = await supabaseClient
+                        .from('shops')
+                        .select('organization_id')
+                        .eq('id', activeThread.shopId)
+                        .single();
 
-                    recipientId = profile && profile[0] ? profile[0].id : null;
+                    if (shop && shop.organization_id) {
+                        // First try to find a manager assigned to this exact shop
+                        const { data: shopManager } = await supabaseClient
+                            .from('user_profiles')
+                            .select('id')
+                            .eq('shop_id', activeThread.shopId)
+                            .in('role', ['manager', 'owner'])
+                            .limit(1);
 
-                    if (!recipientId) {
-                        const { data: shop } = await supabaseClient
-                            .from('shops')
-                            .select('organization_id')
-                            .eq('id', activeThread.shopId)
-                            .single();
-
-                        if (shop) {
+                        if (shopManager && shopManager[0]) {
+                            recipientId = shopManager[0].id;
+                        } else {
+                            // Fall back to org owner
                             const { data: owner } = await supabaseClient
                                 .from('user_profiles')
                                 .select('id')
@@ -1559,8 +1603,12 @@
                 }
 
                 if (!recipientId) {
-                    recipientId = "573267c0-fd4f-4559-8e22-e8cb162cd605"; // Ronny Admin fallback
+                    alert("Cannot send message: Could not find the shop owner. Please try again or contact support.");
+                    return;
                 }
+
+                // Cache recipientId on the thread for future messages in this chat
+                activeThread.recipientId = recipientId;
 
                 // Insert message
                 const { data, error } = await supabaseClient
@@ -2123,25 +2171,26 @@
                 // Find recipient (shop manager/owner)
                 let recipientId = activeThread.recipientId;
                 if (!recipientId) {
-                    // Find recipient (shop owner/manager)
+                    // Find recipient (shop owner/manager) via org lookup
                     try {
-                        let { data: profile } = await supabaseClient
-                            .from('user_profiles')
-                            .select('id')
-                            .eq('shop_id', activeThread.shopId)
-                            .in('role', ['owner', 'manager'])
-                            .limit(1);
+                        const { data: shop } = await supabaseClient
+                            .from('shops')
+                            .select('organization_id')
+                            .eq('id', activeThread.shopId)
+                            .single();
 
-                        recipientId = profile && profile[0] ? profile[0].id : null;
+                        if (shop && shop.organization_id) {
+                            // Try shop-specific manager first
+                            const { data: shopManager } = await supabaseClient
+                                .from('user_profiles')
+                                .select('id')
+                                .eq('shop_id', activeThread.shopId)
+                                .in('role', ['manager', 'owner'])
+                                .limit(1);
 
-                        if (!recipientId) {
-                            const { data: shop } = await supabaseClient
-                                .from('shops')
-                                .select('organization_id')
-                                .eq('id', activeThread.shopId)
-                                .single();
-
-                            if (shop) {
+                            if (shopManager && shopManager[0]) {
+                                recipientId = shopManager[0].id;
+                            } else {
                                 const { data: owner } = await supabaseClient
                                     .from('user_profiles')
                                     .select('id')
@@ -2165,10 +2214,6 @@
                                 console.log("Resolved recipientId from message history fallback:", recipientId);
                             }
                         }
-                    }
-
-                    if (!recipientId) {
-                        recipientId = "573267c0-fd4f-4559-8e22-e8cb162cd605"; // Ronny Admin fallback
                     }
                 }
 
