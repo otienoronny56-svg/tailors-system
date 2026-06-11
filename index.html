@@ -441,10 +441,16 @@
 
         .categories-grid {
             display: flex;
-            gap: 14px;
-            justify-content: center;
-            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            /* Hide scrollbar but keep scroll */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
+        .categories-grid::-webkit-scrollbar { display: none; }
 
         /* Entry state — hidden before animation */
         .cat-pill {
@@ -527,9 +533,6 @@
             gap: 0;
             animation: runLeft 35s linear infinite;
             white-space: nowrap;
-        }
-        .fashion-row.reverse .fashion-row-inner {
-            animation: runRight 40s linear infinite;
         }
         .fashion-row-inner:hover { animation-play-state: paused; }
         @keyframes runLeft {
@@ -1174,27 +1177,6 @@
                 <span class="fashion-word">Capes &amp; Outerwear</span><span class="fashion-sep">✦</span>
                 <span class="fashion-word highlight">Casual Wear</span><span class="fashion-sep">✦</span>
                 <span class="fashion-word">Bags &amp; Leather Goods</span><span class="fashion-sep">✦</span>
-            </div>
-        </div>
-        <!-- Row 2: scrolls right (opposite direction) -->
-        <div class="fashion-row reverse">
-            <div class="fashion-row-inner">
-                <span class="fashion-word">Nairobi Style</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Handcrafted in Kenya</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Your Perfect Fit</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">500+ Providers</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Bespoke &amp; Ready-Made</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Express Your Style</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Kenyan Fashion Forward</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Curated. Crafted. Delivered.</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Nairobi Style</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Handcrafted in Kenya</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Your Perfect Fit</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">500+ Providers</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Bespoke &amp; Ready-Made</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Express Your Style</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Kenyan Fashion Forward</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Curated. Crafted. Delivered.</span><span class="fashion-sep">✦</span>
             </div>
         </div>
     </div>
