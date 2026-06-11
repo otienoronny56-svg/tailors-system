@@ -508,6 +508,30 @@ async function checkSession() {
             return;
         }
 
+        // 🛑 NEW: Check for organization suspension (Enforcement)
+        if (USER_PROFILE.organization_id && USER_PROFILE.role !== 'superadmin') {
+            const { data: org, error: orgError } = await supabaseClient
+                .from('organizations')
+                .select('subscription_status')
+                .eq('id', USER_PROFILE.organization_id)
+                .single();
+            if (!orgError && org && org.subscription_status === 'Suspended') {
+                document.body.innerHTML = `
+                    <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #060c18; font-family: 'Montserrat', sans-serif; color: white;">
+                        <div style="text-align: center; background: rgba(17, 34, 64, 0.75); border: 1px solid rgba(212, 175, 55, 0.15); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 450px;">
+                            <div style="font-size: 50px; color: #ef4444; margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i></div>
+                            <h1 style="color: var(--brand-gold); margin-bottom: 15px; font-family: 'Playfair Display', serif;">Workspace Suspended</h1>
+                            <p style="color: var(--brand-slate); line-height: 1.6; margin-bottom: 25px;">
+                                Your shop/organization has been suspended. Please contact platform administration to reactivate your workspace.
+                            </p>
+                            <button onclick="supabaseClient.auth.signOut().then(() => location.href='index.html')" class="small-btn" style="width: 100%; background: #ef4444; color: white; border: none; font-weight: bold; cursor: pointer;">Logout</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+        }
+
         logDebug(`User authenticated: ${USER_PROFILE.full_name} (${USER_PROFILE.role})`, USER_PROFILE, 'success');
 
         // Update UI
@@ -1008,17 +1032,26 @@ async function loadOrganizations() {
         const tbody = document.getElementById('orgs-tbody');
         if (tbody) {
             if (!orgs || orgs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No organizations found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No organizations found</td></tr>';
             } else {
                 tbody.innerHTML = orgs.map(org => {
                     const shopCount = (org.shops && org.shops[0] && org.shops[0].count !== undefined) ? org.shops[0].count : (Array.isArray(org.shops) ? org.shops.length : 0);
+                    const statusText = org.subscription_status || 'Active';
+                    const isSuspended = statusText === 'Suspended';
+                    const badgeColor = isSuspended ? '#ef4444' : '#10b981';
+                    const btnText = isSuspended ? 'Reactivate' : 'Suspend';
+                    const btnBg = isSuspended ? '#10b981' : '#f59e0b';
                     return `
                     <tr>
                         <td><small>${org.id.slice(-8)}</small></td>
                         <td><strong>${org.name}</strong></td>
                         <td><span style="background:var(--brand-gold); color:black; padding:3px 10px; border-radius:12px; font-weight:bold; font-size:0.85em;">${shopCount}</span></td>
                         <td>${formatDate(org.created_at)}</td>
-                        <td><button class="small-btn" onclick="deleteOrganization('${org.id}')" style="background:#ef4444; color:white;">Delete</button></td>
+                        <td><span style="background:${badgeColor}; color:white; padding:3px 10px; border-radius:12px; font-weight:bold; font-size:0.85em;">${statusText}</span></td>
+                        <td>
+                            <button class="small-btn" onclick="toggleOrganizationSuspension('${org.id}', '${statusText}')" style="background:${btnBg}; color:white; border:none; margin-right:5px;">${btnText}</button>
+                            <button class="small-btn" onclick="deleteOrganization('${org.id}')" style="background:#ef4444; color:white; border:none;">Delete</button>
+                        </td>
                     </tr>
                 `}).join('');
             }
@@ -1264,6 +1297,23 @@ window.shareAdminWhatsApp = function(email, password, name) {
     const text = `*Welcome to Sir's 'n' Suits, ${name}!* 👔\n\nYour Administrator account has been securely provisioned.\n\n*Login Portal:* ${loginUrl}\n*Email:* ${email}\n*Password:* ${password}\n\n_Please log in to manage your organization orders._`;
     const waUrl = "https://wa.me/?text=" + encodeURIComponent(text);
     window.open(waUrl, "_blank");
+};
+
+window.toggleOrganizationSuspension = async function(id, currentStatus) {
+    const newStatus = currentStatus === 'Suspended' ? 'Active' : 'Suspended';
+    const actionText = currentStatus === 'Suspended' ? 'reactivate' : 'suspend';
+    if (!confirm(`Are you sure you want to ${actionText} this organization?`)) return;
+    try {
+        const { error } = await supabaseClient
+            .from('organizations')
+            .update({ subscription_status: newStatus })
+            .eq('id', id);
+        if (error) throw error;
+        alert(`Organization successfully ${newStatus === 'Suspended' ? 'suspended' : 'activated'}!`);
+        loadOrganizations();
+    } catch (err) {
+        alert("Error updating organization: " + err.message);
+    }
 };
 
 window.deleteOrganization = async function(id) {
