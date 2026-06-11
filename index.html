@@ -430,6 +430,13 @@
             text-transform: uppercase;
             color: var(--slate);
             margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .categories-label.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .categories-grid {
@@ -439,6 +446,7 @@
             flex-wrap: wrap;
         }
 
+        /* Entry state — hidden before animation */
         .cat-pill {
             display: flex;
             flex-direction: column;
@@ -449,25 +457,49 @@
             border-radius: 16px;
             padding: 22px 28px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
             min-width: 110px;
             text-decoration: none;
             color: var(--light-slate);
             backdrop-filter: blur(8px);
+            /* Animation entry state */
+            opacity: 0;
+            transform: translateY(28px) scale(0.92);
+            transition:
+                opacity 0.55s cubic-bezier(0.4,0,0.2,1),
+                transform 0.55s cubic-bezier(0.4,0,0.2,1),
+                border-color 0.3s,
+                background 0.3s,
+                box-shadow 0.3s,
+                color 0.3s;
+        }
+        .cat-pill.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
         }
         .cat-pill:hover {
             border-color: var(--gold);
             background: rgba(201,168,76,0.1);
             color: var(--gold);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: translateY(-6px) scale(1.04);
+            box-shadow: 0 14px 35px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,168,76,0.2);
         }
         .cat-pill i {
             font-size: 1.6em;
             color: var(--gold);
-            transition: transform 0.3s;
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            animation: iconIdle 3s ease-in-out infinite;
         }
-        .cat-pill:hover i { transform: scale(1.15); }
+        /* Subtle floating idle animation on icon */
+        @keyframes iconIdle {
+            0%, 100% { transform: translateY(0);    filter: drop-shadow(0 0 0px rgba(201,168,76,0)); }
+            50%       { transform: translateY(-3px); filter: drop-shadow(0 0 6px rgba(201,168,76,0.55)); }
+        }
+        /* On hover — bounce the icon up with spring */
+        .cat-pill:hover i {
+            animation: none;
+            transform: translateY(-6px) scale(1.22);
+            filter: drop-shadow(0 0 10px rgba(201,168,76,0.7));
+        }
         .cat-pill span {
             font-size: 0.78em;
             font-weight: 600;
@@ -536,7 +568,7 @@
         /* ===== PROVIDER CARDS ===== */
         .providers-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 28px;
         }
 
@@ -545,12 +577,23 @@
             border: 1px solid var(--glass-border);
             border-radius: 18px;
             overflow: hidden;
-            transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
             display: flex;
             flex-direction: column;
             cursor: pointer;
             text-decoration: none;
             backdrop-filter: blur(10px);
+            /* Entry animation state */
+            opacity: 0;
+            transform: translateY(36px);
+            transition:
+                opacity 0.6s cubic-bezier(0.4,0,0.2,1),
+                transform 0.6s cubic-bezier(0.4,0,0.2,1),
+                border-color 0.35s,
+                box-shadow 0.35s;
+        }
+        .provider-card.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         .provider-card:hover {
             transform: translateY(-10px);
@@ -1158,37 +1201,37 @@
 
     <!-- ===== CATEGORIES ===== -->
     <div class="categories-section" id="categories-section">
-        <p class="categories-label">Explore by Category</p>
-        <div class="categories-grid">
-            <a href="client-signup.html" class="cat-pill">
+        <p class="categories-label" id="cat-label">Explore by Category</p>
+        <div class="categories-grid" id="cat-grid">
+            <a href="client-signup.html" class="cat-pill" data-index="0">
                 <i class="fas fa-cut"></i>
                 <span>Bespoke<br>Tailoring</span>
             </a>
-            <a href="client-signup.html" class="cat-pill">
+            <a href="client-signup.html" class="cat-pill" data-index="1">
                 <i class="fas fa-tshirt"></i>
                 <span>Ready-Made<br>Fashion</span>
             </a>
-            <a href="client-signup.html" class="cat-pill">
+            <a href="client-signup.html" class="cat-pill" data-index="2">
                 <i class="fas fa-clock"></i>
                 <span>Luxury<br>Watches</span>
             </a>
-            <a href="client-signup.html" class="cat-pill">
+            <a href="client-signup.html" class="cat-pill" data-index="3">
                 <i class="fas fa-shoe-prints"></i>
                 <span>Shoes &amp;<br>Footwear</span>
             </a>
-            <a href="client-signup.html" class="cat-pill">
+            <a href="client-signup.html" class="cat-pill" data-index="4">
                 <i class="fas fa-hat-cowboy"></i>
                 <span>Hats &amp;<br>Caps</span>
             </a>
-            <a href="client-signup.html" class="cat-pill">
+            <a href="client-signup.html" class="cat-pill" data-index="5">
                 <i class="fas fa-gem"></i>
                 <span>Accessories</span>
             </a>
-            <a href="client-signup.html" class="cat-pill">
+            <a href="client-signup.html" class="cat-pill" data-index="6">
                 <i class="fas fa-user-tie"></i>
                 <span>Senator<br>Wear</span>
             </a>
-            <a href="client-signup.html" class="cat-pill">
+            <a href="client-signup.html" class="cat-pill" data-index="7">
                 <i class="fas fa-female"></i>
                 <span>Dresses &amp;<br>Gowns</span>
             </a>
@@ -1207,8 +1250,7 @@
         </div>
 
         <div class="providers-grid" id="providers-container">
-            <!-- Static showcase providers -->
-            <a class="provider-card" href="client-signup.html">
+            <a class="provider-card" href="client-signup.html" data-index="0">
                 <div class="provider-banner" style="background-image: url('https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=600')">
                     <span class="provider-category-tag">Bespoke Tailoring</span>
                     <div class="provider-avatar"><i class="fas fa-cut"></i></div>
@@ -1224,7 +1266,7 @@
                 </div>
             </a>
 
-            <a class="provider-card" href="client-signup.html">
+            <a class="provider-card" href="client-signup.html" data-index="1">
                 <div class="provider-banner" style="background-image: url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600')">
                     <span class="provider-category-tag">Luxury Watches</span>
                     <div class="provider-avatar"><i class="fas fa-clock"></i></div>
@@ -1240,9 +1282,9 @@
                 </div>
             </a>
 
-            <a class="provider-card" href="client-signup.html">
+            <a class="provider-card" href="client-signup.html" data-index="2">
                 <div class="provider-banner" style="background-image: url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600')">
-                    <span class="provider-category-tag">Shoes & Footwear</span>
+                    <span class="provider-category-tag">Shoes &amp; Footwear</span>
                     <div class="provider-avatar"><i class="fas fa-shoe-prints"></i></div>
                 </div>
                 <div class="provider-body">
@@ -1251,22 +1293,6 @@
                     <div class="provider-desc">Hand-finished leather shoes, sneakers, and sandals. Custom sizing available for that perfect, comfortable fit.</div>
                     <div class="provider-footer">
                         <div class="provider-rating"><i class="fas fa-star"></i> 4.7 (207 reviews)</div>
-                        <span class="btn-visit">Visit Shop</span>
-                    </div>
-                </div>
-            </a>
-
-            <a class="provider-card" href="client-signup.html">
-                <div class="provider-banner" style="background-image: url('https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=600')">
-                    <span class="provider-category-tag">Accessories</span>
-                    <div class="provider-avatar"><i class="fas fa-gem"></i></div>
-                </div>
-                <div class="provider-body">
-                    <div class="provider-name">Adorn Accessories Ke</div>
-                    <div class="provider-location"><i class="fas fa-map-marker-alt"></i> Parklands, Nairobi</div>
-                    <div class="provider-desc">Ties, pocket squares, cufflinks, belts, and bags. The finishing touches that elevate any outfit from good to unforgettable.</div>
-                    <div class="provider-footer">
-                        <div class="provider-rating"><i class="fas fa-star"></i> 4.9 (63 reviews)</div>
                         <span class="btn-visit">Visit Shop</span>
                     </div>
                 </div>
@@ -1612,6 +1638,55 @@
             }
 
             startTimer();
+        })();
+
+        // ===== SCROLL-TRIGGERED ANIMATIONS (Category Pills + Provider Cards) =====
+        (function() {
+            const STAGGER = 90; // ms between each item
+
+            function animateOnScroll(selector, parentSelector) {
+                const parent = document.querySelector(parentSelector);
+                if (!parent) return;
+                const label = parent.querySelector('.categories-label');
+                const items = parent.querySelectorAll(selector);
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (!entry.isIntersecting) return;
+                        // Animate label first
+                        if (label) {
+                            setTimeout(() => label.classList.add('visible'), 0);
+                        }
+                        // Stagger items
+                        items.forEach(item => {
+                            const idx = parseInt(item.dataset.index || 0);
+                            setTimeout(() => item.classList.add('visible'), idx * STAGGER + 120);
+                        });
+                        observer.disconnect();
+                    });
+                }, { threshold: 0.15 });
+
+                observer.observe(parent);
+            }
+
+            // Category pills
+            animateOnScroll('.cat-pill', '#categories-section');
+
+            // Provider cards (no label)
+            const provGrid = document.querySelector('#providers-container');
+            if (provGrid) {
+                const provObs = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (!entry.isIntersecting) return;
+                        provGrid.querySelectorAll('.provider-card').forEach(card => {
+                            const idx = parseInt(card.dataset.index || 0);
+                            setTimeout(() => card.classList.add('visible'), idx * 130 + 80);
+                        });
+                        provObs.disconnect();
+                    });
+                }, { threshold: 0.1 });
+                provObs.observe(provGrid);
+            }
         })();
     </script>
 </body>
