@@ -358,7 +358,10 @@
         }
 
         function executeRedirect() {
-            window.location.href = 'client-dashboard.html';
+            // Honor ?next= param (e.g. shop.html?id=xxx) — fallback to client dashboard
+            const nextUrl = urlParams.get('next') || sessionStorage.getItem('auth_next');
+            sessionStorage.removeItem('auth_next');
+            window.location.href = nextUrl || 'client-dashboard.html';
         }
 
         // Init Supabase
@@ -379,7 +382,11 @@
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting to Google...';
             }
-            
+
+            // Persist ?next= across the OAuth redirect (Google takes user away & back)
+            const nextUrl = urlParams.get('next');
+            if (nextUrl) sessionStorage.setItem('auth_next', nextUrl);
+
             const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {

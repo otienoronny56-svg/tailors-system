@@ -1455,12 +1455,6 @@
             location.reload();
         }
 
-        function escapeHTML(str) {
-            if (!str) return '';
-            return str.replace(/[&<>'"]/g,
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
-        }
-
         async function initMarketplace() {
             try {
                 const { data, error } = await supabaseClient
@@ -1658,13 +1652,19 @@
                 <div class="skeleton-card" data-index="2"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>`;
 
             try {
-                const SB_URL = 'https://ouuhirckiavcvgqlpriw.supabase.co';
-                const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91dWhpcmNraWF2Y3ZncWxwcml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYyNDUsImV4cCI6MjA4OTQ5MjI0NX0.l5diE9bfcRQo8ZSMsAx-alG89GFifGA11hA059zDhXM';
+                const SB_URL = APP_CONFIG.supabaseUrl;
+                const SB_KEY = APP_CONFIG.supabaseKey;
 
-                const res = await fetch(
-                    `${SB_URL}/rest/v1/shops?is_public=eq.true&order=created_at.desc&limit=3&select=id,name,location_name,description,banner_image,profile_image`,
-                    { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
-                );
+                // Check session in parallel with the fetch
+                const sbClient = supabase.createClient(SB_URL, SB_KEY);
+                const [res, { data: { user } }] = await Promise.all([
+                    fetch(
+                        `${SB_URL}/rest/v1/shops?is_public=eq.true&order=created_at.desc&limit=3&select=id,name,location_name,description,banner_image,profile_image`,
+                        { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
+                    ),
+                    sbClient.auth.getUser()
+                ]);
+                const isLoggedIn = !!user;
 
                 const shops = await res.json();
 
@@ -1703,8 +1703,14 @@
 
                     const loc = shop.location_name || 'Nairobi, Kenya';
 
+                    // Smart routing: logged-in → direct to shop; guest → login first, then redirect to shop
+                    const shopUrl = `shop.html?id=${encodeURIComponent(shop.id)}`;
+                    const href = isLoggedIn
+                        ? shopUrl
+                        : `client-signup.html?next=${encodeURIComponent(shopUrl)}`;
+
                     return `
-                    <a class="provider-card visible" href="client-signup.html" data-index="${i}" style="transition-delay:${i*130}ms">
+                    <a class="provider-card visible" href="${href}" data-index="${i}" style="transition-delay:${i*130}ms">
                         <div class="provider-banner" style="background-image:url('${banner}')">
                             <div class="provider-avatar" ${avatar ? `style="background-image:url('${avatar}');background-size:cover;"` : ''}>
                                 ${!avatar ? '<i class="fas fa-store"></i>' : ''}
