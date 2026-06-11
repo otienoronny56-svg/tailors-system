@@ -14,7 +14,7 @@ DROP POLICY IF EXISTS "Allow Profile Initial Lookup" ON public.user_profiles;
 -- 2. CREATE CLEAN NON-RECURSIVE SELECT POLICY
 -- ==========================================================
 -- Allows any authenticated user to lookup profiles (e.g. tailors looking up clients, and vice versa)
-CREATE POLICY "Public Read Profiles" 
+CREATE POLICY "Public Read Profiles"
 ON public.user_profiles 
 FOR SELECT 
 TO authenticated 
