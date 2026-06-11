@@ -167,9 +167,9 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             overflow: hidden;
-            padding: 120px 7% 80px;
+            padding: 130px 7% 100px;
         }
 
         /* ---- Slideshow ---- */
@@ -184,16 +184,18 @@
             inset: 0;
             background-size: cover;
             background-position: center center;
+            background-repeat: no-repeat;
             opacity: 0;
             transition: opacity 1.4s ease-in-out;
-            filter: brightness(0.62) saturate(1.3);
-            transform: scale(1.08);
+            filter: brightness(0.65) saturate(1.2);
+            transform: scale(1.03);
             animation: none;
+            transform-origin: center center;
         }
 
         .hero-slide.active {
             opacity: 1;
-            animation: kenBurns 8s ease-in-out forwards;
+            animation: kenBurns 9s ease-in-out forwards;
         }
 
         .hero-slide.exit {
@@ -202,18 +204,18 @@
         }
 
         @keyframes kenBurns {
-            from { transform: scale(1.08); }
+            from { transform: scale(1.03); }
             to   { transform: scale(1.0);  }
         }
 
-        /* Gradient overlay on top of slideshow */
+        /* Gradient overlay - dark center band for text, lighter sides to show subjects */
         .hero-overlay {
             position: absolute;
             inset: 0;
             background:
-                linear-gradient(to right, rgba(6,16,30,0.80) 0%, rgba(6,16,30,0.30) 50%, rgba(6,16,30,0.10) 100%),
-                linear-gradient(to top, rgba(6,16,30,0.88) 0%, transparent 42%),
-                radial-gradient(ellipse at 70% 20%, rgba(201,168,76,0.09) 0%, transparent 50%);
+                radial-gradient(ellipse 55% 100% at 42% 50%, rgba(6,16,30,0.82) 0%, rgba(6,16,30,0.35) 65%, transparent 100%),
+                linear-gradient(to top, rgba(6,16,30,0.9) 0%, rgba(6,16,30,0.2) 35%, transparent 60%),
+                linear-gradient(to bottom, rgba(6,16,30,0.7) 0%, transparent 20%);
             z-index: 1;
         }
 
@@ -264,7 +266,7 @@
         .hero-content {
             position: relative;
             z-index: 2;
-            max-width: 780px;
+            max-width: 620px;
         }
 
         .hero-eyebrow {
@@ -1028,8 +1030,9 @@
         <!-- Auto Slideshow -->
         <div class="hero-slideshow" id="heroSlideshow">
             <div class="hero-slide active" style="background-image:url('hero_bg.png')" data-label="Gen Z Fashion" data-icon="fa-tshirt"></div>
-            <div class="hero-slide" style="background-image:url('hero_slide2.png')" data-label="Luxury Watches" data-icon="fa-clock"></div>
-            <div class="hero-slide" style="background-image:url('hero_slide3.png')" data-label="Bespoke Suits" data-icon="fa-user-tie"></div>
+            <div class="hero-slide" style="background-image:url('hero_slide2.png')" data-label="Luxury Watches & Bags" data-icon="fa-clock"></div>
+            <div class="hero-slide" style="background-image:url('hero_slide3.png')" data-label="Bespoke Suits & Gowns" data-icon="fa-user-tie"></div>
+            <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=1600')" data-label="Casual, Sneakers & Capes" data-icon="fa-shoe-prints"></div>
         </div>
         <div class="hero-overlay"></div>
         <!-- Dot nav -->
@@ -1037,6 +1040,7 @@
             <div class="slide-dot active" onclick="goToSlide(0)"></div>
             <div class="slide-dot" onclick="goToSlide(1)"></div>
             <div class="slide-dot" onclick="goToSlide(2)"></div>
+            <div class="slide-dot" onclick="goToSlide(3)"></div>
         </div>
         <!-- Current slide label -->
         <div class="slide-label" id="slideLabel"><i class="fas fa-tshirt"></i> Gen Z Fashion</div>
