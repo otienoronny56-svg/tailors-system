@@ -1061,6 +1061,29 @@
             .footer-inner { grid-template-columns: 1fr; gap: 30px; }
             footer { padding-left: 5%; padding-right: 5%; }
         }
+        /* Shimmer skeleton for loading state */
+        @keyframes shimmer {
+            0%   { background-position: -600px 0; }
+            100% { background-position:  600px 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, var(--navy-mid) 25%, rgba(255,255,255,0.05) 50%, var(--navy-mid) 75%);
+            background-size: 600px 100%;
+            animation: shimmer 1.4s infinite linear;
+            border-radius: 10px;
+        }
+        .skeleton-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .skeleton-banner { height: 175px; }
+        .skeleton-body { padding: 52px 22px 24px; display: flex; flex-direction: column; gap: 12px; }
+        .skeleton-line { height: 14px; border-radius: 6px; }
+        .skeleton-line.wide { width: 70%; }
+        .skeleton-line.medium { width: 50%; }
+        .skeleton-line.narrow { width: 35%; }
     </style>
 </head>
 <body>
@@ -1232,53 +1255,7 @@
         </div>
 
         <div class="providers-grid" id="providers-container">
-            <a class="provider-card" href="client-signup.html" data-index="0">
-                <div class="provider-banner" style="background-image: url('https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=600')">
-                    <span class="provider-category-tag">Bespoke Tailoring</span>
-                    <div class="provider-avatar"><i class="fas fa-cut"></i></div>
-                </div>
-                <div class="provider-body">
-                    <div class="provider-name">Nairobi Bespoke House</div>
-                    <div class="provider-location"><i class="fas fa-map-marker-alt"></i> Westlands, Nairobi</div>
-                    <div class="provider-desc">Master tailors specialising in executive suits, Senator wear, and custom occasion wear for the modern Kenyan gentleman.</div>
-                    <div class="provider-footer">
-                        <div class="provider-rating"><i class="fas fa-star"></i> 4.9 (142 reviews)</div>
-                        <span class="btn-visit">Visit Shop</span>
-                    </div>
-                </div>
-            </a>
-
-            <a class="provider-card" href="client-signup.html" data-index="1">
-                <div class="provider-banner" style="background-image: url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600')">
-                    <span class="provider-category-tag">Luxury Watches</span>
-                    <div class="provider-avatar"><i class="fas fa-clock"></i></div>
-                </div>
-                <div class="provider-body">
-                    <div class="provider-name">Prestige Timepieces KE</div>
-                    <div class="provider-location"><i class="fas fa-map-marker-alt"></i> CBD, Nairobi</div>
-                    <div class="provider-desc">Curated collection of Swiss and Japanese timepieces. Authentic luxury watches, straps, and servicing experts.</div>
-                    <div class="provider-footer">
-                        <div class="provider-rating"><i class="fas fa-star"></i> 4.8 (89 reviews)</div>
-                        <span class="btn-visit">Visit Shop</span>
-                    </div>
-                </div>
-            </a>
-
-            <a class="provider-card" href="client-signup.html" data-index="2">
-                <div class="provider-banner" style="background-image: url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600')">
-                    <span class="provider-category-tag">Shoes &amp; Footwear</span>
-                    <div class="provider-avatar"><i class="fas fa-shoe-prints"></i></div>
-                </div>
-                <div class="provider-body">
-                    <div class="provider-name">Savanna Step Studio</div>
-                    <div class="provider-location"><i class="fas fa-map-marker-alt"></i> Kilimani, Nairobi</div>
-                    <div class="provider-desc">Hand-finished leather shoes, sneakers, and sandals. Custom sizing available for that perfect, comfortable fit.</div>
-                    <div class="provider-footer">
-                        <div class="provider-rating"><i class="fas fa-star"></i> 4.7 (207 reviews)</div>
-                        <span class="btn-visit">Visit Shop</span>
-                    </div>
-                </div>
-            </a>
+            <!-- Populated by JS from Supabase real shops -->
         </div>
     </section>
 
@@ -1669,6 +1646,90 @@
                 }, { threshold: 0.1 });
                 provObs.observe(provGrid);
             }
+        // ===== LIVE PROVIDER CARDS FROM SUPABASE =====
+        async function loadFeaturedProviders() {
+            const container = document.getElementById('providers-container');
+            if (!container) return;
+
+            // Show shimmer skeletons while loading
+            container.innerHTML = `
+                <div class="skeleton-card" data-index="0"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>
+                <div class="skeleton-card" data-index="1"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>
+                <div class="skeleton-card" data-index="2"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>`;
+
+            try {
+                const SB_URL = 'https://ouuhirckiavcvgqlpriw.supabase.co';
+                const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91dWhpcmNraWF2Y3ZncWxwcml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYyNDUsImV4cCI6MjA4OTQ5MjI0NX0.l5diE9bfcRQo8ZSMsAx-alG89GFifGA11hA059zDhXM';
+
+                const res = await fetch(
+                    `${SB_URL}/rest/v1/shops?is_public=eq.true&order=created_at.desc&limit=3&select=id,name,location_name,description,banner_image,profile_image`,
+                    { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
+                );
+
+                const shops = await res.json();
+
+                if (!Array.isArray(shops) || shops.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--slate);">
+                            <i class="fas fa-store" style="font-size:2.5em;color:var(--gold);margin-bottom:18px;display:block;"></i>
+                            <p style="font-size:1.1em;margin-bottom:8px;color:var(--white);">Providers are joining!</p>
+                            <p style="font-size:0.9em;">Be the first to list your shop on Kenya's premier style marketplace.</p>
+                            <a href="client-signup.html" class="btn-hero-primary" style="display:inline-flex;margin-top:22px;"><i class="fas fa-plus"></i> Join as Provider</a>
+                        </div>`;
+                    return;
+                }
+
+                const STORAGE_URL = `${SB_URL}/storage/v1/object/public/marketplace-assets/`;
+
+                // Default banner images per index (fallback)
+                const fallbackBanners = [
+                    'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=600',
+                    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600',
+                    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600'
+                ];
+
+                container.innerHTML = shops.map((shop, i) => {
+                    const banner = shop.banner_image
+                        ? (shop.banner_image.startsWith('http') ? shop.banner_image : STORAGE_URL + shop.banner_image)
+                        : fallbackBanners[i] || fallbackBanners[0];
+
+                    const avatar = shop.profile_image
+                        ? (shop.profile_image.startsWith('http') ? shop.profile_image : STORAGE_URL + shop.profile_image)
+                        : null;
+
+                    const desc = shop.description
+                        ? (shop.description.length > 110 ? shop.description.substring(0, 107) + '...' : shop.description)
+                        : 'A verified provider on Kenya\'s premier style marketplace.';
+
+                    const loc = shop.location_name || 'Nairobi, Kenya';
+
+                    return `
+                    <a class="provider-card visible" href="client-signup.html" data-index="${i}" style="transition-delay:${i*130}ms">
+                        <div class="provider-banner" style="background-image:url('${banner}')">
+                            <div class="provider-avatar" ${avatar ? `style="background-image:url('${avatar}');background-size:cover;"` : ''}>
+                                ${!avatar ? '<i class="fas fa-store"></i>' : ''}
+                            </div>
+                        </div>
+                        <div class="provider-body">
+                            <div class="provider-name">${escapeHTML(shop.name || 'Style Provider')}</div>
+                            <div class="provider-location"><i class="fas fa-map-marker-alt"></i> ${escapeHTML(loc)}</div>
+                            <div class="provider-desc">${escapeHTML(desc)}</div>
+                            <div class="provider-footer">
+                                <div class="provider-rating"><i class="fas fa-star"></i> Verified Provider</div>
+                                <span class="btn-visit">Visit Shop</span>
+                            </div>
+                        </div>
+                    </a>`;
+                }).join('');
+
+            } catch (err) {
+                console.warn('Provider fetch failed:', err);
+                container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--slate);">Providers loading soon...</div>`;
+            }
+        }
+
+        loadFeaturedProviders();
+
         })();
     </script>
 </body>
