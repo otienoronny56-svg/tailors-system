@@ -878,10 +878,10 @@ async function loadPendingApprovals() {
     try {
         const adminClient = getAdminClient();
 
-        // Fetch all Pending profiles joined with their shops
+        // Step 1: Fetch all Pending profiles (no nested join to avoid schema cache error)
         const { data: pending, error } = await adminClient
             .from('user_profiles')
-            .select('id, full_name, email, created_at, shop_id, organization_id, shops(name)')
+            .select('id, full_name, email, created_at, shop_id, organization_id')
             .eq('status', 'Pending')
             .order('created_at', { ascending: true });
 
@@ -891,7 +891,6 @@ async function loadPendingApprovals() {
 
         // Update badge
         if (badge) badge.textContent = count;
-        // Show/hide the red border section based on whether there are pending items
         if (section) {
             section.style.borderLeftColor = count > 0 ? '#ef4444' : 'rgba(16,185,129,0.3)';
             section.style.borderColor = count > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.15)';
@@ -908,9 +907,22 @@ async function loadPendingApprovals() {
             return;
         }
 
+        // Step 2: Fetch shop names for the shop_ids we have
+        const shopIds = pending.map(p => p.shop_id).filter(Boolean);
+        let shopMap = {};
+        if (shopIds.length > 0) {
+            const { data: shops } = await adminClient
+                .from('shops')
+                .select('id, name')
+                .in('id', shopIds);
+            if (shops) shops.forEach(s => shopMap[s.id] = s.name);
+        }
+
         tbody.innerHTML = pending.map(p => {
-            const shopName = p.shops?.name || '(no shop name)';
+            const shopName = shopMap[p.shop_id] || '(no shop name)';
             const registered = new Date(p.created_at).toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' });
+            // Escape shopName for onclick attribute to avoid quote issues
+            const safeShopName = shopName.replace(/'/g, "\\'");
             return `
                 <tr>
                     <td><strong style="color:var(--brand-white);">${shopName}</strong></td>
@@ -923,7 +935,7 @@ async function loadPendingApprovals() {
                             style="background:#10b981; color:white; border:none; margin-right:6px;">
                             <i class="fas fa-check"></i> Approve
                         </button>
-                        <button onclick="rejectShop('${p.id}', '${p.shop_id}', '${p.organization_id}', '${shopName}')"
+                        <button onclick="rejectShop('${p.id}', '${p.shop_id}', '${p.organization_id}', '${safeShopName}')"
                             class="small-btn"
                             style="background:transparent; border:1px solid #ef4444; color:#ef4444;">
                             <i class="fas fa-times"></i> Reject
