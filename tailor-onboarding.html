@@ -291,10 +291,10 @@
 
                 if (shopErr) throw shopErr;
 
-                // 3. Create User Profile (Pending Approval)
+                // 3. Create or Update User Profile (Pending Approval)
                 const { error: profileErr } = await adminClient
                     .from('user_profiles')
-                    .insert([{
+                    .upsert({
                         id: currentUser.id,
                         organization_id: orgData.id,
                         shop_id: shopData.id,
@@ -302,7 +302,7 @@
                         role: 'owner',
                         status: 'Pending',
                         email: currentUser.email
-                    }]);
+                    });
 
                 if (profileErr) throw profileErr;
 
