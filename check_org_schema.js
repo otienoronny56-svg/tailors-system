@@ -13,13 +13,11 @@ if (!urlMatch || !keyMatch) {
 const supabase = createClient(urlMatch[1], keyMatch[1]);
 
 async function run() {
-    const { data, error } = await supabase.from('organizations').select('*').limit(1);
+    const { data, error } = await supabase.from('organizations').select('id, name, subscription_status, subscription_tier');
     if (error) {
         console.error(error);
-    } else if (data && data[0]) {
-        console.log("ORG_KEYS:" + Object.keys(data[0]).join(','));
     } else {
-        console.log("No data found in organizations table");
+        console.log(JSON.stringify(data, null, 2));
     }
 }
 run();

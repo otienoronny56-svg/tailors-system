@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tailors.co.ke | Kenya's Premium Fashion & Style Marketplace</title>
-    <meta name="description" content="Kenya's premier marketplace for bespoke tailoring, ready-made fashion, luxury watches, shoes, hats and accessories. Connect with trusted style providers across Kenya.">
+    <meta name="description"
+        content="Kenya's premier marketplace for bespoke tailoring, ready-made fashion, luxury watches, shoes, hats and accessories. Connect with trusted style providers across Kenya.">
     <link rel="icon" type="image/png" href="logo.png?v=2">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap"
+        rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Client -->
@@ -16,30 +20,38 @@
     <style>
         /* ===== DESIGN TOKENS ===== */
         :root {
-            --navy:        #06101e;
-            --navy-mid:    #0d1f38;
-            --navy-light:  #122342;
-            --gold:        #C9A84C;
+            --navy: #06101e;
+            --navy-mid: #0d1f38;
+            --navy-light: #122342;
+            --gold: #C9A84C;
             --gold-bright: #E8C96A;
-            --gold-dim:    #8a6f2e;
-            --gold-glow:   rgba(201,168,76,0.18);
-            --emerald:     #1a6b4a;
+            --gold-dim: #8a6f2e;
+            --gold-glow: rgba(201, 168, 76, 0.18);
+            --emerald: #1a6b4a;
             --emerald-mid: #27a870;
-            --emerald-dim: rgba(39,168,112,0.15);
-            --burgundy:    #7c1d2e;
-            --white:       #ffffff;
-            --off-white:   #f0ede5;
-            --slate:       #7e8dac;
+            --emerald-dim: rgba(39, 168, 112, 0.15);
+            --burgundy: #7c1d2e;
+            --white: #ffffff;
+            --off-white: #f0ede5;
+            --slate: #7e8dac;
             --light-slate: #a8b2cd;
-            --glass:       rgba(13,31,56,0.72);
-            --glass-border:rgba(201,168,76,0.18);
-            --card-bg:     rgba(13,31,56,0.75);
+            --glass: rgba(13, 31, 56, 0.72);
+            --glass-border: rgba(201, 168, 76, 0.18);
+            --card-bg: rgba(13, 31, 56, 0.75);
         }
 
         /* ===== RESET ===== */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+        }
 
         body {
             font-family: 'Montserrat', sans-serif;
@@ -50,17 +62,31 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 7px; }
-        ::-webkit-scrollbar-track { background: var(--navy); }
-        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--gold-bright); }
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--navy);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-bright);
+        }
 
         /* ===== HEADER ===== */
         header {
             position: fixed;
-            top: 0; left: 0; width: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
             padding: 18px 7%;
-            background: rgba(6,16,30,0.88);
+            background: rgba(6, 16, 30, 0.88);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             display: flex;
@@ -71,7 +97,11 @@
             transition: padding 0.3s;
         }
 
-        .logo-group { display: flex; flex-direction: column; }
+        .logo-group {
+            display: flex;
+            flex-direction: column;
+        }
+
         .logo-text {
             font-family: 'Playfair Display', serif;
             font-weight: 700;
@@ -80,6 +110,7 @@
             letter-spacing: 1px;
             text-transform: uppercase;
         }
+
         .logo-sub {
             font-size: 0.58em;
             letter-spacing: 4px;
@@ -88,7 +119,12 @@
             font-weight: 500;
         }
 
-        nav { display: flex; align-items: center; gap: 28px; }
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
         nav a {
             color: var(--light-slate);
             text-decoration: none;
@@ -97,7 +133,10 @@
             transition: color 0.3s;
             white-space: nowrap;
         }
-        nav a:hover { color: var(--gold); }
+
+        nav a:hover {
+            color: var(--gold);
+        }
 
         .btn-login {
             color: var(--light-slate);
@@ -107,7 +146,10 @@
             transition: color 0.3s;
             padding: 9px 5px;
         }
-        .btn-login:hover { color: var(--gold); }
+
+        .btn-login:hover {
+            color: var(--gold);
+        }
 
         .btn-signup {
             background: var(--gold);
@@ -122,9 +164,10 @@
             transition: all 0.3s;
             letter-spacing: 0.3px;
         }
+
         .btn-signup:hover {
             background: var(--gold-bright);
-            box-shadow: 0 4px 18px rgba(201,168,76,0.45);
+            box-shadow: 0 4px 18px rgba(201, 168, 76, 0.45);
             transform: translateY(-2px);
         }
 
@@ -139,17 +182,28 @@
             font-size: 0.9em;
             transition: all 0.3s;
         }
+
         .btn-portal:hover {
             background: var(--gold);
             color: var(--navy);
-            box-shadow: 0 4px 15px rgba(201,168,76,0.3);
+            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3);
         }
 
-        .nav-user-pill { display: flex; align-items: center; gap: 12px; }
-        .nav-user-name { font-size: 0.9em; font-weight: 600; color: var(--gold); }
+        .nav-user-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-user-name {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
         .btn-signout {
             background: transparent;
-            border: 1px solid rgba(239,68,68,0.5);
+            border: 1px solid rgba(239, 68, 68, 0.5);
             color: #ef4444;
             padding: 8px 14px;
             border-radius: 6px;
@@ -159,7 +213,10 @@
             transition: all 0.3s;
             text-decoration: none;
         }
-        .btn-signout:hover { background: rgba(239,68,68,0.1); }
+
+        .btn-signout:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
 
         /* ===== HERO ===== */
         .hero {
@@ -204,8 +261,13 @@
         }
 
         @keyframes kenBurns {
-            from { transform: scale(1.03); }
-            to   { transform: scale(1.0);  }
+            from {
+                transform: scale(1.03);
+            }
+
+            to {
+                transform: scale(1.0);
+            }
         }
 
         /* Gradient overlay - dark center band for text, lighter sides to show subjects */
@@ -213,9 +275,9 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse 55% 100% at 42% 50%, rgba(6,16,30,0.82) 0%, rgba(6,16,30,0.35) 65%, transparent 100%),
-                linear-gradient(to top, rgba(6,16,30,0.9) 0%, rgba(6,16,30,0.2) 35%, transparent 60%),
-                linear-gradient(to bottom, rgba(6,16,30,0.7) 0%, transparent 20%);
+                radial-gradient(ellipse 55% 100% at 42% 50%, rgba(6, 16, 30, 0.82) 0%, rgba(6, 16, 30, 0.35) 65%, transparent 100%),
+                linear-gradient(to top, rgba(6, 16, 30, 0.9) 0%, rgba(6, 16, 30, 0.2) 35%, transparent 60%),
+                linear-gradient(to bottom, rgba(6, 16, 30, 0.7) 0%, transparent 20%);
             z-index: 1;
         }
 
@@ -229,15 +291,17 @@
             gap: 10px;
             z-index: 3;
         }
+
         .slide-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.35);
-            border: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255, 255, 255, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             cursor: pointer;
             transition: all 0.4s;
         }
+
         .slide-dot.active {
             background: var(--gold);
             border-color: var(--gold);
@@ -257,8 +321,8 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: rgba(201,168,76,0.12);
-            border: 1px solid rgba(201,168,76,0.3);
+            background: rgba(201, 168, 76, 0.12);
+            border: 1px solid rgba(201, 168, 76, 0.3);
             color: var(--gold);
             font-size: 0.75em;
             font-weight: 700;
@@ -268,7 +332,10 @@
             border-radius: 40px;
             margin-bottom: 28px;
         }
-        .hero-eyebrow i { font-size: 0.9em; }
+
+        .hero-eyebrow i {
+            font-size: 0.9em;
+        }
 
         .hero h1 {
             font-family: 'Playfair Display', serif;
@@ -312,31 +379,33 @@
             gap: 10px;
             border: none;
             cursor: pointer;
-            box-shadow: 0 6px 30px rgba(201,168,76,0.35);
+            box-shadow: 0 6px 30px rgba(201, 168, 76, 0.35);
         }
+
         .btn-hero-primary:hover {
             background: var(--gold-bright);
             transform: translateY(-3px);
-            box-shadow: 0 10px 40px rgba(201,168,76,0.5);
+            box-shadow: 0 10px 40px rgba(201, 168, 76, 0.5);
         }
 
         .btn-hero-secondary {
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             color: var(--white);
             padding: 16px 38px;
             border-radius: 50px;
             font-weight: 700;
             font-size: 1em;
             text-decoration: none;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 10px;
             backdrop-filter: blur(8px);
         }
+
         .btn-hero-secondary:hover {
-            background: rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.12);
             border-color: var(--gold);
             color: var(--gold);
             transform: translateY(-3px);
@@ -351,8 +420,9 @@
             flex-wrap: wrap;
             margin-top: 60px;
             padding-top: 28px;
-            border-top: 1px solid rgba(255,255,255,0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
+
         .trust-item {
             display: flex;
             align-items: center;
@@ -360,8 +430,15 @@
             font-size: 0.82em;
             color: var(--light-slate);
         }
-        .trust-item i { color: var(--gold); font-size: 1.1em; }
-        .trust-item strong { color: var(--white); }
+
+        .trust-item i {
+            color: var(--gold);
+            font-size: 1.1em;
+        }
+
+        .trust-item strong {
+            color: var(--white);
+        }
 
         /* ===== SECTION COMMONS ===== */
         section.content-section {
@@ -381,6 +458,7 @@
             text-transform: uppercase;
             margin-bottom: 14px;
         }
+
         .section-eyebrow::before {
             content: '';
             width: 28px;
@@ -397,7 +475,11 @@
             margin-bottom: 16px;
             line-height: 1.2;
         }
-        .section-heading em { color: var(--gold); font-style: italic; }
+
+        .section-heading em {
+            color: var(--gold);
+            font-style: italic;
+        }
 
         .section-subtext {
             color: var(--slate);
@@ -434,6 +516,7 @@
             transform: translateY(12px);
             transition: opacity 0.6s ease, transform 0.6s ease;
         }
+
         .categories-label.visible {
             opacity: 1;
             transform: translateY(0);
@@ -450,7 +533,10 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-        .categories-grid::-webkit-scrollbar { display: none; }
+
+        .categories-grid::-webkit-scrollbar {
+            display: none;
+        }
 
         /* Entry state — hidden before animation */
         .cat-pill {
@@ -471,41 +557,56 @@
             opacity: 0;
             transform: translateY(28px) scale(0.92);
             transition:
-                opacity 0.55s cubic-bezier(0.4,0,0.2,1),
-                transform 0.55s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.55s cubic-bezier(0.4, 0, 0.2, 1),
                 border-color 0.3s,
                 background 0.3s,
                 box-shadow 0.3s,
                 color 0.3s;
         }
+
         .cat-pill.visible {
             opacity: 1;
             transform: translateY(0) scale(1);
         }
+
         .cat-pill:hover {
             border-color: var(--gold);
-            background: rgba(201,168,76,0.1);
+            background: rgba(201, 168, 76, 0.1);
             color: var(--gold);
             transform: translateY(-6px) scale(1.04);
-            box-shadow: 0 14px 35px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,168,76,0.2);
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(201, 168, 76, 0.2);
         }
+
         .cat-pill i {
             font-size: 1.6em;
             color: var(--gold);
-            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             animation: iconIdle 3s ease-in-out infinite;
         }
+
         /* Subtle floating idle animation on icon */
         @keyframes iconIdle {
-            0%, 100% { transform: translateY(0);    filter: drop-shadow(0 0 0px rgba(201,168,76,0)); }
-            50%       { transform: translateY(-3px); filter: drop-shadow(0 0 6px rgba(201,168,76,0.55)); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+                filter: drop-shadow(0 0 0px rgba(201, 168, 76, 0));
+            }
+
+            50% {
+                transform: translateY(-3px);
+                filter: drop-shadow(0 0 6px rgba(201, 168, 76, 0.55));
+            }
         }
+
         /* On hover — bounce the icon up with spring */
         .cat-pill:hover i {
             animation: none;
             transform: translateY(-6px) scale(1.22);
-            filter: drop-shadow(0 0 10px rgba(201,168,76,0.7));
+            filter: drop-shadow(0 0 10px rgba(201, 168, 76, 0.7));
         }
+
         .cat-pill span {
             font-size: 0.78em;
             font-weight: 600;
@@ -516,44 +617,66 @@
 
         /* ===== PREMIUM FASHION STRIP ===== */
         .fashion-strip {
-            background: rgba(6,16,30,0.97);
-            border-top: 1px solid rgba(201,168,76,0.35);
-            border-bottom: 1px solid rgba(201,168,76,0.35);
+            background: rgba(6, 16, 30, 0.97);
+            border-top: 1px solid rgba(201, 168, 76, 0.35);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.35);
             overflow: hidden;
             padding: 0;
             user-select: none;
         }
+
         .fashion-row {
             display: flex;
             width: max-content;
             padding: 13px 0;
         }
+
         .fashion-row-inner {
             display: inline-flex;
             gap: 0;
             animation: runLeft 35s linear infinite;
             white-space: nowrap;
         }
-        .fashion-row-inner:hover { animation-play-state: paused; }
+
+        .fashion-row-inner:hover {
+            animation-play-state: paused;
+        }
+
         @keyframes runLeft {
-            from { transform: translateX(0); }
-            to   { transform: translateX(-50%); }
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
         }
+
         @keyframes runRight {
-            from { transform: translateX(-50%); }
-            to   { transform: translateX(0); }
+            from {
+                transform: translateX(-50%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
         }
+
         .fashion-word {
             font-family: 'Playfair Display', serif;
             font-style: italic;
             font-size: 0.95em;
             font-weight: 400;
-            color: rgba(255,255,255,0.75);
+            color: rgba(255, 255, 255, 0.75);
             letter-spacing: 1px;
             padding: 0 10px;
             transition: color 0.3s;
         }
-        .fashion-word:hover { color: var(--gold); }
+
+        .fashion-word:hover {
+            color: var(--gold);
+        }
+
         .fashion-sep {
             color: var(--gold);
             font-size: 0.7em;
@@ -562,6 +685,7 @@
             align-items: center;
             opacity: 0.8;
         }
+
         /* Highlight alternating words */
         .fashion-word.highlight {
             color: var(--gold);
@@ -589,20 +713,23 @@
             opacity: 0;
             transform: translateY(36px);
             transition:
-                opacity 0.6s cubic-bezier(0.4,0,0.2,1),
-                transform 0.6s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
                 border-color 0.35s,
                 box-shadow 0.35s;
         }
+
         .provider-card.visible {
             opacity: 1;
             transform: translateY(0);
         }
+
         .provider-card:hover {
             transform: translateY(-10px);
-            border-color: rgba(201,168,76,0.5);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.12);
+            border-color: rgba(201, 168, 76, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(201, 168, 76, 0.12);
         }
+
         .provider-banner {
             height: 175px;
             background: var(--navy-mid);
@@ -610,12 +737,14 @@
             background-position: center;
             position: relative;
         }
+
         .provider-banner::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(6,16,30,0.7) 0%, transparent 60%);
+            background: linear-gradient(to top, rgba(6, 16, 30, 0.7) 0%, transparent 60%);
         }
+
         .provider-avatar {
             width: 64px;
             height: 64px;
@@ -635,11 +764,12 @@
             background-position: center;
             z-index: 1;
         }
+
         .provider-category-tag {
             position: absolute;
             top: 14px;
             right: 14px;
-            background: rgba(6,16,30,0.8);
+            background: rgba(6, 16, 30, 0.8);
             border: 1px solid var(--glass-border);
             color: var(--gold);
             font-size: 0.7em;
@@ -651,12 +781,14 @@
             backdrop-filter: blur(8px);
             z-index: 1;
         }
+
         .provider-body {
             padding: 46px 22px 24px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
+
         .provider-name {
             font-family: 'Playfair Display', serif;
             font-size: 1.2em;
@@ -664,6 +796,7 @@
             font-weight: 600;
             margin-bottom: 4px;
         }
+
         .provider-location {
             font-size: 0.82em;
             color: var(--gold);
@@ -672,6 +805,7 @@
             gap: 5px;
             margin-bottom: 12px;
         }
+
         .provider-desc {
             font-size: 0.87em;
             color: var(--slate);
@@ -682,14 +816,16 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
         .provider-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-top: 18px;
             padding-top: 14px;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .provider-rating {
             display: flex;
             align-items: center;
@@ -698,6 +834,7 @@
             color: var(--gold);
             font-weight: 600;
         }
+
         .btn-visit {
             background: var(--gold);
             color: var(--navy);
@@ -708,9 +845,10 @@
             text-decoration: none;
             transition: all 0.3s;
         }
+
         .btn-visit:hover {
             background: var(--gold-bright);
-            box-shadow: 0 4px 12px rgba(201,168,76,0.4);
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4);
         }
 
         /* ===== SHOWCASE CARDS (listings) ===== */
@@ -725,22 +863,25 @@
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             overflow: hidden;
-            transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             backdrop-filter: blur(8px);
         }
+
         .listing-card:hover {
             transform: translateY(-8px);
-            border-color: rgba(201,168,76,0.4);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+            border-color: rgba(201, 168, 76, 0.4);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
         }
+
         .listing-img-wrap {
             position: relative;
             height: 260px;
             background: var(--navy-mid);
             overflow: hidden;
         }
+
         .listing-img-blur {
             position: absolute;
             inset: -20px;
@@ -748,6 +889,7 @@
             background-position: center;
             filter: blur(18px) brightness(0.45);
         }
+
         .listing-img {
             position: absolute;
             inset: 0;
@@ -755,12 +897,13 @@
             background-repeat: no-repeat;
             background-position: center;
         }
+
         .listing-badge {
             position: absolute;
             top: 12px;
             left: 12px;
-            background: rgba(201,168,76,0.18);
-            border: 1px solid rgba(201,168,76,0.4);
+            background: rgba(201, 168, 76, 0.18);
+            border: 1px solid rgba(201, 168, 76, 0.4);
             color: var(--gold);
             font-size: 0.68em;
             font-weight: 700;
@@ -771,7 +914,14 @@
             backdrop-filter: blur(8px);
             z-index: 2;
         }
-        .listing-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+
+        .listing-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
         .listing-title {
             font-family: 'Playfair Display', serif;
             font-size: 1.1em;
@@ -779,6 +929,7 @@
             color: var(--white);
             margin-bottom: 8px;
         }
+
         .listing-desc {
             font-size: 0.84em;
             color: var(--slate);
@@ -789,19 +940,22 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
         .listing-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-top: 16px;
             padding-top: 14px;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .listing-price {
             font-weight: 700;
             font-size: 1.05em;
             color: var(--gold);
         }
+
         .btn-inquire {
             background: transparent;
             border: 1px solid var(--gold);
@@ -814,6 +968,7 @@
             transition: all 0.3s;
             cursor: pointer;
         }
+
         .btn-inquire:hover {
             background: var(--gold);
             color: var(--navy);
@@ -821,12 +976,17 @@
 
         /* ===== HOW IT WORKS ===== */
         .hiw-section {
-            background: linear-gradient(135deg, rgba(13,31,56,0.6) 0%, rgba(6,16,30,0.9) 100%);
+            background: linear-gradient(135deg, rgba(13, 31, 56, 0.6) 0%, rgba(6, 16, 30, 0.9) 100%);
             border-top: 1px solid var(--glass-border);
             border-bottom: 1px solid var(--glass-border);
             padding: 90px 7%;
         }
-        .hiw-inner { max-width: 1380px; margin: 0 auto; }
+
+        .hiw-inner {
+            max-width: 1380px;
+            margin: 0 auto;
+        }
+
         .hiw-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -834,19 +994,23 @@
             margin-top: 55px;
             position: relative;
         }
+
         .hiw-grid::before {
             content: '';
             position: absolute;
             top: 35px;
-            left: 0; right: 0;
+            left: 0;
+            right: 0;
             height: 1px;
             background: linear-gradient(to right, transparent, var(--glass-border), transparent);
         }
+
         .hiw-step {
             text-align: center;
             padding: 32px 20px;
             position: relative;
         }
+
         .hiw-number {
             width: 54px;
             height: 54px;
@@ -859,10 +1023,21 @@
             font-size: 1.2em;
             font-weight: 800;
             margin: 0 auto 20px;
-            box-shadow: 0 6px 20px rgba(201,168,76,0.4);
+            box-shadow: 0 6px 20px rgba(201, 168, 76, 0.4);
         }
-        .hiw-step h4 { color: var(--white); font-weight: 700; margin-bottom: 10px; font-size: 1em; }
-        .hiw-step p { color: var(--slate); font-size: 0.86em; line-height: 1.65; }
+
+        .hiw-step h4 {
+            color: var(--white);
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .hiw-step p {
+            color: var(--slate);
+            font-size: 0.86em;
+            line-height: 1.65;
+        }
 
         /* ===== VALUE PROPS ===== */
         .value-section {
@@ -870,12 +1045,14 @@
             max-width: 1380px;
             margin: 0 auto;
         }
+
         .value-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 28px;
             margin-top: 55px;
         }
+
         .value-card {
             background: var(--card-bg);
             border: 1px solid var(--glass-border);
@@ -885,24 +1062,29 @@
             position: relative;
             overflow: hidden;
         }
+
         .value-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 3px;
             background: linear-gradient(to right, var(--gold), transparent);
         }
+
         .value-card:hover {
-            border-color: rgba(201,168,76,0.35);
+            border-color: rgba(201, 168, 76, 0.35);
             transform: translateY(-5px);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
         }
+
         .value-icon {
             width: 52px;
             height: 52px;
             border-radius: 12px;
             background: var(--gold-glow);
-            border: 1px solid rgba(201,168,76,0.25);
+            border: 1px solid rgba(201, 168, 76, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -910,18 +1092,21 @@
             font-size: 1.4em;
             margin-bottom: 24px;
         }
+
         .value-card h3 {
             font-family: 'Playfair Display', serif;
             font-size: 1.3em;
             color: var(--white);
             margin-bottom: 14px;
         }
+
         .value-card ul {
             list-style: none;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
+
         .value-card ul li {
             color: var(--light-slate);
             font-size: 0.9em;
@@ -930,7 +1115,13 @@
             gap: 10px;
             line-height: 1.55;
         }
-        .value-card ul li i { color: var(--gold); margin-top: 3px; flex-shrink: 0; }
+
+        .value-card ul li i {
+            color: var(--gold);
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
         .value-card .card-action {
             display: block;
             text-align: center;
@@ -942,19 +1133,23 @@
             text-decoration: none;
             transition: all 0.3s;
         }
+
         .value-card .card-action.gold {
             background: var(--gold);
             color: var(--navy);
         }
+
         .value-card .card-action.gold:hover {
             background: var(--gold-bright);
-            box-shadow: 0 5px 20px rgba(201,168,76,0.35);
+            box-shadow: 0 5px 20px rgba(201, 168, 76, 0.35);
         }
+
         .value-card .card-action.outline {
             border: 1px solid var(--gold);
             color: var(--gold);
             background: transparent;
         }
+
         .value-card .card-action.outline:hover {
             background: var(--gold);
             color: var(--navy);
@@ -965,18 +1160,20 @@
             margin: 0 7% 90px;
             border-radius: 24px;
             background:
-                radial-gradient(ellipse at top right, rgba(201,168,76,0.2) 0%, transparent 55%),
+                radial-gradient(ellipse at top right, rgba(201, 168, 76, 0.2) 0%, transparent 55%),
                 linear-gradient(135deg, var(--navy-mid) 0%, var(--navy) 100%);
             border: 1px solid var(--glass-border);
             padding: 65px 55px;
             text-align: center;
         }
+
         .cta-section h2 {
             font-family: 'Playfair Display', serif;
             font-size: clamp(1.7em, 3vw, 2.3em);
             color: var(--white);
             margin-bottom: 14px;
         }
+
         .cta-section p {
             color: var(--slate);
             font-size: 1em;
@@ -984,7 +1181,10 @@
             margin: 0 auto 32px;
             line-height: 1.7;
         }
-        .cta-section .btn-hero-primary { margin: 0 auto; }
+
+        .cta-section .btn-hero-primary {
+            margin: 0 auto;
+        }
 
         /* ===== FOOTER ===== */
         footer {
@@ -992,6 +1192,7 @@
             border-top: 1px solid var(--glass-border);
             padding: 55px 7% 32px;
         }
+
         .footer-inner {
             max-width: 1380px;
             margin: 0 auto;
@@ -1000,7 +1201,11 @@
             gap: 40px;
             margin-bottom: 40px;
         }
-        .footer-brand .logo-text { font-size: 1.3em; }
+
+        .footer-brand .logo-text {
+            font-size: 1.3em;
+        }
+
         .footer-brand p {
             color: var(--slate);
             font-size: 0.88em;
@@ -1008,6 +1213,7 @@
             line-height: 1.7;
             max-width: 240px;
         }
+
         .footer-col h5 {
             color: var(--white);
             font-weight: 700;
@@ -1016,16 +1222,27 @@
             text-transform: uppercase;
             margin-bottom: 18px;
         }
-        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+        .footer-col ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
         .footer-col ul a {
             color: var(--slate);
             text-decoration: none;
             font-size: 0.88em;
             transition: color 0.3s;
         }
-        .footer-col ul a:hover { color: var(--gold); }
+
+        .footer-col ul a:hover {
+            color: var(--gold);
+        }
+
         .footer-bottom {
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding-top: 24px;
             text-align: center;
             color: var(--slate);
@@ -1034,58 +1251,147 @@
 
         /* ===== ANIMATIONS ===== */
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .animate-fadeup { animation: fadeUp 0.7s ease both; }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.35s; }
-        .delay-4 { animation-delay: 0.5s; }
+
+        .animate-fadeup {
+            animation: fadeUp 0.7s ease both;
+        }
+
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.35s;
+        }
+
+        .delay-4 {
+            animation-delay: 0.5s;
+        }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
-            .footer-inner { grid-template-columns: 1fr 1fr; }
+            .footer-inner {
+                grid-template-columns: 1fr 1fr;
+            }
         }
+
         @media (max-width: 768px) {
-            header { padding: 15px 5%; }
-            nav { gap: 16px; }
-            nav > a:not(:last-of-type) { display: none; }
-            .hero { padding: 120px 5% 70px; }
-            .hero-trust { gap: 18px; }
+            header {
+                padding: 15px 5%;
+            }
+
+            nav {
+                gap: 16px;
+            }
+
+            nav>a:not(:last-of-type) {
+                display: none;
+            }
+
+            .hero {
+                padding: 120px 5% 70px;
+            }
+
+            .hero-trust {
+                gap: 18px;
+            }
+
             .categories-section,
             .content-section,
-            .value-section { padding-left: 5%; padding-right: 5%; }
-            .cta-section { margin: 0 5% 70px; padding: 45px 28px; }
-            .hiw-section { padding: 70px 5%; }
-            .footer-inner { grid-template-columns: 1fr; gap: 30px; }
-            footer { padding-left: 5%; padding-right: 5%; }
+            .value-section {
+                padding-left: 5%;
+                padding-right: 5%;
+            }
+
+            .cta-section {
+                margin: 0 5% 70px;
+                padding: 45px 28px;
+            }
+
+            .hiw-section {
+                padding: 70px 5%;
+            }
+
+            .footer-inner {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            footer {
+                padding-left: 5%;
+                padding-right: 5%;
+            }
         }
+
         /* Shimmer skeleton for loading state */
         @keyframes shimmer {
-            0%   { background-position: -600px 0; }
-            100% { background-position:  600px 0; }
+            0% {
+                background-position: -600px 0;
+            }
+
+            100% {
+                background-position: 600px 0;
+            }
         }
+
         .skeleton {
-            background: linear-gradient(90deg, var(--navy-mid) 25%, rgba(255,255,255,0.05) 50%, var(--navy-mid) 75%);
+            background: linear-gradient(90deg, var(--navy-mid) 25%, rgba(255, 255, 255, 0.05) 50%, var(--navy-mid) 75%);
             background-size: 600px 100%;
             animation: shimmer 1.4s infinite linear;
             border-radius: 10px;
         }
+
         .skeleton-card {
             background: var(--card-bg);
             border: 1px solid var(--glass-border);
             border-radius: 18px;
             overflow: hidden;
         }
-        .skeleton-banner { height: 175px; }
-        .skeleton-body { padding: 52px 22px 24px; display: flex; flex-direction: column; gap: 12px; }
-        .skeleton-line { height: 14px; border-radius: 6px; }
-        .skeleton-line.wide { width: 70%; }
-        .skeleton-line.medium { width: 50%; }
-        .skeleton-line.narrow { width: 35%; }
+
+        .skeleton-banner {
+            height: 175px;
+        }
+
+        .skeleton-body {
+            padding: 52px 22px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            border-radius: 6px;
+        }
+
+        .skeleton-line.wide {
+            width: 70%;
+        }
+
+        .skeleton-line.medium {
+            width: 50%;
+        }
+
+        .skeleton-line.narrow {
+            width: 35%;
+        }
     </style>
 </head>
+
 <body>
 
     <!-- ===== HEADER ===== -->
@@ -1110,10 +1416,15 @@
     <section class="hero">
         <!-- Auto Slideshow -->
         <div class="hero-slideshow" id="heroSlideshow">
-            <div class="hero-slide active" style="background-image:url('hero_bg.png')" data-label="Gen Z Fashion" data-icon="fa-tshirt"></div>
-            <div class="hero-slide" style="background-image:url('hero_slide2.png')" data-label="Luxury Watches & Bags" data-icon="fa-clock"></div>
-            <div class="hero-slide" style="background-image:url('hero_slide3.png')" data-label="Bespoke Suits & Gowns" data-icon="fa-user-tie"></div>
-            <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=1600')" data-label="Casual, Sneakers & Capes" data-icon="fa-shoe-prints"></div>
+            <div class="hero-slide active" style="background-image:url('hero_bg.png')" data-label="Gen Z Fashion"
+                data-icon="fa-tshirt"></div>
+            <div class="hero-slide" style="background-image:url('hero_slide2.png')" data-label="Luxury Watches & Bags"
+                data-icon="fa-clock"></div>
+            <div class="hero-slide" style="background-image:url('hero_slide3.png')" data-label="Bespoke Suits & Gowns"
+                data-icon="fa-user-tie"></div>
+            <div class="hero-slide"
+                style="background-image:url('https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=1600')"
+                data-label="Casual, Sneakers & Capes" data-icon="fa-shoe-prints"></div>
         </div>
         <div class="hero-overlay"></div>
         <!-- Dot nav -->
@@ -1137,7 +1448,8 @@
             </h1>
 
             <p class="animate-fadeup delay-3">
-                From hand-stitched bespoke suits and ready-made fashion to luxury watches, premium shoes, hats, and accessories — discover and connect with Kenya's finest style providers in one place.
+                From hand-stitched bespoke suits and ready-made fashion to luxury watches, premium shoes, hats, and
+                accessories — discover and connect with Kenya's finest style providers in one place.
             </p>
 
             <div class="hero-cta animate-fadeup delay-4">
@@ -1249,9 +1561,11 @@
             <div>
                 <span class="section-eyebrow">Service Providers</span>
                 <h2 class="section-heading">Meet Our <em>Featured</em> Providers</h2>
-                <p class="section-subtext">Tailors, designers, watchmakers, cobblers, hatters and more — all in one marketplace, all for you.</p>
+                <p class="section-subtext">Tailors, designers, watchmakers, cobblers, hatters and more — all in one
+                    marketplace, all for you.</p>
             </div>
-            <a href="client-signup.html" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All Providers <i class="fas fa-arrow-right"></i></a>
+            <a href="client-signup.html" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All
+                Providers <i class="fas fa-arrow-right"></i></a>
         </div>
 
         <div class="providers-grid" id="providers-container">
@@ -1265,9 +1579,11 @@
             <div>
                 <span class="section-eyebrow">Design Showcase</span>
                 <h2 class="section-heading">Handcrafted <em>Pieces</em> for You</h2>
-                <p class="section-subtext">Browse premium garments, accessories and styles crafted by verified providers across Kenya.</p>
+                <p class="section-subtext">Browse premium garments, accessories and styles crafted by verified providers
+                    across Kenya.</p>
             </div>
-            <a href="client-signup.html" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All Listings <i class="fas fa-arrow-right"></i></a>
+            <a href="client-signup.html" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All Listings
+                <i class="fas fa-arrow-right"></i></a>
         </div>
 
         <div class="listings-grid" id="teaser-listings-container">
@@ -1281,7 +1597,8 @@
             <div style="text-align:center; margin-bottom:8px;">
                 <span class="section-eyebrow" style="justify-content:center;">Simple Process</span>
                 <h2 class="section-heading" style="text-align:center;">How the <em>Marketplace</em> Works</h2>
-                <p class="section-subtext" style="margin: 0 auto; text-align:center;">Getting your perfect style is straightforward — whether it's a suit, a watch, or a pair of bespoke shoes.</p>
+                <p class="section-subtext" style="margin: 0 auto; text-align:center;">Getting your perfect style is
+                    straightforward — whether it's a suit, a watch, or a pair of bespoke shoes.</p>
             </div>
             <div class="hiw-grid">
                 <div class="hiw-step">
@@ -1319,23 +1636,32 @@
                 <div class="value-icon"><i class="fas fa-user-circle"></i></div>
                 <h3>For Clients</h3>
                 <ul>
-                    <li><i class="fas fa-check"></i> Discover bespoke tailors, watchmakers, shoe designers, hatters and more — all in one place.</li>
-                    <li><i class="fas fa-check"></i> Real-time chat with providers, share inspiration photos and get instant quotes.</li>
-                    <li><i class="fas fa-check"></i> Save your measurements profile for fast, accurate orders every time.</li>
+                    <li><i class="fas fa-check"></i> Discover bespoke tailors, watchmakers, shoe designers, hatters and
+                        more — all in one place.</li>
+                    <li><i class="fas fa-check"></i> Real-time chat with providers, share inspiration photos and get
+                        instant quotes.</li>
+                    <li><i class="fas fa-check"></i> Save your measurements profile for fast, accurate orders every
+                        time.</li>
                     <li><i class="fas fa-check"></i> End-to-end order tracking from first stitch to final delivery.</li>
                 </ul>
-                <a href="client-signup.html?mode=signup" class="card-action gold">Join as a Client <i class="fas fa-arrow-right"></i></a>
+                <a href="client-signup.html?mode=signup" class="card-action gold">Join as a Client <i
+                        class="fas fa-arrow-right"></i></a>
             </div>
             <div class="value-card">
                 <div class="value-icon"><i class="fas fa-store"></i></div>
                 <h3>For Providers</h3>
                 <ul>
-                    <li><i class="fas fa-check"></i> List your shop — tailors, watch sellers, shoe designers, accessory vendors all welcome.</li>
-                    <li><i class="fas fa-check"></i> Publish your catalog, set prices, and manage inquiries from a smart dashboard.</li>
-                    <li><i class="fas fa-check"></i> Reach thousands of style-conscious Kenyans actively looking for your craft.</li>
-                    <li><i class="fas fa-check"></i> Team tools: manage staff, track orders and grow your revenue online.</li>
+                    <li><i class="fas fa-check"></i> List your shop — tailors, watch sellers, shoe designers, accessory
+                        vendors all welcome.</li>
+                    <li><i class="fas fa-check"></i> Publish your catalog, set prices, and manage inquiries from a smart
+                        dashboard.</li>
+                    <li><i class="fas fa-check"></i> Reach thousands of style-conscious Kenyans actively looking for
+                        your craft.</li>
+                    <li><i class="fas fa-check"></i> Team tools: manage staff, track orders and grow your revenue
+                        online.</li>
                 </ul>
-                <a href="login.html" class="card-action outline">Register Your Business <i class="fas fa-arrow-right"></i></a>
+                <a href="login.html" class="card-action outline">Register Your Business <i
+                        class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     </section>
@@ -1343,7 +1669,8 @@
     <!-- ===== CTA BANNER ===== -->
     <div class="cta-section">
         <h2>Kenya's Style, All in One Place</h2>
-        <p>Join thousands of Kenyans already discovering bespoke fashion, luxury accessories, and premium style from trusted local providers.</p>
+        <p>Join thousands of Kenyans already discovering bespoke fashion, luxury accessories, and premium style from
+            trusted local providers.</p>
         <a href="client-signup.html?mode=signup" class="btn-hero-primary" style="display:inline-flex;">
             <i class="fas fa-shopping-bag"></i> Get Started Free
         </a>
@@ -1357,7 +1684,8 @@
                     <span class="logo-text">Tailors.co.ke</span>
                     <span class="logo-sub">Kenya's Style Marketplace</span>
                 </div>
-                <p>Connecting Kenya's finest tailors, designers, watchmakers, cobblers and accessory vendors with style-conscious clients everywhere.</p>
+                <p>Connecting Kenya's finest tailors, designers, watchmakers, cobblers and accessory vendors with
+                    style-conscious clients everywhere.</p>
             </div>
             <div class="footer-col">
                 <h5>Marketplace</h5>
@@ -1439,8 +1767,8 @@
                     renderTeaserListings(allListings);
                 } else {
                     const dashUrl = role === 'superadmin' ? 'superadmin-dashboard.html'
-                                  : role === 'owner'      ? 'admin-dashboard.html'
-                                  : 'manager-dashboard.html';
+                        : role === 'owner' ? 'admin-dashboard.html'
+                            : 'manager-dashboard.html';
                     authArea.innerHTML = `
                         <div class="nav-user-pill">
                             <span class="nav-user-name"><i class="fas fa-user-tie"></i> ${escapeHTML(firstName)}</span>
@@ -1535,12 +1863,12 @@
         }
 
         // ===== HERO SLIDESHOW =====
-        (function() {
-            const slides  = document.querySelectorAll('.hero-slide');
-            const dots    = document.querySelectorAll('.slide-dot');
-            const label   = document.getElementById('slideLabel');
-            let current   = 0;
-            let timer     = null;
+        (function () {
+            const slides = document.querySelectorAll('.hero-slide');
+            const dots = document.querySelectorAll('.slide-dot');
+            const label = document.getElementById('slideLabel');
+            let current = 0;
+            let timer = null;
 
             function goToSlide(n) {
                 slides[current].classList.remove('active');
@@ -1560,7 +1888,7 @@
                 dots[current].classList.add('active');
 
                 // Update label
-                const lbl  = slides[current].dataset.label;
+                const lbl = slides[current].dataset.label;
                 const icon = slides[current].dataset.icon;
                 if (label) {
                     label.style.opacity = '0';
@@ -1581,7 +1909,7 @@
             }
 
             // Expose to inline onclick
-            window.goToSlide = function(n) { goToSlide(n); startTimer(); };
+            window.goToSlide = function (n) { goToSlide(n); startTimer(); };
 
             // Pause on hover
             const hero = document.querySelector('.hero');
@@ -1594,7 +1922,7 @@
         })();
 
         // ===== SCROLL-TRIGGERED ANIMATIONS (Category Pills + Provider Cards) =====
-        (function() {
+        (function () {
             const STAGGER = 90; // ms between each item
 
             function animateOnScroll(selector, parentSelector) {
@@ -1640,77 +1968,82 @@
                 }, { threshold: 0.1 });
                 provObs.observe(provGrid);
             }
-        // ===== LIVE PROVIDER CARDS FROM SUPABASE =====
-        async function loadFeaturedProviders() {
-            const container = document.getElementById('providers-container');
-            if (!container) return;
+            // ===== LIVE PROVIDER CARDS FROM SUPABASE =====
+            async function loadFeaturedProviders() {
+                const container = document.getElementById('providers-container');
+                if (!container) return;
 
-            // Show shimmer skeletons while loading
-            container.innerHTML = `
+                // Show shimmer skeletons while loading
+                container.innerHTML = `
                 <div class="skeleton-card" data-index="0"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>
                 <div class="skeleton-card" data-index="1"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>
                 <div class="skeleton-card" data-index="2"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>`;
 
-            try {
-                const SB_URL = APP_CONFIG.supabaseUrl;
-                const SB_KEY = APP_CONFIG.supabaseKey;
+                if (typeof APP_CONFIG === 'undefined' || !supabaseClient) {
+                    console.warn('Supabase config or client not found. Falling back.');
+                    container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--slate);">Providers loading soon...</div>`;
+                    return;
+                }
 
-                // Check session in parallel with the fetch
-                const sbClient = supabase.createClient(SB_URL, SB_KEY);
-                const [res, { data: { user } }] = await Promise.all([
-                    fetch(
-                        `${SB_URL}/rest/v1/shops?is_public=eq.true&order=created_at.desc&limit=3&select=id,name,location_name,description,banner_image,profile_image`,
-                        { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
-                    ),
-                    sbClient.auth.getUser()
-                ]);
-                const isLoggedIn = !!user;
+                try {
+                    const SB_URL = APP_CONFIG.supabaseUrl;
+                    const SB_KEY = APP_CONFIG.supabaseKey;
 
-                const shops = await res.json();
+                    // Check session in parallel with the fetch
+                    const [res, { data: { user } }] = await Promise.all([
+                        fetch(
+                            `${SB_URL}/rest/v1/shops?is_public=eq.true&order=created_at.desc&limit=3&select=id,name,location_name,description,banner_image,profile_image`,
+                            { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
+                        ),
+                        supabaseClient.auth.getUser()
+                    ]);
+                    const isLoggedIn = !!user;
 
-                if (!Array.isArray(shops) || shops.length === 0) {
-                    container.innerHTML = `
+                    const shops = await res.json();
+
+                    if (!Array.isArray(shops) || shops.length === 0) {
+                        container.innerHTML = `
                         <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--slate);">
                             <i class="fas fa-store" style="font-size:2.5em;color:var(--gold);margin-bottom:18px;display:block;"></i>
                             <p style="font-size:1.1em;margin-bottom:8px;color:var(--white);">Providers are joining!</p>
                             <p style="font-size:0.9em;">Be the first to list your shop on Kenya's premier style marketplace.</p>
                             <a href="client-signup.html" class="btn-hero-primary" style="display:inline-flex;margin-top:22px;"><i class="fas fa-plus"></i> Join as Provider</a>
                         </div>`;
-                    return;
-                }
+                        return;
+                    }
 
-                const STORAGE_URL = `${SB_URL}/storage/v1/object/public/marketplace-assets/`;
+                    const STORAGE_URL = `${SB_URL}/storage/v1/object/public/marketplace-assets/`;
 
-                // Default banner images per index (fallback)
-                const fallbackBanners = [
-                    'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=600',
-                    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600',
-                    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600'
-                ];
+                    // Default banner images per index (fallback)
+                    const fallbackBanners = [
+                        'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=600',
+                        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600',
+                        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600'
+                    ];
 
-                container.innerHTML = shops.map((shop, i) => {
-                    const banner = shop.banner_image
-                        ? (shop.banner_image.startsWith('http') ? shop.banner_image : STORAGE_URL + shop.banner_image)
-                        : fallbackBanners[i] || fallbackBanners[0];
+                    container.innerHTML = shops.map((shop, i) => {
+                        const banner = shop.banner_image
+                            ? (shop.banner_image.startsWith('http') ? shop.banner_image : STORAGE_URL + shop.banner_image)
+                            : fallbackBanners[i] || fallbackBanners[0];
 
-                    const avatar = shop.profile_image
-                        ? (shop.profile_image.startsWith('http') ? shop.profile_image : STORAGE_URL + shop.profile_image)
-                        : null;
+                        const avatar = shop.profile_image
+                            ? (shop.profile_image.startsWith('http') ? shop.profile_image : STORAGE_URL + shop.profile_image)
+                            : null;
 
-                    const desc = shop.description
-                        ? (shop.description.length > 110 ? shop.description.substring(0, 107) + '...' : shop.description)
-                        : 'A verified provider on Kenya\'s premier style marketplace.';
+                        const desc = shop.description
+                            ? (shop.description.length > 110 ? shop.description.substring(0, 107) + '...' : shop.description)
+                            : 'A verified provider on Kenya\'s premier style marketplace.';
 
-                    const loc = shop.location_name || 'Nairobi, Kenya';
+                        const loc = shop.location_name || 'Nairobi, Kenya';
 
-                    // Smart routing: logged-in → direct to shop; guest → login first, then redirect to shop
-                    const shopUrl = `shop.html?id=${encodeURIComponent(shop.id)}`;
-                    const href = isLoggedIn
-                        ? shopUrl
-                        : `client-signup.html?next=${encodeURIComponent(shopUrl)}`;
+                        // Smart routing: logged-in → direct to shop; guest → login first, then redirect to shop
+                        const shopUrl = `shop.html?id=${encodeURIComponent(shop.id)}`;
+                        const href = isLoggedIn
+                            ? shopUrl
+                            : `client-signup.html?next=${encodeURIComponent(shopUrl)}`;
 
-                    return `
-                    <a class="provider-card visible" href="${href}" data-index="${i}" style="transition-delay:${i*130}ms">
+                        return `
+                    <a class="provider-card visible" href="${href}" data-index="${i}" style="transition-delay:${i * 130}ms">
                         <div class="provider-banner" style="background-image:url('${banner}')">
                             <div class="provider-avatar" ${avatar ? `style="background-image:url('${avatar}');background-size:cover;"` : ''}>
                                 ${!avatar ? '<i class="fas fa-store"></i>' : ''}
@@ -1726,17 +2059,18 @@
                             </div>
                         </div>
                     </a>`;
-                }).join('');
+                    }).join('');
 
-            } catch (err) {
-                console.warn('Provider fetch failed:', err);
-                container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--slate);">Providers loading soon...</div>`;
+                } catch (err) {
+                    console.warn('Provider fetch failed:', err);
+                    container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--slate);">Providers loading soon...</div>`;
+                }
             }
-        }
 
-        loadFeaturedProviders();
+            loadFeaturedProviders();
 
         })();
     </script>
 </body>
+
 </html>

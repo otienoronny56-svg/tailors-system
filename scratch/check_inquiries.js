@@ -1,38 +1,19 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 
-const configContent = fs.readFileSync('config.js', 'utf8');
-const urlMatch = configContent.match(/supabaseUrl:\s*"([^"]+)"/);
-const keyMatch = configContent.match(/serviceRoleKey:\s*"([^"]+)"/);
+const configText = fs.readFileSync('config.js', 'utf8');
+const url = configText.match(/supabaseUrl:\s*['\"]([^'\"]+)['\"]/)[1];
+const key = configText.match(/serviceRoleKey:\s*['\"]([^'\"]+)['\"]/)[1];
 
-if (!urlMatch || !keyMatch) {
-    console.error("Could not load config keys");
-    process.exit(1);
+const supabase = createClient(url, key);
+
+async function check() {
+    const { data: inqs, error: inqErr } = await supabase.from('marketplace_inquiries').select('*').order('created_at', { ascending: false }).limit(5);
+    if (inqErr) console.error("Inq Error:", inqErr);
+    else console.log("LATEST INQUIRIES:", JSON.stringify(inqs, null, 2));
+
+    const { data: msgs, error: msgErr } = await supabase.from('messages').select('*').order('created_at', { ascending: false }).limit(5);
+    if (msgErr) console.error("Msg Error:", msgErr);
+    else console.log("LATEST MESSAGES:", JSON.stringify(msgs, null, 2));
 }
-
-const supabase = createClient(urlMatch[1], keyMatch[1]);
-
-async function checkInquiries() {
-    try {
-        console.log("--- Marketplace Inquiries ---");
-        const { data: inqs, error: inqErr } = await supabase
-            .from('marketplace_inquiries')
-            .select('id, client_name, client_email, client_phone, message, created_at, shop_id');
-        if (inqErr) throw inqErr;
-        console.table(inqs);
-
-        console.log("--- Latest 10 Messages ---");
-        const { data: msgs, error: msgErr } = await supabase
-            .from('messages')
-            .select('id, inquiry_id, sender_id, recipient_id, message_text, created_at')
-            .order('created_at', { ascending: false })
-            .limit(10);
-        if (msgErr) throw msgErr;
-        console.table(msgs);
-
-    } catch (err) {
-        console.error("Error checking database:", err.message);
-    }
-}
-
-checkInquiries();
+check();
