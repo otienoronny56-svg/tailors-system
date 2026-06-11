@@ -881,9 +881,8 @@ async function loadPendingApprovals() {
         // Step 1: Fetch all Pending profiles (no nested join to avoid schema cache error)
         const { data: pending, error } = await adminClient
             .from('user_profiles')
-            .select('id, full_name, email, created_at, shop_id, organization_id')
-            .eq('status', 'Pending')
-            .order('created_at', { ascending: true });
+            .select('id, full_name, email, shop_id, organization_id')
+            .eq('status', 'Pending');
 
         if (error) throw error;
 
@@ -899,7 +898,7 @@ async function loadPendingApprovals() {
         if (count === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" style="text-align:center; padding:30px; color:#10b981;">
+                    <td colspan="4" style="text-align:center; padding:30px; color:#10b981;">
                         <i class="fas fa-check-circle" style="font-size:1.5em; margin-bottom:8px; display:block;"></i>
                         No pending approvals — all caught up!
                     </td>
@@ -920,15 +919,12 @@ async function loadPendingApprovals() {
 
         tbody.innerHTML = pending.map(p => {
             const shopName = shopMap[p.shop_id] || '(no shop name)';
-            const registered = new Date(p.created_at).toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' });
-            // Escape shopName for onclick attribute to avoid quote issues
             const safeShopName = shopName.replace(/'/g, "\\'");
             return `
                 <tr>
                     <td><strong style="color:var(--brand-white);">${shopName}</strong></td>
                     <td>${p.full_name || '—'}</td>
                     <td style="font-size:0.85em;">${p.email || '—'}</td>
-                    <td style="font-size:0.85em;">${registered}</td>
                     <td style="text-align:center; white-space:nowrap;">
                         <button onclick="approveShop('${p.id}', '${p.shop_id}', '${p.organization_id}')"
                             class="small-btn"
@@ -946,7 +942,7 @@ async function loadPendingApprovals() {
 
     } catch (err) {
         console.error('loadPendingApprovals error:', err);
-        if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:20px;">Error loading pending approvals: ${err.message}</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ef4444; padding:20px;">Error loading pending approvals: ${err.message}</td></tr>`;
     }
 }
 
