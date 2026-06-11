@@ -463,6 +463,12 @@ async function checkSession() {
                     logDebug("Worker lookup error", workerError, 'error');
                     throw new Error("Worker Lookup Error: " + workerError.message);
                 }
+                // No profile found anywhere.
+                // If we are on the onboarding page, that is expected — let the user proceed.
+                if (path.includes('tailor-onboarding')) {
+                    logDebug("No profile yet — user is completing onboarding. Allowing.", null, 'info');
+                    return;
+                }
                 logDebug("Profile not found in either table", null, 'error');
                 alert("Error: Your account is authenticated but no Profile was found. Contact Support.");
                 const loginBtn = document.getElementById('login-button');
@@ -511,6 +517,18 @@ async function checkSession() {
         }
 
         // [FIX] Check for 'index.html', 'login.html', OR if the path is just '/' (root)
+        // Also skip redirect logic entirely if we are on the tailor-onboarding page
+        if (path.includes('tailor-onboarding')) {
+            // On the onboarding page: if a COMPLETED profile already exists, redirect to their dashboard.
+            // If status is Pending or incomplete, stay here and let them complete the form.
+            if (USER_PROFILE && USER_PROFILE.status !== 'Pending' && USER_PROFILE.organization_id) {
+                let redirectTo = 'admin-dashboard.html';
+                if (USER_PROFILE.role === 'client') redirectTo = 'client-dashboard.html';
+                window.location.href = redirectTo;
+            }
+            return; // Always stop here — let the onboarding page handle itself
+        }
+
         if (path.includes('index.html') || path.includes('login.html') || path === '/' || path.endsWith('/')) {
             let redirectTo = 'manager-dashboard.html';
             if (USER_PROFILE.role === 'superadmin') redirectTo = 'superadmin-dashboard.html';
@@ -842,8 +860,131 @@ async function loadSuperadminDashboard() {
                 `;
             }).join('');
         }
+
+        // Load pending approvals separately
+        await loadPendingApprovals();
+
     } catch (err) {
         console.error("Superadmin Dashboard Error:", err);
+    }
+}
+
+async function loadPendingApprovals() {
+    const tbody = document.getElementById('pending-approvals-tbody');
+    const badge = document.getElementById('pending-badge');
+    const section = document.getElementById('pending-approvals-section');
+    if (!tbody) return;
+
+    try {
+        const adminClient = getAdminClient();
+
+        // Fetch all Pending profiles joined with their shops
+        const { data: pending, error } = await adminClient
+            .from('user_profiles')
+            .select('id, full_name, email, created_at, shop_id, organization_id, shops(name)')
+            .eq('status', 'Pending')
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        const count = pending?.length || 0;
+
+        // Update badge
+        if (badge) badge.textContent = count;
+        // Show/hide the red border section based on whether there are pending items
+        if (section) {
+            section.style.borderLeftColor = count > 0 ? '#ef4444' : 'rgba(16,185,129,0.3)';
+            section.style.borderColor = count > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.15)';
+        }
+
+        if (count === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:30px; color:#10b981;">
+                        <i class="fas fa-check-circle" style="font-size:1.5em; margin-bottom:8px; display:block;"></i>
+                        No pending approvals — all caught up!
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        tbody.innerHTML = pending.map(p => {
+            const shopName = p.shops?.name || '(no shop name)';
+            const registered = new Date(p.created_at).toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' });
+            return `
+                <tr>
+                    <td><strong style="color:var(--brand-white);">${shopName}</strong></td>
+                    <td>${p.full_name || '—'}</td>
+                    <td style="font-size:0.85em;">${p.email || '—'}</td>
+                    <td style="font-size:0.85em;">${registered}</td>
+                    <td style="text-align:center; white-space:nowrap;">
+                        <button onclick="approveShop('${p.id}', '${p.shop_id}', '${p.organization_id}')"
+                            class="small-btn"
+                            style="background:#10b981; color:white; border:none; margin-right:6px;">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button onclick="rejectShop('${p.id}', '${p.shop_id}', '${p.organization_id}', '${shopName}')"
+                            class="small-btn"
+                            style="background:transparent; border:1px solid #ef4444; color:#ef4444;">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </td>
+                </tr>`;
+        }).join('');
+
+    } catch (err) {
+        console.error('loadPendingApprovals error:', err);
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:20px;">Error loading pending approvals: ${err.message}</td></tr>`;
+    }
+}
+
+async function approveShop(profileId, shopId, orgId) {
+    if (!confirm('Approve this shop? They will gain full access to their dashboard.')) return;
+    try {
+        const adminClient = getAdminClient();
+
+        // 1. Set profile status to Active
+        const { error: profErr } = await adminClient
+            .from('user_profiles')
+            .update({ status: 'Active' })
+            .eq('id', profileId);
+        if (profErr) throw profErr;
+
+        // 2. Set shop status to active (if the shops table has a status column)
+        if (shopId && shopId !== 'null') {
+            await adminClient
+                .from('shops')
+                .update({ status: 'active' })
+                .eq('id', shopId);
+        }
+
+        alert('✅ Shop approved! The tailor can now log in and access their dashboard.');
+        loadPendingApprovals();
+        loadSuperadminDashboard();
+    } catch (err) {
+        alert('Error approving shop: ' + err.message);
+    }
+}
+
+async function rejectShop(profileId, shopId, orgId, shopName) {
+    if (!confirm(`Reject and delete "${shopName}"? This will remove their profile, shop, and organization so they can re-register.`)) return;
+    try {
+        const adminClient = getAdminClient();
+
+        // Delete in order: profile → shop → org
+        await adminClient.from('user_profiles').delete().eq('id', profileId);
+
+        if (shopId && shopId !== 'null') {
+            await adminClient.from('shops').delete().eq('id', shopId);
+        }
+        if (orgId && orgId !== 'null') {
+            await adminClient.from('organizations').delete().eq('id', orgId);
+        }
+
+        alert('🗑️ Registration rejected and removed. The user can re-register with a different shop name.');
+        loadPendingApprovals();
+    } catch (err) {
+        alert('Error rejecting shop: ' + err.message);
     }
 }
 

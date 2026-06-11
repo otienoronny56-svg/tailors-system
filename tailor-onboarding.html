@@ -240,14 +240,20 @@
             // Check if profile already exists to prevent duplicate onboarding
             const { data: profile } = await supabaseClient
                 .from('user_profiles')
-                .select('id, status')
+                .select('id, status, organization_id, role')
                 .eq('id', user.id)
                 .single();
 
             if (profile) {
-                // Profile exists! Go to dashboard (the checkSession will catch if they're pending)
-                window.location.href = 'admin-dashboard.html';
+                // If they have a complete profile with an org already set up,
+                // send them to admin dashboard (checkSession will handle Pending/Active screen)
+                if (profile.organization_id) {
+                    window.location.href = 'admin-dashboard.html';
+                    return;
+                }
+                // If profile exists but has no org (e.g. partial Google signup), let them complete onboarding
             }
+            // No profile at all = first Google login, continue with form
         });
 
         // Form Submission

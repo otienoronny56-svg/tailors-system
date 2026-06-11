@@ -299,6 +299,41 @@
                 </div>
             </div>
 
+            <!-- 🔔 PENDING SHOP APPROVALS -->
+            <section class="order-list" id="pending-approvals-section" style="margin-top: 30px; border: 1px solid rgba(239,68,68,0.3); border-left: 4px solid #ef4444;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #ef4444 !important; display: flex; align-items: center; gap: 10px;">
+                        <span style="width:10px; height:10px; background:#ef4444; border-radius:50%; display:inline-block; animation: pulse-dot 1.5s infinite;"></span>
+                        Pending Shop Approvals
+                        <span id="pending-badge" style="background:#ef4444; color:white; border-radius:20px; padding:2px 10px; font-size:0.6em; font-family:'Montserrat',sans-serif; font-weight:700; vertical-align:middle;">0</span>
+                    </h2>
+                    <span style="font-size:0.8em; color:var(--brand-slate);">New tailor shops awaiting activation</span>
+                </div>
+                <style>
+                    @keyframes pulse-dot {
+                        0%, 100% { opacity: 1; transform: scale(1); }
+                        50% { opacity: 0.5; transform: scale(1.4); }
+                    }
+                </style>
+                <div style="width: 100%; overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Shop Name</th>
+                                <th>Owner Name</th>
+                                <th>Email</th>
+                                <th>Registered</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-approvals-tbody">
+                            <tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Registered Organizations -->
             <section class="order-list" style="margin-top: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2>Registered Organizations</h2>
