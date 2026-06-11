@@ -378,6 +378,9 @@
                         <td>${shopMap[list.shop_id] || 'Unknown Shop'}</td>
                         <td>${statusBadge}</td>
                         <td style="text-align: center;">
+                            <button onclick="openEditModal('${list.id}')" class="small-btn" style="background: transparent; border: 1px solid #3b82f6; color: #3b82f6; margin-right: 5px;" title="Edit details">
+                                <i class="fas fa-pen"></i> Edit
+                            </button>
                             <button onclick="toggleListingStatus('${list.id}', '${list.status}')" class="small-btn" style="background: transparent; border: 1px solid var(--brand-gold); color: var(--brand-gold); margin-right: 5px;">
                                 <i class="fas ${statusBtnIcon}"></i> ${statusBtnText}
                             </button>
@@ -482,6 +485,145 @@
                 alert("Error deleting listing: " + err.message);
             }
         }
+
+        function openEditModal(id) {
+            const listing = listings.find(l => l.id === id);
+            if (!listing) return;
+
+            document.getElementById('edit-listing-id').value = id;
+            document.getElementById('edit-listing-title').value = listing.title || '';
+            document.getElementById('edit-listing-desc').value = listing.description || '';
+            document.getElementById('edit-listing-price').value = listing.price || '';
+
+            // Set category select
+            const catSelect = document.getElementById('edit-listing-category');
+            if (catSelect) {
+                catSelect.value = listing.category || '';
+            }
+
+            document.getElementById('edit-listing-modal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-listing-modal').style.display = 'none';
+        }
+
+        async function saveListingEdit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-edit');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                const id = document.getElementById('edit-listing-id').value;
+                const title = document.getElementById('edit-listing-title').value.trim();
+                const description = document.getElementById('edit-listing-desc').value.trim();
+                const price = parseFloat(document.getElementById('edit-listing-price').value);
+                const category = document.getElementById('edit-listing-category').value;
+
+                if (!title) throw new Error('Title is required.');
+
+                const { error } = await supabaseClient
+                    .from('marketplace_listings')
+                    .update({ title, description, price, category })
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                closeEditModal();
+                loadListingsScreen();
+            } catch (err) {
+                alert('Error saving changes: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            }
+        }
     </script>
+
+    <!-- ✏️ EDIT LISTING MODAL -->
+    <div id="edit-listing-modal" style="display:none; position:fixed; z-index:3000; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:14px; width:560px; max-width:95%; box-shadow:0 20px 60px rgba(0,0,0,0.25); overflow:hidden; display:flex; flex-direction:column; max-height:90vh;">
+
+            <!-- Modal Header -->
+            <div style="background:var(--brand-navy); padding:20px 28px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; color:var(--brand-gold); font-family:'Playfair Display',serif; font-size:1.3em;">
+                    <i class="fas fa-pen" style="margin-right:8px;"></i> Edit Listing Details
+                </h3>
+                <span onclick="closeEditModal()" style="color:#94a3b8; font-size:1.6em; cursor:pointer; line-height:1;">&times;</span>
+            </div>
+
+            <!-- Modal Form -->
+            <form onsubmit="saveListingEdit(event)" style="padding:28px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:18px;">
+                <input type="hidden" id="edit-listing-id">
+
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Design Title *</label>
+                    <input type="text" id="edit-listing-title" required
+                        style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box; transition:border 0.2s;"
+                        onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div>
+                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Category</label>
+                        <select id="edit-listing-category"
+                            style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9em; box-sizing:border-box; background:white;">
+                            <optgroup label="— Tailored Clothing —">
+                                <option value="Suits">Suits</option>
+                                <option value="Senator Wear">Senator Wear</option>
+                                <option value="Dresses">Dresses</option>
+                                <option value="Shirts">Shirts</option>
+                                <option value="Trousers">Trousers</option>
+                                <option value="Coats">Coats</option>
+                                <option value="Alterations">Alterations</option>
+                            </optgroup>
+                            <optgroup label="— Accessories —">
+                                <option value="Watches">Watches</option>
+                                <option value="Ties &amp; Bowties">Ties &amp; Bowties</option>
+                                <option value="Scarves &amp; Capes">Scarves &amp; Capes</option>
+                                <option value="Belts">Belts</option>
+                                <option value="Hats &amp; Caps">Hats &amp; Caps</option>
+                                <option value="Bags &amp; Clutches">Bags &amp; Clutches</option>
+                                <option value="Jewellery">Jewellery</option>
+                            </optgroup>
+                            <optgroup label="— Footwear —">
+                                <option value="Shoes">Shoes</option>
+                                <option value="Sandals &amp; Slippers">Sandals &amp; Slippers</option>
+                                <option value="Boots">Boots</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Price (Ksh)</label>
+                        <input type="number" id="edit-listing-price" min="0" step="1"
+                            style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box; transition:border 0.2s;"
+                            onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Description / Details</label>
+                    <textarea id="edit-listing-desc" rows="4"
+                        placeholder="Describe materials, fit, customization options..."
+                        style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9em; font-family:inherit; resize:vertical; box-sizing:border-box; transition:border 0.2s;"
+                        onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+                </div>
+
+                <div style="display:flex; gap:12px; padding-top:4px;">
+                    <button type="button" onclick="closeEditModal()"
+                        style="flex:1; padding:12px; border:1px solid #e2e8f0; border-radius:8px; background:white; color:#64748b; font-weight:600; cursor:pointer; transition:all 0.2s;"
+                        onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                        Cancel
+                    </button>
+                    <button type="submit" id="btn-save-edit"
+                        style="flex:2; padding:12px; border:none; border-radius:8px; background:var(--brand-navy); color:var(--brand-gold); font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;"
+                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
