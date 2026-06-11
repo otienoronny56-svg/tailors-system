@@ -172,27 +172,94 @@
             padding: 120px 7% 80px;
         }
 
-        /* Background image layer */
-        .hero-bg {
+        /* ---- Slideshow ---- */
+        .hero-slideshow {
             position: absolute;
             inset: 0;
-            background-image: url('hero_bg.png');
-            background-size: cover;
-            background-position: center center;
-            filter: brightness(0.6) saturate(1.25);
             z-index: 0;
         }
 
-        /* Gradient overlays on top of the BG */
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center center;
+            opacity: 0;
+            transition: opacity 1.4s ease-in-out;
+            filter: brightness(0.62) saturate(1.3);
+            transform: scale(1.08);
+            animation: none;
+        }
+
+        .hero-slide.active {
+            opacity: 1;
+            animation: kenBurns 8s ease-in-out forwards;
+        }
+
+        .hero-slide.exit {
+            opacity: 0;
+            transition: opacity 1.4s ease-in-out;
+        }
+
+        @keyframes kenBurns {
+            from { transform: scale(1.08); }
+            to   { transform: scale(1.0);  }
+        }
+
+        /* Gradient overlay on top of slideshow */
         .hero-overlay {
             position: absolute;
             inset: 0;
             background:
-                linear-gradient(to right, rgba(6,16,30,0.78) 0%, rgba(6,16,30,0.25) 55%, rgba(6,16,30,0.08) 100%),
-                linear-gradient(to top, rgba(6,16,30,0.85) 0%, transparent 45%),
-                radial-gradient(ellipse at 75% 25%, rgba(201,168,76,0.1) 0%, transparent 50%);
+                linear-gradient(to right, rgba(6,16,30,0.80) 0%, rgba(6,16,30,0.30) 50%, rgba(6,16,30,0.10) 100%),
+                linear-gradient(to top, rgba(6,16,30,0.88) 0%, transparent 42%),
+                radial-gradient(ellipse at 70% 20%, rgba(201,168,76,0.09) 0%, transparent 50%);
             z-index: 1;
         }
+
+        /* Slide dot indicators */
+        .slide-dots {
+            position: absolute;
+            bottom: 38px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 3;
+        }
+        .slide-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.4);
+            cursor: pointer;
+            transition: all 0.4s;
+        }
+        .slide-dot.active {
+            background: var(--gold);
+            border-color: var(--gold);
+            width: 26px;
+            border-radius: 4px;
+        }
+
+        /* Slide label badge */
+        .slide-label {
+            position: absolute;
+            bottom: 38px;
+            right: 7%;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+            transition: all 0.5s;
+        }
+        .slide-label i { color: var(--gold); }
 
         .hero-content {
             position: relative;
@@ -958,8 +1025,21 @@
 
     <!-- ===== HERO ===== -->
     <section class="hero">
-        <div class="hero-bg"></div>
+        <!-- Auto Slideshow -->
+        <div class="hero-slideshow" id="heroSlideshow">
+            <div class="hero-slide active" style="background-image:url('hero_bg.png')" data-label="Gen Z Fashion" data-icon="fa-tshirt"></div>
+            <div class="hero-slide" style="background-image:url('hero_slide2.png')" data-label="Luxury Watches" data-icon="fa-clock"></div>
+            <div class="hero-slide" style="background-image:url('hero_slide3.png')" data-label="Bespoke Suits" data-icon="fa-user-tie"></div>
+        </div>
         <div class="hero-overlay"></div>
+        <!-- Dot nav -->
+        <div class="slide-dots" id="slideDots">
+            <div class="slide-dot active" onclick="goToSlide(0)"></div>
+            <div class="slide-dot" onclick="goToSlide(1)"></div>
+            <div class="slide-dot" onclick="goToSlide(2)"></div>
+        </div>
+        <!-- Current slide label -->
+        <div class="slide-label" id="slideLabel"><i class="fas fa-tshirt"></i> Gen Z Fashion</div>
 
         <div class="hero-content">
             <div class="hero-eyebrow animate-fadeup delay-1">
@@ -1427,6 +1507,65 @@
                 }
             ];
         }
+
+        // ===== HERO SLIDESHOW =====
+        (function() {
+            const slides  = document.querySelectorAll('.hero-slide');
+            const dots    = document.querySelectorAll('.slide-dot');
+            const label   = document.getElementById('slideLabel');
+            let current   = 0;
+            let timer     = null;
+
+            function goToSlide(n) {
+                slides[current].classList.remove('active');
+                slides[current].classList.add('exit');
+                dots[current].classList.remove('active');
+
+                // Force reflow to restart Ken Burns on next active
+                void slides[n].offsetWidth;
+
+                slides[current].addEventListener('transitionend', function cleanup() {
+                    slides[current].classList.remove('exit');
+                    this.removeEventListener('transitionend', cleanup);
+                }, { once: true });
+
+                current = n;
+                slides[current].classList.add('active');
+                dots[current].classList.add('active');
+
+                // Update label
+                const lbl  = slides[current].dataset.label;
+                const icon = slides[current].dataset.icon;
+                if (label) {
+                    label.style.opacity = '0';
+                    setTimeout(() => {
+                        label.innerHTML = `<i class="fas ${icon}"></i> ${lbl}`;
+                        label.style.opacity = '1';
+                    }, 400);
+                }
+            }
+
+            function nextSlide() {
+                goToSlide((current + 1) % slides.length);
+            }
+
+            function startTimer() {
+                clearInterval(timer);
+                timer = setInterval(nextSlide, 6000);
+            }
+
+            // Expose to inline onclick
+            window.goToSlide = function(n) { goToSlide(n); startTimer(); };
+
+            // Pause on hover
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                hero.addEventListener('mouseenter', () => clearInterval(timer));
+                hero.addEventListener('mouseleave', startTimer);
+            }
+
+            startTimer();
+        })();
     </script>
 </body>
 </html>
