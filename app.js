@@ -7450,7 +7450,7 @@ async function updateSidebarBranding(forcedName = null) {
                     <a href="marketplace.html" id="nav-marketplace-browse" target="_blank"><i class="fas fa-shopping-bag" style="margin-right: 8px;"></i> Browse Marketplace</a>
                     
                     <div class="sidebar-dropdown">
-                        <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <button class="dropdown-trigger" id="nav-clients-dropdown" onclick="toggleSidebarDropdown(this)">
                             <span><i class="fas fa-address-book" style="margin-right: 8px;"></i> Clients & Inbox</span>
                             <i class="fas fa-chevron-down dropdown-arrow"></i>
                         </button>
@@ -7572,7 +7572,7 @@ async function updateSidebarBranding(forcedName = null) {
 }
 
 window.addEventListener('DOMContentLoaded', function () {
-    // --- ðŸŽ¨ AUTO-BRANDING (Master Template Feature) ---
+    // --- 🎨 AUTO-BRANDING (Master Template Feature) ---
     if (typeof APP_CONFIG !== 'undefined') {
         // B. Update Dashboard Sidebar (Initial guess from config)
         updateSidebarBranding();
@@ -7703,7 +7703,7 @@ window.addEventListener('beforeunload', function () {
 });
 
 // ==========================================
-// ðŸ’³ PAYMENT EDITING FUNCTIONS
+// 💰 PAYMENT EDITING FUNCTIONS
 // ==========================================
 
 let SELECTED_PAYMENT_ID = null; // Track which payment is being edited
@@ -7789,7 +7789,7 @@ async function savePaymentEdit() {
 }
 
 async function deletePaymentRecord(paymentId) {
-    if (!confirm("âš ï¸ Soft-delete this payment? It will be hidden but recoverable.")) {
+    if (!confirm("⚠️ Soft-delete this payment? It will be hidden but recoverable.")) {
         return;
     }
 
@@ -7832,7 +7832,7 @@ window.addEventListener('click', (e) => {
 });
 
 // ==========================================
-// ðŸ’³ PAYMENT DISPLAY ENHANCEMENT
+// 💰 PAYMENT DISPLAY ENHANCEMENT
 // ==========================================
 // This function transforms the payment history display to add edit/delete buttons
 async function enhancePaymentDisplay() {
@@ -7881,14 +7881,14 @@ async function enhancePaymentDisplay() {
             <td style="max-width: 80px; overflow: hidden; text-overflow: ellipsis;">${p.notes || '-'}</td>
             <td style="text-align: center; white-space: nowrap;">
                 ${p.deleted_at
-            ? `<span style="color: #dc3545; font-size: 0.75em;">ðŸ—‘ï¸ Deleted</span>`
+            ? `<span style="color: #dc3545; font-size: 0.75em;">🗑️ Deleted</span>`
             : `<button onclick="openPaymentEditModal('${p.id}')" style="padding: 4px 8px; background: var(--brand-gold); color: black; border: none; border-radius: 3px; cursor: pointer; font-size: 0.75em;">Edit</button>
                        <button onclick="deletePaymentRecord('${p.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 2px; font-size: 0.75em;">Del</button>`
         }
             </td>
         </tr>
-        ${p.edited_at ? `<tr style="background: #f0f0f0; font-size: 0.75em; color: #666;"><td colspan="5">âœï¸ Last edited ${formatDate(p.edited_at)} by ${p.edited_by ? p.edited_by.slice(-6) : 'Admin'}</td></tr>` : ''}
-        ${p.deleted_at ? `<tr style="background: #f0f0f0; font-size: 0.75em; color: #999;"><td colspan="5">ðŸ—‘ï¸ Soft-deleted ${formatDate(p.deleted_at)} by ${p.deleted_by ? p.deleted_by.slice(-6) : 'Admin'}</td></tr>` : ''}
+        ${p.edited_at ? `<tr style="background: #f0f0f0; font-size: 0.75em; color: #666;"><td colspan="5">✏️ Last edited ${formatDate(p.edited_at)} by ${p.edited_by ? p.edited_by.slice(-6) : 'Admin'}</td></tr>` : ''}
+        ${p.deleted_at ? `<tr style="background: #f0f0f0; font-size: 0.75em; color: #999;"><td colspan="5">🗑️ Soft-deleted ${formatDate(p.deleted_at)} by ${p.deleted_by ? p.deleted_by.slice(-6) : 'Admin'}</td></tr>` : ''}
     `).join('') : '<tr><td colspan="5" style="text-align:center; padding:15px;">No payments recorded yet.</td></tr>';
 }
 
@@ -7926,7 +7926,7 @@ loadAdminOrderDetails = async function () {
 };
 
 // ==========================================
-// ðŸš€ NEW ANALYTICS FEATURES
+// 🚀 NEW ANALYTICS FEATURES
 // ==========================================
 
 async function loadOrderVolumeChart(shopId) {
@@ -8350,7 +8350,7 @@ async function exportTransactionsCSV() {
 }
 
 // ==========================================
-// ðŸ  CLIENT DATABASE SYSTEM
+// 🏠 CLIENT DATABASE SYSTEM
 // ==========================================
 
 /**
@@ -8820,8 +8820,8 @@ window.saveNewClient = async function (e) {
         const { error } = await supabaseClient
             .from('clients')
             .insert([{
-                organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
-                shop_id: USER_PROFILE.shop_id || null, // ðŸ‘ˆ Enforced for isolated viewing
+                organization_id: USER_PROFILE.organization_id, // ☝️ Multi-tenant safe
+                shop_id: USER_PROFILE.shop_id || null, // ☝️ Enforced for isolated viewing
                 name,
                 phone,
                 notes,
@@ -9297,7 +9297,7 @@ window.generateCustomInvoice = async function () {
 };
 
 // ==========================================
-// ðŸ‘” OWNER MODULE - MANAGEMENT & SETUP
+// 👔 OWNER MODULE - MANAGEMENT & SETUP
 // ==========================================
 
 async function loadAdminManagementScreen() {
@@ -9376,13 +9376,13 @@ async function handleAddShopAndManager(e) {
 
         if (profileErr) throw profileErr;
 
-        msg.innerHTML = `<span style="color:green;">âœ… Shop '${shopName}' and Manager '${mgrName}' created!</span>`;
+        msg.innerHTML = `<span style="color:green;">✅ Shop '${shopName}' and Manager '${mgrName}' created!</span>`;
         document.getElementById('add-shop-form').reset();
         await loadAdminManagementScreen(); // Refresh
         await loadShopsForDropdown('shop-filter'); // Refresh global dropdowns if any
 
     } catch (error) {
-        msg.innerHTML = `<span style="color:red;">âŒ Error: ${error.message}</span>`;
+        msg.innerHTML = `<span style="color:red;">❌ Error: ${error.message}</span>`;
         logDebug("Create Shop/Manager Error", error, 'error');
     } finally {
         submitBtn.disabled = false;
@@ -9419,7 +9419,7 @@ async function handleAdminAddWorker(e) {
 
         if (error) throw error;
 
-        alert(`âœ… Crew member ${workerName} assigned successfully!`);
+        alert(`✅ Crew member ${workerName} assigned successfully!`);
         document.getElementById('admin-add-worker-form').reset();
         await loadAdminManagementScreen();
 
@@ -9562,10 +9562,10 @@ async function handlePasswordReset() {
         const { data, error } = await adminClient.auth.admin.updateUserById(userId, { password: newPass });
         if (error) throw error;
 
-        alert("âœ… Password updated successfully! The manager can now log in with the new password.");
+        alert("✅ Password updated successfully! The manager can now log in with the new password.");
         document.getElementById('password-reset-modal').style.display = 'none';
     } catch (error) {
-        alert("âŒ Error: " + error.message);
+        alert("❌ Error: " + error.message);
     }
 }
 
@@ -9574,7 +9574,7 @@ window.deleteWorker = async function(id, name) {
     try {
         const { error } = await supabaseClient.from('workers').delete().eq('id', id);
         if (error) throw error;
-        alert(`âœ… Crew member ${name} removed.`);
+        alert(`✅ Crew member ${name} removed.`);
         loadShopCommandCenter();
     } catch (err) {
         alert("Error removing crew member: " + err.message);
@@ -9814,15 +9814,15 @@ window.saveShopDetails = async function(e) {
         const { error: updateError } = await supabaseClient.from('shops').update(updatePayload).eq('id', shopId);
         if (updateError) throw updateError;
         
-        alert("âœ… Shop configuration updated safely!");
+        alert("✅ Shop configuration updated safely!");
         closeEditShopModal();
         loadShopCommandCenter();
         
     } catch (err) {
         if (err.message && (err.message.includes('column') || err.message.includes('does not exist') || err.message.includes('42703'))) {
-            alert("âŒ Error: Missing columns in the database.\n\nPlease run the SQL query from the file 'add_shop_fields.sql' in your Supabase SQL Editor to add the required fields (working hours, specialization, website) to your database, then try again!");
+            alert("❌ Error: Missing columns in the database.\n\nPlease run the SQL query from the file 'add_shop_fields.sql' in your Supabase SQL Editor to add the required fields (working hours, specialization, website) to your database, then try again!");
         } else {
-            alert("âŒ Error saving shop config: " + err.message);
+            alert("❌ Error saving shop config: " + err.message);
         }
         logDebug("Shop Update Error:", err, 'error');
     } finally {
@@ -9832,7 +9832,7 @@ window.saveShopDetails = async function(e) {
 }
 
 // ==========================================
-// ðŸ›’ ORDER EXTRAS HELPERS
+// 📦 ORDER EXTRAS HELPERS
 // ==========================================
 
 async function loadExtrasForShop(shopId) {
@@ -9866,7 +9866,7 @@ async function loadExtrasForShop(shopId) {
                 <div style="flex:1;">
                     <strong style="color:#334155; font-size:0.9em;">${item.name}</strong>
                     <span style="font-size:0.75em; background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:4px; margin-left:6px;">${item.category}</span>
-                    <div style="font-size:0.8em; color:#64748b; margin-top:2px;">${formatCurrency(item.price)} each Â· ${item.stock_quantity} in stock</div>
+                    <div style="font-size:0.8em; color:#64748b; margin-top:2px;">${formatCurrency(item.price)} each · ${item.stock_quantity} in stock</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <input type="number" min="0" max="${item.stock_quantity}" value="0" class="extra-qty-input" data-item-id="${item.id}" data-item-name="${item.name}" data-item-price="${item.price}" data-max-stock="${item.stock_quantity}"
@@ -9894,7 +9894,7 @@ function updateExtrasSubtotal() {
 
         if (qty > 0) {
             listHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.95em; color:#334155;">
-                            <span>â€¢ ${input.dataset.itemName} (x${qty})</span>
+                            <span>• ${input.dataset.itemName} (x${qty})</span>
                             <span style="font-weight:600;">${formatCurrency(price * qty)}</span>
                          </div>`;
         }
@@ -10000,7 +10000,7 @@ async function saveOrderExtrasWithStock(orderId, shopId) {
 }
 
 // ==========================================
-// ðŸ“¦ INVENTORY MANAGEMENT SYSTEM
+// 📦 INVENTORY MANAGEMENT SYSTEM
 // ==========================================
 
 let ALL_INVENTORY = [];
@@ -10126,7 +10126,7 @@ async function addInventoryItem() {
     const msgEl = document.getElementById('inv-add-msg');
 
     if (!name || !shopId) {
-        if (msgEl) { msgEl.textContent = 'âŒ Please fill in name and select a shop.'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+        if (msgEl) { msgEl.textContent = '❌ Please fill in name and select a shop.'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
         return;
     }
 
@@ -10142,7 +10142,7 @@ async function addInventoryItem() {
 
         if (error) throw error;
 
-        if (msgEl) { msgEl.textContent = `âœ… "${name}" added to inventory!`; msgEl.style.color = '#10b981'; msgEl.style.display = 'block'; }
+        if (msgEl) { msgEl.textContent = `✅ "${name}" added to inventory!`; msgEl.style.color = '#10b981'; msgEl.style.display = 'block'; }
         
         // Reset form
         document.getElementById('inv-name').value = '';
@@ -10155,7 +10155,7 @@ async function addInventoryItem() {
         setTimeout(() => { if (msgEl) msgEl.style.display = 'none'; }, 3000);
 
     } catch (err) {
-        if (msgEl) { msgEl.textContent = 'âŒ Error: ' + err.message; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+        if (msgEl) { msgEl.textContent = '❌ Error: ' + err.message; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
     }
 }
 
@@ -10190,9 +10190,9 @@ async function saveInventoryEdit() {
 
         document.getElementById('inv-edit-modal').classList.remove('active');
         await loadInventoryScreen();
-        alert('âœ… Item updated successfully!');
+        alert('✅ Item updated successfully!');
     } catch (err) {
-        alert('âŒ Error updating item: ' + err.message);
+        alert('❌ Error updating item: ' + err.message);
     }
 }
 
@@ -10203,9 +10203,9 @@ async function deleteInventoryItem(itemId, itemName) {
         const { error } = await supabaseClient.from('inventory_items').delete().eq('id', itemId);
         if (error) throw error;
         await loadInventoryScreen();
-        alert(`âœ… "${itemName}" has been deleted.`);
+        alert(`✅ "${itemName}" has been deleted.`);
     } catch (err) {
-        alert('âŒ Error deleting item: ' + err.message);
+        alert('❌ Error deleting item: ' + err.message);
     }
 }
 
@@ -10233,11 +10233,11 @@ async function saveRestock() {
 
         if (error) throw error;
 
-        document.getElementById('inv-restock-modal').classList.remove('active');
+        document.getElementById('inv-restock-modal').classList.add('active');
         await loadInventoryScreen();
-        alert(`âœ… Restocked! ${item.name} now has ${newQty} units.`);
+        alert(`✅ Restocked! ${item.name} now has ${newQty} units.`);
     } catch (err) {
-        alert('âŒ Error restocking: ' + err.message);
+        alert('❌ Error restocking: ' + err.message);
     }
 }
 
@@ -10336,7 +10336,6 @@ function hideMngModal() {
     if (modal) modal.classList.remove('active');
 }
 
-
 // ==========================================
 // 🔔 UNREAD MESSAGES NOTIFICATION
 // ==========================================
@@ -10376,18 +10375,31 @@ async function checkUnreadMessages() {
             const lastViewedTime = lastViewedStr ? parseInt(lastViewedStr) : 0;
             
             const navMsg = document.getElementById('nav-messages');
-            if (navMsg) {
-                if (latestMsgTime > lastViewedTime) {
-                    if (!navMsg.querySelector('.msg-badge')) {
-                        const badge = document.createElement('span');
-                        badge.className = 'msg-badge';
-                        badge.style.cssText = 'background:#ef4444; color:white; font-size:0.75em; padding:2px 6px; border-radius:10px; margin-left:6px; font-weight:bold; vertical-align:middle;';
-                        badge.textContent = 'NEW';
-                        navMsg.appendChild(badge);
-                    }
-                } else {
+            const navDropdown = document.getElementById('nav-clients-dropdown');
+            
+            if (latestMsgTime > lastViewedTime) {
+                if (navMsg && !navMsg.querySelector('.msg-badge')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'msg-badge';
+                    badge.style.cssText = 'background:#ef4444; color:white; font-size:0.75em; padding:2px 6px; border-radius:10px; margin-left:6px; font-weight:bold; vertical-align:middle;';
+                    badge.textContent = 'NEW';
+                    navMsg.appendChild(badge);
+                }
+                if (navDropdown && !navDropdown.querySelector('.msg-badge-outer')) {
+                    const outerBadge = document.createElement('span');
+                    outerBadge.className = 'msg-badge-outer';
+                    outerBadge.style.cssText = 'background:#ef4444; color:white; font-size:0.65em; width:8px; height:8px; border-radius:50%; margin-left:6px; display:inline-block; vertical-align:middle; animation: pulse 2s infinite;';
+                    const spanEl = navDropdown.querySelector('span');
+                    if (spanEl) spanEl.appendChild(outerBadge);
+                }
+            } else {
+                if (navMsg) {
                     const badge = navMsg.querySelector('.msg-badge');
                     if (badge) badge.remove();
+                }
+                if (navDropdown) {
+                    const outerBadge = navDropdown.querySelector('.msg-badge-outer');
+                    if (outerBadge) outerBadge.remove();
                 }
             }
         }
