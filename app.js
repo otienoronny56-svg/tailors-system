@@ -2662,6 +2662,7 @@ async function loadAdminDashboard() {
 }
 
 async function loadMetrics() {
+    if (!USER_PROFILE) return;
     try {
         const { data: shops } = await supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id);
         if (!shops || shops.length === 0) return;
@@ -2962,6 +2963,7 @@ function closeAdminModal() {
 // ==========================================
 
 async function loadAdminOrders(mode = 'current') {
+    if (!USER_PROFILE) return;
     // [NEW] Update Header based on mode
     const headerTitle = document.querySelector('header h1');
     if (headerTitle) {
@@ -8120,6 +8122,7 @@ async function loadRecentActivities(shopId) {
 }
 
 async function loadTransactionKPIs() {
+    if (!USER_PROFILE) return;
     try {
         let paymentsQuery = supabaseClient.from('payments').select('amount').is('deleted_at', null).eq('organization_id', USER_PROFILE.organization_id);
         let ordersQuery = supabaseClient.from('orders').select('price').eq('organization_id', USER_PROFILE.organization_id);
@@ -8155,6 +8158,7 @@ async function loadTransactionKPIs() {
 }
 
 async function loadAllTransactions() {
+    if (!USER_PROFILE) return;
     const tbody = document.getElementById('all-transactions-tbody');
     if (!tbody) return;
 
