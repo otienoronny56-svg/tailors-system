@@ -237,7 +237,7 @@
     </div>
 
     <script>
-        const supabaseClient = supabase.createClient(CONFIG.supabaseUrl, CONFIG.anonKey);
+        const supabaseClient = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
 
         const STATUS_MAP = {
             1: { title: "Order Assigned", desc: "Your order has been assigned to a tailor." },
