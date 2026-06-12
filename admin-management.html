@@ -516,25 +516,68 @@
                             <input type="text" id="edit-shop-name" placeholder="Shop Name" required style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group" style="position: relative;">
+                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Payment Method</label>
+                            <i class="fas fa-money-bill-wave" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
+                            <select id="edit-shop-payment-type" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none; appearance: none; cursor: pointer;">
+                                <option value="paybill">Paybill</option>
+                                <option value="till">Buy Goods (Till Number)</option>
+                                <option value="pochi">Pochi La Biashara</option>
+                            </select>
+                            <i class="fas fa-chevron-down" style="position: absolute; right: 15px; top: 38px; color: var(--brand-gold); pointer-events: none;"></i>
+                        </div>
+
+                        <div id="payment-fields-paybill" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <div class="form-group" style="position: relative;">
-                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">M-Pesa Paybill / Till Number</label>
-                                <i class="fas fa-mobile-alt" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
+                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Paybill Number</label>
+                                <i class="fas fa-hashtag" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
                                 <input type="text" id="edit-shop-paybill" placeholder="e.g. 247247" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
                             </div>
+                            <div class="form-group" style="position: relative;">
+                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Account Number</label>
+                                <i class="fas fa-user-circle" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
+                                <input type="text" id="edit-shop-account" placeholder="e.g. 0110001234" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                            </div>
+                        </div>
 
+                        <div id="payment-fields-till" style="display: none; grid-template-columns: 1fr; gap: 20px;">
+                            <div class="form-group" style="position: relative;">
+                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Till Number</label>
+                                <i class="fas fa-store" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
+                                <input type="text" id="edit-shop-till" placeholder="e.g. 123456" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                            </div>
+                        </div>
+
+                        <div id="payment-fields-pochi" style="display: none; grid-template-columns: 1fr; gap: 20px;">
+                            <div class="form-group" style="position: relative;">
+                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Pochi La Biashara Number</label>
+                                <i class="fas fa-mobile-alt" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
+                                <input type="text" id="edit-shop-pochi" placeholder="e.g. 0722000000" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                            </div>
+                        </div>
+
+                        <script>
+                            document.getElementById('edit-shop-payment-type')?.addEventListener('change', function(e) {
+                                document.getElementById('payment-fields-paybill').style.display = 'none';
+                                document.getElementById('payment-fields-till').style.display = 'none';
+                                document.getElementById('payment-fields-pochi').style.display = 'none';
+                                
+                                const val = e.target.value;
+                                if (val === 'paybill') {
+                                    document.getElementById('payment-fields-paybill').style.display = 'grid';
+                                } else if (val === 'till') {
+                                    document.getElementById('payment-fields-till').style.display = 'grid';
+                                } else if (val === 'pochi') {
+                                    document.getElementById('payment-fields-pochi').style.display = 'grid';
+                                }
+                            });
+                        </script>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <div class="form-group" style="position: relative;">
                                 <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Contact Phone</label>
                                 <i class="fas fa-phone" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
                                 <input type="text" id="edit-shop-phone" placeholder="e.g. 0722 000 000" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div class="form-group" style="position: relative;">
-                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">M-Pesa Account Number</label>
-                                <i class="fas fa-hashtag" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                                <input type="text" id="edit-shop-account" placeholder="e.g. 0110001234" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
                             </div>
 
                             <div class="form-group" style="position: relative;">

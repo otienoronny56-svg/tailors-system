@@ -4840,9 +4840,12 @@ function buildInvoiceDocument(options) {
         companySubtitle = subtitle,
         companyPhone = APP_CONFIG?.shopPhone || "",
         companyLocation = "Nairobi, Kenya",
+        paymentMethodType = "paybill",
         paybill = APP_CONFIG?.billing?.paybill || "",
         account = APP_CONFIG?.billing?.account || "",
         accountName = APP_CONFIG?.billing?.accountName || "",
+        tillNumber = "",
+        pochiNumber = "",
         logoUrl = null
     } = options;
 
@@ -4856,14 +4859,25 @@ function buildInvoiceDocument(options) {
             <td class="items-right items-bold">${formatCurrency(item.total)}</td>
         </tr>`).join('');
 
+    let paymentDetailsHtml = '';
+    if (paymentMethodType === 'till') {
+        paymentDetailsHtml = `<td><strong>Buy Goods (Till No):</strong> ${tillNumber}</td>`;
+    } else if (paymentMethodType === 'pochi') {
+        paymentDetailsHtml = `<td><strong>Pochi La Biashara:</strong> ${pochiNumber}</td>`;
+    } else {
+        paymentDetailsHtml = `
+            <td><strong>Paybill:</strong> ${paybill}</td>
+            <td><strong>Account:</strong> ${account}</td>
+            <td><strong>Account Name:</strong> ${accountName}</td>
+        `;
+    }
+
     const paymentBlock = showPaymentDetails ? `
         <div class="section">
             <div class="pay-title">Payment Details</div>
             <table class="pay-table">
                 <tr>
-                    <td><strong>Paybill:</strong> ${paybill}</td>
-                    <td><strong>Account:</strong> ${account}</td>
-                    <td><strong>Account Name:</strong> ${accountName}</td>
+                    ${paymentDetailsHtml}
                 </tr>
             </table>
         </div>` : '';
@@ -5107,8 +5121,11 @@ window.generateExpenseInvoice = async function (expenseId) {
             companySubtitle: shop.receipt_header_text || "Authorized Internal Request",
             companyPhone: shop.phone_number || APP_CONFIG?.shopPhone || "",
             logoUrl: shop.logo_url || null,
+            paymentMethodType: shop.payment_method_type || 'paybill',
             paybill: shop.paybill_number || APP_CONFIG?.billing?.paybill,
             account: shop.paybill_account || APP_CONFIG?.billing?.account,
+            tillNumber: shop.till_number || '',
+            pochiNumber: shop.pochi_number || '',
             invoiceNumber: `EXP-${year}-${String(expense.id).slice(-6).toUpperCase()}`,
             date: formatDate(expense.incurred_at || expense.created_at),
             dueDate: "Immediate",
@@ -5205,8 +5222,11 @@ window.downloadInvoicePDF = async function (orderId) {
                 balance: Math.max(0, balance) 
             },
             showPaymentDetails: true,
+            paymentMethodType: shop.payment_method_type || 'paybill',
             paybill: shop.paybill_number || APP_CONFIG?.billing?.paybill,
             account: shop.paybill_account || APP_CONFIG?.billing?.account,
+            tillNumber: shop.till_number || '',
+            pochiNumber: shop.pochi_number || '',
             accountName: shop.name || APP_CONFIG?.billing?.accountName
         });
 
@@ -9492,8 +9512,16 @@ window.openEditShopModal = async function(shopId) {
         
         document.getElementById('edit-shop-id').value = shop.id;
         document.getElementById('edit-shop-name').value = shop.name || '';
+        const paymentType = shop.payment_method_type || 'paybill';
+        const typeSelect = document.getElementById('edit-shop-payment-type');
+        if (typeSelect) {
+            typeSelect.value = paymentType;
+            typeSelect.dispatchEvent(new Event('change'));
+        }
         document.getElementById('edit-shop-paybill').value = shop.paybill_number || '';
         document.getElementById('edit-shop-account').value = shop.paybill_account || '';
+        if(document.getElementById('edit-shop-till')) document.getElementById('edit-shop-till').value = shop.till_number || '';
+        if(document.getElementById('edit-shop-pochi')) document.getElementById('edit-shop-pochi').value = shop.pochi_number || '';
         document.getElementById('edit-shop-phone').value = shop.phone_number || '';
         document.getElementById('edit-shop-receipt').value = shop.receipt_header_text || '';
         document.getElementById('edit-shop-bank').value = shop.bank_details || '';
@@ -9626,8 +9654,11 @@ window.saveShopDetails = async function(e) {
     try {
         const shopId = document.getElementById('edit-shop-id').value;
         const name = document.getElementById('edit-shop-name').value.trim();
-        const paybill_number = document.getElementById('edit-shop-paybill').value.trim();
-        const paybill_account = document.getElementById('edit-shop-account').value.trim();
+        const payment_method_type = document.getElementById('edit-shop-payment-type')?.value || 'paybill';
+        const paybill_number = document.getElementById('edit-shop-paybill')?.value.trim() || '';
+        const paybill_account = document.getElementById('edit-shop-account')?.value.trim() || '';
+        const till_number = document.getElementById('edit-shop-till')?.value.trim() || '';
+        const pochi_number = document.getElementById('edit-shop-pochi')?.value.trim() || '';
         const phone_number = document.getElementById('edit-shop-phone').value.trim();
         const receipt_header_text = document.getElementById('edit-shop-receipt').value.trim();
         const bank_details = document.getElementById('edit-shop-bank').value.trim();
@@ -9637,8 +9668,11 @@ window.saveShopDetails = async function(e) {
         
         let updatePayload = {
             name,
+            payment_method_type,
             paybill_number,
             paybill_account,
+            till_number,
+            pochi_number,
             phone_number,
             receipt_header_text,
             bank_details
