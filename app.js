@@ -7307,6 +7307,7 @@ async function updateSidebarBranding(forcedName = null) {
                 navHtml = `
                     <a href="admin-dashboard.html" id="nav-dashboard"><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin Dashboard</a>
                     <a href="admin-orders.html" id="nav-orders"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global Orders</a>
+                    <a href="marketplace.html" id="nav-marketplace-browse" target="_blank"><i class="fas fa-shopping-bag" style="margin-right: 8px;"></i> Browse Marketplace</a>
                     
                     <div class="sidebar-dropdown">
                         <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
@@ -7351,6 +7352,7 @@ async function updateSidebarBranding(forcedName = null) {
                 navHtml = `
                     <a href="manager-dashboard.html" id="nav-dashboard"><i class="fas fa-list-check" style="margin-right: 8px;"></i> Active Orders</a>
                     <a href="all-orders.html" id="nav-all-orders"><i class="fas fa-history" style="margin-right: 8px;"></i> All Orders</a>
+                    <a href="marketplace.html" id="nav-marketplace-browse" target="_blank"><i class="fas fa-shopping-bag" style="margin-right: 8px;"></i> Browse Marketplace</a>
                     <a href="worker-management.html" id="nav-workers"><i class="fas fa-users" style="margin-right: 8px;"></i> Tailors Directory</a>
                     <a href="worker-assignments.html" id="nav-assignments"><i class="fas fa-tasks" style="margin-right: 8px;"></i> Job Assignments</a>
                     <a href="expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
@@ -9450,6 +9452,53 @@ window.openEditShopModal = async function(shopId) {
         if (document.getElementById('edit-shop-loc-name')) {
             document.getElementById('edit-shop-loc-name').value = shop.location_name || '';
         }
+        if (document.getElementById('edit-shop-specialization')) {
+            document.getElementById('edit-shop-specialization').value = shop.specialization || '';
+        }
+        // Reset and populate daily working hours
+        const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        let hoursData = {};
+        try {
+            if (shop.availability_hours && shop.availability_hours.trim().startsWith('{')) {
+                hoursData = JSON.parse(shop.availability_hours);
+            }
+        } catch (e) {
+            console.warn("Could not parse availability_hours JSON", e);
+        }
+
+        daysOfWeek.forEach(day => {
+            const chk = document.getElementById(`chk-day-${day}`);
+            const timeFrom = document.getElementById(`time-from-${day}`);
+            const timeTo = document.getElementById(`time-to-${day}`);
+            const inputs = document.getElementById(`time-inputs-${day}`);
+            const closed = document.getElementById(`closed-label-${day}`);
+
+            if (chk) {
+                const dayData = hoursData[day] || {
+                    open: day !== 'Sunday', // Sunday closed by default
+                    from: '08:00',
+                    to: '18:00'
+                };
+
+                chk.checked = !!dayData.open;
+                if (timeFrom) timeFrom.value = dayData.from || '08:00';
+                if (timeTo) timeTo.value = dayData.to || '18:00';
+
+                if (inputs && closed) {
+                    if (dayData.open) {
+                        inputs.style.display = 'flex';
+                        closed.style.display = 'none';
+                    } else {
+                        inputs.style.display = 'none';
+                        closed.style.display = 'block';
+                    }
+                }
+            }
+        });
+
+        if (document.getElementById('edit-shop-website')) {
+            document.getElementById('edit-shop-website').value = shop.website_url || '';
+        }
         if (document.getElementById('edit-shop-banner-img')) {
             document.getElementById('edit-shop-banner-img').value = shop.banner_image || '';
         }
@@ -9467,6 +9516,43 @@ window.openEditShopModal = async function(shopId) {
         } else {
             preview.src = '';
             preview.style.display = 'none';
+        }
+
+        // Reset upload status texts
+        const profileStatus = document.getElementById('upload-status');
+        if (profileStatus) profileStatus.textContent = '';
+        const bannerStatus = document.getElementById('upload-banner-status');
+        if (bannerStatus) bannerStatus.textContent = '';
+
+        // Clear files from inputs
+        const profileUpload = document.getElementById('shop-profile-upload');
+        if (profileUpload) profileUpload.value = '';
+        const bannerUpload = document.getElementById('shop-banner-upload');
+        if (bannerUpload) bannerUpload.value = '';
+
+        // Load previews for public marketplace assets
+        const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
+        
+        const profilePreview = document.getElementById('edit-shop-profile-preview');
+        if (profilePreview) {
+            if (shop.profile_image) {
+                profilePreview.src = shop.profile_image.startsWith('http') ? shop.profile_image : STORAGE_URL + shop.profile_image;
+                profilePreview.style.display = 'block';
+            } else {
+                profilePreview.src = '';
+                profilePreview.style.display = 'none';
+            }
+        }
+
+        const bannerPreview = document.getElementById('edit-shop-banner-preview');
+        if (bannerPreview) {
+            if (shop.banner_image) {
+                bannerPreview.src = shop.banner_image.startsWith('http') ? shop.banner_image : STORAGE_URL + shop.banner_image;
+                bannerPreview.style.display = 'block';
+            } else {
+                bannerPreview.src = '';
+                bannerPreview.style.display = 'none';
+            }
         }
         
         document.getElementById('edit-shop-modal').style.display = 'flex';
@@ -9512,6 +9598,29 @@ window.saveShopDetails = async function(e) {
         if (document.getElementById('edit-shop-loc-name')) {
             updatePayload.location_name = document.getElementById('edit-shop-loc-name').value.trim();
         }
+        if (document.getElementById('edit-shop-specialization')) {
+            updatePayload.specialization = document.getElementById('edit-shop-specialization').value.trim();
+        }
+        
+        // Build Google Maps style hours JSON payload
+        const hoursObj = {};
+        daysOfWeek.forEach(day => {
+            const chk = document.getElementById(`chk-day-${day}`);
+            const timeFrom = document.getElementById(`time-from-${day}`);
+            const timeTo = document.getElementById(`time-to-${day}`);
+            if (chk) {
+                hoursObj[day] = {
+                    open: chk.checked,
+                    from: timeFrom ? timeFrom.value : '08:00',
+                    to: timeTo ? timeTo.value : '18:00'
+                };
+            }
+        });
+        updatePayload.availability_hours = JSON.stringify(hoursObj);
+
+        if (document.getElementById('edit-shop-website')) {
+            updatePayload.website_url = document.getElementById('edit-shop-website').value.trim();
+        }
         if (document.getElementById('edit-shop-banner-img')) {
             updatePayload.banner_image = document.getElementById('edit-shop-banner-img').value.trim();
         }
@@ -9547,7 +9656,11 @@ window.saveShopDetails = async function(e) {
         loadShopCommandCenter();
         
     } catch (err) {
-        alert("❌ Error saving shop config: " + err.message);
+        if (err.message && (err.message.includes('column') || err.message.includes('does not exist') || err.message.includes('42703'))) {
+            alert("❌ Error: Missing columns in the database.\n\nPlease run the SQL query from the file 'add_shop_fields.sql' in your Supabase SQL Editor to add the required fields (working hours, specialization, website) to your database, then try again!");
+        } else {
+            alert("❌ Error saving shop config: " + err.message);
+        }
         logDebug("Shop Update Error:", err, 'error');
     } finally {
         btn.disabled = false;

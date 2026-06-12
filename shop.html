@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Profile | Tailors Marketplace</title>
     <link rel="icon" type="image/png" href="logo.png?v=2">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Client -->
@@ -38,7 +41,8 @@
             color: var(--brand-white);
             line-height: 1.6;
             overflow-x: hidden;
-            padding-top: 80px; /* Account for fixed header */
+            padding-top: 80px;
+            /* Account for fixed header */
         }
 
         /* --- Header / Navigation --- */
@@ -125,7 +129,10 @@
             transition: color 0.3s;
             padding: 10px 5px;
         }
-        .btn-login:hover { color: var(--brand-gold); }
+
+        .btn-login:hover {
+            color: var(--brand-gold);
+        }
 
         .btn-signup {
             background: var(--brand-gold);
@@ -139,6 +146,7 @@
             cursor: pointer;
             transition: all 0.3s;
         }
+
         .btn-signup:hover {
             background: var(--brand-gold-hover);
             box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
@@ -150,14 +158,16 @@
             align-items: center;
             gap: 12px;
         }
+
         .nav-user-name {
             font-size: 0.9em;
             font-weight: 600;
             color: var(--brand-gold);
         }
+
         .btn-signout {
             background: transparent;
-            border: 1px solid rgba(239,68,68,0.5);
+            border: 1px solid rgba(239, 68, 68, 0.5);
             color: #ef4444;
             padding: 8px 14px;
             border-radius: 6px;
@@ -167,7 +177,10 @@
             transition: all 0.3s;
             text-decoration: none;
         }
-        .btn-signout:hover { background: rgba(239,68,68,0.1); }
+
+        .btn-signout:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
 
         /* --- Shop Banner --- */
         .shop-banner {
@@ -214,7 +227,7 @@
             padding: 30px 20px;
             text-align: center;
             backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .shop-logo-large {
@@ -318,7 +331,7 @@
             border-radius: 12px;
             padding: 30px;
             backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .form-row {
@@ -342,7 +355,9 @@
             letter-spacing: 0.5px;
         }
 
-        .form-group input, .form-group textarea, .form-group select {
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
             background: rgba(6, 12, 24, 0.6);
             border: 1px solid var(--glass-border);
             border-radius: 8px;
@@ -353,7 +368,9 @@
             transition: all 0.3s;
         }
 
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
             border-color: var(--brand-gold);
             box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
@@ -404,7 +421,8 @@
         }
 
         .listing-img-wrap {
-            height: 280px; /* Taller image space for portrait clothing listings */
+            height: 280px;
+            /* Taller image space for portrait clothing listings */
             position: relative;
             overflow: hidden;
             background-color: #060c18;
@@ -428,7 +446,8 @@
             position: relative;
             height: 100%;
             width: 100%;
-            background-size: contain; /* Show the entire photo without truncation */
+            background-size: contain;
+            /* Show the entire photo without truncation */
             background-repeat: no-repeat;
             background-position: center;
             background-color: transparent;
@@ -506,7 +525,7 @@
             color: white;
             padding: 15px 25px;
             border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             display: none;
             align-items: center;
             gap: 10px;
@@ -515,8 +534,15 @@
         }
 
         @keyframes slideIn {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         /* Footer */
@@ -535,10 +561,12 @@
                 grid-template-columns: 1fr;
                 margin-top: -40px;
             }
+
             .form-row {
                 grid-template-columns: 1fr;
                 gap: 0;
             }
+
             .form-row .form-group {
                 margin-bottom: 20px;
             }
@@ -552,7 +580,7 @@
             border-radius: 12px;
             padding: 25px;
         }
-        
+
         .review-card {
             background: rgba(17, 34, 64, 0.3);
             border: 1px solid var(--glass-border);
@@ -560,19 +588,19 @@
             padding: 20px;
             transition: all 0.3s;
         }
-        
+
         .review-card:hover {
             border-color: rgba(212, 175, 55, 0.25);
             transform: translateY(-2px);
         }
-        
+
         .review-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 10px;
         }
-        
+
         .review-author {
             font-weight: 600;
             color: var(--brand-white);
@@ -580,7 +608,7 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .review-anonymous-badge {
             background: rgba(255, 255, 255, 0.05);
             color: var(--brand-slate);
@@ -588,24 +616,24 @@
             font-size: 0.75em;
             border-radius: 4px;
         }
-        
+
         .review-date {
             font-size: 0.8em;
             color: var(--brand-slate);
         }
-        
+
         .review-rating {
             color: var(--brand-gold);
             font-size: 0.9em;
             margin-bottom: 8px;
         }
-        
+
         .review-comment {
             color: var(--brand-light-slate);
             font-size: 0.92em;
             line-height: 1.5;
         }
-        
+
         .review-item-badge {
             display: inline-flex;
             align-items: center;
@@ -620,7 +648,7 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .review-item-badge:hover {
             background: rgba(212, 175, 55, 0.15);
         }
@@ -629,7 +657,10 @@
         .review-modal-backdrop {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(4, 8, 16, 0.85);
             backdrop-filter: blur(8px);
             z-index: 10000;
@@ -637,7 +668,7 @@
             justify-content: center;
             padding: 20px;
         }
-        
+
         .review-modal-content {
             background: #0d1e36;
             border: 1px solid var(--glass-border);
@@ -645,18 +676,18 @@
             width: 100%;
             max-width: 500px;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             position: relative;
         }
-        
+
         .rating-stars-input i {
             transition: color 0.2s, transform 0.2s;
         }
-        
+
         .rating-stars-input i:hover {
             transform: scale(1.1);
         }
-        
+
         .rating-stars-input i.active {
             color: var(--brand-gold);
         }
@@ -719,6 +750,7 @@
                 opacity: 0;
                 transform: translateY(12px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -786,6 +818,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -795,7 +828,7 @@
         </div>
         <nav>
             <a href="index.html"><i class="fas fa-home"></i> Home</a>
-            <a href="index.html#tailors-section">Other Shops</a>
+            <a href="marketplace.html"><i class="fas fa-shopping-bag"></i> Marketplace</a>
             <div id="nav-auth-area" style="display:flex; align-items:center; gap:12px;">
                 <!-- Dynamically rendered by checkSession() -->
                 <a href="client-signup.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
@@ -804,7 +837,9 @@
         </nav>
     </header>
 
-    <div class="shop-banner" id="shop-banner-bg" style="background-image: url('https://images.unsplash.com/photo-1558278224-5db3792065f0?auto=format&fit=crop&q=80&w=1400');"></div>
+    <div class="shop-banner" id="shop-banner-bg"
+        style="background: linear-gradient(135deg, var(--brand-navy) 0%, #112240 100%); border-bottom: 2px solid var(--brand-gold);">
+    </div>
 
     <div class="shop-container">
         <!-- 👤 LEFT SIDEBAR: PROFILE CARD -->
@@ -820,19 +855,23 @@
                 <div class="shop-description-text" id="shop-description">
                     Loading shop biography and services information...
                 </div>
-                
+
                 <div class="shop-meta-info">
-                    <div class="meta-row">
+                    <div class="meta-row" id="shop-specialization-row">
                         <i class="fas fa-cut"></i>
-                        <span>Bespoke Custom Tailoring</span>
+                        <span id="shop-specialization"></span>
                     </div>
-                    <div class="meta-row">
+                    <div class="meta-row" id="shop-hours-row">
                         <i class="fas fa-clock"></i>
-                        <span>Mon - Sat: 8:00 AM - 6:00 PM</span>
+                        <span id="shop-hours"></span>
                     </div>
                     <div class="meta-row" id="shop-phone-row">
                         <i class="fas fa-phone"></i>
                         <span id="shop-phone">Loading contact...</span>
+                    </div>
+                    <div class="meta-row" id="shop-website-row" style="display: none;">
+                        <i class="fas fa-globe"></i>
+                        <a id="shop-website" href="#" target="_blank" style="color: var(--brand-gold); text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--brand-gold)'">Visit Website</a>
                     </div>
                 </div>
             </div>
@@ -859,7 +898,8 @@
                 <div class="shop-filter-row">
                     <div class="search-wrap">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="shop-search" placeholder="Search this shop's designs..." onkeyup="filterShopCatalog()">
+                        <input type="text" id="shop-search" placeholder="Search this shop's designs..."
+                            onkeyup="filterShopCatalog()">
                     </div>
                     <div class="select-wrap">
                         <select id="shop-category-filter" onchange="filterShopCatalog()">
@@ -913,12 +953,14 @@
             <div id="section-inquiry" class="shop-section" style="display: none;">
                 <div class="inquiry-form-card" id="inquiry-section" style="margin-top: 0; padding-top: 5px;">
                     <div class="section-header-row" style="border-bottom:none; margin-bottom:15px; padding-bottom:0;">
-                        <h2 class="column-section-title" style="margin:0;"><i class="fas fa-envelope"></i> Send Inquiry or Book Fitting</h2>
+                        <h2 class="column-section-title" style="margin:0;"><i class="fas fa-envelope"></i> Send Inquiry
+                            or Book Fitting</h2>
                     </div>
                     <p style="color: var(--brand-slate); font-size: 0.92em; margin-bottom: 25px;">
-                        Fill out the form below to message this tailor. You can request custom garments, upload design specs, or ask for pricing.
+                        Fill out the form below to message this tailor. You can request custom garments, upload design
+                        specs, or ask for pricing.
                     </p>
-                    
+
                     <form id="inquiry-form" onsubmit="submitInquiry(event)">
                         <div class="form-row">
                             <div class="form-group">
@@ -945,7 +987,8 @@
                         </div>
                         <div class="form-group" style="margin-bottom: 25px;">
                             <label for="message">Your Message & Custom Requirements</label>
-                            <textarea id="message" rows="5" required placeholder="Describe what you want to tailor, colors, fabric choice, or your approximate size/measurements..."></textarea>
+                            <textarea id="message" rows="5" required
+                                placeholder="Describe what you want to tailor, colors, fabric choice, or your approximate size/measurements..."></textarea>
                         </div>
                         <button type="submit" class="btn-submit-inquiry" id="btn-submit">
                             <i class="fas fa-paper-plane"></i> Send Message to Tailor
@@ -958,27 +1001,38 @@
             <!-- Tab 3: Reviews -->
             <div id="section-reviews" class="shop-section" style="display: none;">
                 <div class="reviews-section-card" id="reviews-section" style="margin-top: 0; padding-top: 5px;">
-                    <div class="section-header-row" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 20px;">
-                        <h2 class="column-section-title" style="margin: 0;"><i class="fas fa-star" style="color: var(--brand-gold);"></i> Customer Reviews</h2>
-                        <button type="button" class="btn-write-review" onclick="openReviewModal()" style="background: transparent; border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 8px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                    <div class="section-header-row"
+                        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 20px;">
+                        <h2 class="column-section-title" style="margin: 0;"><i class="fas fa-star"
+                                style="color: var(--brand-gold);"></i> Customer Reviews</h2>
+                        <button type="button" class="btn-write-review" onclick="openReviewModal()"
+                            style="background: transparent; border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 8px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
                             <i class="fas fa-pen-fancy"></i> Leave a Review
                         </button>
                     </div>
-                    <div class="reviews-summary-display" style="display: flex; gap: 30px; align-items: center; margin-bottom: 25px; padding: 20px; background: rgba(17, 34, 64, 0.2); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.03);">
+                    <div class="reviews-summary-display"
+                        style="display: flex; gap: 30px; align-items: center; margin-bottom: 25px; padding: 20px; background: rgba(17, 34, 64, 0.2); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.03);">
                         <div style="text-align: center; min-width: 100px;">
-                            <div style="font-size: 2.8em; font-weight: 800; color: var(--brand-white); line-height: 1.1;" id="shop-avg-rating">0.0</div>
-                            <div style="color: var(--brand-gold); font-size: 1.1em; margin: 6px 0;" id="shop-stars-display">
-                                <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                            <div style="font-size: 2.8em; font-weight: 800; color: var(--brand-white); line-height: 1.1;"
+                                id="shop-avg-rating">0.0</div>
+                            <div style="color: var(--brand-gold); font-size: 1.1em; margin: 6px 0;"
+                                id="shop-stars-display">
+                                <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i
+                                    class="far fa-star"></i><i class="far fa-star"></i>
                             </div>
-                            <div style="font-size: 0.8em; color: var(--brand-slate);" id="shop-reviews-count">0 reviews</div>
+                            <div style="font-size: 0.8em; color: var(--brand-slate);" id="shop-reviews-count">0 reviews
+                            </div>
                         </div>
-                        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px;" id="rating-bars-container">
+                        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px;"
+                            id="rating-bars-container">
                             <!-- Rating progress bars will load here dynamically -->
                         </div>
                     </div>
-                    <div class="reviews-list" id="reviews-list" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="reviews-list" id="reviews-list"
+                        style="display: flex; flex-direction: column; gap: 15px;">
                         <div style="text-align: center; padding: 30px; color: var(--brand-slate);">
-                            <i class="fas fa-spinner fa-spin" style="font-size: 1.5em; color: var(--brand-gold); margin-bottom: 8px;"></i>
+                            <i class="fas fa-spinner fa-spin"
+                                style="font-size: 1.5em; color: var(--brand-gold); margin-bottom: 8px;"></i>
                             <p>Loading reviews...</p>
                         </div>
                     </div>
@@ -990,14 +1044,21 @@
     <!-- ✍️ WRITE REVIEW MODAL -->
     <div class="review-modal-backdrop" id="review-modal">
         <div class="review-modal-content">
-            <button class="modal-close-btn" onclick="closeReviewModal()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: var(--brand-slate); font-size: 1.5em; cursor: pointer;">&times;</button>
-            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.6em; color: var(--brand-white); margin-bottom: 8px;"><i class="fas fa-edit" style="color: var(--brand-gold);"></i> Write a Review</h3>
-            <p style="color: var(--brand-slate); font-size: 0.85em; margin-bottom: 20px;">Share your experience to help others evaluate this tailor.</p>
-            
+            <button class="modal-close-btn" onclick="closeReviewModal()"
+                style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: var(--brand-slate); font-size: 1.5em; cursor: pointer;">&times;</button>
+            <h3
+                style="font-family: 'Playfair Display', serif; font-size: 1.6em; color: var(--brand-white); margin-bottom: 8px;">
+                <i class="fas fa-edit" style="color: var(--brand-gold);"></i> Write a Review</h3>
+            <p style="color: var(--brand-slate); font-size: 0.85em; margin-bottom: 20px;">Share your experience to help
+                others evaluate this tailor.</p>
+
             <form id="review-form" onsubmit="submitReviewForm(event)">
                 <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 8px; color: var(--brand-white);">Select Rating *</label>
-                    <div class="rating-stars-input" id="review-stars-input" style="display: flex; gap: 8px; font-size: 2em; color: var(--brand-slate); cursor: pointer;">
+                    <label
+                        style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 8px; color: var(--brand-white);">Select
+                        Rating *</label>
+                    <div class="rating-stars-input" id="review-stars-input"
+                        style="display: flex; gap: 8px; font-size: 2em; color: var(--brand-slate); cursor: pointer;">
                         <i class="far fa-star" data-val="1" onclick="setFormRating(1)"></i>
                         <i class="far fa-star" data-val="2" onclick="setFormRating(2)"></i>
                         <i class="far fa-star" data-val="3" onclick="setFormRating(3)"></i>
@@ -1008,26 +1069,36 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="review-listing" style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 8px; color: var(--brand-white);">Reviewed Garment (Optional)</label>
-                    <select id="review-listing" style="width: 100%; padding: 10px; background: #060c18; border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-family: inherit; outline: none;">
+                    <label for="review-listing"
+                        style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 8px; color: var(--brand-white);">Reviewed
+                        Garment (Optional)</label>
+                    <select id="review-listing"
+                        style="width: 100%; padding: 10px; background: #060c18; border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-family: inherit; outline: none;">
                         <option value="">General Shop Review</option>
                         <!-- Loaded dynamically -->
                     </select>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="review-comment" style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 8px; color: var(--brand-white);">Review Comment</label>
-                    <textarea id="review-comment" rows="4" placeholder="Detail your experience with sizing, fabric quality, speed, or communications..." style="width: 100%; padding: 12px; background: #060c18; border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-family: inherit; resize: none; outline: none;"></textarea>
+                    <label for="review-comment"
+                        style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 8px; color: var(--brand-white);">Review
+                        Comment</label>
+                    <textarea id="review-comment" rows="4"
+                        placeholder="Detail your experience with sizing, fabric quality, speed, or communications..."
+                        style="width: 100%; padding: 12px; background: #060c18; border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-family: inherit; resize: none; outline: none;"></textarea>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 25px; display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="review-anonymous" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--brand-gold);">
-                    <label for="review-anonymous" style="font-size: 0.9em; color: var(--brand-slate); cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="review-anonymous"
+                        style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--brand-gold);">
+                    <label for="review-anonymous"
+                        style="font-size: 0.9em; color: var(--brand-slate); cursor: pointer; user-select: none;">
                         Post Anonymously (Identity will be protected)
                     </label>
                 </div>
 
-                <button type="submit" class="btn-submit-review" style="width: 100%; background: var(--brand-gold); color: var(--brand-navy); border: none; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 1em; cursor: pointer; transition: all 0.3s;">
+                <button type="submit" class="btn-submit-review"
+                    style="width: 100%; background: var(--brand-gold); color: var(--brand-navy); border: none; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 1em; cursor: pointer; transition: all 0.3s;">
                     <i class="fas fa-paper-plane"></i> Publish Review
                 </button>
             </form>
@@ -1134,7 +1205,7 @@
                         if (logoGroup) {
                             logoGroup.setAttribute('onclick', "location.href='client-dashboard.html'");
                         }
-                        
+
                         authArea.innerHTML = `
                             <div class="nav-user-pill">
                                 <span class="nav-user-name"><i class="fas fa-user-circle"></i> ${escapeHTML(firstName)}</span>
@@ -1145,12 +1216,13 @@
                     } else {
                         // Staff member browsing marketplace
                         const dashUrl = role === 'superadmin' ? 'superadmin-dashboard.html'
-                                      : role === 'owner'      ? 'admin-dashboard.html'
-                                      : 'manager-dashboard.html';
+                            : role === 'owner' ? 'admin-dashboard.html'
+                                : 'manager-dashboard.html';
                         authArea.innerHTML = `
                             <div class="nav-user-pill">
                                 <span class="nav-user-name"><i class="fas fa-user-tie"></i> ${escapeHTML(firstName)}</span>
                                 <a href="${dashUrl}" class="btn-portal"><i class="fas fa-th-large"></i> Dashboard</a>
+                                <button class="btn-signout" onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                             </div>
                         `;
                     }
@@ -1227,22 +1299,133 @@
             document.getElementById('shop-name').textContent = shopDetails.name;
             document.getElementById('shop-location-badge').querySelector('span').textContent = shopDetails.location_name || shopDetails.location || 'Nairobi, Kenya';
             document.getElementById('shop-description').textContent = shopDetails.description || 'Premium custom design shop specializing in bespoke suits, custom measurements, and high-fashion alterations.';
-            
+
+            // Set specialization
+            const specializationRow = document.getElementById('shop-specialization-row');
+            const specializationEl = document.getElementById('shop-specialization');
+            if (specializationRow && specializationEl) {
+                if (shopDetails.specialization && shopDetails.specialization.trim() !== '') {
+                    specializationEl.textContent = shopDetails.specialization.trim();
+                    specializationRow.style.display = 'flex';
+                } else {
+                    specializationRow.style.display = 'none';
+                }
+            }
+
+            // Set working hours
+            const hoursEl = document.getElementById('shop-hours');
+            if (hoursEl) {
+                let formattedHours = '';
+                try {
+                    if (shopDetails.availability_hours && shopDetails.availability_hours.trim().startsWith('{')) {
+                        const hoursObj = JSON.parse(shopDetails.availability_hours);
+                        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                        const dayAbbrs = {
+                            'Monday': 'Mon', 'Tuesday': 'Tue', 'Wednesday': 'Wed', 'Thursday': 'Thu',
+                            'Friday': 'Fri', 'Saturday': 'Sat', 'Sunday': 'Sun'
+                        };
+                        
+                        // Check if it's Open 24/7
+                        let all247 = true;
+                        days.forEach(day => {
+                            const data = hoursObj[day];
+                            if (!data || !data.open || data.from !== '00:00' || (data.to !== '23:59' && data.to !== '00:00')) {
+                                all247 = false;
+                            }
+                        });
+
+                        if (all247) {
+                            formattedHours = 'Open 24/7';
+                        } else {
+                            const groups = [];
+                            let currentGroup = null;
+
+                            days.forEach(day => {
+                                const data = hoursObj[day] || { open: false };
+                                const statusKey = data.open ? `${data.from}-${data.to}` : 'closed';
+                                
+                                if (currentGroup && currentGroup.statusKey === statusKey) {
+                                    currentGroup.days.push(day);
+                                } else {
+                                    if (currentGroup) groups.push(currentGroup);
+                                    currentGroup = { statusKey, open: data.open, from: data.from, to: data.to, days: [day] };
+                                }
+                            });
+                            if (currentGroup) groups.push(currentGroup);
+
+                            // Helper to format 24h string to 12h AM/PM
+                            const formatTime = (timeStr) => {
+                                if (!timeStr) return '';
+                                const parts = timeStr.split(':');
+                                const hour = parseInt(parts[0]);
+                                const mins = parts[1] || '00';
+                                const ampm = hour >= 12 ? 'PM' : 'AM';
+                                const formattedHour = hour % 12 || 12;
+                                return `${formattedHour}:${mins} ${ampm}`;
+                            };
+
+                            const formattedParts = [];
+                            groups.forEach(g => {
+                                if (g.open) {
+                                    const dayRange = g.days.length === 1 
+                                        ? dayAbbrs[g.days[0]]
+                                        : `${dayAbbrs[g.days[0]]} - ${dayAbbrs[g.days[g.days.length - 1]]}`;
+                                    formattedParts.push(`${dayRange}: ${formatTime(g.from)} - ${formatTime(g.to)}`);
+                                }
+                            });
+
+                            formattedHours = formattedParts.join(', ') || 'Closed';
+                        }
+                    } else {
+                        formattedHours = shopDetails.availability_hours || 'Mon - Sat: 8:00 AM - 6:00 PM';
+                    }
+                } catch (e) {
+                    console.error("Error parsing hours details:", e);
+                    formattedHours = shopDetails.availability_hours || 'Mon - Sat: 8:00 AM - 6:00 PM';
+                }
+                hoursEl.textContent = formattedHours;
+            }
+
+            // Set website link
+            const websiteRow = document.getElementById('shop-website-row');
+            const websiteLink = document.getElementById('shop-website');
+            if (websiteRow && websiteLink) {
+                if (shopDetails.website_url && shopDetails.website_url.trim() !== '') {
+                    let url = shopDetails.website_url.trim();
+                    if (!/^https?:\/\//i.test(url)) {
+                        url = 'https://' + url;
+                    }
+                    websiteLink.href = url;
+                    websiteLink.textContent = shopDetails.website_url.replace(/^(https?:\/\/)?(www\.)?/i, '');
+                    websiteRow.style.display = 'flex';
+                } else {
+                    websiteRow.style.display = 'none';
+                }
+            }
+
             // Set contact details
-            const phone = shopDetails.shop_phone || shopDetails.phone || APP_CONFIG.shopPhone || '0721401495';
+            const phone = shopDetails.phone_number || shopDetails.shop_phone || shopDetails.phone || APP_CONFIG.shopPhone || '0721401495';
             document.getElementById('shop-phone').textContent = phone;
 
             // Banners and Logos
-            if (shopDetails.banner_image) {
-                document.getElementById('shop-banner-bg').style.backgroundImage = `url('${shopDetails.banner_image}')`;
+            const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
+
+            const hasBanner = shopDetails.banner_image && shopDetails.banner_image.trim() !== '' && !shopDetails.banner_image.endsWith('/');
+            if (hasBanner) {
+                const bannerUrl = shopDetails.banner_image.startsWith('http') ? shopDetails.banner_image : STORAGE_URL + shopDetails.banner_image;
+                document.getElementById('shop-banner-bg').style.backgroundImage = `url('${bannerUrl}')`;
+            } else {
+                document.getElementById('shop-banner-bg').style.backgroundImage = 'none';
+                document.getElementById('shop-banner-bg').style.background = 'linear-gradient(135deg, var(--brand-navy) 0%, #112240 100%)';
             }
             if (shopDetails.profile_image) {
+                const avatarUrl = shopDetails.profile_image.startsWith('http') ? shopDetails.profile_image : STORAGE_URL + shopDetails.profile_image;
                 const avatar = document.getElementById('shop-logo-large');
-                avatar.style.backgroundImage = `url('${shopDetails.profile_image}')`;
+                avatar.style.backgroundImage = `url('${avatarUrl}')`;
                 avatar.style.border = "4px solid var(--brand-gold)";
                 avatar.innerHTML = ""; // Clear icon
             }
-            
+
             document.title = `${shopDetails.name} | Shop Profile`;
         }
 
@@ -1269,14 +1452,14 @@
 
             grid.innerHTML = listings.map(list => {
                 const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=400`;
-                
+
                 // Get ratings for this specific listing item
                 const itemReviews = shopReviews.filter(r => r.listing_id === list.id);
-                const avgRating = itemReviews.length > 0 
+                const avgRating = itemReviews.length > 0
                     ? (itemReviews.reduce((sum, r) => sum + r.rating, 0) / itemReviews.length).toFixed(1)
                     : null;
-                
-                const ratingDisplay = avgRating 
+
+                const ratingDisplay = avgRating
                     ? `<span onclick="openReviewModalForListing('${list.id}')" style="color: var(--brand-gold); font-size: 0.8em; font-weight: 600; cursor: pointer; border-bottom: 1px dashed rgba(212,175,55,0.4); display: inline-flex; align-items: center; gap: 4px;" title="Rate this design"><i class="fas fa-star"></i> ${avgRating} (${itemReviews.length})</span>`
                     : `<span onclick="openReviewModalForListing('${list.id}')" style="color: var(--brand-slate); font-size: 0.8em; font-style: italic; cursor: pointer; border-bottom: 1px dashed rgba(136,146,176,0.3); display: inline-flex; align-items: center; gap: 4px;" title="Be the first to rate this design"><i class="far fa-star"></i> Rate item</span>`;
 
@@ -1321,7 +1504,7 @@
             if (!select) return;
 
             select.value = id;
-            
+
             const message = document.getElementById('message');
             if (message) {
                 message.value = `Hi! I am interested in ordering/customizing your "${title}". Please contact me to discuss my measurements and pricing.`;
@@ -1376,8 +1559,8 @@
             const category = categorySelect.value;
 
             const filtered = shopListings.filter(list => {
-                const matchesQuery = !query || 
-                    list.title.toLowerCase().includes(query) || 
+                const matchesQuery = !query ||
+                    list.title.toLowerCase().includes(query) ||
                     (list.description && list.description.toLowerCase().includes(query));
                 const matchesCategory = !category || list.category === category;
                 return matchesQuery && matchesCategory;
@@ -1416,11 +1599,11 @@
                 if (error) {
                     throw error;
                 }
-                
+
                 showSuccess(currentUser);
             } catch (err) {
                 console.warn("DB Inquiry Insert failed (might be schema is not updated yet). Simulating success...", err);
-                
+
                 // Keep local log of simulated inquiry so it doesn't get lost in testing
                 const offlineInquiries = JSON.parse(localStorage.getItem('offline_inquiries') || '[]');
                 offlineInquiries.push({
@@ -1432,7 +1615,7 @@
                     timestamp: new Date()
                 });
                 localStorage.setItem('offline_inquiries', JSON.stringify(offlineInquiries));
-                
+
                 showSuccess(currentUser);
             } finally {
                 btn.disabled = false;
@@ -1452,10 +1635,10 @@
 
             const successWrapper = document.getElementById('inquiry-success-wrapper');
             const form = document.getElementById('inquiry-form');
-            
+
             if (successWrapper && form) {
                 const shopName = shopDetails ? shopDetails.name : 'the tailor';
-                
+
                 if (user) {
                     successWrapper.innerHTML = `
                         <div class="success-chat-invite" style="text-align: center; padding: 40px 20px; animation: slideIn 0.3s ease-out;">
@@ -1499,7 +1682,7 @@
 
         function escapeHTML(str) {
             if (!str) return '';
-            return str.replace(/[&<>'"]/g, 
+            return str.replace(/[&<>'"]/g,
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
             );
         }
@@ -1625,10 +1808,10 @@
 
             // Render reviews list
             listContainer.innerHTML = shopReviews.map(r => {
-                const dateStr = new Date(r.created_at).toLocaleDateString(undefined, { 
-                    year: 'numeric', month: 'long', day: 'numeric' 
+                const dateStr = new Date(r.created_at).toLocaleDateString(undefined, {
+                    year: 'numeric', month: 'long', day: 'numeric'
                 });
-                
+
                 let reviewStars = '';
                 for (let i = 1; i <= 5; i++) {
                     reviewStars += i <= r.rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
@@ -1674,22 +1857,22 @@
                 location.href = 'client-signup.html?mode=login';
                 return;
             }
-            
+
             // Clear inputs
             selectedFormRating = 0;
             document.getElementById('review-rating-value').value = '';
             document.getElementById('review-comment').value = '';
             document.getElementById('review-anonymous').checked = false;
-            
+
             // Reset star input styles
             const stars = document.getElementById('review-stars-input').querySelectorAll('i');
             stars.forEach(s => {
                 s.className = 'far fa-star';
                 s.classList.remove('active');
             });
-            
+
             populateReviewListingDropdown();
-            
+
             document.getElementById('review-modal').style.display = 'flex';
         }
 
@@ -1708,7 +1891,7 @@
         function setFormRating(rating) {
             selectedFormRating = rating;
             document.getElementById('review-rating-value').value = rating;
-            
+
             const stars = document.getElementById('review-stars-input').querySelectorAll('i');
             stars.forEach((s, idx) => {
                 if (idx < rating) {
@@ -1735,7 +1918,7 @@
 
         async function submitReviewForm(event) {
             event.preventDefault();
-            
+
             const ratingVal = parseInt(document.getElementById('review-rating-value').value);
             const comment = document.getElementById('review-comment').value.trim();
             const listingId = document.getElementById('review-listing').value || null;
@@ -1772,7 +1955,7 @@
                 // Success
                 closeReviewModal();
                 showToastNotification("Review Published!", "Thank you for sharing your feedback with our community.");
-                
+
                 // Reload data
                 await fetchShopReviews();
                 renderReviews();
@@ -1790,7 +1973,7 @@
             const toast = document.getElementById('toast-success');
             const tTitle = document.getElementById('toast-title');
             const tSub = document.getElementById('toast-subtitle');
-            
+
             if (toast && tTitle && tSub) {
                 tTitle.textContent = title;
                 tSub.textContent = subtitle;
@@ -1802,4 +1985,5 @@
         }
     </script>
 </body>
+
 </html>

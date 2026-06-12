@@ -1453,7 +1453,7 @@
             </p>
 
             <div class="hero-cta animate-fadeup delay-4">
-                <a href="client-signup.html" class="btn-hero-primary" id="main-cta-btn">
+                <a href="marketplace.html" class="btn-hero-primary" id="main-cta-btn">
                     <i class="fas fa-shopping-bag"></i> Browse Marketplace
                 </a>
                 <a href="login.html" class="btn-hero-secondary">
@@ -1520,35 +1520,35 @@
     <div class="categories-section" id="categories-section">
         <p class="categories-label" id="cat-label">Explore by Category</p>
         <div class="categories-grid" id="cat-grid">
-            <a href="client-signup.html" class="cat-pill" data-index="0">
+            <a href="marketplace.html?category=Suits" class="cat-pill" data-index="0">
                 <i class="fas fa-cut"></i>
                 <span>Bespoke<br>Tailoring</span>
             </a>
-            <a href="client-signup.html" class="cat-pill" data-index="1">
+            <a href="marketplace.html?category=Ready-to-Wear%20Dresses" class="cat-pill" data-index="1">
                 <i class="fas fa-tshirt"></i>
                 <span>Ready-Made<br>Fashion</span>
             </a>
-            <a href="client-signup.html" class="cat-pill" data-index="2">
+            <a href="marketplace.html?category=Watches" class="cat-pill" data-index="2">
                 <i class="fas fa-clock"></i>
                 <span>Luxury<br>Watches</span>
             </a>
-            <a href="client-signup.html" class="cat-pill" data-index="3">
+            <a href="marketplace.html?category=Shoes" class="cat-pill" data-index="3">
                 <i class="fas fa-shoe-prints"></i>
                 <span>Shoes &amp;<br>Footwear</span>
             </a>
-            <a href="client-signup.html" class="cat-pill" data-index="4">
+            <a href="marketplace.html?category=Hats%20%26%20Caps" class="cat-pill" data-index="4">
                 <i class="fas fa-hat-cowboy"></i>
                 <span>Hats &amp;<br>Caps</span>
             </a>
-            <a href="client-signup.html" class="cat-pill" data-index="5">
+            <a href="marketplace.html?category=Belts" class="cat-pill" data-index="5">
                 <i class="fas fa-gem"></i>
                 <span>Accessories</span>
             </a>
-            <a href="client-signup.html" class="cat-pill" data-index="6">
+            <a href="marketplace.html?category=Senator%20Wear" class="cat-pill" data-index="6">
                 <i class="fas fa-user-tie"></i>
                 <span>Senator<br>Wear</span>
             </a>
-            <a href="client-signup.html" class="cat-pill" data-index="7">
+            <a href="marketplace.html?category=Dresses" class="cat-pill" data-index="7">
                 <i class="fas fa-female"></i>
                 <span>Dresses &amp;<br>Gowns</span>
             </a>
@@ -1564,7 +1564,7 @@
                 <p class="section-subtext">Tailors, designers, watchmakers, cobblers, hatters and more — all in one
                     marketplace, all for you.</p>
             </div>
-            <a href="client-signup.html" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All
+            <a href="marketplace.html?tab=shops" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All
                 Providers <i class="fas fa-arrow-right"></i></a>
         </div>
 
@@ -1582,7 +1582,7 @@
                 <p class="section-subtext">Browse premium garments, accessories and styles crafted by verified providers
                     across Kenya.</p>
             </div>
-            <a href="client-signup.html" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All Listings
+            <a href="marketplace.html?tab=listings" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All Listings
                 <i class="fas fa-arrow-right"></i></a>
         </div>
 
@@ -1690,11 +1690,11 @@
             <div class="footer-col">
                 <h5>Marketplace</h5>
                 <ul>
-                    <li><a href="client-signup.html">Browse Providers</a></li>
-                    <li><a href="client-signup.html">Bespoke Tailoring</a></li>
-                    <li><a href="client-signup.html">Ready-Made Fashion</a></li>
-                    <li><a href="client-signup.html">Watches &amp; Accessories</a></li>
-                    <li><a href="client-signup.html">Shoes &amp; Hats</a></li>
+                    <li><a href="marketplace.html?tab=shops">Browse Providers</a></li>
+                    <li><a href="marketplace.html">Bespoke Tailoring</a></li>
+                    <li><a href="marketplace.html">Ready-Made Fashion</a></li>
+                    <li><a href="marketplace.html?category=Watches">Watches &amp; Accessories</a></li>
+                    <li><a href="marketplace.html?category=Shoes">Shoes &amp; Hats</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -1762,6 +1762,17 @@
                 const name = profile?.full_name || user.user_metadata?.full_name || 'Account';
                 const firstName = name.split(' ')[0];
 
+                // Dynamically redirect all client signup links to dashboard/next target since user is logged in
+                document.querySelectorAll('a[href^="client-signup.html"]').forEach(a => {
+                    try {
+                        const url = new URL(a.href, window.location.origin);
+                        const next = url.searchParams.get('next');
+                        a.href = next ? decodeURIComponent(next) : 'client-dashboard.html';
+                    } catch (e) {
+                        a.href = 'client-dashboard.html';
+                    }
+                });
+
                 if (role === 'client') {
                     const mainCta = document.getElementById('main-cta-btn');
                     if (mainCta) { mainCta.innerHTML = '<i class="fas fa-th-large"></i> Go to Marketplace App'; mainCta.href = 'client-dashboard.html'; }
@@ -1776,10 +1787,13 @@
                     const dashUrl = role === 'superadmin' ? 'superadmin-dashboard.html'
                         : role === 'owner' ? 'admin-dashboard.html'
                             : 'manager-dashboard.html';
+                    const mainCta = document.getElementById('main-cta-btn');
+                    if (mainCta) { mainCta.innerHTML = '<i class="fas fa-th-large"></i> Go to Dashboard'; mainCta.href = dashUrl; }
                     authArea.innerHTML = `
                         <div class="nav-user-pill">
                             <span class="nav-user-name"><i class="fas fa-user-tie"></i> ${escapeHTML(firstName)}</span>
                             <a href="${dashUrl}" class="btn-portal"><i class="fas fa-th-large"></i> Dashboard</a>
+                            <button class="btn-signout" onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                         </div>`;
                 }
             } catch (err) { console.warn('Nav session check failed:', err); }
@@ -1997,16 +2011,21 @@
                     const SB_KEY = APP_CONFIG.supabaseKey;
 
                     // Check session in parallel with the fetch
-                    const [res, { data: { user } }] = await Promise.all([
+                    const [shopsRes, reviewsRes, { data: { user } }] = await Promise.all([
                         fetch(
-                            `${SB_URL}/rest/v1/shops?is_public=eq.true&order=created_at.desc&limit=3&select=id,name,location_name,description,banner_image,profile_image`,
+                            `${SB_URL}/rest/v1/shops?is_public=eq.true&select=id,name,location_name,description,banner_image,profile_image`,
                             { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
                         ),
+                        fetch(
+                            `${SB_URL}/rest/v1/vw_marketplace_reviews?select=shop_id,rating`,
+                            { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
+                        ).catch(() => ({ ok: false, json: async () => [] })),
                         supabaseClient.auth.getUser()
                     ]);
                     const isLoggedIn = !!user;
 
-                    const shops = await res.json();
+                    let shops = await shopsRes.json();
+                    const reviews = reviewsRes.ok ? await reviewsRes.json() : [];
 
                     if (!Array.isArray(shops) || shops.length === 0) {
                         container.innerHTML = `
@@ -2019,19 +2038,41 @@
                         return;
                     }
 
+                    // Calculate average ratings and review counts
+                    const shopStats = {};
+                    if (Array.isArray(reviews)) {
+                        reviews.forEach(r => {
+                            if (!shopStats[r.shop_id]) shopStats[r.shop_id] = { sum: 0, count: 0 };
+                            shopStats[r.shop_id].sum += r.rating;
+                            shopStats[r.shop_id].count += 1;
+                        });
+                    }
+
+                    shops.forEach(shop => {
+                        const stats = shopStats[shop.id];
+                        shop.reviewCount = stats ? stats.count : 0;
+                        shop.avgRating = stats ? (stats.sum / stats.count) : 0;
+                    });
+
+                    // Sort by highest rating first, then by most reviews
+                    shops.sort((a, b) => {
+                        if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
+                        return b.reviewCount - a.reviewCount;
+                    });
+
+                    // Take only the top 3
+                    shops = shops.slice(0, 3);
+
                     const STORAGE_URL = `${SB_URL}/storage/v1/object/public/marketplace-assets/`;
 
-                    // Default banner images per index (fallback)
-                    const fallbackBanners = [
-                        'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=600',
-                        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600',
-                        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600'
-                    ];
-
                     container.innerHTML = shops.map((shop, i) => {
-                        const banner = shop.banner_image
+                        const hasBanner = shop.banner_image && shop.banner_image.trim() !== '' && !shop.banner_image.endsWith('/');
+                        const banner = hasBanner
                             ? (shop.banner_image.startsWith('http') ? shop.banner_image : STORAGE_URL + shop.banner_image)
-                            : fallbackBanners[i] || fallbackBanners[0];
+                            : null;
+                        const bannerStyle = banner
+                            ? `background-image:url('${banner}')`
+                            : `background:linear-gradient(135deg, #0a192f 0%, #112240 100%); border-bottom:1px solid rgba(212,175,55,0.15);`;
 
                         const avatar = shop.profile_image
                             ? (shop.profile_image.startsWith('http') ? shop.profile_image : STORAGE_URL + shop.profile_image)
@@ -2049,9 +2090,13 @@
                             ? shopUrl
                             : `client-signup.html?next=${encodeURIComponent(shopUrl)}`;
 
+                        const ratingText = shop.reviewCount > 0
+                            ? `${shop.avgRating.toFixed(1)} (${shop.reviewCount} Reviews)`
+                            : 'New Provider';
+
                         return `
                     <a class="provider-card visible" href="${href}" data-index="${i}" style="transition-delay:${i * 130}ms">
-                        <div class="provider-banner" style="background-image:url('${banner}')">
+                        <div class="provider-banner" style="${bannerStyle}">
                             <div class="provider-avatar" ${avatar ? `style="background-image:url('${avatar}');background-size:cover;"` : ''}>
                                 ${!avatar ? '<i class="fas fa-store"></i>' : ''}
                             </div>
@@ -2061,7 +2106,7 @@
                             <div class="provider-location"><i class="fas fa-map-marker-alt"></i> ${escapeHTML(loc)}</div>
                             <div class="provider-desc">${escapeHTML(desc)}</div>
                             <div class="provider-footer">
-                                <div class="provider-rating"><i class="fas fa-star"></i> Verified Provider</div>
+                            <div class="provider-rating"><i class="fas fa-star"></i> ${ratingText}</div>
                                 <span class="btn-visit">Visit Shop</span>
                             </div>
                         </div>

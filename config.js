@@ -17,8 +17,8 @@ const APP_CONFIG = {
     },
 
     // === 3. BRANDING IDENTITY ===
-    appName: "EPHRAIMS BESPOKE",
-    appSubtitle: "BY RONNY",
+    appName: "TAILORS.CO.KE",
+    appSubtitle: "KENYA'S STYLE MARKETPLACE",
     logoPath: "logo.png",
 
     // === 4. CONTACT DETAILS (For Receipts) ===
