@@ -831,8 +831,8 @@
             <a href="marketplace.html"><i class="fas fa-shopping-bag"></i> Marketplace</a>
             <div id="nav-auth-area" style="display:flex; align-items:center; gap:12px;">
                 <!-- Dynamically rendered by checkSession() -->
-                <a href="client-signup.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
-                <a href="client-signup.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
+                <a href="login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                <a href="login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
             </div>
         </nav>
     </header>
@@ -1167,8 +1167,8 @@
                     // Guest: show Log In + Sign Up
                     if (authArea) {
                         authArea.innerHTML = `
-                            <a href="client-signup.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
-                            <a href="client-signup.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
+                            <a href="login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                            <a href="login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
                         `;
                     }
                     return;
@@ -1660,7 +1660,7 @@
                                 We have dispatched your request to <strong>${escapeHTML(shopName)}</strong>. 
                                 To track this inquiry and chat directly with the tailor in real-time, log in or create a client account.
                             </p>
-                            <a href="client-signup.html" class="btn-portal" style="display: inline-block; padding: 12px 30px; font-size: 1em;"><i class="fas fa-comments"></i> Log In &amp; Chat Now</a>
+                            <a href="login.html" class="btn-portal" style="display: inline-block; padding: 12px 30px; font-size: 1em;"><i class="fas fa-comments"></i> Log In &amp; Chat Now</a>
                             <button type="button" onclick="resetInquiryForm()" style="background: transparent; border: none; color: var(--brand-slate); display: block; margin: 15px auto 0; cursor: pointer; text-decoration: underline; font-size: 0.85em;">Send another inquiry</button>
                         </div>`;
                 }
@@ -1854,7 +1854,7 @@
         function openReviewModal() {
             if (!currentUser) {
                 alert("Please sign in or create an account to leave a review.");
-                location.href = 'client-signup.html?mode=login';
+                location.href = 'login.html';
                 return;
             }
 

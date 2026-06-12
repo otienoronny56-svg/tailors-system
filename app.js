@@ -432,7 +432,7 @@ async function checkSession() {
         const path = window.location.pathname;
         const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
         if (userError || !user) {
-            const isPublicPage = window.location.pathname.includes('index.html') || window.location.pathname.includes('login.html') || window.location.pathname.includes('client-signup.html') || window.location.pathname.endsWith('/');
+            const isPublicPage = window.location.pathname.includes('index.html') || window.location.pathname.includes('login.html') || window.location.pathname.endsWith('/');
             if (!isPublicPage && window.location.pathname !== '/') {
                 window.location.href = 'index.html';
             }

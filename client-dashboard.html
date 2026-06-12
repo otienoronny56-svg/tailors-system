@@ -1223,7 +1223,7 @@
             try {
                 const { data: { user }, error } = await supabaseClient.auth.getUser();
                 if (error || !user) {
-                    location.href = 'client-signup.html';
+                    location.href = 'login.html';
                     return;
                 }
                 currentUser = user;
@@ -1239,7 +1239,7 @@
                 switchTab('marketplace');
             } catch (err) {
                 console.error("Session lookup failed:", err);
-                location.href = 'client-signup.html';
+                location.href = 'login.html';
             }
         }
 

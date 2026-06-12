@@ -1406,8 +1406,8 @@
             <a href="#showcase-section">Showcase</a>
             <a href="#hiw-section">How It Works</a>
             <div id="nav-auth-area">
-                <a href="client-signup.html?mode=login" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
-                <a href="client-signup.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
+                <a href="login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                <a href="login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
             </div>
         </nav>
     </header>
@@ -1644,7 +1644,7 @@
                         time.</li>
                     <li><i class="fas fa-check"></i> End-to-end order tracking from first stitch to final delivery.</li>
                 </ul>
-                <a href="client-signup.html?mode=signup" class="card-action gold">Join as a Client <i
+                <a href="login.html?mode=signup" class="card-action gold">Join as a Client <i
                         class="fas fa-arrow-right"></i></a>
             </div>
             <div class="value-card">
@@ -1671,7 +1671,7 @@
         <h2>Kenya's Style, All in One Place</h2>
         <p>Join thousands of Kenyans already discovering bespoke fashion, luxury accessories, and premium style from
             trusted local providers.</p>
-        <a href="client-signup.html?mode=signup" class="btn-hero-primary" style="display:inline-flex;">
+        <a href="login.html?mode=signup" class="btn-hero-primary" style="display:inline-flex;">
             <i class="fas fa-shopping-bag"></i> Get Started Free
         </a>
     </div>
@@ -1752,8 +1752,8 @@
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) {
                     authArea.innerHTML = `
-                        <a href="client-signup.html?mode=login" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
-                        <a href="client-signup.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>`;
+                        <a href="login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                        <a href="login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>`;
                     return;
                 }
                 const { data: profile } = await supabaseClient
@@ -1762,14 +1762,18 @@
                 const name = profile?.full_name || user.user_metadata?.full_name || 'Account';
                 const firstName = name.split(' ')[0];
 
-                // Dynamically redirect all client signup links to dashboard/next target since user is logged in
-                document.querySelectorAll('a[href^="client-signup.html"]').forEach(a => {
+                // Dynamically redirect all auth/login/signup links to dashboard/next target since user is logged in
+                const dashUrl = role === 'superadmin' ? 'superadmin-dashboard.html'
+                    : role === 'owner' ? 'admin-dashboard.html'
+                    : role === 'client' ? 'client-dashboard.html'
+                    : 'manager-dashboard.html';
+                document.querySelectorAll('a[href^="client-signup.html"], a[href^="login.html"]').forEach(a => {
                     try {
                         const url = new URL(a.href, window.location.origin);
                         const next = url.searchParams.get('next');
-                        a.href = next ? decodeURIComponent(next) : 'client-dashboard.html';
+                        a.href = next ? decodeURIComponent(next) : dashUrl;
                     } catch (e) {
-                        a.href = 'client-dashboard.html';
+                        a.href = dashUrl;
                     }
                 });
 
@@ -1817,7 +1821,7 @@
             const container = document.getElementById('teaser-listings-container');
             if (!container) return;
             const isLogged = document.getElementById('nav-auth-area')?.querySelector('.nav-user-name') !== null;
-            const linkTarget = isLogged ? 'client-dashboard.html' : 'client-signup.html';
+            const linkTarget = isLogged ? 'client-dashboard.html' : 'login.html';
             const actionText = isLogged ? 'View Details' : 'Sign Up to Inquire';
 
             container.innerHTML = listings.map(list => {
@@ -2033,7 +2037,7 @@
                             <i class="fas fa-store" style="font-size:2.5em;color:var(--gold);margin-bottom:18px;display:block;"></i>
                             <p style="font-size:1.1em;margin-bottom:8px;color:var(--white);">Providers are joining!</p>
                             <p style="font-size:0.9em;">Be the first to list your shop on Kenya's premier style marketplace.</p>
-                            <a href="client-signup.html" class="btn-hero-primary" style="display:inline-flex;margin-top:22px;"><i class="fas fa-plus"></i> Join as Provider</a>
+                            <a href="login.html?mode=signup&role=tailor" class="btn-hero-primary" style="display:inline-flex;margin-top:22px;"><i class="fas fa-plus"></i> Join as Provider</a>
                         </div>`;
                         return;
                     }
@@ -2088,7 +2092,7 @@
                         const shopUrl = `shop.html?id=${encodeURIComponent(shop.id)}`;
                         const href = isLoggedIn
                             ? shopUrl
-                            : `client-signup.html?next=${encodeURIComponent(shopUrl)}`;
+                            : `login.html?next=${encodeURIComponent(shopUrl)}`;
 
                         const ratingText = shop.reviewCount > 0
                             ? `${shop.avgRating.toFixed(1)} (${shop.reviewCount} Reviews)`

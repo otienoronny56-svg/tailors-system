@@ -699,8 +699,8 @@
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) {
                     authArea.innerHTML = `
-                        <a href="client-signup.html?mode=login" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
-                        <a href="client-signup.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>`;
+                        <a href="login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                        <a href="login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>`;
                     return;
                 }
 
@@ -735,8 +735,8 @@
             } catch (err) {
                 console.warn('Session verification failed:', err);
                 authArea.innerHTML = `
-                    <a href="client-signup.html?mode=login" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
-                    <a href="client-signup.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>`;
+                    <a href="login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                    <a href="login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>`;
             }
         }
 

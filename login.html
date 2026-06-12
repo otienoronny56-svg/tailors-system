@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Access</title>
+    <title>Account Access | Tailors.co.ke</title>
     <link rel="icon" type="image/png" href="logo.png?v=2">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -59,7 +59,8 @@
 
         .logo-section {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            cursor: pointer;
         }
 
         .brand-logo {
@@ -83,36 +84,36 @@
         /* --- Tabs --- */
         .tabs-header {
             display: flex;
-            border-bottom: 2px solid rgba(255,255,255,0.05);
-            margin-bottom: 30px;
+            background: rgba(6, 12, 24, 0.5);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
         }
 
         .tab-btn {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             background: transparent;
             border: none;
             color: var(--brand-slate);
             font-family: 'Montserrat', sans-serif;
             font-weight: 600;
-            font-size: 0.9em;
+            font-size: 0.88em;
             cursor: pointer;
             transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-            text-transform: none;
-            box-shadow: none;
+            border-radius: 8px;
         }
 
         .tab-btn:hover {
             color: var(--brand-white);
-            background: transparent;
         }
 
         .tab-btn.active {
-            color: var(--brand-gold);
-            border-bottom-color: var(--brand-gold);
+            color: var(--brand-navy);
+            background: var(--brand-gold);
+            font-weight: 700;
         }
 
         .tab-content {
@@ -129,11 +130,38 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* --- Sub-tabs for signup --- */
+        .role-pills {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .role-pill {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.8em;
+            font-weight: 600;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--brand-slate);
+            background: rgba(10, 25, 47, 0.4);
+        }
+
+        .role-pill.active {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--brand-gold);
+            border-color: var(--brand-gold);
+        }
+
         /* --- Form Styling --- */
         .form-group {
             display: flex;
             flex-direction: column;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             position: relative;
         }
 
@@ -149,7 +177,7 @@
         .form-group i {
             position: absolute;
             left: 15px;
-            top: 40px;
+            top: 38px;
             color: var(--brand-gold);
         }
 
@@ -206,7 +234,7 @@
             text-align: center;
             color: var(--brand-slate);
             font-size: 0.8em;
-            margin: 25px 0;
+            margin: 20px 0;
             text-transform: uppercase;
         }
 
@@ -256,28 +284,6 @@
             color: #ea4335;
         }
 
-        .btn-facebook i {
-            color: #1877f2;
-        }
-
-        .toggle-mode {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 0.85em;
-            color: var(--brand-slate);
-        }
-
-        .toggle-mode span {
-            color: var(--brand-gold);
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .toggle-mode span:hover {
-            text-decoration: underline;
-        }
-
-        /* Back link */
         .back-link {
             display: block;
             text-align: center;
@@ -296,149 +302,152 @@
 <body>
 
     <div class="login-card">
-        <div class="logo-section">
+        <div class="logo-section" onclick="location.href='index.html'">
             <h1 class="brand-logo">Tailors.co.ke</h1>
-            <span class="brand-sub">Tailor Shop Portal</span>
+            <span class="brand-sub">Unified Access Portal</span>
         </div>
 
-        <!-- 🏢 STAFF / TAILOR PORTAL -->
-        <div class="tab-content active" id="tailor-tab">
-            <form id="auth-form" onsubmit="handleStaffAuth(event)">
-                <input type="hidden" id="staff-mode" value="signin">
+        <div class="tabs-header">
+            <button class="tab-btn active" id="tab-signin-btn" onclick="setMode('signin')">Sign In</button>
+            <button class="tab-btn" id="tab-signup-btn" onclick="setMode('signup')">Sign Up</button>
+        </div>
 
-                <div class="form-group" id="staff-shop-name-group" style="display: none;">
-                    <label for="staff-shop-name">Shop Name / Business Name</label>
-                    <i class="fas fa-store"></i>
-                    <input type="text" id="staff-shop-name" placeholder="e.g. Elegant Cuts Tailors">
-                </div>
-
-                <div class="form-group" id="staff-name-group" style="display: none;">
-                    <label for="staff-fullname">Owner Full Name</label>
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="staff-fullname" placeholder="e.g. John Otieno">
-                </div>
-
+        <!-- 🔓 SIGN IN FORM -->
+        <div class="tab-content active" id="signin-pane">
+            <form onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" required placeholder="staff@example.com">
+                    <input type="email" id="email" required placeholder="name@example.com">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" required placeholder="••••••••">
                 </div>
-                <button type="submit" class="btn-submit" id="login-button">Sign In to Dashboard</button>
+                <button type="submit" class="btn-submit" id="login-button">Sign In to Account</button>
                 <p id="auth-message" class="error-message"></p>
-
-                <div class="toggle-mode" id="staff-mode-toggle" style="margin-top: 15px;">
-                    Want to register a new shop? <span onclick="toggleStaffMode('signup')">Register Shop</span>
-                </div>
             </form>
-
+            
             <div class="divider">Or Continue With</div>
-
             <div class="social-buttons">
-                <button class="btn-social btn-google" onclick="handleSocialLogin('google', 'owner')">
-                    <i class="fab fa-google"></i> Google
+                <button class="btn-social btn-google" onclick="handleSocialLogin('google', 'client')">
+                    <i class="fab fa-google"></i> Google Login
                 </button>
             </div>
         </div>
 
-        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Marketplace</a>
+        <!-- 📝 SIGN UP FORM -->
+        <div class="tab-content" id="signup-pane">
+            <div class="role-pills">
+                <div class="role-pill active" id="pill-client" onclick="setSignupRole('client')">Client Account</div>
+                <div class="role-pill" id="pill-tailor" onclick="setSignupRole('tailor')">Register Tailor Shop</div>
+            </div>
+
+            <!-- Client Signup Form -->
+            <form id="client-signup-form" onsubmit="handleClientSignUp(event)">
+                <div class="form-group">
+                    <label for="client-name">Your Full Name</label>
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="client-name" placeholder="e.g. John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="client-email">Email Address</label>
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="client-email" placeholder="name@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="client-password">Create Password</label>
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="client-password" placeholder="Min. 6 characters">
+                </div>
+                <button type="submit" class="btn-submit" id="btn-client-submit">Create Client Account</button>
+            </form>
+
+            <!-- Tailor Shop Register Form -->
+            <form id="tailor-signup-form" onsubmit="handleTailorSignUp(event)" style="display: none;">
+                <div class="form-group">
+                    <label for="staff-shop-name">Shop / Business Name</label>
+                    <i class="fas fa-store"></i>
+                    <input type="text" id="staff-shop-name" placeholder="e.g. Elegant Cuts Tailors">
+                </div>
+                <div class="form-group">
+                    <label for="staff-fullname">Owner Full Name</label>
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="staff-fullname" placeholder="e.g. Jane Ogwang">
+                </div>
+                <div class="form-group">
+                    <label for="tailor-email">Business Email</label>
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="tailor-email" placeholder="shop@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="tailor-password">Create Password</label>
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="tailor-password" placeholder="Min. 6 characters">
+                </div>
+                <button type="submit" class="btn-submit" id="btn-tailor-submit">Register Tailor Shop</button>
+            </form>
+
+            <p id="signup-message" class="error-message"></p>
+        </div>
+
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home / Marketplace</a>
     </div>
 
     <script src="config.js"></script>
     <script src="app.js"></script>
     <script>
-        // Tab switching
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        let currentMode = 'signin';
+        let currentSignupRole = 'client';
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('tab-signin-btn').classList.toggle('active', mode === 'signin');
+            document.getElementById('tab-signup-btn').classList.toggle('active', mode === 'signup');
+
+            document.getElementById('signin-pane').classList.toggle('active', mode === 'signin');
+            document.getElementById('signup-pane').classList.toggle('active', mode === 'signup');
             
-            btn.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+            // Clear message elements
+            document.getElementById('auth-message').style.display = 'none';
+            document.getElementById('signup-message').style.display = 'none';
         }
 
-        // Auto-switch tab based on URL param (?tab=client or ?tab=signup)
+        function setSignupRole(role) {
+            currentSignupRole = role;
+            document.getElementById('pill-client').classList.toggle('active', role === 'client');
+            document.getElementById('pill-tailor').classList.toggle('active', role === 'tailor');
+
+            document.getElementById('client-signup-form').style.display = role === 'client' ? 'block' : 'none';
+            document.getElementById('tailor-signup-form').style.display = role === 'tailor' ? 'block' : 'none';
+
+            // Set validation requirements
+            document.getElementById('client-name').required = (role === 'client');
+            document.getElementById('client-email').required = (role === 'client');
+            document.getElementById('client-password').required = (role === 'client');
+
+            document.getElementById('staff-shop-name').required = (role === 'tailor');
+            document.getElementById('staff-fullname').required = (role === 'tailor');
+            document.getElementById('tailor-email').required = (role === 'tailor');
+            document.getElementById('tailor-password').required = (role === 'tailor');
+
+            document.getElementById('signup-message').style.display = 'none';
+        }
+
+        // Auto-detect mode on load (e.g. ?mode=signup or ?role=tailor)
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const tab = params.get('tab');
+            const mode = params.get('mode');
+            const role = params.get('role');
 
-            if (tab === 'client' || tab === 'signup') {
-                // Activate the Client Account tab
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-                const clientBtn = document.querySelector('.tab-btn:nth-child(2)');
-                if (clientBtn) clientBtn.classList.add('active');
-                const clientTab = document.getElementById('client-tab');
-                if (clientTab) clientTab.classList.add('active');
-
-                // If signup specifically, switch to signup mode
-                if (tab === 'signup') {
-                    toggleClientMode('signup');
-                }
+            if (mode === 'signup' || params.get('tab') === 'signup') {
+                setMode('signup');
+            }
+            if (role === 'tailor' || params.get('tab') === 'tailor') {
+                setSignupRole('tailor');
             }
         });
-
-        // Toggle signup vs signin for clients
-        function toggleClientMode(mode) {
-            const modeInput = document.getElementById('client-mode');
-            const nameGroup = document.getElementById('client-name-group');
-            const nameInput = document.getElementById('client-name');
-            const submitBtn = document.getElementById('btn-client-submit');
-            const toggleDiv = document.getElementById('client-mode-toggle');
-            const messageEl = document.getElementById('client-message');
-
-            messageEl.style.display = 'none';
-
-            if (mode === 'signup') {
-                modeInput.value = 'signup';
-                nameGroup.style.display = 'flex';
-                nameInput.required = true;
-                submitBtn.textContent = 'Create Account';
-                toggleDiv.innerHTML = 'Already have an account? <span onclick="toggleClientMode(\'signin\')">Sign In</span>';
-            } else {
-                modeInput.value = 'signin';
-                nameGroup.style.display = 'none';
-                nameInput.required = false;
-                submitBtn.textContent = 'Client Log In';
-                toggleDiv.innerHTML = 'Don\'t have an account? <span onclick="toggleClientMode(\'signup\')">Create Account</span>';
-            }
-        }
-
-        // Toggle signup vs signin for staff
-        function toggleStaffMode(mode) {
-            const modeInput = document.getElementById('staff-mode');
-            const shopNameGroup = document.getElementById('staff-shop-name-group');
-            const shopNameInput = document.getElementById('staff-shop-name');
-            const nameGroup = document.getElementById('staff-name-group');
-            const nameInput = document.getElementById('staff-fullname');
-            const submitBtn = document.getElementById('login-button');
-            const toggleDiv = document.getElementById('staff-mode-toggle');
-            const messageEl = document.getElementById('auth-message');
-
-            messageEl.style.display = 'none';
-
-            if (mode === 'signup') {
-                modeInput.value = 'signup';
-                shopNameGroup.style.display = 'flex';
-                shopNameInput.required = true;
-                nameGroup.style.display = 'flex';
-                nameInput.required = true;
-                submitBtn.textContent = 'Register Shop';
-                toggleDiv.innerHTML = 'Already have a shop account? <span onclick="toggleStaffMode(\'signin\')">Sign In</span>';
-            } else {
-                modeInput.value = 'signin';
-                shopNameGroup.style.display = 'none';
-                shopNameInput.required = false;
-                nameGroup.style.display = 'none';
-                nameInput.required = false;
-                submitBtn.textContent = 'Sign In to Dashboard';
-                toggleDiv.innerHTML = 'Want to register a new shop? <span onclick="toggleStaffMode(\'signup\')">Register Shop</span>';
-            }
-        }
 
         // Lazy load admin client with service role privileges
         function getAdminClient() {
@@ -447,27 +456,70 @@
             });
         }
 
-        // Handle staff authentication (signin vs signup)
-        async function handleStaffAuth(e) {
+        // Handle Client Sign Up
+        async function handleClientSignUp(e) {
             e.preventDefault();
-            const mode = document.getElementById('staff-mode').value;
-            const messageEl = document.getElementById('auth-message');
-            const btn = document.getElementById('login-button');
+            const name = document.getElementById('client-name').value.trim();
+            const email = document.getElementById('client-email').value.trim();
+            const password = document.getElementById('client-password').value;
+            const btn = document.getElementById('btn-client-submit');
+            const messageEl = document.getElementById('signup-message');
 
             messageEl.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Creating Account...';
 
-            if (mode === 'signin') {
-                // Call global handleLogin from app.js
-                handleLogin(e);
-                return;
+            try {
+                // 1. Supabase Auth Signup
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: name
+                        }
+                    }
+                });
+
+                if (error) throw error;
+                if (!data.user) throw new Error("Could not complete registration.");
+
+                // 2. Insert Client Profile record
+                const { error: profileError } = await supabaseClient.from('user_profiles').insert([{
+                    id: data.user.id,
+                    full_name: name,
+                    role: 'client',
+                    email: email,
+                    organization_id: null,
+                    shop_id: null
+                }]);
+
+                if (profileError) {
+                    console.error("Could not write profile record:", profileError);
+                }
+
+                alert("Client Account created successfully! Redirecting to marketplace...");
+                location.href = 'client-dashboard.html';
+            } catch (err) {
+                console.error("Client Signup Error:", err);
+                messageEl.textContent = "❌ " + err.message;
+                messageEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Create Client Account';
             }
+        }
 
-            // Otherwise, we do tailor self-signup
+        // Handle Tailor Shop Register / Sign Up
+        async function handleTailorSignUp(e) {
+            e.preventDefault();
             const shopName = document.getElementById('staff-shop-name').value.trim();
             const fullName = document.getElementById('staff-fullname').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('tailor-email').value.trim();
+            const password = document.getElementById('tailor-password').value;
+            const btn = document.getElementById('btn-tailor-submit');
+            const messageEl = document.getElementById('signup-message');
 
+            messageEl.style.display = 'none';
             btn.disabled = true;
             btn.textContent = 'Registering Shop...';
 
@@ -488,7 +540,7 @@
 
                 const adminClient = getAdminClient();
 
-                // 2. Insert Organization (using admin client to bypass RLS)
+                // 2. Insert Organization
                 const { data: orgData, error: orgError } = await adminClient
                     .from('organizations')
                     .insert([{ name: shopName }])
@@ -497,7 +549,7 @@
 
                 if (orgError) throw orgError;
 
-                // 3. Insert Shop (using admin client to bypass RLS)
+                // 3. Insert Shop
                 const { data: shopData, error: shopError } = await adminClient
                     .from('shops')
                     .insert([{ organization_id: orgData.id, name: shopName }])
@@ -522,9 +574,7 @@
                 if (profileError) throw profileError;
 
                 alert("Shop registered successfully! Awaiting administrator approval.");
-                // Redirect to dashboard (app.js checkSession will block them and show pending page)
                 window.location.href = 'admin-dashboard.html';
-
             } catch (err) {
                 console.error("Tailor Signup Error:", err);
                 messageEl.textContent = "❌ " + err.message;
@@ -534,77 +584,10 @@
             }
         }
 
-        // Handle Client Login & Register via Email
-        async function handleClientAuth(e) {
-            e.preventDefault();
-            const mode = document.getElementById('client-mode').value;
-            const name = document.getElementById('client-name').value.trim();
-            const email = document.getElementById('client-email').value.trim();
-            const password = document.getElementById('client-password').value;
-            const btn = document.getElementById('btn-client-submit');
-            const messageEl = document.getElementById('client-message');
-
-            messageEl.style.display = 'none';
-            btn.disabled = true;
-            btn.textContent = mode === 'signup' ? 'Creating Account...' : 'Logging In...';
-
-            try {
-                if (mode === 'signup') {
-                    // 1. Supabase Auth Signup
-                    const { data, error } = await supabaseClient.auth.signUp({
-                        email,
-                        password,
-                        options: {
-                            data: {
-                                full_name: name
-                            }
-                        }
-                    });
-
-                    if (error) throw error;
-                    if (!data.user) throw new Error("Could not complete registration.");
-
-                    // 2. Insert Client Profile record
-                    const { error: profileError } = await supabaseClient.from('user_profiles').insert([{
-                        id: data.user.id,
-                        full_name: name,
-                        role: 'client',
-                        email: email,
-                        organization_id: null,
-                        shop_id: null
-                    }]);
-
-                    if (profileError) {
-                        console.error("Could not write profile record:", profileError);
-                        // Safe bypass: we let them log in anyway if the profile insertion fails
-                    }
-
-                    alert("Account created successfully! Redirecting you to the marketplace...");
-                    location.href = 'index.html';
-                } else {
-                    // Supabase Signin
-                    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-
-                    location.href = 'index.html';
-                }
-            } catch (err) {
-                console.error("Client Auth Error:", err);
-                messageEl.textContent = "❌ " + err.message;
-                messageEl.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                btn.textContent = mode === 'signup' ? 'Create Account' : 'Client Log In';
-            }
-        }
-
         // Handle Google / Facebook OAuth logins
         async function handleSocialLogin(provider, role = 'client') {
             try {
-                const redirectUrl = role === 'owner' 
-                    ? window.location.origin + '/tailor-onboarding.html'
-                    : window.location.origin + '/index.html';
-                
+                const redirectUrl = window.location.origin + '/login.html';
                 const { error } = await supabaseClient.auth.signInWithOAuth({
                     provider: provider,
                     options: {
