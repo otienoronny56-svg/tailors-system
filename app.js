@@ -5004,7 +5004,7 @@ function buildInvoiceDocument(options) {
 <div class="header">
   <div class="header-left">
     <div class="logo-row">
-      <div class="logo-cell">${logoAbsUrl ? \`<img src="${logoAbsUrl}" alt="Logo" onerror="this.style.display='none'">\` : ''}</div>
+      <div class="logo-cell">${logoAbsUrl ? `<img src="${logoAbsUrl}" alt="Logo" onerror="this.style.display='none'">` : ''}</div>
       <div class="brand-cell">
         <div class="brand-name">${companyName}</div>
         <div class="brand-sub">${companySubtitle}</div>
