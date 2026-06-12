@@ -432,8 +432,9 @@ async function checkSession() {
 
     try {
         const path = window.location.pathname;
-        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-        if (userError || !user) {
+        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        const user = session?.user;
+        if (sessionError || !user) {
             const isPublicPage = window.location.pathname.includes('index.html') || window.location.pathname.includes('login.html') || window.location.pathname.endsWith('/');
             if (!isPublicPage && window.location.pathname !== '/') {
                 window.location.href = 'index.html';
@@ -441,6 +442,16 @@ async function checkSession() {
             return;
         }
 
+        // [PERF] Try to load profile from sessionStorage first for instant navigation
+        const cachedProfileData = sessionStorage.getItem('USER_PROFILE_' + user.id);
+        if (cachedProfileData) {
+            try {
+                USER_PROFILE = JSON.parse(cachedProfileData);
+                logDebug("Loaded user profile from cache", null, 'info');
+            } catch(e) {}
+        }
+
+        if (!USER_PROFILE) {
         // Try to get profile from user_profiles table
         const { data: profile, error: profileError } = await supabaseClient
             .from('user_profiles')
@@ -519,7 +530,13 @@ async function checkSession() {
             USER_PROFILE = profile;
         }
 
-        // ðŸ›‘ NEW: Check for suspension (Enforcement)
+        // [PERF] Cache the loaded profile
+        if (USER_PROFILE) {
+            sessionStorage.setItem('USER_PROFILE_' + user.id, JSON.stringify(USER_PROFILE));
+        }
+        } // End of if (!USER_PROFILE)
+
+        // 🛑 NEW: Check for suspension (Enforcement)
         if (USER_PROFILE.status === 'Suspended') {
             document.body.innerHTML = `
                 <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #f8fafc; font-family: 'Inter', sans-serif;">
@@ -540,14 +557,24 @@ async function checkSession() {
             return;
         }
 
-        // ðŸ›‘ NEW: Check for organization suspension (Enforcement)
+        // 🛑 NEW: Check for organization suspension (Enforcement)
         if (USER_PROFILE.organization_id && USER_PROFILE.role !== 'superadmin') {
-            const { data: org, error: orgError } = await supabaseClient
-                .from('organizations')
-                .select('subscription_status')
-                .eq('id', USER_PROFILE.organization_id)
-                .single();
-            if (!orgError && org && org.subscription_status === 'Suspended') {
+            const cachedOrgStatus = sessionStorage.getItem('ORG_STATUS_' + USER_PROFILE.organization_id);
+            let isOrgSuspended = cachedOrgStatus === 'Suspended';
+            
+            if (!cachedOrgStatus) {
+                const { data: org, error: orgError } = await supabaseClient
+                    .from('organizations')
+                    .select('subscription_status')
+                    .eq('id', USER_PROFILE.organization_id)
+                    .single();
+                if (!orgError && org) {
+                    sessionStorage.setItem('ORG_STATUS_' + USER_PROFILE.organization_id, org.subscription_status);
+                    isOrgSuspended = org.subscription_status === 'Suspended';
+                }
+            }
+
+            if (isOrgSuspended) {
                 document.body.innerHTML = `
                     <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #060c18; font-family: 'Montserrat', sans-serif; color: white;">
                         <div style="text-align: center; background: rgba(17, 34, 64, 0.75); border: 1px solid rgba(212, 175, 55, 0.15); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 450px;">
@@ -556,7 +583,7 @@ async function checkSession() {
                             <p style="color: var(--brand-slate); line-height: 1.6; margin-bottom: 25px;">
                                 Your shop/organization has been suspended. Please contact platform administration to reactivate your workspace.
                             </p>
-                            <button onclick="supabaseClient.auth.signOut().then(() => location.href='index.html')" class="small-btn" style="width: 100%; background: #ef4444; color: white; border: none; font-weight: bold; cursor: pointer;">Logout</button>
+                            <button onclick="supabaseClient.auth.signOut().then(() => { sessionStorage.clear(); location.href='index.html'; })" class="small-btn" style="width: 100%; background: #ef4444; color: white; border: none; font-weight: bold; cursor: pointer;">Logout</button>
                         </div>
                     </div>
                 `;
@@ -1378,7 +1405,8 @@ async function loadOrders(mode = 'open') {
         let query = supabaseClient.from('orders')
             .select('*')
             .eq('shop_id', USER_PROFILE.shop_id)
-            .order('due_date', { ascending: true });
+            .order(mode === 'all' ? 'created_at' : 'due_date', { ascending: mode !== 'all' })
+            .limit(mode === 'all' ? 200 : 1000);
 
         if (mode === 'open' || mode === 'urgent') {
             query = query.neq('status', 6);
@@ -2635,9 +2663,12 @@ async function loadAdminDashboard() {
 
 async function loadMetrics() {
     try {
-        const [{ data: shops }, { data: orders }, { data: allPayments }] = await Promise.all([
-            supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id),
-            supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date'),
+        const { data: shops } = await supabaseClient.from('shops').select('id, name').eq('organization_id', USER_PROFILE.organization_id);
+        if (!shops || shops.length === 0) return;
+        const shopIds = shops.map(s => s.id);
+
+        const [{ data: orders }, { data: allPayments }] = await Promise.all([
+            supabaseClient.from('orders').select('id, shop_id, price, amount_paid, status, due_date').in('shop_id', shopIds),
             supabaseClient.from('payments').select('order_id, amount').is('deleted_at', null)
         ]);
 
@@ -2651,14 +2682,20 @@ async function loadMetrics() {
             });
         }
 
-        const { data: accessories } = await supabaseClient.from('order_accessories').select('*').in('order_id', orders.map(o => o.id));
+        // Fetch accessories in batches to avoid URL length limits
+        const orderIds = orders.map(o => o.id);
+        let accessories = [];
+        for (let i = 0; i < orderIds.length; i += 200) {
+            const batch = orderIds.slice(i, i + 200);
+            const { data: accBatch } = await supabaseClient.from('order_accessories').select('*').in('order_id', batch);
+            if (accBatch) accessories = accessories.concat(accBatch);
+        }
+        
         const accessoriesByOrder = {};
-        accessories?.forEach(a => {
+        accessories.forEach(a => {
             if (!accessoriesByOrder[a.order_id]) accessoriesByOrder[a.order_id] = [];
             accessoriesByOrder[a.order_id].push(a);
         });
-
-        if (!orders) return;
 
         const shopMap = {};
         shops?.forEach(s => shopMap[s.id] = s.name);
@@ -2941,10 +2978,16 @@ async function loadAdminOrders(mode = 'current') {
     logDebug(`Loading admin orders (${mode})`, null, 'info');
 
     try {
+        // Ensure owner only sees their organization's shops
+        const { data: orgShops } = await supabaseClient.from('shops').select('id').eq('organization_id', USER_PROFILE.organization_id);
+        const validShopIds = orgShops ? orgShops.map(s => s.id) : [];
+        if(validShopIds.length === 0) return;
+
         let query = supabaseClient.from('orders')
             .select('*')
-            .order('due_date', { ascending: true }) // [CHANGED] Sort by date for urgency
-            .limit(100);
+            .in('shop_id', validShopIds)
+            .order(mode === 'all' ? 'created_at' : 'due_date', { ascending: mode !== 'all' }) // [CHANGED] Sort correctly for history
+            .limit(mode === 'all' ? 200 : 1000);
 
         // If mode is current or urgent, exclude closed
         if (mode === 'current' || mode === 'urgent') {
@@ -8120,9 +8163,9 @@ async function loadAllTransactions() {
     try {
         const typeFilter = document.getElementById('transaction-type-filter')?.value || 'all';
 
-        let orderQuery = supabaseClient.from('orders').select('id, garment_type, customer_name, price, created_at, status').order('created_at', { ascending: false }).limit(250);
-        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, order_id').is('deleted_at', null).order('recorded_at', { ascending: false }).limit(250);
-        let expenseQuery = supabaseClient.from('expenses').select('id, amount, item_name, category, incurred_at').order('incurred_at', { ascending: false }).limit(250);
+        let orderQuery = supabaseClient.from('orders').select('id, garment_type, customer_name, price, created_at, status').eq('organization_id', USER_PROFILE.organization_id).order('created_at', { ascending: false }).limit(250);
+        let paymentQuery = supabaseClient.from('payments').select('id, amount, payment_method, recorded_at, order_id').eq('organization_id', USER_PROFILE.organization_id).is('deleted_at', null).order('recorded_at', { ascending: false }).limit(250);
+        let expenseQuery = supabaseClient.from('expenses').select('id, amount, item_name, category, incurred_at').eq('organization_id', USER_PROFILE.organization_id).order('incurred_at', { ascending: false }).limit(250);
 
         const [ordersData, paymentsData, expensesData] = await Promise.all([orderQuery, paymentQuery, expenseQuery]);
 
