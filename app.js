@@ -2394,39 +2394,78 @@ function showNuclearSharingModal(receiptHTML, receiptText, customerName, custome
     const cleanPhone = customerPhone ? customerPhone.replace(/\D/g, '') : '';
 
     const modalHTML = `
-        <div id="receipt-sharing-modal" class="modal" style="display: flex; z-index: 9999;">
-            <div class="modal-content" style="max-width: 500px; width: 90%; padding: 20px;">
-                <span class="close-btn" onclick="closeReceiptModal()" style="font-size: 28px;">&times;</span>
-                
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="color: #d4af37; margin-bottom: 5px;">ðŸ“„ Share Receipt</h2>
-                    <p style="color: #666;">For: ${customerName || 'Customer'}</p>
+        <div id="receipt-sharing-modal"
+             style="display:flex; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%;
+                    background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
+                    align-items:center; justify-content:center;">
+            <div style="background:#fff; border-radius:14px; width:480px; max-width:95vw;
+                        max-height:90vh; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,0.35);
+                        display:flex; flex-direction:column;">
+
+                <!-- Header -->
+                <div style="padding:16px 20px; border-bottom:2px solid #f1f5f9;
+                            display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="background:#d4af37; width:36px; height:36px; border-radius:50%;
+                                     display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-receipt" style="color:#000; font-size:0.9em;"></i>
+                        </span>
+                        <div>
+                            <h2 style="margin:0; font-size:1.15em; color:#0f172a;">Share Receipt</h2>
+                            <p style="margin:0; font-size:0.8em; color:#64748b;">${customerName || 'Customer'}</p>
+                        </div>
+                    </div>
+                    <button onclick="closeReceiptModal()"
+                            style="background:none; border:none; font-size:1.4em; color:#94a3b8;
+                                   cursor:pointer; line-height:1; padding:4px 8px; border-radius:6px;"
+                            onmouseover="this.style.background='#f1f5f9'"
+                            onmouseout="this.style.background='none'">&times;</button>
                 </div>
-                
-                <div id="receipt-preview-container" style="max-height: 350px; overflow-y: auto; margin-bottom: 25px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+
+                <!-- Receipt Preview — fixed height, scrollable ONLY this section -->
+                <div id="receipt-preview-container"
+                     style="flex:1; overflow-y:auto; padding:16px; background:#f8fafc; border-bottom:1px solid #e2e8f0;">
                     ${receiptHTML}
                 </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 12px;">
+
+                <!-- Share Buttons — fixed at bottom, never scroll -->
+                <div style="padding:16px 20px; display:flex; flex-direction:column; gap:10px; flex-shrink:0; background:#fff;">
                     ${cleanPhone ? `
-                        <button id="whatsapp-btn" class="share-btn" style="background: #25D366;">
-                            <span style="font-size: 1.3em;">ðŸ“±</span> Share via WhatsApp
+                        <button id="whatsapp-btn"
+                                style="display:flex; align-items:center; gap:10px; background:#25D366; color:#fff;
+                                       border:none; padding:12px 16px; border-radius:8px; cursor:pointer;
+                                       font-weight:600; font-size:0.9em; transition:opacity 0.2s;"
+                                onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                            <i class="fab fa-whatsapp" style="font-size:1.2em;"></i>
+                            Share via WhatsApp
                         </button>
-                        <button id="sms-btn" class="share-btn" style="background: #007bff;">
-                            <span style="font-size: 1.3em;">ðŸ’¬</span> Share as SMS
+                        <button id="sms-btn"
+                                style="display:flex; align-items:center; gap:10px; background:#3b82f6; color:#fff;
+                                       border:none; padding:12px 16px; border-radius:8px; cursor:pointer;
+                                       font-weight:600; font-size:0.9em; transition:opacity 0.2s;"
+                                onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                            <i class="fas fa-comment-sms" style="font-size:1.1em;"></i>
+                            Share via SMS
                         </button>
                     ` : ''}
-                    
-                    <button id="share-image-btn" class="share-btn" style="background: #9b59b6;">
-                        <span style="font-size: 1.3em;">ðŸ–¼ï¸</span> Share as Image
-                    </button>
-                    
-                    <button id="copy-btn" class="share-btn" style="background: #6c757d;">
-                        <span style="font-size: 1.3em;">ðŸ“‹</span> Copy to Clipboard
-                    </button>
+                    <div style="display:flex; gap:10px;">
+                        <button id="share-image-btn"
+                                style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+                                       background:#7c3aed; color:#fff; border:none; padding:12px; border-radius:8px;
+                                       cursor:pointer; font-weight:600; font-size:0.9em; transition:opacity 0.2s;"
+                                onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                            <i class="fas fa-image"></i> Save Image
+                        </button>
+                        <button id="copy-btn"
+                                style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+                                       background:#64748b; color:#fff; border:none; padding:12px; border-radius:8px;
+                                       cursor:pointer; font-weight:600; font-size:0.9em; transition:opacity 0.2s;"
+                                onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                            <i class="fas fa-copy"></i> Copy Text
+                        </button>
+                    </div>
+                    <div id="share-status" style="text-align:center; min-height:20px;"></div>
                 </div>
-                
-                <div id="share-status" style="margin-top: 15px; text-align: center;"></div>
             </div>
         </div>
     `;
@@ -2460,7 +2499,7 @@ function showNuclearSharingModal(receiptHTML, receiptText, customerName, custome
 function shareViaWhatsApp(receiptText, phoneNumber) {
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(receiptText)}`;
     window.open(whatsappUrl, '_blank');
-    showStatusMessage('âœ… Opening WhatsApp...', 'success');
+    showStatusMessage('Opening WhatsApp...', 'success');
 }
 
 function shareViaSMS(receiptText, phoneNumber) {
@@ -2468,7 +2507,7 @@ function shareViaSMS(receiptText, phoneNumber) {
         ? `sms:${phoneNumber}&body=${encodeURIComponent(receiptText)}`
         : `sms:${phoneNumber}?body=${encodeURIComponent(receiptText)}`;
     window.open(smsUrl, '_blank');
-    showStatusMessage('âœ… Opening SMS app...', 'success');
+    showStatusMessage('Opening SMS app...', 'success');
 }
 
 async function shareReceiptAsImage() {
@@ -2545,7 +2584,7 @@ function copyReceiptText(receiptText) {
 function showStatusMessage(message, type) {
     const statusDiv = document.getElementById('share-status');
     if (statusDiv) {
-        statusDiv.innerHTML = `<p style="color: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#ffc107'}">${message}</p>`;
+        statusDiv.innerHTML = `<p style="display:flex;align-items:center;justify-content:center;gap:6px;color:${type==='success'?'#16a34a':type==='error'?'#dc2626':'#d97706'};font-weight:600;font-size:0.85em;">${message}</p>`;
         setTimeout(() => statusDiv.innerHTML = '', 3000);
     }
 }
