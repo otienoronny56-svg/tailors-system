@@ -340,7 +340,7 @@
                     </div>
                     <div class="score-val" id="bi-clients">...</div>
                     <div class="score-trend trend-up">
-                        <i class="fas fa-arrow-up"></i> <span id="bi-clients-trend">Unique customers</span>
+                        <i class="fas fa-arrow-up"></i> <span id="bi-clients-trend">from client records + orders + signups</span>
                     </div>
                 </div>
                 <div class="scorecard speed">
@@ -470,6 +470,8 @@
         let rawOrders = [];
         let rawPayments = [];
         let rawExpenses = [];
+        let rawClients = [];         // from the clients table (tailor-managed)
+        let rawClientProfiles = [];  // from user_profiles role=client (marketplace signups)
 
         // BI Analytics Initialization
         document.addEventListener('DOMContentLoaded', async () => {
@@ -486,20 +488,25 @@
             document.getElementById('bi-speed').innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 0.8em; color: #cbd5e1;"></i>';
 
             try {
-                // 1. Fetch Data concurrently
-                const [ordersRes, paymentsRes, expensesRes] = await Promise.all([
+                // 1. Fetch all data concurrently including the actual clients table
+                const [ordersRes, paymentsRes, expensesRes, clientsRes, profilesRes] = await Promise.all([
                     supabaseClient.from('orders').select('*'),
                     supabaseClient.from('payments').select('*').is('deleted_at', null),
-                    supabaseClient.from('expenses').select('*')
+                    supabaseClient.from('expenses').select('*'),
+                    supabaseClient.from('clients').select('id, name, phone'),
+                    supabaseClient.from('user_profiles').select('id, full_name, email, role').eq('role', 'client')
                 ]);
 
                 if (ordersRes.error) throw ordersRes.error;
                 if (paymentsRes.error) throw paymentsRes.error;
                 if (expensesRes.error) throw expensesRes.error;
+                // clients & profiles errors are non-fatal — tolerate if tables missing
 
                 rawOrders = ordersRes.data || [];
                 rawPayments = paymentsRes.data || [];
                 rawExpenses = expensesRes.data || [];
+                rawClients = clientsRes.data || [];
+                rawClientProfiles = profilesRes.data || [];
 
                 calculateAndRenderKPIs();
                 generateAIInsights();
@@ -522,13 +529,34 @@
                 marginPercent = ((totalRevenue - totalExpenses) / totalRevenue) * 100;
             }
 
-            // 3. Unique Clients
-            const uniquePhones = new Set();
-            rawOrders.forEach(o => {
-                if (o.customer_phone) uniquePhones.add(o.customer_phone.trim());
-                else if (o.customer_name) uniquePhones.add(o.customer_name.trim().toLowerCase());
+            // 3. True Unique Client Count — union all three sources:
+            //    A) clients table (tailor-managed, auto-created per order)
+            //    B) orders table (phone-deduplicated fallback)
+            //    C) user_profiles role=client (marketplace app signups)
+            const clientSet = new Set();
+
+            // Source A: clients table (most complete — dedupe by phone, fallback name)
+            rawClients.forEach(c => {
+                if (c.phone) clientSet.add('ph:' + c.phone.trim().replace(/\s+/g, ''));
+                else if (c.name) clientSet.add('nm:' + c.name.trim().toLowerCase());
             });
-            const totalClients = uniquePhones.size;
+
+            // Source B: orders table phones not already in clients table
+            rawOrders.forEach(o => {
+                if (o.customer_phone) {
+                    const key = 'ph:' + o.customer_phone.trim().replace(/\s+/g, '');
+                    clientSet.add(key); // Set dedupes automatically
+                } else if (o.customer_name) {
+                    clientSet.add('nm:' + o.customer_name.trim().toLowerCase());
+                }
+            });
+
+            // Source C: marketplace signups (dedupe by email)
+            rawClientProfiles.forEach(u => {
+                if (u.email) clientSet.add('em:' + u.email.trim().toLowerCase());
+            });
+
+            const totalClients = clientSet.size;
 
             // 4. Avg Fulfillment (Orders with status 6 - Closed)
             const closedOrders = rawOrders.filter(o => o.status === 6 && o.updated_at && o.created_at);
@@ -545,6 +573,10 @@
             document.getElementById('bi-revenue').textContent = 'Ksh ' + totalRevenue.toLocaleString();
             document.getElementById('bi-margin').textContent = marginPercent.toFixed(1) + '%';
             document.getElementById('bi-clients').textContent = totalClients.toLocaleString();
+            // Update trend text with breakdown
+            const trendEls = document.querySelectorAll('#bi-clients-trend');
+            const breakdownText = `${rawClients.length} managed · ${rawClientProfiles.length} app signups`;
+            trendEls.forEach(el => el.textContent = breakdownText);
             document.getElementById('bi-speed').textContent = avgSpeed + ' Days';
         }
 
