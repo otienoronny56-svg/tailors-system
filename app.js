@@ -9603,6 +9603,7 @@ window.saveShopDetails = async function(e) {
         }
         
         // Build Google Maps style hours JSON payload
+        const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         const hoursObj = {};
         daysOfWeek.forEach(day => {
             const chk = document.getElementById(`chk-day-${day}`);
