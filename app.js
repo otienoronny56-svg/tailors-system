@@ -469,20 +469,50 @@ async function checkSession() {
                     logDebug("No profile yet — user is completing onboarding. Allowing.", null, 'info');
                     return;
                 }
-                logDebug("Profile not found in either table", null, 'error');
-                alert("Error: Your account is authenticated but no Profile was found. Contact Support.");
-                const loginBtn = document.getElementById('login-button');
-                if (loginBtn) {
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'Login to Dashboard';
+                
+                // Automatically create a default client profile for OAuth (e.g. Google Sign-Up) users
+                logDebug("Profile not found. Creating default client profile for OAuth user...", null, 'info');
+                const { error: insertError } = await supabaseClient
+                    .from('user_profiles')
+                    .insert([{
+                        id: user.id,
+                        full_name: user.user_metadata?.full_name || 'User',
+                        role: 'client',
+                        email: user.email,
+                        organization_id: null,
+                        shop_id: null
+                    }]);
+
+                if (insertError) {
+                    logDebug("Failed to create default client profile:", insertError, 'error');
+                    alert("Error: Your account is authenticated but no Profile was found. Contact Support.");
+                    const loginBtn = document.getElementById('login-button');
+                    if (loginBtn) {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Login to Dashboard';
+                    }
+                    return;
                 }
-                return;
+
+                // Query the newly created profile
+                const { data: newProfile, error: fetchErr } = await supabaseClient
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (fetchErr || !newProfile) {
+                    alert("Error retrieving new profile. Contact Support.");
+                    return;
+                }
+                USER_PROFILE = newProfile;
+            } else {
+                USER_PROFILE = {
+                    ...workerProfile,
+                    full_name: workerProfile.name,
+                    role: 'manager'
+                };
             }
-            USER_PROFILE = {
-                ...workerProfile,
-                full_name: workerProfile.name,
-                role: 'manager'
-            };
         } else {
             USER_PROFILE = profile;
         }
