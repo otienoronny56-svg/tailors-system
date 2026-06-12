@@ -6,7 +6,7 @@ window.logDebug = (msg, data = null, type = 'info') => {
 };
 
 // ==========================================
-// 🌙 DARK MODE SYSTEM
+// ðŸŒ™ DARK MODE SYSTEM
 // ==========================================
 function initTheme() {
     const savedTheme = localStorage.getItem('theme');
@@ -33,7 +33,7 @@ function toggleTheme() {
 initTheme();
 
 // ==========================================
-// 🛠️ UTILITY FUNCTIONS
+// ðŸ› ï¸ UTILITY FUNCTIONS
 // ==========================================
 
 // Currency formatter
@@ -60,7 +60,7 @@ window.loadScript = function (src) {
     });
 };
 
-// --- 🛡️ CRASH PROTECTION & INITIALIZATION ---
+// --- ðŸ›¡ï¸ CRASH PROTECTION & INITIALIZATION ---
 let supabaseClient = null; // Declared ONCE here to prevent "Identifier already declared" errors
 
 try {
@@ -89,7 +89,7 @@ try {
             </style>
             
             <div class="lock-box">
-                <div style="font-size: 50px; margin-bottom: 20px;">⚙️</div>
+                <div style="font-size: 50px; margin-bottom: 20px;">âš™ï¸</div>
                 <h1>SYSTEM MAINTENANCE</h1>
                 <p style="color: #aaa; margin-bottom: 20px;">We are currently performing scheduled maintenance and database updates for <strong>${APP_CONFIG.appName}</strong>.</p>
                 
@@ -102,10 +102,10 @@ try {
             </div>
         `;
 
-        throw new Error("❌ SYSTEM OFFLINE: MAINTENANCE");
+        throw new Error("âŒ SYSTEM OFFLINE: MAINTENANCE");
     }
     window.appInitialized = true;
-    console.log("✅ System Initialized Successfully");
+    console.log("âœ… System Initialized Successfully");
 
 } catch (error) {
     console.error(error);
@@ -120,9 +120,9 @@ const CURRENCY = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.currencySymbol
 
 // Admin client - lazy loaded to avoid "Multiple GoTrueClient" warnings
 function getAdminClient() {
-    // ⚠️ SECURITY CHECK: Ensure the secret key exists
+    // âš ï¸ SECURITY CHECK: Ensure the secret key exists
     if (!APP_CONFIG.serviceRoleKey) {
-        console.error("❌ CRITICAL: Service Role Key missing in config.js");
+        console.error("âŒ CRITICAL: Service Role Key missing in config.js");
         alert("Admin Error: You need the 'serviceRoleKey' in config.js to create users.");
         return null;
     }
@@ -219,11 +219,11 @@ const GARMENT_MEASUREMENTS = {
 };
 
 // ==========================================
-// 📋 COPY & SHARE FUNCTIONS (FINAL CLEAN)
+// ðŸ“‹ COPY & SHARE FUNCTIONS (FINAL CLEAN)
 // ==========================================
 
 function copyReceiptToClipboard(order, paymentAmount) {
-    // 1. ☢️ NUCLEAR MATH (Strict Calculation)
+    // 1. â˜¢ï¸ NUCLEAR MATH (Strict Calculation)
     const totalCost = parseFloat(order.price) || 0;
     const existingPaid = parseFloat(order.amount_paid) || 0;
     const payingNow = parseFloat(paymentAmount) || 0;
@@ -237,7 +237,7 @@ function copyReceiptToClipboard(order, paymentAmount) {
     }
     const remainingBalance = totalCost - realTotalPaid;
 
-    // 2. 🎨 STRICT BRANDING (No Subtitles Allowed)
+    // 2. ðŸŽ¨ STRICT BRANDING (No Subtitles Allowed)
     // We only take the App Name. We ignore the subtitle completely.
     const shopName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appName)
         ? APP_CONFIG.appName.toUpperCase()
@@ -269,15 +269,15 @@ Thank you!
 
     // 4. COPY TO CLIPBOARD
     navigator.clipboard.writeText(receiptText).then(() => {
-        alert("✅ Receipt copied to clipboard!");
+        alert("âœ… Receipt copied to clipboard!");
     }).catch(err => {
         console.error('Failed to copy: ', err);
-        alert("❌ Failed to copy receipt.");
+        alert("âŒ Failed to copy receipt.");
     });
 }
 
 function shareReceiptAsText(order, paymentAmount) {
-    // 1. ☢️ NUCLEAR MATH
+    // 1. â˜¢ï¸ NUCLEAR MATH
     const totalCost = parseFloat(order.price) || 0;
     const existingPaid = parseFloat(order.amount_paid) || 0;
     const payingNow = parseFloat(paymentAmount) || 0;
@@ -309,7 +309,7 @@ function shareReceiptAsText(order, paymentAmount) {
     }
 }
 // ==========================================
-// 🛠️ CORE UTILITIES
+// ðŸ› ï¸ CORE UTILITIES
 // ==========================================
 // ==========================================
 
@@ -364,7 +364,7 @@ function calculateBalance(order, payments = []) {
 }
 
 // ==========================================
-// 🔄 VIEW MANAGEMENT
+// ðŸ”„ VIEW MANAGEMENT
 // ==========================================
 
 function refreshCurrentView() {
@@ -376,6 +376,8 @@ function refreshCurrentView() {
     } else if (path.includes('all-orders')) {
         loadOrders('all');
     } else if (path.includes('admin-current-orders')) {
+        loadAdminOrders('current');
+    } else if (path.includes('admin-orders')) {
         loadAdminOrders('current');
     } else if (path.includes('admin-all-orders')) {
         loadAdminOrders('all');
@@ -422,7 +424,7 @@ function addRefreshButton() {
 }
 
 // ==========================================
-// 🔐 AUTHENTICATION SYSTEM
+// ðŸ” AUTHENTICATION SYSTEM
 // ==========================================
 
 async function checkSession() {
@@ -464,9 +466,9 @@ async function checkSession() {
                     throw new Error("Worker Lookup Error: " + workerError.message);
                 }
                 // No profile found anywhere.
-                // If we are on the onboarding page, that is expected — let the user proceed.
+                // If we are on the onboarding page, that is expected â€” let the user proceed.
                 if (path.includes('tailor-onboarding')) {
-                    logDebug("No profile yet — user is completing onboarding. Allowing.", null, 'info');
+                    logDebug("No profile yet â€” user is completing onboarding. Allowing.", null, 'info');
                     return;
                 }
                 
@@ -517,7 +519,7 @@ async function checkSession() {
             USER_PROFILE = profile;
         }
 
-        // 🛑 NEW: Check for suspension (Enforcement)
+        // ðŸ›‘ NEW: Check for suspension (Enforcement)
         if (USER_PROFILE.status === 'Suspended') {
             document.body.innerHTML = `
                 <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #f8fafc; font-family: 'Inter', sans-serif;">
@@ -538,7 +540,7 @@ async function checkSession() {
             return;
         }
 
-        // 🛑 NEW: Check for organization suspension (Enforcement)
+        // ðŸ›‘ NEW: Check for organization suspension (Enforcement)
         if (USER_PROFILE.organization_id && USER_PROFILE.role !== 'superadmin') {
             const { data: org, error: orgError } = await supabaseClient
                 .from('organizations')
@@ -580,7 +582,7 @@ async function checkSession() {
                 if (USER_PROFILE.role === 'client') redirectTo = 'client-dashboard.html';
                 window.location.href = redirectTo;
             }
-            return; // Always stop here — let the onboarding page handle itself
+            return; // Always stop here â€” let the onboarding page handle itself
         }
 
         if (path.includes('index.html') || path.includes('login.html') || path === '/' || path.endsWith('/')) {
@@ -639,6 +641,8 @@ async function routeToPage(path) {
         } else if (path.includes('financial-overview')) {
             await loadAnalyticsDashboard();
         } else if (path.includes('admin-current-orders')) {
+            await loadAdminOrders('current');
+        } else if (path.includes('admin-orders') && !path.includes('admin-order-details') && !path.includes('admin-order-form')) {
             await loadAdminOrders('current');
         } else if (path.includes('admin-all-orders')) {
             await loadAdminOrders('all');
@@ -722,7 +726,7 @@ async function handleLogin(e) {
         // Show the error directly on the screen for her
         const msgEl = document.getElementById('auth-message');
         if (msgEl) {
-            msgEl.textContent = "❌ Error: " + error.message;
+            msgEl.textContent = "âŒ Error: " + error.message;
             msgEl.style.display = "block";
             msgEl.style.color = "#ff4444";
         }
@@ -755,7 +759,7 @@ async function handleLogout() {
 }
 
 // ==========================================
-// 👑 SUPERADMIN MODULE
+// ðŸ‘‘ SUPERADMIN MODULE
 // ==========================================
 
 async function loadSuperadminDashboard() {
@@ -954,7 +958,7 @@ async function loadPendingApprovals() {
                 <tr>
                     <td colspan="4" style="text-align:center; padding:30px; color:#10b981;">
                         <i class="fas fa-check-circle" style="font-size:1.5em; margin-bottom:8px; display:block;"></i>
-                        No pending approvals — all caught up!
+                        No pending approvals â€” all caught up!
                     </td>
                 </tr>`;
             return;
@@ -977,8 +981,8 @@ async function loadPendingApprovals() {
             return `
                 <tr>
                     <td><strong style="color:var(--brand-white);">${shopName}</strong></td>
-                    <td>${p.full_name || '—'}</td>
-                    <td style="font-size:0.85em;">${p.email || '—'}</td>
+                    <td>${p.full_name || 'â€”'}</td>
+                    <td style="font-size:0.85em;">${p.email || 'â€”'}</td>
                     <td style="text-align:center; white-space:nowrap;">
                         <button onclick="approveShop('${p.id}', '${p.shop_id}', '${p.organization_id}')"
                             class="small-btn"
@@ -1020,7 +1024,7 @@ async function approveShop(profileId, shopId, orgId) {
                 .eq('id', shopId);
         }
 
-        alert('✅ Shop approved! The tailor can now log in and access their dashboard.');
+        alert('âœ… Shop approved! The tailor can now log in and access their dashboard.');
         loadPendingApprovals();
         loadSuperadminDashboard();
     } catch (err) {
@@ -1033,7 +1037,7 @@ async function rejectShop(profileId, shopId, orgId, shopName) {
     try {
         const adminClient = getAdminClient();
 
-        // Delete in order: profile → shop → org
+        // Delete in order: profile â†’ shop â†’ org
         await adminClient.from('user_profiles').delete().eq('id', profileId);
 
         if (shopId && shopId !== 'null') {
@@ -1043,7 +1047,7 @@ async function rejectShop(profileId, shopId, orgId, shopName) {
             await adminClient.from('organizations').delete().eq('id', orgId);
         }
 
-        alert('🗑️ Registration rejected and removed. The user can re-register with a different shop name.');
+        alert('ðŸ—‘ï¸ Registration rejected and removed. The user can re-register with a different shop name.');
         loadPendingApprovals();
     } catch (err) {
         alert('Error rejecting shop: ' + err.message);
@@ -1098,11 +1102,11 @@ async function loadOrganizations() {
                 try {
                     const { error } = await supabaseClient.from('organizations').insert([{ name: nameInput.value.trim() }]);
                     if (error) throw error;
-                    msg.innerHTML = '<span style="color:green;">✅ Organization Created!</span>';
+                    msg.innerHTML = '<span style="color:green;">âœ… Organization Created!</span>';
                     nameInput.value = '';
                     loadOrganizations();
                 } catch (err) {
-                    msg.innerHTML = `<span style="color:red;">❌ Error: ${err.message}</span>`;
+                    msg.innerHTML = `<span style="color:red;">âŒ Error: ${err.message}</span>`;
                 }
             };
         }
@@ -1214,7 +1218,7 @@ async function loadPlatformUsers() {
 
     } catch (err) {
         console.error("Platform Users Error:", err);
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red; padding:40px;">⚠️ Error: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red; padding:40px;">âš ï¸ Error: ${err.message}</td></tr>`;
     }
 }
 
@@ -1292,7 +1296,7 @@ async function handleCreateAdminAccount(e) {
 
         msg.innerHTML = `
             <div style="margin-bottom: 10px;">
-                <span style="color:green; display:block; margin-bottom: 15px; font-weight: bold;">✅ Admin Account Created Successfully!</span>
+                <span style="color:green; display:block; margin-bottom: 15px; font-weight: bold;">âœ… Admin Account Created Successfully!</span>
                 <div style="display: flex; gap: 10px; justify-content: center;">
                     <button type="button" onclick="copyAdminCredentials('${email}', '${password}', '${fullNameStatus}')" style="background: #f1f5f9; color: var(--brand-navy); border: 1px solid #cbd5e1; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
                         <i class="fas fa-copy"></i> Copy Details
@@ -1305,7 +1309,7 @@ async function handleCreateAdminAccount(e) {
         `;
         document.getElementById('create-admin-form').reset();
     } catch (err) {
-        msg.innerHTML = `<span style="color:red;">❌ Error: ${err.message}</span>`;
+        msg.innerHTML = `<span style="color:red;">âŒ Error: ${err.message}</span>`;
     } finally {
         btn.disabled = false;
         btn.textContent = 'Create Admin Account';
@@ -1314,7 +1318,7 @@ async function handleCreateAdminAccount(e) {
 
 window.copyAdminCredentials = function(email, password, name) {
     const loginUrl = window.location.origin + '/index.html';
-    const text = `*Welcome to Sir's 'n' Suits, ${name}!* 👔\n\nYour Administrator account has been securely provisioned.\n\n*Login Portal:* ${loginUrl}\n*Email:* ${email}\n*Password:* ${password}\n\n_Please log in to manage your organization orders._`;
+    const text = `*Welcome to Sir's 'n' Suits, ${name}!* ðŸ‘”\n\nYour Administrator account has been securely provisioned.\n\n*Login Portal:* ${loginUrl}\n*Email:* ${email}\n*Password:* ${password}\n\n_Please log in to manage your organization orders._`;
     navigator.clipboard.writeText(text).then(() => {
         alert("Credentials copied to clipboard!");
     }).catch(err => {
@@ -1324,7 +1328,7 @@ window.copyAdminCredentials = function(email, password, name) {
 
 window.shareAdminWhatsApp = function(email, password, name) {
     const loginUrl = window.location.origin + '/index.html';
-    const text = `*Welcome to Sir's 'n' Suits, ${name}!* 👔\n\nYour Administrator account has been securely provisioned.\n\n*Login Portal:* ${loginUrl}\n*Email:* ${email}\n*Password:* ${password}\n\n_Please log in to manage your organization orders._`;
+    const text = `*Welcome to Sir's 'n' Suits, ${name}!* ðŸ‘”\n\nYour Administrator account has been securely provisioned.\n\n*Login Portal:* ${loginUrl}\n*Email:* ${email}\n*Password:* ${password}\n\n_Please log in to manage your organization orders._`;
     const waUrl = "https://wa.me/?text=" + encodeURIComponent(text);
     window.open(waUrl, "_blank");
 };
@@ -1358,7 +1362,7 @@ window.deleteOrganization = async function(id) {
 };
 
 // ==========================================
-// 👔 MANAGER MODULE - ORDERS
+// ðŸ‘” MANAGER MODULE - ORDERS
 // ==========================================
 
 async function loadOrders(mode = 'open') {
@@ -1366,7 +1370,7 @@ async function loadOrders(mode = 'open') {
 
     const headerTitle = document.querySelector('header h1');
     if (headerTitle) {
-        if (mode === 'urgent') headerTitle.innerHTML = '🔥 Urgent Attention Required';
+        if (mode === 'urgent') headerTitle.innerHTML = 'ðŸ”¥ Urgent Attention Required';
         else headerTitle.textContent = 'Manager Dashboard (Orders In Progress)';
     }
 
@@ -1408,7 +1412,7 @@ async function loadOrders(mode = 'open') {
 
         if (!orders.length) {
             tbody.innerHTML = mode === 'urgent'
-                ? '<tr><td colspan="8" style="text-align:center; padding:30px;">✅ Good job! No urgent orders.</td></tr>'
+                ? '<tr><td colspan="8" style="text-align:center; padding:30px;">âœ… Good job! No urgent orders.</td></tr>'
                 : '<tr><td colspan="8" style="text-align:center; padding:20px;">No orders found</td></tr>';
             return;
         }
@@ -1499,8 +1503,8 @@ async function loadOrders(mode = 'open') {
                 <td style="color:${balance > 0 ? '#dc3545' : '#28a745'}; font-weight:bold;">${balance.toLocaleString()}</td>
                 <td>
                     <div style="display:flex; gap:5px;">
-                        <button class="small-btn" onclick="location.href='order-details.html?id=${order.id}'">👁️ View</button>
-                        <button class="small-btn" style="background:#28a745;" onclick="generateAndShareReceipt('${order.id}')">📄</button>
+                        <button class="small-btn" onclick="location.href='order-details.html?id=${order.id}'">ðŸ‘ï¸ View</button>
+                        <button class="small-btn" style="background:#28a745;" onclick="generateAndShareReceipt('${order.id}')">ðŸ“„</button>
                     </div>
                 </td>
             </tr>`;
@@ -1513,7 +1517,7 @@ async function loadOrders(mode = 'open') {
 }
 
 // ==========================================
-// 👔 MANAGER MODULE - WORKER MANAGEMENT
+// ðŸ‘” MANAGER MODULE - WORKER MANAGEMENT
 // ==========================================
 
 async function loadWorkerScreen() {
@@ -1580,7 +1584,7 @@ async function loadWorkerScreen() {
                         <td>
                             <button class="small-btn" style="background:#007bff;" 
                                     onclick="location.href='worker-assignments.html?id=${worker.id}'">
-                                📂 View Work
+                                ðŸ“‚ View Work
                             </button>
                         </td>
                     </tr>
@@ -1783,7 +1787,7 @@ async function loadWorkersDropdown() {
 }
 
 // ==========================================
-// 👔 MANAGER MODULE - ORDER FORM
+// ðŸ‘” MANAGER MODULE - ORDER FORM
 // ==========================================
 
 function initOrderForm() {
@@ -1824,7 +1828,7 @@ function initOrderForm() {
                 const finalPrice = basePrice + extrasTotal;
 
                 const orderData = {
-                    organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safety
+                    organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safety
                     shop_id: USER_PROFILE.shop_id,
                     manager_id: USER_PROFILE.id,
                     customer_name: document.getElementById('customer_name').value,
@@ -1859,15 +1863,15 @@ function initOrderForm() {
                     history = history.slice(0, 10); // Keep last 10
 
                     await supabaseClient.from('clients').upsert({
-                        organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
-                        shop_id: orderData.shop_id, // 👈 RLS safe
+                        organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
+                        shop_id: orderData.shop_id, // ðŸ‘ˆ RLS safe
                         name: orderData.customer_name,
                         phone: orderData.customer_phone,
                         measurements_history: history,
                         last_garment_type: orderData.garment_type,
                         notes: orderData.customer_preferences,
                         updated_at: new Date().toISOString()
-                    }, { onConflict: 'organization_id,phone' }); // 👈 Updated Conflict target
+                    }, { onConflict: 'organization_id,phone' }); // ðŸ‘ˆ Updated Conflict target
                 } catch (e) {
                     console.error("Error upserting client:", e);
                 }
@@ -1875,7 +1879,7 @@ function initOrderForm() {
                 const deposit = parseFloat(document.getElementById('deposit_paid').value) || 0;
                 if (deposit > 0) {
                     await supabaseClient.from('payments').insert([{
-                        organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
+                        organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
                         order_id: order.id,
                         manager_id: USER_PROFILE.id,
                         amount: deposit,
@@ -1937,7 +1941,7 @@ function generateMeasurementFieldsManager() {
 }
 
 // ==========================================
-// 👔 MANAGER MODULE - EXPENSES
+// ðŸ‘” MANAGER MODULE - EXPENSES
 // ==========================================
 
 async function loadExpensesScreen() {
@@ -1952,7 +1956,7 @@ async function loadExpensesScreen() {
 
                 try {
                     const expenseData = {
-                        organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
+                        organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
                         shop_id: USER_PROFILE.shop_id,
                         manager_id: USER_PROFILE.id,
                         item_name: document.getElementById('ex-name').value || 'General',
@@ -2015,7 +2019,7 @@ async function loadExpensesList() {
                     <td>
                         <button class="small-btn" style="background:#3b82f6; width: auto;" 
                                 onclick="generateExpenseInvoice('${expense.id}')">
-                            📄 Req Funds
+                            ðŸ“„ Req Funds
                         </button>
                     </td>
                 </tr>
@@ -2029,7 +2033,7 @@ async function loadExpensesList() {
 }
 
 // ==========================================
-// 👔 MANAGER MODULE - ORDER DETAILS
+// ðŸ‘” MANAGER MODULE - ORDER DETAILS
 // ==========================================
 
 async function loadOrderDetailsScreen() {
@@ -2126,19 +2130,19 @@ async function loadOrderDetailsScreen() {
                 <div class="quick-actions-toolbar">
                     <button class="small-btn" style="background:#6c757d;" 
                             onclick="generateAndShareReceipt('${order.id}')">
-                        📄 Generate Receipt
+                        ðŸ“„ Generate Receipt
                     </button>
                     <button class="small-btn" style="background:#3b82f6;" 
                             onclick="downloadInvoicePDF('${order.id}')">
-                        📄 Generate Invoice
+                        ðŸ“„ Generate Invoice
                     </button>
                     <button class="small-btn" style="background:#28a745;" 
                             onclick="quickPay('${order.id}', ${balance})" ${balance <= 0 ? 'disabled' : ''}>
-                        💰 Record Payment
+                        ðŸ’° Record Payment
                     </button>
                     <button class="small-btn" style="background:#ffc107; color:black;" 
                             onclick="updateStatus('${order.id}')">
-                        🔄 Update Status
+                        ðŸ”„ Update Status
                     </button>
                 </div>
                 
@@ -2166,13 +2170,13 @@ async function loadOrderDetailsScreen() {
 }
 
 // ==========================================
-// 📄 RECEIPT SYSTEM (CORE LOGIC FOR GENERATE RECEIPT FIX)
+// ðŸ“„ RECEIPT SYSTEM (CORE LOGIC FOR GENERATE RECEIPT FIX)
 // ==========================================
 
 function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
     const dateStr = new Date().toLocaleDateString();
 
-    // --- ☢️ NUCLEAR ARITHMETIC (Do not touch) ☢️ ---
+    // --- â˜¢ï¸ NUCLEAR ARITHMETIC (Do not touch) â˜¢ï¸ ---
     const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
     const totalCost = parseFloat(order.price) || 0; // [NEW] order.price is now the absolute total cost
     const garmentCost = Math.max(0, totalCost - accTotal); // Back-calculate garment cost
@@ -2193,7 +2197,7 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
     const receiptLogo = shopConfig.logo_url ? `<img src="${shopConfig.logo_url}" style="height: 60px; margin-bottom: 10px;" />` : '';
     const receiptHeader = shopConfig.receipt_header_text ? `<p style="margin: 5px 0 0 0; font-size: 0.8em; font-weight: 600; color: #555;">${shopConfig.receipt_header_text}</p>` : '';
 
-    // --- 🎨 ULTIMATE MODERN DESIGN ---
+    // --- ðŸŽ¨ ULTIMATE MODERN DESIGN ---
     const orderIdStr = (order.id !== undefined && order.id !== null) ? String(order.id) : '';
     let clientPhone = '';
     if (order.phone_number && String(order.phone_number).trim() !== '') clientPhone = order.phone_number;
@@ -2244,7 +2248,7 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
                             <p style="margin: 0 0 4px 0; font-size: 0.7em; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing:0.5px;">Extras / Accessories</p>
                             ${accessories.map(a => `
                                 <div style="display: flex; justify-content: space-between; font-size: 0.85em; color: #444; margin-bottom: 3px;">
-                                    <span>• ${a.name || a.item_name} (x${a.quantity || 1})</span>
+                                    <span>â€¢ ${a.name || a.item_name} (x${a.quantity || 1})</span>
                                     <span>${formatCurrency((a.quantity || 1) * (a.price || 0))}</span>
                                 </div>
                             `).join('')}
@@ -2333,7 +2337,7 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
         accessories.forEach(a => {
             const price = parseFloat(a.price) || 0;
             const aName = a.name || a.item_name || 'Accessory';
-            lines.push(`• ${aName} (x${a.quantity || 1}): Ksh ${(price * (a.quantity || 1)).toLocaleString()}`);
+            lines.push(`â€¢ ${aName} (x${a.quantity || 1}): Ksh ${(price * (a.quantity || 1)).toLocaleString()}`);
         });
     }
     lines.push('');
@@ -2344,7 +2348,7 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     lines.push('-----------------------------');
     if (shopConfig.paybill_number) lines.push(`Paybill: ${shopConfig.paybill_number}`);
     if (shopConfig.paybill_account) lines.push(`Account: ${shopConfig.paybill_account}`);
-    lines.push(remainingBalance > 0 ? 'Balance Due' : '✅ PAID IN FULL');
+    lines.push(remainingBalance > 0 ? 'Balance Due' : 'âœ… PAID IN FULL');
     lines.push('');
     lines.push('Thank you for your business!');
     return lines.join('\n');
@@ -2395,7 +2399,7 @@ function showNuclearSharingModal(receiptHTML, receiptText, customerName, custome
                 <span class="close-btn" onclick="closeReceiptModal()" style="font-size: 28px;">&times;</span>
                 
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="color: #d4af37; margin-bottom: 5px;">📄 Share Receipt</h2>
+                    <h2 style="color: #d4af37; margin-bottom: 5px;">ðŸ“„ Share Receipt</h2>
                     <p style="color: #666;">For: ${customerName || 'Customer'}</p>
                 </div>
                 
@@ -2406,19 +2410,19 @@ function showNuclearSharingModal(receiptHTML, receiptText, customerName, custome
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     ${cleanPhone ? `
                         <button id="whatsapp-btn" class="share-btn" style="background: #25D366;">
-                            <span style="font-size: 1.3em;">📱</span> Share via WhatsApp
+                            <span style="font-size: 1.3em;">ðŸ“±</span> Share via WhatsApp
                         </button>
                         <button id="sms-btn" class="share-btn" style="background: #007bff;">
-                            <span style="font-size: 1.3em;">💬</span> Share as SMS
+                            <span style="font-size: 1.3em;">ðŸ’¬</span> Share as SMS
                         </button>
                     ` : ''}
                     
                     <button id="share-image-btn" class="share-btn" style="background: #9b59b6;">
-                        <span style="font-size: 1.3em;">🖼️</span> Share as Image
+                        <span style="font-size: 1.3em;">ðŸ–¼ï¸</span> Share as Image
                     </button>
                     
                     <button id="copy-btn" class="share-btn" style="background: #6c757d;">
-                        <span style="font-size: 1.3em;">📋</span> Copy to Clipboard
+                        <span style="font-size: 1.3em;">ðŸ“‹</span> Copy to Clipboard
                     </button>
                 </div>
                 
@@ -2456,7 +2460,7 @@ function showNuclearSharingModal(receiptHTML, receiptText, customerName, custome
 function shareViaWhatsApp(receiptText, phoneNumber) {
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(receiptText)}`;
     window.open(whatsappUrl, '_blank');
-    showStatusMessage('✅ Opening WhatsApp...', 'success');
+    showStatusMessage('âœ… Opening WhatsApp...', 'success');
 }
 
 function shareViaSMS(receiptText, phoneNumber) {
@@ -2464,17 +2468,17 @@ function shareViaSMS(receiptText, phoneNumber) {
         ? `sms:${phoneNumber}&body=${encodeURIComponent(receiptText)}`
         : `sms:${phoneNumber}?body=${encodeURIComponent(receiptText)}`;
     window.open(smsUrl, '_blank');
-    showStatusMessage('✅ Opening SMS app...', 'success');
+    showStatusMessage('âœ… Opening SMS app...', 'success');
 }
 
 async function shareReceiptAsImage() {
     const receiptContent = document.querySelector('#receipt-preview-container > div');
     if (!receiptContent) {
-        showStatusMessage('❌ Receipt content not found', 'error');
+        showStatusMessage('âŒ Receipt content not found', 'error');
         return;
     }
 
-    showStatusMessage('🔄 Creating image...', 'info');
+    showStatusMessage('ðŸ”„ Creating image...', 'info');
 
     try {
         // *** CRITICAL FIX: Ensure html2canvas is loaded and available ***
@@ -2507,25 +2511,25 @@ async function shareReceiptAsImage() {
                             title: 'Tailoring Receipt',
                             text: 'Receipt from Sir\'s \'n\' Suits'
                         });
-                        showStatusMessage('✅ Image shared!', 'success');
+                        showStatusMessage('âœ… Image shared!', 'success');
                     } catch (shareError) {
-                        showStatusMessage('✅ Image downloaded!', 'success');
+                        showStatusMessage('âœ… Image downloaded!', 'success');
                     }
                 } else {
-                    showStatusMessage('✅ Image downloaded!', 'success');
+                    showStatusMessage('âœ… Image downloaded!', 'success');
                 }
             }
         }, 'image/png');
 
     } catch (error) {
         logDebug("Image generation error:", error, 'error');
-        showStatusMessage('❌ Error creating image', 'error');
+        showStatusMessage('âŒ Error creating image', 'error');
     }
 }
 
 function copyReceiptText(receiptText) {
     navigator.clipboard.writeText(receiptText)
-        .then(() => showStatusMessage('✅ Copied to clipboard!', 'success'))
+        .then(() => showStatusMessage('âœ… Copied to clipboard!', 'success'))
         .catch(() => {
             // Fallback
             const textArea = document.createElement('textarea');
@@ -2534,7 +2538,7 @@ function copyReceiptText(receiptText) {
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            showStatusMessage('✅ Copied to clipboard!', 'success');
+            showStatusMessage('âœ… Copied to clipboard!', 'success');
         });
 }
 
@@ -2562,7 +2566,7 @@ async function loadScript(src) {
 }
 
 // ==========================================
-// 👑 OWNER MODULE - ADMIN ORDERS
+// ðŸ‘‘ OWNER MODULE - ADMIN ORDERS
 
 // Redundant loadAdminOrders removed - moved and updated below at line 2082
 
@@ -2879,14 +2883,14 @@ function closeAdminModal() {
 }
 
 // ==========================================
-// 👑 OWNER MODULE - ADMIN ORDERS
+// ðŸ‘‘ OWNER MODULE - ADMIN ORDERS
 // ==========================================
 
 async function loadAdminOrders(mode = 'current') {
     // [NEW] Update Header based on mode
     const headerTitle = document.querySelector('header h1');
     if (headerTitle) {
-        if (mode === 'urgent') headerTitle.innerHTML = '🔥 Global Urgent Attention';
+        if (mode === 'urgent') headerTitle.innerHTML = 'ðŸ”¥ Global Urgent Attention';
         else if (mode === 'current') headerTitle.textContent = 'Global Active Orders';
         else headerTitle.textContent = 'Global Order History';
     }
@@ -2953,7 +2957,7 @@ async function loadAdminOrders(mode = 'current') {
 
         if (!orders || orders.length === 0) {
             tbody.innerHTML = mode === 'urgent'
-                ? '<tr><td colspan="9" style="text-align:center; padding:30px; font-size:1.2em;">✅ No urgent issues across shops.</td></tr>'
+                ? '<tr><td colspan="9" style="text-align:center; padding:30px; font-size:1.2em;">âœ… No urgent issues across shops.</td></tr>'
                 : '<tr><td colspan="9" style="text-align:center; padding:20px;">No orders found</td></tr>';
             return;
         }
@@ -3162,15 +3166,15 @@ async function openAdminOrderView(orderId) {
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                     <button onclick="window.location.href='admin-order-details.html?id=${order.id}'" 
                             style="flex: 1; background: #000; color: #d4af37; padding: 12px; border-radius: 4px; border: none; cursor: pointer;">
-                        ✏️ Edit Order
+                        âœï¸ Edit Order
                     </button>
                     <button onclick="generateAndShareReceipt('${order.id}')" 
                             style="flex: 1; background: #28a745; color: white; padding: 12px; border-radius: 4px; border: none; cursor: pointer;">
-                        📄 Receipt
+                        ðŸ“„ Receipt
                     </button>
                     <button onclick="downloadInvoicePDF('${order.id}')" 
                             style="flex: 1; background: #3b82f6; color: white; padding: 12px; border-radius: 4px; border: none; cursor: pointer;">
-                        📄 Invoice
+                        ðŸ“„ Invoice
                     </button>
                 </div>
                 
@@ -3201,12 +3205,12 @@ async function openAdminOrderView(orderId) {
                     html += '<div>';
                     html += '<p style="margin: 0 0 5px 0; font-weight: bold;">';
                     html += formatDate(p.recorded_at);
-                    html += isEdited ? ' ✏️' : '';
-                    html += isDeleted ? ' 🗑️' : '';
+                    html += isEdited ? ' âœï¸' : '';
+                    html += isDeleted ? ' ðŸ—‘ï¸' : '';
                     html += '</p>';
                     html += '<p style="margin: 0 0 5px 0; color: #666; font-size: 0.85em;">';
                     html += '<strong style="color: #28a745;">Ksh ' + p.amount.toLocaleString() + '</strong>';
-                    html += p.payment_method ? ' • ' + p.payment_method : '';
+                    html += p.payment_method ? ' â€¢ ' + p.payment_method : '';
                     html += '</p>';
                     html += '<p style="margin: 0; color: #666; font-size: 0.8em;">';
                     html += 'Recorded: ' + (p.manager_id ? p.manager_id.slice(-6) : 'System');
@@ -3214,12 +3218,12 @@ async function openAdminOrderView(orderId) {
                     html += '</div></div>';
                     if (isEdited) {
                         html += '<p style="margin: 8px 0 0 0; padding-top: 8px; border-top: 1px solid #ffd54f; font-size: 0.85em; color: #f57c00;">';
-                        html += '✏️ Last edited: ' + formatDate(p.edited_at);
+                        html += 'âœï¸ Last edited: ' + formatDate(p.edited_at);
                         html += '</p>';
                     }
                     if (isDeleted) {
                         html += '<p style="margin: 8px 0 0 0; padding-top: 8px; border-top: 1px solid #ef5350; font-size: 0.85em; color: #d32f2f;">';
-                        html += '🗑️ Deleted: ' + formatDate(p.deleted_at);
+                        html += 'ðŸ—‘ï¸ Deleted: ' + formatDate(p.deleted_at);
                         html += '</p>';
                     }
                     html += '</div>';
@@ -3236,13 +3240,13 @@ async function openAdminOrderView(orderId) {
                         ${balance > 0 ?
                 `<button onclick="quickPay('${order.id}', ${balance})" 
                                     style="flex: 1; background: #ffc107; color: black; padding: 10px; border-radius: 4px; border: none; cursor: pointer;">
-                                💰 Record Full Payment (Ksh ${balance.toLocaleString()})
+                                ðŸ’° Record Full Payment (Ksh ${balance.toLocaleString()})
                             </button>`
-                : '<button disabled style="flex: 1; background: #ccc; padding: 10px; border-radius: 4px; border: none;">✅ Fully Paid</button>'
+                : '<button disabled style="flex: 1; background: #ccc; padding: 10px; border-radius: 4px; border: none;">âœ… Fully Paid</button>'
             }
                         <button onclick="updateAdminStatus('${order.id}')" 
                                 style="flex: 1; background: #17a2b8; color: white; padding: 10px; border-radius: 4px; border: none; cursor: pointer;">
-                            🔄 Update Status
+                            ðŸ”„ Update Status
                         </button>
                     </div>
                 </div>
@@ -3293,8 +3297,8 @@ async function updateAdminStatus(orderId) {
 
         // Refresh current view
         const path = window.location.pathname;
-        if (path.includes('admin-current-orders') || path.includes('admin-all-orders')) {
-            const mode = path.includes('current') ? 'current' : 'all';
+        if (path.includes('admin-current-orders') || path.includes('admin-all-orders') || path.includes('admin-orders')) {
+            const mode = path.includes('all') ? 'all' : 'current';
             loadAdminOrders(mode);
         }
 
@@ -3308,7 +3312,7 @@ async function updateAdminStatus(orderId) {
 }
 
 // ==========================================
-// 👑 OWNER MODULE - ADMIN ORDER DETAILS (FIXED)
+// ðŸ‘‘ OWNER MODULE - ADMIN ORDER DETAILS (FIXED)
 // ==========================================
 
 async function loadAdminOrderDetails() {
@@ -3630,7 +3634,7 @@ async function saveAdminOrder() {
         }
 
         alert("Order saved successfully!");
-        window.location.href = 'admin-current-orders.html';
+        window.location.href = 'admin-orders.html';
 
     } catch (error) {
         logDebug("Error saving admin order:", error, 'error');
@@ -3640,7 +3644,7 @@ async function saveAdminOrder() {
 }
 
 // ==========================================
-// 👑 OWNER MODULE - ADMIN MANAGEMENT
+// ðŸ‘‘ OWNER MODULE - ADMIN MANAGEMENT
 // ==========================================
 
 async function loadAdminManagementScreen() {
@@ -3677,7 +3681,7 @@ async function loadAdminManagementScreen() {
                     const { error } = await supabaseClient
                         .from('workers')
                         .insert([{
-                            organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
+                            organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
                             shop_id: shopId,
                             name: name.trim(),
                             phone_number: phone.trim() || null,
@@ -3778,7 +3782,7 @@ window.deleteWorker = async function (workerId) {
 };
 
 // ==========================================
-// 👑 OWNER MODULE - ADMIN ORDER FORM
+// ðŸ‘‘ OWNER MODULE - ADMIN ORDER FORM
 // ==========================================
 
 function initAdminOrderForm() {
@@ -3855,7 +3859,7 @@ function initAdminOrderForm() {
             const finalPrice = basePrice + extrasTotal;
 
             const orderData = {
-                organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
+                organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
                 shop_id: shopId,
                 customer_name: document.getElementById('customer_name').value,
                 customer_phone: document.getElementById('customer_phone').value,
@@ -3888,15 +3892,15 @@ function initAdminOrderForm() {
                 history = history.slice(0, 10); // Keep last 10
 
                 await supabaseClient.from('clients').upsert({
-                    organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
-                    shop_id: orderData.shop_id, // 👈 RLS safe
+                    organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
+                    shop_id: orderData.shop_id, // ðŸ‘ˆ RLS safe
                     name: orderData.customer_name,
                     phone: orderData.customer_phone,
                     measurements_history: history,
                     last_garment_type: orderData.garment_type,
                     notes: orderData.customer_preferences || '',
                     updated_at: new Date().toISOString()
-                }, { onConflict: 'organization_id,phone' }); // 👈 Updated Conflict target
+                }, { onConflict: 'organization_id,phone' }); // ðŸ‘ˆ Updated Conflict target
             } catch (e) {
                 console.error("Error upserting client:", e);
             }
@@ -3913,7 +3917,7 @@ function initAdminOrderForm() {
                 if (depErr) console.error("Deposit error:", depErr);
             }
 
-            window.location.href = 'admin-current-orders.html';
+            window.location.href = 'admin-orders.html';
         };
     }
 }
@@ -4463,7 +4467,7 @@ function exportDashboardData() {
 }
 
 // ==========================================
-// 💰 PAYMENT FUNCTIONS
+// ðŸ’° PAYMENT FUNCTIONS
 // ==========================================
 
 window.quickPay = async function (orderId, balance) {
@@ -4556,7 +4560,7 @@ window.updateStatus = async function (orderId) {
 };
 
 // ==========================================
-// 👑 OWNER MODULE - ADMIN ORDER DETAILS (FINAL VERSION)
+// ðŸ‘‘ OWNER MODULE - ADMIN ORDER DETAILS (FINAL VERSION)
 // ==========================================
 
 async function loadAdminOrderDetails() {
@@ -4788,7 +4792,7 @@ function downloadOrderPDF() {
 }
 
 // ==========================================
-// 📄 INVOICING ENGINE — NUCLEAR REWRITE
+// ðŸ“„ INVOICING ENGINE â€” NUCLEAR REWRITE
 // Uses window.open + browser print (pixel-perfect, no html2canvas bugs)
 // ==========================================
 
@@ -4845,7 +4849,7 @@ function buildInvoiceDocument(options) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>${title} — ${invoiceNumber}</title>
+<title>${title} â€” ${invoiceNumber}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -4863,7 +4867,7 @@ function buildInvoiceDocument(options) {
     print-color-adjust: exact;
   }
 
-  /* ─── HEADER ─── */
+  /* â”€â”€â”€ HEADER â”€â”€â”€ */
   .header { display: table; width: 100%; margin-bottom: 20px; }
   .header-left { display: table-cell; vertical-align: middle; width: 55%; }
   .header-right { display: table-cell; vertical-align: top; text-align: right; width: 45%; }
@@ -4880,10 +4884,10 @@ function buildInvoiceDocument(options) {
   .inv-number { font-size: 15px; font-weight: 700; color: #f59e0b; margin: 6px 0; }
   .inv-dates  { font-size: 11px; color: #64748b; line-height: 1.8; }
 
-  /* ─── DIVIDER ─── */
+  /* â”€â”€â”€ DIVIDER â”€â”€â”€ */
   .divider { border: none; border-top: 2px solid #0f172a; margin: 18px 0; }
 
-  /* ─── BILL TO ─── */
+  /* â”€â”€â”€ BILL TO â”€â”€â”€ */
   .bill-box {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -4895,7 +4899,7 @@ function buildInvoiceDocument(options) {
   .bill-name  { font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; }
   .bill-sub   { font-size: 12px; color: #475569; margin-top: 3px; }
 
-  /* ─── ITEMS TABLE ─── */
+  /* â”€â”€â”€ ITEMS TABLE â”€â”€â”€ */
   .items-table { width: 100%; border-collapse: collapse; margin-bottom: 22px; }
   .items-table thead tr { border-bottom: 2px solid #0f172a; }
   .items-table th {
@@ -4913,7 +4917,7 @@ function buildInvoiceDocument(options) {
   .items-right  { padding: 11px 8px; border-bottom: 1px dotted #e2e8f0; text-align: right; }
   .items-bold   { font-weight: 700; }
 
-  /* ─── TOTALS ─── */
+  /* â”€â”€â”€ TOTALS â”€â”€â”€ */
   .totals-wrap { display: table; width: 100%; margin-bottom: 24px; }
   .totals-spacer { display: table-cell; width: 58%; }
   .totals-box    { display: table-cell; width: 42%; }
@@ -4925,14 +4929,14 @@ function buildInvoiceDocument(options) {
   .totals-value.big    { font-size: 17px; font-weight: 900; color: #ef4444; }
   .totals-label.big    { font-size: 15px; font-weight: 800; color: #0f172a; }
 
-  /* ─── PAYMENT DETAILS ─── */
+  /* â”€â”€â”€ PAYMENT DETAILS â”€â”€â”€ */
   .section { margin-bottom: 22px; }
   .pay-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #0f172a; border-top: 1.5px solid #e2e8f0; padding-top: 14px; margin-bottom: 10px; }
   .pay-table { width: 100%; border-collapse: collapse; font-size: 12px; color: #475569; }
   .pay-table td { padding: 3px 10px 3px 0; }
   .pay-table td strong { color: #0f172a; }
 
-  /* ─── FOOTER ─── */
+  /* â”€â”€â”€ FOOTER â”€â”€â”€ */
   .footer { text-align: center; border-top: 1px dashed #e2e8f0; padding-top: 18px; margin-top: 40px; }
   .footer-text { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
   .footer-bar { width: 30px; height: 2px; background: #f59e0b; border-radius: 2px; margin: 10px auto 0; }
@@ -5051,7 +5055,7 @@ function openInvoicePrintWindow(htmlDoc, filenameHint) {
     win.document.close();
 }
 
-// ─── EXPENSE REQUISITION ────────────────────────────────────────────────────
+// â”€â”€â”€ EXPENSE REQUISITION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 window.generateExpenseInvoice = async function (expenseId) {
     if (!expenseId) return alert("Expense ID not found");
@@ -5107,7 +5111,7 @@ window.generateExpenseInvoice = async function (expenseId) {
     }
 };
 
-// ─── ORDER INVOICE ───────────────────────────────────────────────────────────
+// â”€â”€â”€ ORDER INVOICE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 window.downloadInvoicePDF = async function (orderId) {
     if (!orderId) {
@@ -5220,7 +5224,7 @@ async function deleteOrder() {
         if (error) throw error;
 
         alert("Order deleted successfully!");
-        window.location.href = 'admin-current-orders.html';
+        window.location.href = 'admin-orders.html';
 
     } catch (error) {
         logDebug("Error deleting order:", error, 'error');
@@ -5229,7 +5233,7 @@ async function deleteOrder() {
 }
 
 // ==========================================
-// 👑 OWNER MODULE - ADMIN MANAGEMENT
+// ðŸ‘‘ OWNER MODULE - ADMIN MANAGEMENT
 // ==========================================
 
 async function loadAdminManagementScreen() {
@@ -5343,7 +5347,7 @@ async function loadShopCommandCenter() {
                         managerEmailMap[profile.id] = data.user.email;
                     }
                 } catch (e) {
-                    // Silently skip — email just won't show for this manager
+                    // Silently skip â€” email just won't show for this manager
                 }
             }));
         }
@@ -5573,7 +5577,7 @@ window.deleteWorker = async function (workerId) {
 };
 
 // ==========================================
-// 👑 OWNER MODULE - ADMIN ORDER FORM
+// ðŸ‘‘ OWNER MODULE - ADMIN ORDER FORM
 // ==========================================
 
 function initAdminOrderForm() {
@@ -5720,15 +5724,15 @@ function initAdminOrderForm() {
                 history = history.slice(0, 10); // Keep last 10
 
                 await supabaseClient.from('clients').upsert({
-                    organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
-                    shop_id: orderData.shop_id, // 👈 RLS safe
+                    organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
+                    shop_id: orderData.shop_id, // ðŸ‘ˆ RLS safe
                     name: orderData.customer_name,
                     phone: orderData.customer_phone,
                     measurements_history: history,
                     last_garment_type: orderData.garment_type,
                     notes: orderData.customer_preferences || '',
                     updated_at: new Date().toISOString()
-                }, { onConflict: 'organization_id,phone' }); // 👈 Updated Conflict target
+                }, { onConflict: 'organization_id,phone' }); // ðŸ‘ˆ Updated Conflict target
             } catch (e) {
                 console.error("Error upserting client:", e);
             }
@@ -5746,7 +5750,7 @@ function initAdminOrderForm() {
                 if (depErr) console.error("Admin deposit error:", depErr);
             }
 
-            window.location.href = 'admin-current-orders.html';
+            window.location.href = 'admin-orders.html';
         };
     }
 }
@@ -5815,7 +5819,7 @@ function generateAdminOrderFormMeasurements() {
 }
 
 // ==========================================
-// 👑 OWNER MODULE - ADMIN EXPENSES
+// ðŸ‘‘ OWNER MODULE - ADMIN EXPENSES
 // ==========================================
 
 async function loadAdminExpensesScreen() {
@@ -5835,7 +5839,7 @@ async function loadAdminExpensesScreen() {
                     const shopId = document.getElementById('admin-ex-shop').value || null;
 
                     const expenseData = {
-                        organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
+                        organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
                         shop_id: shopId,
                         manager_id: USER_PROFILE.id, // Admin who recorded it
                         item_name: document.getElementById('admin-ex-name').value || 'Global Expense',
@@ -6093,7 +6097,7 @@ async function updateExpense(id) {
 }
 
 // ==========================================
-// 🚀 MODERN BI & ANALYTICS MODULE
+// ðŸš€ MODERN BI & ANALYTICS MODULE
 // ==========================================
 
 async function loadBIAnalytics() {
@@ -6373,7 +6377,7 @@ async function loadAnalyticsDashboard() {
     if (now - lastDashboardLoad < DEBOUNCE_DELAY) return;
     lastDashboardLoad = now;
 
-    logDebug("📊 Loading analytics dashboard", null, 'info');
+    logDebug("ðŸ“Š Loading analytics dashboard", null, 'info');
 
     // Clean up charts
     Object.values(analyticsCharts).forEach(chart => {
@@ -7159,7 +7163,7 @@ function exportDashboardData() {
 }
 
 // ==========================================
-// 💰 PAYMENT FUNCTIONS
+// ðŸ’° PAYMENT FUNCTIONS
 // ==========================================
 
 window.quickPay = async function (orderId, balance) {
@@ -7252,7 +7256,7 @@ window.updateStatus = async function (orderId) {
 };
 
 // ==========================================
-// 🏁 APPLICATION INITIALIZATION
+// ðŸ APPLICATION INITIALIZATION
 // ==========================================
 
 /**
@@ -7458,7 +7462,7 @@ async function updateSidebarBranding(forcedName = null) {
 }
 
 window.addEventListener('DOMContentLoaded', function () {
-    // --- 🎨 AUTO-BRANDING (Master Template Feature) ---
+    // --- ðŸŽ¨ AUTO-BRANDING (Master Template Feature) ---
     if (typeof APP_CONFIG !== 'undefined') {
         // B. Update Dashboard Sidebar (Initial guess from config)
         updateSidebarBranding();
@@ -7589,7 +7593,7 @@ window.addEventListener('beforeunload', function () {
 });
 
 // ==========================================
-// 💳 PAYMENT EDITING FUNCTIONS
+// ðŸ’³ PAYMENT EDITING FUNCTIONS
 // ==========================================
 
 let SELECTED_PAYMENT_ID = null; // Track which payment is being edited
@@ -7675,7 +7679,7 @@ async function savePaymentEdit() {
 }
 
 async function deletePaymentRecord(paymentId) {
-    if (!confirm("⚠️ Soft-delete this payment? It will be hidden but recoverable.")) {
+    if (!confirm("âš ï¸ Soft-delete this payment? It will be hidden but recoverable.")) {
         return;
     }
 
@@ -7718,7 +7722,7 @@ window.addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 💳 PAYMENT DISPLAY ENHANCEMENT
+// ðŸ’³ PAYMENT DISPLAY ENHANCEMENT
 // ==========================================
 // This function transforms the payment history display to add edit/delete buttons
 async function enhancePaymentDisplay() {
@@ -7767,14 +7771,14 @@ async function enhancePaymentDisplay() {
             <td style="max-width: 80px; overflow: hidden; text-overflow: ellipsis;">${p.notes || '-'}</td>
             <td style="text-align: center; white-space: nowrap;">
                 ${p.deleted_at
-            ? `<span style="color: #dc3545; font-size: 0.75em;">🗑️ Deleted</span>`
+            ? `<span style="color: #dc3545; font-size: 0.75em;">ðŸ—‘ï¸ Deleted</span>`
             : `<button onclick="openPaymentEditModal('${p.id}')" style="padding: 4px 8px; background: var(--brand-gold); color: black; border: none; border-radius: 3px; cursor: pointer; font-size: 0.75em;">Edit</button>
                        <button onclick="deletePaymentRecord('${p.id}')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 2px; font-size: 0.75em;">Del</button>`
         }
             </td>
         </tr>
-        ${p.edited_at ? `<tr style="background: #f0f0f0; font-size: 0.75em; color: #666;"><td colspan="5">✏️ Last edited ${formatDate(p.edited_at)} by ${p.edited_by ? p.edited_by.slice(-6) : 'Admin'}</td></tr>` : ''}
-        ${p.deleted_at ? `<tr style="background: #f0f0f0; font-size: 0.75em; color: #999;"><td colspan="5">🗑️ Soft-deleted ${formatDate(p.deleted_at)} by ${p.deleted_by ? p.deleted_by.slice(-6) : 'Admin'}</td></tr>` : ''}
+        ${p.edited_at ? `<tr style="background: #f0f0f0; font-size: 0.75em; color: #666;"><td colspan="5">âœï¸ Last edited ${formatDate(p.edited_at)} by ${p.edited_by ? p.edited_by.slice(-6) : 'Admin'}</td></tr>` : ''}
+        ${p.deleted_at ? `<tr style="background: #f0f0f0; font-size: 0.75em; color: #999;"><td colspan="5">ðŸ—‘ï¸ Soft-deleted ${formatDate(p.deleted_at)} by ${p.deleted_by ? p.deleted_by.slice(-6) : 'Admin'}</td></tr>` : ''}
     `).join('') : '<tr><td colspan="5" style="text-align:center; padding:15px;">No payments recorded yet.</td></tr>';
 }
 
@@ -7812,7 +7816,7 @@ loadAdminOrderDetails = async function () {
 };
 
 // ==========================================
-// 🚀 NEW ANALYTICS FEATURES
+// ðŸš€ NEW ANALYTICS FEATURES
 // ==========================================
 
 async function loadOrderVolumeChart(shopId) {
@@ -8234,7 +8238,7 @@ async function exportTransactionsCSV() {
 }
 
 // ==========================================
-// 🏠 CLIENT DATABASE SYSTEM
+// ðŸ  CLIENT DATABASE SYSTEM
 // ==========================================
 
 /**
@@ -8702,8 +8706,8 @@ window.saveNewClient = async function (e) {
         const { error } = await supabaseClient
             .from('clients')
             .insert([{
-                organization_id: USER_PROFILE.organization_id, // 👈 Multi-tenant safe
-                shop_id: USER_PROFILE.shop_id || null, // 👈 Enforced for isolated viewing
+                organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
+                shop_id: USER_PROFILE.shop_id || null, // ðŸ‘ˆ Enforced for isolated viewing
                 name,
                 phone,
                 notes,
@@ -9179,7 +9183,7 @@ window.generateCustomInvoice = async function () {
 };
 
 // ==========================================
-// 👔 OWNER MODULE - MANAGEMENT & SETUP
+// ðŸ‘” OWNER MODULE - MANAGEMENT & SETUP
 // ==========================================
 
 async function loadAdminManagementScreen() {
@@ -9258,13 +9262,13 @@ async function handleAddShopAndManager(e) {
 
         if (profileErr) throw profileErr;
 
-        msg.innerHTML = `<span style="color:green;">✅ Shop '${shopName}' and Manager '${mgrName}' created!</span>`;
+        msg.innerHTML = `<span style="color:green;">âœ… Shop '${shopName}' and Manager '${mgrName}' created!</span>`;
         document.getElementById('add-shop-form').reset();
         await loadAdminManagementScreen(); // Refresh
         await loadShopsForDropdown('shop-filter'); // Refresh global dropdowns if any
 
     } catch (error) {
-        msg.innerHTML = `<span style="color:red;">❌ Error: ${error.message}</span>`;
+        msg.innerHTML = `<span style="color:red;">âŒ Error: ${error.message}</span>`;
         logDebug("Create Shop/Manager Error", error, 'error');
     } finally {
         submitBtn.disabled = false;
@@ -9301,7 +9305,7 @@ async function handleAdminAddWorker(e) {
 
         if (error) throw error;
 
-        alert(`✅ Crew member ${workerName} assigned successfully!`);
+        alert(`âœ… Crew member ${workerName} assigned successfully!`);
         document.getElementById('admin-add-worker-form').reset();
         await loadAdminManagementScreen();
 
@@ -9444,10 +9448,10 @@ async function handlePasswordReset() {
         const { data, error } = await adminClient.auth.admin.updateUserById(userId, { password: newPass });
         if (error) throw error;
 
-        alert("✅ Password updated successfully! The manager can now log in with the new password.");
+        alert("âœ… Password updated successfully! The manager can now log in with the new password.");
         document.getElementById('password-reset-modal').style.display = 'none';
     } catch (error) {
-        alert("❌ Error: " + error.message);
+        alert("âŒ Error: " + error.message);
     }
 }
 
@@ -9456,7 +9460,7 @@ window.deleteWorker = async function(id, name) {
     try {
         const { error } = await supabaseClient.from('workers').delete().eq('id', id);
         if (error) throw error;
-        alert(`✅ Crew member ${name} removed.`);
+        alert(`âœ… Crew member ${name} removed.`);
         loadShopCommandCenter();
     } catch (err) {
         alert("Error removing crew member: " + err.message);
@@ -9682,15 +9686,15 @@ window.saveShopDetails = async function(e) {
         const { error: updateError } = await supabaseClient.from('shops').update(updatePayload).eq('id', shopId);
         if (updateError) throw updateError;
         
-        alert("✅ Shop configuration updated safely!");
+        alert("âœ… Shop configuration updated safely!");
         closeEditShopModal();
         loadShopCommandCenter();
         
     } catch (err) {
         if (err.message && (err.message.includes('column') || err.message.includes('does not exist') || err.message.includes('42703'))) {
-            alert("❌ Error: Missing columns in the database.\n\nPlease run the SQL query from the file 'add_shop_fields.sql' in your Supabase SQL Editor to add the required fields (working hours, specialization, website) to your database, then try again!");
+            alert("âŒ Error: Missing columns in the database.\n\nPlease run the SQL query from the file 'add_shop_fields.sql' in your Supabase SQL Editor to add the required fields (working hours, specialization, website) to your database, then try again!");
         } else {
-            alert("❌ Error saving shop config: " + err.message);
+            alert("âŒ Error saving shop config: " + err.message);
         }
         logDebug("Shop Update Error:", err, 'error');
     } finally {
@@ -9700,7 +9704,7 @@ window.saveShopDetails = async function(e) {
 }
 
 // ==========================================
-// 🛒 ORDER EXTRAS HELPERS
+// ðŸ›’ ORDER EXTRAS HELPERS
 // ==========================================
 
 async function loadExtrasForShop(shopId) {
@@ -9734,7 +9738,7 @@ async function loadExtrasForShop(shopId) {
                 <div style="flex:1;">
                     <strong style="color:#334155; font-size:0.9em;">${item.name}</strong>
                     <span style="font-size:0.75em; background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:4px; margin-left:6px;">${item.category}</span>
-                    <div style="font-size:0.8em; color:#64748b; margin-top:2px;">${formatCurrency(item.price)} each · ${item.stock_quantity} in stock</div>
+                    <div style="font-size:0.8em; color:#64748b; margin-top:2px;">${formatCurrency(item.price)} each Â· ${item.stock_quantity} in stock</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <input type="number" min="0" max="${item.stock_quantity}" value="0" class="extra-qty-input" data-item-id="${item.id}" data-item-name="${item.name}" data-item-price="${item.price}" data-max-stock="${item.stock_quantity}"
@@ -9762,7 +9766,7 @@ function updateExtrasSubtotal() {
 
         if (qty > 0) {
             listHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.95em; color:#334155;">
-                            <span>• ${input.dataset.itemName} (x${qty})</span>
+                            <span>â€¢ ${input.dataset.itemName} (x${qty})</span>
                             <span style="font-weight:600;">${formatCurrency(price * qty)}</span>
                          </div>`;
         }
@@ -9868,7 +9872,7 @@ async function saveOrderExtrasWithStock(orderId, shopId) {
 }
 
 // ==========================================
-// 📦 INVENTORY MANAGEMENT SYSTEM
+// ðŸ“¦ INVENTORY MANAGEMENT SYSTEM
 // ==========================================
 
 let ALL_INVENTORY = [];
@@ -9994,7 +9998,7 @@ async function addInventoryItem() {
     const msgEl = document.getElementById('inv-add-msg');
 
     if (!name || !shopId) {
-        if (msgEl) { msgEl.textContent = '❌ Please fill in name and select a shop.'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+        if (msgEl) { msgEl.textContent = 'âŒ Please fill in name and select a shop.'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
         return;
     }
 
@@ -10010,7 +10014,7 @@ async function addInventoryItem() {
 
         if (error) throw error;
 
-        if (msgEl) { msgEl.textContent = `✅ "${name}" added to inventory!`; msgEl.style.color = '#10b981'; msgEl.style.display = 'block'; }
+        if (msgEl) { msgEl.textContent = `âœ… "${name}" added to inventory!`; msgEl.style.color = '#10b981'; msgEl.style.display = 'block'; }
         
         // Reset form
         document.getElementById('inv-name').value = '';
@@ -10023,7 +10027,7 @@ async function addInventoryItem() {
         setTimeout(() => { if (msgEl) msgEl.style.display = 'none'; }, 3000);
 
     } catch (err) {
-        if (msgEl) { msgEl.textContent = '❌ Error: ' + err.message; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+        if (msgEl) { msgEl.textContent = 'âŒ Error: ' + err.message; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
     }
 }
 
@@ -10058,9 +10062,9 @@ async function saveInventoryEdit() {
 
         document.getElementById('inv-edit-modal').classList.remove('active');
         await loadInventoryScreen();
-        alert('✅ Item updated successfully!');
+        alert('âœ… Item updated successfully!');
     } catch (err) {
-        alert('❌ Error updating item: ' + err.message);
+        alert('âŒ Error updating item: ' + err.message);
     }
 }
 
@@ -10071,9 +10075,9 @@ async function deleteInventoryItem(itemId, itemName) {
         const { error } = await supabaseClient.from('inventory_items').delete().eq('id', itemId);
         if (error) throw error;
         await loadInventoryScreen();
-        alert(`✅ "${itemName}" has been deleted.`);
+        alert(`âœ… "${itemName}" has been deleted.`);
     } catch (err) {
-        alert('❌ Error deleting item: ' + err.message);
+        alert('âŒ Error deleting item: ' + err.message);
     }
 }
 
@@ -10103,9 +10107,9 @@ async function saveRestock() {
 
         document.getElementById('inv-restock-modal').classList.remove('active');
         await loadInventoryScreen();
-        alert(`✅ Restocked! ${item.name} now has ${newQty} units.`);
+        alert(`âœ… Restocked! ${item.name} now has ${newQty} units.`);
     } catch (err) {
-        alert('❌ Error restocking: ' + err.message);
+        alert('âŒ Error restocking: ' + err.message);
     }
 }
 
@@ -10203,3 +10207,4 @@ function hideMngModal() {
     const modal = document.getElementById('mng-modal');
     if (modal) modal.classList.remove('active');
 }
+
