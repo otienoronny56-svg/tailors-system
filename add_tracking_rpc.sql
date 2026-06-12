@@ -29,7 +29,7 @@ BEGIN
         o.garment_type,
         o.status,
         o.price,
-        o.amount_paid,
+        (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE order_id = o.id AND deleted_at IS NULL) AS amount_paid,
         o.due_date,
         o.created_at,
         o.updated_at
