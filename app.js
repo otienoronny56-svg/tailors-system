@@ -7514,29 +7514,7 @@ async function updateSidebarBranding(forcedName = null) {
 
     let logoHtml = mainTitle ? mainTitle.toUpperCase() : "&nbsp;";
     
-    // If the user is tied to a specific organization/shop, let's try to fetch its logo
-    if (USER_PROFILE && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
-        try {
-            // Priority: Shop logo (if they belong to a shop), else try to find any shop for their org
-            let fetchQuery = supabaseClient.from('shops').select('logo_url').eq('organization_id', USER_PROFILE.organization_id).not('logo_url', 'is', null).limit(1);
-            if (USER_PROFILE.shop_id) {
-                fetchQuery = supabaseClient.from('shops').select('logo_url').eq('id', USER_PROFILE.shop_id).single();
-            }
-            
-            const { data: logoData } = await fetchQuery;
-            let finalLogoUrl = null;
-            if (logoData) {
-                if (Array.isArray(logoData) && logoData.length > 0) finalLogoUrl = logoData[0].logo_url;
-                else if (!Array.isArray(logoData)) finalLogoUrl = logoData.logo_url;
-            }
 
-            if (finalLogoUrl) {
-                logoHtml = `<div style="display:flex; align-items:center; gap:10px;"><img src="${finalLogoUrl}" alt="Logo" style="height: 35px; width: auto; object-fit: contain; border-radius: 4px;"> <span style="font-size: 0.8em;">${logoHtml}</span></div>`;
-            }
-        } catch (e) {
-            console.warn("Could not fetch shop logo for sidebar", e);
-        }
-    }
 
     if (sidebarLogo) sidebarLogo.innerHTML = logoHtml;
     if (sidebarSub) sidebarSub.innerHTML = subTitle ? subTitle.toUpperCase() : "&nbsp;";
