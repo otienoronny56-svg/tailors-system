@@ -97,6 +97,7 @@
             padding: 20px;
             position: relative;
             overflow: hidden;
+            min-height: 0;
         }
 
         /* Abstract glowing orb in background */
@@ -126,7 +127,8 @@
             display: flex;
             flex-direction: column;
             z-index: 1;
-            max-height: 85vh; /* Responsive height constraint */
+            max-height: 100%;
+            min-height: 0;
             overflow: hidden; /* Hide outer scrollbar */
         }
 
@@ -134,6 +136,7 @@
             padding: 30px 30px 20px 30px;
             border-bottom: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.02);
+            flex-shrink: 0;
         }
 
         .order-title-group {
@@ -214,6 +217,7 @@
             padding: 30px;
             overflow-y: auto;
             flex: 1;
+            min-height: 0;
         }
 
         .card-body::-webkit-scrollbar {
