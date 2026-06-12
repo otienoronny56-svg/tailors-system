@@ -602,11 +602,17 @@
                         <div class="form-group" style="position: relative;">
                             <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Upload Shop Logo (Invoice / Header)</label>
                             <i class="fas fa-image" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="file" id="edit-shop-logo-file" accept="image/*" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                            <input type="file" id="edit-shop-logo-file" accept="image/*" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;" onchange="const f=this.files[0]; if(f){const p=document.getElementById('edit-shop-logo-preview'); p.src=URL.createObjectURL(f); p.style.display='block';}">
                             <div style="display: flex; gap: 15px; align-items: center; margin-top: 10px;">
                                 <img id="edit-shop-logo-preview" src="" style="display:none; max-height: 60px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1);">
-                                <small style="color: #8892b0;">Recommended: Transparent PNG, under 2MB.</small>
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
+                                    <button type="button" onclick="uploadShopLogoAction()" style="background: var(--brand-navy); border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 700;">
+                                        <i class="fas fa-upload"></i> Upload Logo
+                                    </button>
+                                    <small style="color: #8892b0;">Recommended: Transparent PNG, under 2MB.</small>
+                                </div>
                             </div>
+                            <div id="upload-logo-status" style="margin-top: 10px; font-size: 0.85em; font-weight: 600;"></div>
                         </div>
                     </div>
 
@@ -859,6 +865,54 @@
     <script src="mobile-nav.js"></script>
 
     <script>
+        async function uploadShopLogoAction() {
+            const fileInput = document.getElementById('edit-shop-logo-file');
+            const statusDiv = document.getElementById('upload-logo-status');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                statusDiv.textContent = "âš ï¸  Please select an image file first.";
+                statusDiv.style.color = "#f59e0b"; // warning yellow
+                return;
+            }
+
+            const shopId = document.getElementById('edit-shop-id').value;
+            if (!shopId) {
+                statusDiv.textContent = "â Œ Error: Could not determine shop ID.";
+                statusDiv.style.color = "#ef4444";
+                return;
+            }
+
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading logo...';
+            statusDiv.style.color = "#3b82f6";
+
+            try {
+                const fileExt = file.name.split('.').pop();
+                const filePath = `${shopId}_logo_${Date.now()}.${fileExt}`;
+
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('shop_logos')
+                    .upload(filePath, file, { upsert: true, cacheControl: '3600' });
+                if (uploadError) throw uploadError;
+
+                const { data } = supabaseClient.storage.from('shop_logos').getPublicUrl(filePath);
+
+                const { error: updateError } = await supabaseClient.from('shops').update({ logo_url: data.publicUrl }).eq('id', shopId);
+                if (updateError) throw updateError;
+
+                statusDiv.innerHTML = "âœ… Logo updated successfully! Please refresh to see changes across the CRM.";
+                statusDiv.style.color = "#10b981"; // success green
+                
+                // Update sidebar instantly if applicable
+                const sidebarLogo = document.querySelector('.sidebar-logo img');
+                if (sidebarLogo) sidebarLogo.src = data.publicUrl;
+
+            } catch (error) {
+                statusDiv.innerHTML = "â Œ Upload failed: " + error.message;
+                statusDiv.style.color = "#ef4444";
+            }
+        }
+
         async function uploadShopProfileImage() {
             const fileInput = document.getElementById('shop-profile-upload');
             const statusDiv = document.getElementById('upload-status');

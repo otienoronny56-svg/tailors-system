@@ -4690,8 +4690,8 @@ async function loadAdminOrderDetails() {
                         .then(({ data }) => { 
                             if (data) {
                                 if (document.getElementById('admin-detail-shop')) document.getElementById('admin-detail-shop').textContent = data.name; 
+                                const logoEl = document.getElementById('pdf-logo');
                                 if (data.logo_url) {
-                                    const logoEl = document.getElementById('pdf-logo');
                                     if (logoEl) {
                                         // Fetch as blob to avoid canvas CORS issues during PDF export
                                         fetch(data.logo_url)
@@ -4700,13 +4700,18 @@ async function loadAdminOrderDetails() {
                                                 const reader = new FileReader();
                                                 reader.onloadend = () => {
                                                     logoEl.src = reader.result;
+                                                    logoEl.style.display = 'block';
                                                 };
                                                 reader.readAsDataURL(blob);
                                             })
                                             .catch(() => {
                                                 logoEl.src = data.logo_url;
+                                                logoEl.style.display = 'block';
                                             });
                                     }
+                                } else if (logoEl) {
+                                    logoEl.style.display = 'none';
+                                    logoEl.src = '';
                                 }
                             }
                         });
@@ -4863,7 +4868,7 @@ function buildInvoiceDocument(options) {
         logoUrl = null
     } = options;
 
-    const logoAbsUrl = logoUrl || window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + (APP_CONFIG?.logoPath || 'logo.png');
+    const logoAbsUrl = logoUrl || null;
 
     const itemRows = items.map(item => `
         <tr>
@@ -4999,7 +5004,7 @@ function buildInvoiceDocument(options) {
 <div class="header">
   <div class="header-left">
     <div class="logo-row">
-      <div class="logo-cell"><img src="${logoAbsUrl}" alt="Logo" onerror="this.style.display='none'"></div>
+      <div class="logo-cell">${logoAbsUrl ? \`<img src="${logoAbsUrl}" alt="Logo" onerror="this.style.display='none'">\` : ''}</div>
       <div class="brand-cell">
         <div class="brand-name">${companyName}</div>
         <div class="brand-sub">${companySubtitle}</div>
@@ -7480,7 +7485,7 @@ async function updateSidebarBranding(forcedName = null) {
                         fallbackLink.classList.add('active');
                         const dropdownContent = fallbackLink.closest('.dropdown-content');
                         if (dropdownContent) {
-                            const dropdownContainer = dropdownContent.closest('.sidebar-dropdown');
+                            const dropdownContainer = fallbackLink.closest('.sidebar-dropdown');
                             if (dropdownContainer) {
                                 dropdownContainer.classList.add('open');
                             }
@@ -7507,7 +7512,33 @@ async function updateSidebarBranding(forcedName = null) {
         }
     }
 
-    if (sidebarLogo) sidebarLogo.innerHTML = mainTitle ? mainTitle.toUpperCase() : "&nbsp;";
+    let logoHtml = mainTitle ? mainTitle.toUpperCase() : "&nbsp;";
+    
+    // If the user is tied to a specific organization/shop, let's try to fetch its logo
+    if (USER_PROFILE && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
+        try {
+            // Priority: Shop logo (if they belong to a shop), else try to find any shop for their org
+            let fetchQuery = supabaseClient.from('shops').select('logo_url').eq('organization_id', USER_PROFILE.organization_id).not('logo_url', 'is', null).limit(1);
+            if (USER_PROFILE.shop_id) {
+                fetchQuery = supabaseClient.from('shops').select('logo_url').eq('id', USER_PROFILE.shop_id).single();
+            }
+            
+            const { data: logoData } = await fetchQuery;
+            let finalLogoUrl = null;
+            if (logoData) {
+                if (Array.isArray(logoData) && logoData.length > 0) finalLogoUrl = logoData[0].logo_url;
+                else if (!Array.isArray(logoData)) finalLogoUrl = logoData.logo_url;
+            }
+
+            if (finalLogoUrl) {
+                logoHtml = `<div style="display:flex; align-items:center; gap:10px;"><img src="${finalLogoUrl}" alt="Logo" style="height: 35px; width: auto; object-fit: contain; border-radius: 4px;"> <span style="font-size: 0.8em;">${logoHtml}</span></div>`;
+            }
+        } catch (e) {
+            console.warn("Could not fetch shop logo for sidebar", e);
+        }
+    }
+
+    if (sidebarLogo) sidebarLogo.innerHTML = logoHtml;
     if (sidebarSub) sidebarSub.innerHTML = subTitle ? subTitle.toUpperCase() : "&nbsp;";
 }
 
