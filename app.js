@@ -3091,6 +3091,7 @@ async function loadAdminOrders(mode = 'current') {
                         <button class="btn-compact" title="View Order" onclick="openAdminOrderView('${order.id}')"><i class="fas fa-eye"></i></button>
                         <button class="btn-compact" title="Edit Order" style="background:var(--brand-gold); color:black;" onclick="window.location.href='admin-order-details.html?id=${order.id}'"><i class="fas fa-edit"></i></button>
                         <button class="btn-compact" title="Generate Receipt" style="background:var(--profit-green);" onclick="generateAndShareReceipt('${order.id}')"><i class="fas fa-receipt"></i></button>
+                        <button class="btn-compact" title="Share Tracking Link" style="background:#3b82f6;" onclick="shareTrackingLink('${order.id}', '${order.customer_phone || ''}')"><i class="fas fa-location-arrow"></i></button>
                     </td>
                 </tr>
             `;
@@ -3107,6 +3108,31 @@ async function loadAdminOrders(mode = 'current') {
         }
     }
 }
+
+// [NEW] Tracking Link Sharing Function
+function shareTrackingLink(orderId, phone) {
+    const trackingUrl = `${window.location.origin}/track.html?id=${orderId}`;
+    const text = `Hi! You can track the live status of your custom tailoring order here:\n\n${trackingUrl}`;
+    
+    // Attempt to open WhatsApp if phone exists
+    if (phone && phone.trim() !== '') {
+        // Clean phone number
+        let cleanPhone = phone.replace(/\\D/g, '');
+        if (cleanPhone.startsWith('0')) cleanPhone = '254' + cleanPhone.substring(1);
+        if (cleanPhone.length >= 10) {
+            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+            return;
+        }
+    }
+    
+    // Fallback: Copy to clipboard
+    navigator.clipboard.writeText(text).then(() => {
+        alert("Tracking link copied to clipboard! You can paste it to the client.");
+    }).catch(err => {
+        prompt("Copy this tracking link:", trackingUrl);
+    });
+}
+
 
 // [NEW] Debounce Helper for Search
 let adminSearchTimeout = null;
