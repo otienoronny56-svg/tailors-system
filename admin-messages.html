@@ -438,6 +438,10 @@
                 return;
             }
 
+            // Mark inbox as viewed
+            localStorage.setItem('last_inbox_view_' + USER_PROFILE.id, Date.now().toString());
+
+
             try {
                 // Fetch all inquiries sent to any shops owned by this organization
                 const { data: shops } = await supabaseClient
@@ -1016,6 +1020,9 @@
                                 newMsg.synced = true;
                                 syncSubmissionToClientsTable(newMsg);
                             }
+
+                            // Keep inbox marked as viewed while we are actively here
+                            localStorage.setItem('last_inbox_view_' + USER_PROFILE.id, Date.now().toString());
 
                             // Real-time Unlock: If clientUid was previously null, re-resolve and unlock tailor input panel!
                             if (!activeThread.clientUid && newMsg.sender_id && newMsg.sender_id !== USER_PROFILE.id) {

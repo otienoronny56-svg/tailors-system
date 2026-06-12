@@ -632,6 +632,12 @@ async function checkSession() {
 
         // Final UI Updates
         updateSidebarBranding();
+        
+        // Start unread messages polling
+        checkUnreadMessages();
+        if (!window._inboxPollInterval) {
+            window._inboxPollInterval = setInterval(checkUnreadMessages, 60000); // Check every minute
+        }
 
     } catch (error) {
         logDebug("Session check error:", error, 'error');
