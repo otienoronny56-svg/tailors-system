@@ -2860,8 +2860,7 @@ async function finalizeOrder(orderId, hasDebt) {
         const { error } = await supabaseClient
             .from('orders')
             .update({
-                status: 6,
-                updated_at: new Date().toISOString()
+                status: 6
             })
             .eq('id', orderId);
 
@@ -3286,8 +3285,7 @@ async function updateAdminStatus(orderId) {
         const { error } = await supabaseClient
             .from('orders')
             .update({
-                status: Number(statusCode),
-                updated_at: new Date().toISOString()
+                status: Number(statusCode)
             })
             .eq('id', orderId);
 
@@ -4544,8 +4542,7 @@ window.updateStatus = async function (orderId) {
         const { error } = await supabaseClient
             .from('orders')
             .update({
-                status: Number(statusCode),
-                updated_at: new Date().toISOString()
+                status: Number(statusCode)
             })
             .eq('id', orderId);
 
@@ -7240,8 +7237,7 @@ window.updateStatus = async function (orderId) {
         const { error } = await supabaseClient
             .from('orders')
             .update({
-                status: Number(statusCode),
-                updated_at: new Date().toISOString()
+                status: Number(statusCode)
             })
             .eq('id', orderId);
 
