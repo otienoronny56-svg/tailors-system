@@ -3131,16 +3131,14 @@ async function openAdminOrderView(orderId) {
                     Order #${shortId} - ${order.customer_name}
                 </h2>
                 
-                <div style="margin-bottom: 20px;">
-                    <p><strong>Shop:</strong> ${shopName}</p>
-                    <p><strong>Garment:</strong> ${order.garment_type}</p>
-                    <p><strong>Worker:</strong> ${workerName}</p>
-                    <p><strong>Due Date:</strong> ${formatDate(order.due_date)}</p>
-                    <p><strong>Status:</strong> <span class="status-indicator status-${order.status}">
-                        ${STATUS_MAP[order.status] || `Status ${order.status}`}
-                    </span></p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 20px; margin-bottom:16px; font-size:0.9em;">
+                    <p style="margin:4px 0;"><strong>Shop:</strong> ${shopName}</p>
+                    <p style="margin:4px 0;"><strong>Garment:</strong> ${order.garment_type}</p>
+                    <p style="margin:4px 0;"><strong>Worker:</strong> ${workerName}</p>
+                    <p style="margin:4px 0;"><strong>Due Date:</strong> ${formatDate(order.due_date)}</p>
+                    <p style="margin:4px 0; grid-column:1/-1;"><strong>Status:</strong> <span class="status-indicator status-${order.status}">${STATUS_MAP[order.status] || 'Unknown'}</span></p>
                 </div>
-                
+
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                     <div style="flex: 1; background: #000; color: white; padding: 15px; border-radius: 5px; text-align: center;">
                         <small>Total Price</small>
@@ -3164,95 +3162,56 @@ async function openAdminOrderView(orderId) {
                 
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                     <button onclick="window.location.href='admin-order-details.html?id=${order.id}'" 
-                            style="flex: 1; background: #000; color: #d4af37; padding: 12px; border-radius: 4px; border: none; cursor: pointer;">
-                        âœï¸ Edit Order
+                            style="flex: 1; background: #000; color: #d4af37; padding: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <i class="fas fa-pen"></i> Edit Order
                     </button>
                     <button onclick="generateAndShareReceipt('${order.id}')" 
-                            style="flex: 1; background: #28a745; color: white; padding: 12px; border-radius: 4px; border: none; cursor: pointer;">
-                        ðŸ“„ Receipt
+                            style="flex: 1; background: #28a745; color: white; padding: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <i class="fas fa-receipt"></i> Receipt
                     </button>
                     <button onclick="downloadInvoicePDF('${order.id}')" 
-                            style="flex: 1; background: #3b82f6; color: white; padding: 12px; border-radius: 4px; border: none; cursor: pointer;">
-                        ðŸ“„ Invoice
+                            style="flex: 1; background: #3b82f6; color: white; padding: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <i class="fas fa-file-invoice"></i> Invoice
                     </button>
                 </div>
-                
-                <!-- [NEW] Accessories List View -->
                 ${accessories && accessories.length > 0 ? `
-                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
-                    <h3 style="color: #d4af37;"><i class="fas fa-shopping-bag"></i> Accessories / Extras</h3>
-                    <ul style="padding-left: 20px; margin-bottom: 10px;">
-                        ${accessories.map(a => `<li><strong>${a.name || a.item_name || 'Accessory'}</strong> (Qty: ${a.quantity})${parseFloat(a.price) > 0 ? ` - Ksh ${parseFloat(a.price).toLocaleString()}` : ''}</li>`).join('')}
+                <div style="margin-bottom:15px; background:#f8fafc; border-radius:6px; padding:12px; border:1px solid #e2e8f0;">
+                    <h4 style="margin:0 0 8px 0; color:#d4af37; font-size:0.9em;"><i class="fas fa-shopping-bag"></i> Accessories</h4>
+                    <ul style="padding-left:18px; margin:0;">
+                        ${accessories.map(a => `<li style="font-size:0.85em;">${a.name || a.item_name || 'Accessory'} x${a.quantity}${parseFloat(a.price) > 0 ? ' - Ksh ' + parseFloat(a.price).toLocaleString() : ''}</li>`).join('')}
                     </ul>
-                </div>
-                ` : ''}
+                </div>` : ''}
 
-                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
-                    <h3>Payment History</h3>
-                    ${payments && payments.length > 0 ?
-                `<div style="max-height: 200px; overflow-y: auto;">
-                            ${payments.map(p => {
-                    const isDeleted = p.deleted_at;
-                    const isEdited = p.edited_at;
-                    const rowStyle = isDeleted
-                        ? 'background: #ffebee; opacity: 0.7; text-decoration: line-through;'
-                        : isEdited
-                            ? 'background: #fff3e0;'
-                            : '';
-                    let html = '<div style="padding: 10px; border-bottom: 1px solid #eee; ' + rowStyle + '">';
-                    html += '<div style="display: flex; justify-content: space-between; align-items: start;">';
-                    html += '<div>';
-                    html += '<p style="margin: 0 0 5px 0; font-weight: bold;">';
-                    html += formatDate(p.recorded_at);
-                    html += isEdited ? ' âœï¸' : '';
-                    html += isDeleted ? ' ðŸ—‘ï¸' : '';
-                    html += '</p>';
-                    html += '<p style="margin: 0 0 5px 0; color: #666; font-size: 0.85em;">';
-                    html += '<strong style="color: #28a745;">Ksh ' + p.amount.toLocaleString() + '</strong>';
-                    html += p.payment_method ? ' â€¢ ' + p.payment_method : '';
-                    html += '</p>';
-                    html += '<p style="margin: 0; color: #666; font-size: 0.8em;">';
-                    html += 'Recorded: ' + (p.manager_id ? p.manager_id.slice(-6) : 'System');
-                    html += '</p>';
-                    html += '</div></div>';
-                    if (isEdited) {
-                        html += '<p style="margin: 8px 0 0 0; padding-top: 8px; border-top: 1px solid #ffd54f; font-size: 0.85em; color: #f57c00;">';
-                        html += 'âœï¸ Last edited: ' + formatDate(p.edited_at);
-                        html += '</p>';
-                    }
-                    if (isDeleted) {
-                        html += '<p style="margin: 8px 0 0 0; padding-top: 8px; border-top: 1px solid #ef5350; font-size: 0.85em; color: #d32f2f;">';
-                        html += 'ðŸ—‘ï¸ Deleted: ' + formatDate(p.deleted_at);
-                        html += '</p>';
-                    }
-                    html += '</div>';
-                    return html;
-                }).join('')}
-                        </div>`
-                : '<p style="color: #666; text-align: center;">No payments recorded</p>'
-            }
+                <div style="border-top:1px solid #eee; padding-top:12px; margin-bottom:12px;">
+                    <h4 style="margin:0 0 8px 0; font-size:0.9em;"><i class="fas fa-history" style="color:#d4af37;"></i> Payment History</h4>
+                    ${payments && payments.filter(p => !p.deleted_at).length > 0 ?
+                        payments.filter(p => !p.deleted_at).map(p =>
+                            `<div style="padding:6px 10px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; font-size:0.82em;">
+                                <span style="color:#64748b;">${formatDate(p.recorded_at)}${p.edited_at ? ' <i class="fas fa-pen" style="color:#f59e0b;font-size:0.7em;"></i>' : ''}</span>
+                                <span style="font-weight:700; color:#16a34a;">Ksh ${p.amount.toLocaleString()}</span>
+                                <span style="color:#94a3b8;">${p.payment_method || 'cash'}</span>
+                            </div>`
+                        ).join('')
+                    : '<p style="color:#94a3b8; text-align:center; font-size:0.82em; margin:6px 0;">No payments recorded</p>'}
                 </div>
-                
-                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
-                    <h4>Quick Actions</h4>
-                    <div style="display: flex; gap: 10px;">
-                        ${balance > 0 ?
-                `<button onclick="quickPay('${order.id}', ${balance})" 
-                                    style="flex: 1; background: #ffc107; color: black; padding: 10px; border-radius: 4px; border: none; cursor: pointer;">
-                                ðŸ’° Record Full Payment (Ksh ${balance.toLocaleString()})
-                            </button>`
-                : '<button disabled style="flex: 1; background: #ccc; padding: 10px; border-radius: 4px; border: none;">âœ… Fully Paid</button>'
-            }
-                        <button onclick="updateAdminStatus('${order.id}')" 
-                                style="flex: 1; background: #17a2b8; color: white; padding: 10px; border-radius: 4px; border: none; cursor: pointer;">
-                            ðŸ”„ Update Status
-                        </button>
-                    </div>
+
+                <div style="display:flex; gap:10px;">
+                    ${balance > 0 ?
+                        `<button onclick="quickPay('${order.id}', ${balance})"
+                                style="flex:1; background:#ffc107; color:black; padding:10px; border-radius:4px; border:none; cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
+                            <i class="fas fa-money-bill-wave"></i> Pay Ksh ${balance.toLocaleString()}
+                        </button>`
+                    : '<button disabled style="flex:1; background:#d1fae5; color:#065f46; padding:10px; border-radius:4px; border:1px solid #6ee7b7; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;"><i class="fas fa-check-circle"></i> Fully Paid</button>'
+                    }
+                    <button onclick="updateAdminStatus('${order.id}')"
+                            style="flex:1; background:#17a2b8; color:white; padding:10px; border-radius:4px; border:none; cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <i class="fas fa-sync-alt"></i> Update Status
+                    </button>
                 </div>
             </div>
         `;
 
-        // Show modal
+        // Show modal — centered, fits viewport, no scroll
         let modal = document.getElementById('order-modal');
         if (!modal) {
             modal = document.createElement('div');
@@ -3262,8 +3221,10 @@ async function openAdminOrderView(orderId) {
             document.body.appendChild(modal);
         }
 
-        modal.querySelector('.modal-content').innerHTML = modalContent;
-        modal.style.display = 'flex';
+        const mc = modal.querySelector('.modal-content');
+        mc.style.cssText = 'width:600px; max-width:95vw; max-height:90vh; overflow:hidden; border-radius:12px; background:white; box-shadow:0 20px 60px rgba(0,0,0,0.3); position:relative;';
+        mc.innerHTML = modalContent;
+        modal.style.cssText = 'display:flex; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center;';
 
     } catch (error) {
         logDebug("Error opening admin order view:", error, 'error');
