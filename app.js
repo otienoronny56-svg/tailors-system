@@ -4692,7 +4692,21 @@ async function loadAdminOrderDetails() {
                                 if (document.getElementById('admin-detail-shop')) document.getElementById('admin-detail-shop').textContent = data.name; 
                                 if (data.logo_url) {
                                     const logoEl = document.getElementById('pdf-logo');
-                                    if (logoEl) logoEl.src = data.logo_url;
+                                    if (logoEl) {
+                                        // Fetch as blob to avoid canvas CORS issues during PDF export
+                                        fetch(data.logo_url)
+                                            .then(res => res.blob())
+                                            .then(blob => {
+                                                const reader = new FileReader();
+                                                reader.onloadend = () => {
+                                                    logoEl.src = reader.result;
+                                                };
+                                                reader.readAsDataURL(blob);
+                                            })
+                                            .catch(() => {
+                                                logoEl.src = data.logo_url;
+                                            });
+                                    }
                                 }
                             }
                         });
