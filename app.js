@@ -8615,8 +8615,10 @@ window.saveClientInfo = async function (clientId) {
 window.openNewClientModal = function () {
     const modal = document.getElementById('new-client-modal');
     if (modal) {
-        document.getElementById('new-client-form').reset();
-        document.getElementById('new-client-measurements-container').innerHTML = '';
+        const form = document.getElementById('new-client-form');
+        if (form) form.reset();
+        const measContainer = document.getElementById('new-client-measurements-container');
+        if (measContainer) measContainer.innerHTML = '';
         modal.style.display = 'block';
     }
 };

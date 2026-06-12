@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -29,7 +29,7 @@
                 
                 <div class="sidebar-dropdown">
                     <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
-                        <span><i class="fas fa-address-book" style="margin-right: 8px;"></i> Clients & Inbox</span>
+                        <span><i class="fas fa-address-book" style="margin-right: 8px;"></i> Clients &amp; Inbox</span>
                         <i class="fas fa-chevron-down dropdown-arrow"></i>
                     </button>
                     <div class="dropdown-content">
@@ -40,7 +40,7 @@
 
                 <div class="sidebar-dropdown">
                     <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
-                        <span><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Products & Stock</span>
+                        <span><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Products &amp; Stock</span>
                         <i class="fas fa-chevron-down dropdown-arrow"></i>
                     </button>
                     <div class="dropdown-content">
@@ -51,12 +51,12 @@
 
                 <div class="sidebar-dropdown">
                     <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
-                        <span><i class="fas fa-wallet" style="margin-right: 8px;"></i> Finance & Analytics</span>
+                        <span><i class="fas fa-wallet" style="margin-right: 8px;"></i> Finance &amp; Analytics</span>
                         <i class="fas fa-chevron-down dropdown-arrow"></i>
                     </button>
                     <div class="dropdown-content">
                         <a href="financial-overview.html" id="nav-finance"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial Overview</a>
-                        <a href="admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics & AI</a>
+                        <a href="admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics &amp; AI</a>
                         <a href="admin-transactions.html" id="nav-transactions"><i class="fas fa-list-ul" style="margin-right: 8px;"></i> Transactions</a>
                         <a href="admin-expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
                     </div>
@@ -85,10 +85,8 @@
         <main class="main-content">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                 <div>
-                    <h1 style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">Client
-                        Management (Global)</h1>
-                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">View and manage clients from all shops.
-                    </p>
+                    <h1 style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">Client Management (Global)</h1>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">View and manage clients from all shops.</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button onclick="openNewClientModal()"
@@ -146,40 +144,76 @@
     <div id="new-client-modal" class="modal"
         style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
         <div class="modal-content"
-            style="background-color: white; margin: 5% auto; padding: 0; border-radius: 12px; width: 600px; max-width: 95%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; overflow: hidden; display: flex; flex-direction: column; max-height: 85vh;">
-            <div
-                style="padding: 20px 30px; border-bottom: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fff;">
-                <h2 style="margin: 0; color: var(--brand-navy); font-size: 1.5em;"><i class="fas fa-user-plus"
-                        style="color: var(--brand-gold);"></i> Add New Client</h2>
+            style="background-color: white; margin: 5% auto; padding: 0; border-radius: 12px; width: 620px; max-width: 95%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+
+            <!-- Modal Header -->
+            <div style="padding: 20px 30px; border-bottom: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fff;">
+                <h2 style="margin: 0; color: var(--brand-navy); font-size: 1.5em;">
+                    <i class="fas fa-user-plus" style="color: var(--brand-gold);"></i> Add New Client
+                </h2>
                 <span class="close" onclick="closeNewClientModal()"
                     style="font-size: 28px; font-weight: bold; color: #94a3b8; cursor: pointer;">&times;</span>
             </div>
 
             <form id="new-client-form" onsubmit="saveNewClient(event)"
                 style="flex: 1; overflow-y: auto; padding: 30px;">
+
+                <!-- Name + Phone -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div>
-                        <label
-                            style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Full
-                            Name *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Full Name *</label>
                         <input type="text" id="new-client-name" required placeholder="e.g. John Doe"
                             style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box;">
                     </div>
                     <div>
-                        <label
-                            style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Phone
-                            Number *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Phone Number *</label>
                         <input type="tel" id="new-client-phone" required placeholder="e.g. 0712345678"
                             style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box;">
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 10px; padding-bottom: 20px;">
+                <!-- Garment type for measurements -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">
+                        Initial Garment Type
+                        <span style="color:#94a3b8; font-weight:400;">(optional — to capture first measurements)</span>
+                    </label>
+                    <select id="new-client-garment-type" onchange="generateNewClientMeasurementFields()"
+                        style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; background: white;">
+                        <option value="">-- Skip measurements for now --</option>
+                        <option value="Suit">Suit</option>
+                        <option value="Shirt">Shirt</option>
+                        <option value="Trouser">Trouser</option>
+                        <option value="Dress">Dress</option>
+                        <option value="Skirt">Skirt</option>
+                        <option value="Blouse">Blouse</option>
+                        <option value="Coat">Coat</option>
+                        <option value="Half Coat">Half Coat</option>
+                        <option value="Kanzu">Kanzu</option>
+                        <option value="Buibui">Buibui</option>
+                    </select>
+                </div>
+
+                <!-- Dynamic measurement fields injected by JS -->
+                <div id="new-client-measurements-container"></div>
+
+                <!-- Notes -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">
+                        Notes <span style="color:#94a3b8; font-weight:400;">(optional)</span>
+                    </label>
+                    <textarea id="new-client-notes" rows="2" placeholder="Any preferences or special instructions..."
+                        style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; resize: vertical;"></textarea>
+                </div>
+
+                <!-- Actions -->
+                <div style="display: flex; gap: 10px; padding-bottom: 10px;">
                     <button type="button" onclick="closeNewClientModal()"
                         style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancel</button>
                     <button type="submit"
-                        style="flex: 2; background: var(--brand-navy); color: var(--brand-gold); border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">Save
-                        Client</button>
+                        style="flex: 2; background: var(--brand-navy); color: var(--brand-gold); border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fas fa-user-plus"></i> Save Client
+                    </button>
                 </div>
             </form>
         </div>
@@ -208,15 +242,15 @@
             <span>Setup</span>
         </a>
     </nav>
+
     <script src="config.js"></script>
     <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof initApp === 'function') initApp();
-            // loadClients();
         });
     </script>
-    <script src="mobile-nav.js"></script>`n</body>
+    <script src="mobile-nav.js"></script>
+</body>
 
 </html>
-
