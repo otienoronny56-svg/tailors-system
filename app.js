@@ -5142,12 +5142,6 @@ window.downloadInvoicePDF = async function (orderId) {
         else return alert("Order ID not found");
     }
     try {
-        const payMethod = document.getElementById('invoice-payment-method')?.value;
-        let customPaybill, customAccount;
-        if (payMethod === 'custom') {
-            customPaybill = document.getElementById('custom-paybill')?.value;
-            customAccount = document.getElementById('custom-account')?.value;
-        }
 
         const [{ data: order }, { data: payments }, { data: accessories }] = await Promise.all([
             supabaseClient.from('orders').select('*').eq('id', orderId).single(),
@@ -5211,8 +5205,8 @@ window.downloadInvoicePDF = async function (orderId) {
                 balance: Math.max(0, balance) 
             },
             showPaymentDetails: true,
-            paybill: customPaybill || shop.paybill_number || APP_CONFIG?.billing?.paybill,
-            account: customAccount || shop.paybill_account || APP_CONFIG?.billing?.account,
+            paybill: shop.paybill_number || APP_CONFIG?.billing?.paybill,
+            account: shop.paybill_account || APP_CONFIG?.billing?.account,
             accountName: shop.name || APP_CONFIG?.billing?.accountName
         });
 
