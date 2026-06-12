@@ -39,6 +39,46 @@
             font-size: 0.8em;
             font-weight: 600;
         }
+        /* Featured & Views badges */
+        .btn-feature {
+            background: transparent;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.2s;
+            color: #94a3b8;
+        }
+        .btn-feature:hover { border-color: #D4AF37; transform: scale(1.1); }
+        .btn-feature.is-featured {
+            background: #fffbeb;
+            border-color: #D4AF37;
+            color: #D4AF37;
+            box-shadow: 0 0 8px rgba(212,175,55,0.25);
+        }
+        .badge-views {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.78em;
+            font-weight: 600;
+        }
+        .score-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: linear-gradient(135deg, #0a192f, #112240);
+            color: #D4AF37;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 0.78em;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -222,13 +262,16 @@
                                 <th>Category</th>
                                 <th>Price</th>
                                 <th>Shop</th>
+                                <th style="text-align:center;" title="Showcase score based on completeness, views & freshness">Score</th>
+                                <th style="text-align:center;">Views</th>
+                                <th style="text-align:center;" title="Pin to homepage showcase">⭐ Featured</th>
                                 <th>Status</th>
                                 <th style="text-align: center;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="listings-table-body">
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">Loading published catalog...</td>
+                                <td colspan="11" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">Loading published catalog...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -294,7 +337,7 @@
                 console.error("Session load timed out or USER_PROFILE is missing.");
                 const tbody = document.getElementById('listings-table-body');
                 if (tbody) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #ef4444;">
+                    tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 40px; color: #ef4444;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 2em; margin-bottom: 10px; display:block;"></i>
                         Error: Session load timed out. Please refresh the page.
                     </td></tr>`;
@@ -351,12 +394,31 @@
                 console.error("Error loading listings screen:", err);
                 const tbody = document.getElementById('listings-table-body');
                 if (tbody) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #ef4444;">
+                    tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 40px; color: #ef4444;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 2em; margin-bottom: 10px; display:block;"></i>
-                        Error: ${err.message}. Please make sure database migration marketplace_schema.sql has been run.
+                        Error: ${err.message}. Please run add_showcase_ranking.sql in Supabase first.
                     </td></tr>`;
                 }
             }
+        }
+
+        // Compute showcase score client-side (mirrors the ranking logic in index.html)
+        function computeScore(list) {
+            const hasImage = !!(list.image_urls && JSON.parse(list.image_urls || '[]').length > 0);
+            const hasPrice = list.price != null;
+            const hasDesc = !!(list.description && list.description.length > 20);
+            const hasCategory = !!list.category;
+            const views = list.views || 0;
+            const ageMonths = (Date.now() - new Date(list.created_at)) / (1000 * 60 * 60 * 24 * 30);
+            const freshnessScore = Math.max(0, 10 - ageMonths * 1.5);
+            return Math.round(
+                (hasImage ? 40 : 0) +
+                (hasPrice ? 20 : 0) +
+                (hasDesc ? 15 : 0) +
+                (hasCategory ? 5 : 0) +
+                Math.min(views * 0.5, 20) +
+                freshnessScore
+            );
         }
 
         function renderListingsTable() {
@@ -364,7 +426,7 @@
             if (!tbody) return;
 
             if (listings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">
                     No listings found. Add your first marketplace listing above!
                 </td></tr>`;
                 return;
@@ -373,21 +435,37 @@
             const shopMap = {};
             shops.forEach(s => shopMap[s.id] = s.name);
 
-            tbody.innerHTML = listings.map(list => {
+            // Sort by: featured first, then score descending
+            const sorted = [...listings].sort((a, b) => {
+                if (b.is_featured !== a.is_featured) return (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0);
+                return computeScore(b) - computeScore(a);
+            });
+
+            tbody.innerHTML = sorted.map(list => {
                 const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || 'https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=60';
                 const statusBadge = list.status === 'active' ? '<span class="badge-active">Active</span>' : '<span class="badge-archived">Archived</span>';
                 const statusBtnText = list.status === 'active' ? 'Archive' : 'Activate';
                 const statusBtnIcon = list.status === 'active' ? 'fa-eye-slash' : 'fa-eye';
+                const score = computeScore(list);
+                const isFeatured = !!list.is_featured;
+                const views = list.views || 0;
 
                 return `
-                    <tr>
+                    <tr style="${isFeatured ? 'background: #fffdf0;' : ''}">
                         <td><img src="${imageUrl}" class="listing-img-thumbnail" alt="thumbnail"></td>
-                        <td><strong>${list.title}</strong></td>
-                        <td>${list.category}</td>
-                        <td>Ksh ${parseFloat(list.price).toLocaleString()}</td>
+                        <td><strong>${list.title}</strong>${isFeatured ? ' <span style="color:#D4AF37;font-size:0.8em;">★ Pinned</span>' : ''}</td>
+                        <td>${list.category || '—'}</td>
+                        <td>Ksh ${parseFloat(list.price || 0).toLocaleString()}</td>
                         <td>${shopMap[list.shop_id] || 'Unknown Shop'}</td>
+                        <td style="text-align:center;"><span class="score-pill"><i class="fas fa-bolt" style="font-size:0.7em;"></i> ${score}</span></td>
+                        <td style="text-align:center;"><span class="badge-views"><i class="fas fa-eye"></i> ${views}</span></td>
+                        <td style="text-align:center;">
+                            <button onclick="toggleFeatured('${list.id}', ${isFeatured})" class="btn-feature ${isFeatured ? 'is-featured' : ''}" title="${isFeatured ? 'Remove from homepage showcase' : 'Pin to homepage showcase'}">
+                                ${isFeatured ? '★' : '☆'}
+                            </button>
+                        </td>
                         <td>${statusBadge}</td>
-                        <td style="text-align: center;">
+                        <td style="text-align: center; white-space:nowrap;">
                             <button onclick="openEditModal('${list.id}')" class="small-btn" style="background: transparent; border: 1px solid #3b82f6; color: #3b82f6; margin-right: 5px;" title="Edit details">
                                 <i class="fas fa-pen"></i> Edit
                             </button>
@@ -463,6 +541,25 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish Design';
+            }
+        }
+
+        async function toggleFeatured(id, currentFeatured) {
+            const nextFeatured = !currentFeatured;
+            try {
+                const { error } = await supabaseClient
+                    .from('marketplace_listings')
+                    .update({ is_featured: nextFeatured })
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                // Optimistic update in local array
+                const idx = listings.findIndex(l => l.id === id);
+                if (idx !== -1) listings[idx].is_featured = nextFeatured;
+                renderListingsTable();
+            } catch (err) {
+                alert("Error updating featured status: " + err.message + "\n\nMake sure you've run add_showcase_ranking.sql in Supabase.");
             }
         }
 

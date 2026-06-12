@@ -1810,9 +1810,35 @@
 
         async function initMarketplace() {
             try {
+                // Smart ranking: featured first, then by views desc, then by completeness
+                // Columns is_featured & views added via add_showcase_ranking.sql
                 const { data, error } = await supabaseClient
-                    .from('marketplace_listings').select('*').eq('status', 'active').limit(6);
-                allListings = (!error && data && data.length > 0) ? data : getMockListings();
+                    .from('marketplace_listings')
+                    .select('*, shops(name, profile_image)')
+                    .eq('status', 'active')
+                    .order('is_featured', { ascending: false })
+                    .order('views', { ascending: false })
+                    .order('created_at', { ascending: false })
+                    .limit(6);
+
+                if (!error && data && data.length > 0) {
+                    // Client-side quality sort as tiebreaker
+                    data.sort((a, b) => {
+                        // Featured always first
+                        const featDiff = (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0);
+                        if (featDiff !== 0) return featDiff;
+                        // Then views
+                        const viewDiff = (b.views || 0) - (a.views || 0);
+                        if (viewDiff !== 0) return viewDiff;
+                        // Then listing completeness (has desc > 20 chars)
+                        const aDesc = !!(a.description && a.description.length > 20);
+                        const bDesc = !!(b.description && b.description.length > 20);
+                        return (bDesc ? 1 : 0) - (aDesc ? 1 : 0);
+                    });
+                    allListings = data;
+                } else {
+                    allListings = getMockListings();
+                }
             } catch { allListings = getMockListings(); }
             renderTeaserListings(allListings);
         }
@@ -1827,8 +1853,13 @@
             container.innerHTML = listings.map(list => {
                 const imgUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url
                     || 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=400';
+                const isFeatured = !!list.is_featured;
+                const views = list.views || 0;
+                // Inline score for tooltip display
+                const hasDesc = !!(list.description && list.description.length > 20);
                 return `
-                <div class="listing-card">
+                <div class="listing-card" style="cursor:pointer; position:relative;" onclick="trackListingView('${list.id || ''}', '${linkTarget}')">
+                    ${isFeatured ? `<div style="position:absolute;top:10px;right:10px;z-index:2;background:#D4AF37;color:#0a192f;border-radius:20px;padding:3px 10px;font-size:0.72em;font-weight:800;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(212,175,55,0.4);">&#9733; FEATURED</div>` : ''}
                     <div class="listing-img-wrap">
                         <div class="listing-img-blur" style="background-image:url('${imgUrl}')"></div>
                         <div class="listing-img" style="background-image:url('${imgUrl}')"></div>
@@ -1839,11 +1870,23 @@
                         <div class="listing-desc">${list.description || 'Crafted with premium materials to your exact specifications.'}</div>
                         <div class="listing-footer">
                             <span class="listing-price">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
-                            <a href="${linkTarget}" class="btn-inquire">${actionText} <i class="fas fa-chevron-right"></i></a>
+                            <span style="font-size:0.75em;color:#94a3b8;"><i class="fas fa-eye" style="margin-right:3px;"></i>${views}</span>
+                            <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation();">${actionText} <i class="fas fa-chevron-right"></i></a>
                         </div>
                     </div>
                 </div>`;
             }).join('');
+        }
+
+        // Track a listing card click — increments view counter via DB function
+        async function trackListingView(listingId, fallbackUrl) {
+            if (listingId && supabaseClient && !listingId.startsWith('mock')) {
+                try {
+                    await supabaseClient.rpc('increment_listing_views', { listing_id: listingId });
+                } catch (e) { /* silent — don't block navigation */ }
+            }
+            // Navigate to the action page after tracking
+            setTimeout(() => window.location.href = fallbackUrl, 120);
         }
 
         function getMockListings() {
