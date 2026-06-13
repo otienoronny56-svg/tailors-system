@@ -1871,7 +1871,7 @@
                         <div class="listing-desc">${list.description || 'Crafted with premium materials to your exact specifications.'}</div>
                         <div class="listing-footer">
                             <span class="listing-price">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
-                            <span style="font-size:0.75em;color:#94a3b8;"><i class="fas fa-eye" style="margin-right:3px;"></i>${views}</span>
+                            <span id="view-count-${list.id}" style="font-size:0.75em;color:#94a3b8;"><i class="fas fa-eye" style="margin-right:3px;"></i>${views}</span>
                             <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '${linkTarget}'); return false;">${actionText} <i class="fas fa-chevron-right"></i></a>
                         </div>
                     </div>
@@ -1882,6 +1882,13 @@
         // Track a listing card click — increments view counter via DB function
         async function trackListingView(listingId, fallbackUrl) {
             if (listingId && supabaseClient && !listingId.startsWith('mock')) {
+                // Optimistically update the UI to fix stale browser back/forward cache (BFCache)
+                const viewSpan = document.getElementById(`view-count-${listingId}`);
+                if (viewSpan) {
+                    const currentViews = parseInt(viewSpan.innerText.replace(/[^0-9]/g, '')) || 0;
+                    viewSpan.innerHTML = `<i class="fas fa-eye" style="margin-right:3px;"></i>${currentViews + 1}`;
+                }
+
                 try {
                     await supabaseClient.rpc('increment_listing_views', { listing_id: listingId });
                 } catch (e) { /* silent — don't block navigation */ }
