@@ -1049,13 +1049,29 @@
             .marketplace-toggle-container {
                 width: 100% !important;
                 display: flex !important;
+                margin: 0 0 10px !important;
+                border-radius: 6px !important;
+                padding: 2px !important;
             }
             .mkt-toggle-btn {
                 flex: 1 !important;
                 justify-content: center !important;
-                padding: 10px 8px !important;
-                font-size: 0.8em !important;
+                padding: 6px 4px !important;
+                font-size: 0.72em !important;
                 text-align: center !important;
+                gap: 4px !important;
+                border-radius: 4px !important;
+            }
+            .section-title {
+                display: block !important;
+                font-size: 0.95em !important;
+                margin: 15px 0 10px !important;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .section-title::after {
+                display: none !important;
             }
             .listing-card .card-banner-wrap {
                 height: 180px;
