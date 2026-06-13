@@ -817,6 +817,21 @@
             border-color: rgba(212, 175, 55, 0.3);
         }
         @media (max-width: 600px) {
+            header {
+                padding: 12px 15px;
+            }
+            .logo-text {
+                font-size: 1.2em;
+            }
+            .logo-sub {
+                font-size: 0.55em;
+            }
+            nav {
+                gap: 10px;
+            }
+            nav > a {
+                display: none; /* Hide text links to save space for auth buttons */
+            }
             .shop-container {
                 flex-direction: column;
                 margin-top: -30px;
@@ -826,9 +841,20 @@
                 width: 100%;
             }
             .shop-profile-card {
-                padding: 20px;
+                padding: 15px;
                 align-items: center;
                 text-align: center;
+            }
+            .shop-logo-large {
+                width: 80px;
+                height: 80px;
+                font-size: 2em;
+                margin-bottom: 12px;
+            }
+            .shop-name-title {
+                font-size: 1.3em;
+                word-break: break-word;
+                overflow-wrap: break-word;
             }
             .shop-description-text, .shop-meta-info {
                 text-align: center;
