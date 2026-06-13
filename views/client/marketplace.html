@@ -577,9 +577,9 @@
             animation: fa-spin 1.5s infinite linear;
         }
         @media (max-width: 600px) {
-            .listings-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
+            .content-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 12px !important;
             }
             .listing-card .card-banner-wrap {
                 height: 180px;
@@ -588,27 +588,38 @@
                 padding: 12px;
             }
             .listing-card .card-body h3 {
-                font-size: 0.95em;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                font-size: 0.82em !important;
+                line-height: 1.25 !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+                height: 2.5em !important;
+                white-space: normal !important;
             }
             .listing-card .card-body p {
                 display: none;
             }
+            .listing-card .card-badge {
+                font-size: 0.62em !important;
+                padding: 3px 8px !important;
+            }
+            .listing-card .card-body span[title] {
+                font-size: 0.72em !important;
+            }
             .listing-card .card-footer {
                 flex-direction: column;
                 align-items: stretch !important;
-                gap: 8px !important;
+                gap: 4px !important;
             }
             .listing-card .price-tag {
-                font-size: 0.9em;
+                font-size: 0.88em !important;
             }
             .listing-card .card-btn {
                 width: 100%;
                 text-align: center;
-                padding: 8px;
-                font-size: 0.85em;
+                padding: 6px !important;
+                font-size: 0.75em !important;
                 margin-top: 4px;
             }
         }
