@@ -74,17 +74,17 @@ async function updateSidebarBranding(forcedName = null) {
 
             if (USER_PROFILE.role === 'superadmin') {
                 navHtml = `
-                    <a href="superadmin-dashboard.html" id="nav-dashboard"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> SaaS Dashboard</a>
-                    <a href="superadmin-orgs.html" id="nav-orgs"><i class="fas fa-building" style="margin-right: 8px;"></i> Manage Tenants</a>
-                    <a href="superadmin-users-list.html" id="nav-users"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
-                    <a href="superadmin-users.html" id="nav-admins"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
+                    <a href="/views/superadmin/superadmin-dashboard.html" id="nav-dashboard"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> SaaS Dashboard</a>
+                    <a href="/views/superadmin/superadmin-orgs.html" id="nav-orgs"><i class="fas fa-building" style="margin-right: 8px;"></i> Manage Tenants</a>
+                    <a href="/views/superadmin/superadmin-users-list.html" id="nav-users"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
+                    <a href="/views/superadmin/superadmin-users.html" id="nav-admins"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
                     <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
                 `;
             } else if (USER_PROFILE.role === 'owner') {
                 navHtml = `
-                    <a href="admin-dashboard.html" id="nav-dashboard"><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin Dashboard</a>
-                    <a href="admin-orders.html" id="nav-orders"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global Orders</a>
-                    <a href="marketplace.html" id="nav-marketplace-browse" target="_blank"><i class="fas fa-shopping-bag" style="margin-right: 8px;"></i> Browse Marketplace</a>
+                    <a href="/views/admin/admin-dashboard.html" id="nav-dashboard"><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin Dashboard</a>
+                    <a href="/views/admin/admin-orders.html" id="nav-orders"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global Orders</a>
+                    <a href="/views/client/marketplace.html" id="nav-marketplace-browse" target="_blank"><i class="fas fa-shopping-bag" style="margin-right: 8px;"></i> Browse Marketplace</a>
                     
                     <div class="sidebar-dropdown">
                         <button class="dropdown-trigger" id="nav-clients-dropdown" onclick="toggleSidebarDropdown(this)">
@@ -92,8 +92,8 @@ async function updateSidebarBranding(forcedName = null) {
                             <i class="fas fa-chevron-down dropdown-arrow"></i>
                         </button>
                         <div class="dropdown-content">
-                            <a href="admin-clients.html" id="nav-clients"><i class="fas fa-users" style="margin-right: 8px;"></i> Client Database</a>
-                            <a href="admin-messages.html" id="nav-messages"><i class="fas fa-comments" style="margin-right: 8px;"></i> Messages Inbox</a>
+                            <a href="/views/admin/admin-clients.html" id="nav-clients"><i class="fas fa-users" style="margin-right: 8px;"></i> Client Database</a>
+                            <a href="/views/admin/admin-messages.html" id="nav-messages"><i class="fas fa-comments" style="margin-right: 8px;"></i> Messages Inbox</a>
                         </div>
                     </div>
 
@@ -103,8 +103,8 @@ async function updateSidebarBranding(forcedName = null) {
                             <i class="fas fa-chevron-down dropdown-arrow"></i>
                         </button>
                         <div class="dropdown-content">
-                            <a href="admin-inventory.html" id="nav-inventory"><i class="fas fa-box-open" style="margin-right: 8px;"></i> Inventory</a>
-                            <a href="admin-listings.html" id="nav-listings"><i class="fas fa-tags" style="margin-right: 8px;"></i> Marketplace Catalog</a>
+                            <a href="/views/admin/admin-inventory.html" id="nav-inventory"><i class="fas fa-box-open" style="margin-right: 8px;"></i> Inventory</a>
+                            <a href="/views/admin/admin-listings.html" id="nav-listings"><i class="fas fa-tags" style="margin-right: 8px;"></i> Marketplace Catalog</a>
                         </div>
                     </div>
 
@@ -114,27 +114,27 @@ async function updateSidebarBranding(forcedName = null) {
                             <i class="fas fa-chevron-down dropdown-arrow"></i>
                         </button>
                         <div class="dropdown-content">
-                            <a href="financial-overview.html" id="nav-finance"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial Overview</a>
-                            <a href="admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics & AI</a>
-                            <a href="admin-transactions.html" id="nav-transactions"><i class="fas fa-list-ul" style="margin-right: 8px;"></i> Transactions</a>
-                            <a href="admin-expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
+                            <a href="/views/admin/financial-overview.html" id="nav-finance"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial Overview</a>
+                            <a href="/views/admin/admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics & AI</a>
+                            <a href="/views/admin/admin-transactions.html" id="nav-transactions"><i class="fas fa-list-ul" style="margin-right: 8px;"></i> Transactions</a>
+                            <a href="/views/admin/admin-expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
                         </div>
                     </div>
 
-                    <a href="admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
+                    <a href="/views/admin/admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
 
                     <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
                 `;
             } else {
                 navHtml = `
-                    <a href="manager-dashboard.html" id="nav-dashboard"><i class="fas fa-list-check" style="margin-right: 8px;"></i> Active Orders</a>
-                    <a href="all-orders.html" id="nav-all-orders"><i class="fas fa-history" style="margin-right: 8px;"></i> All Orders</a>
-                    <a href="marketplace.html" id="nav-marketplace-browse" target="_blank"><i class="fas fa-shopping-bag" style="margin-right: 8px;"></i> Browse Marketplace</a>
-                    <a href="worker-management.html" id="nav-workers"><i class="fas fa-users" style="margin-right: 8px;"></i> Tailors Directory</a>
-                    <a href="worker-assignments.html" id="nav-assignments"><i class="fas fa-tasks" style="margin-right: 8px;"></i> Job Assignments</a>
-                    <a href="expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
+                    <a href="/views/manager/manager-dashboard.html" id="nav-dashboard"><i class="fas fa-list-check" style="margin-right: 8px;"></i> Active Orders</a>
+                    <a href="/views/manager/all-orders.html" id="nav-all-orders"><i class="fas fa-history" style="margin-right: 8px;"></i> All Orders</a>
+                    <a href="/views/client/marketplace.html" id="nav-marketplace-browse" target="_blank"><i class="fas fa-shopping-bag" style="margin-right: 8px;"></i> Browse Marketplace</a>
+                    <a href="/views/worker/worker-management.html" id="nav-workers"><i class="fas fa-users" style="margin-right: 8px;"></i> Tailors Directory</a>
+                    <a href="/views/worker/worker-assignments.html" id="nav-assignments"><i class="fas fa-tasks" style="margin-right: 8px;"></i> Job Assignments</a>
+                    <a href="/views/manager/expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
                     
-                    <a href="order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> Create Order</a>
+                    <a href="/views/manager/order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> Create Order</a>
 
                     <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
                 `;
@@ -146,7 +146,7 @@ async function updateSidebarBranding(forcedName = null) {
             const pathParts = window.location.pathname.split('/');
             const currentFile = pathParts[pathParts.length - 1] || 'index.html';
 
-            let activeLink = navEl.querySelector(`a[href="${currentFile}"]`);
+            let activeLink = navEl.querySelector(`a[href*="${currentFile}"]`);
             if (activeLink) {
                 activeLink.classList.add('active');
                 const dropdownContent = activeLink.closest('.dropdown-content');
