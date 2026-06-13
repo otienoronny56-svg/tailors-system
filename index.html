@@ -830,6 +830,12 @@
             gap: 30px;
         }
 
+        @media (min-width: 1200px) {
+            .listings-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
         .listing-card {
             background: var(--bg-card);
             border: 1px solid var(--border-glass);
