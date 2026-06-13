@@ -989,9 +989,43 @@
                 font-size: 0.75em;
             }
             /* Grid and cards */
-            .listings-grid {
+            .grid-listings {
                 grid-template-columns: 1fr 1fr;
                 gap: 12px;
+            }
+            .grid-shops {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .marketplace-search-row {
+                min-width: 0 !important;
+                width: 100% !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                padding: 10px !important;
+            }
+            .search-input-group {
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+                padding-right: 0 !important;
+                padding-bottom: 8px !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+            .search-input-group:last-child {
+                border-bottom: none !important;
+                padding-bottom: 0 !important;
+            }
+            .marketplace-toggle-container {
+                width: 100% !important;
+                display: flex !important;
+            }
+            .mkt-toggle-btn {
+                flex: 1 !important;
+                justify-content: center !important;
+                padding: 10px 8px !important;
+                font-size: 0.8em !important;
+                text-align: center !important;
             }
             .listing-card .card-banner-wrap {
                 height: 180px;
