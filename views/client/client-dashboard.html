@@ -1951,6 +1951,7 @@
         let allMarketplaceShops = [];
         let allMarketplaceListings = [];
         let allMarketplaceReviews = []; // Store reviews globally
+        let userLikes = []; // Track liked listings
 
         async function loadMarketplaceData() {
             const shopsContainer = document.getElementById('marketplace-shops-container');
@@ -1990,6 +1991,17 @@
                     .from('vw_marketplace_reviews')
                     .select('*');
                 allMarketplaceReviews = reviews || [];
+
+                // Fetch user likes if logged in
+                if (currentUser) {
+                    let { data: likes, error: likesErr } = await supabaseClient
+                        .from('marketplace_likes')
+                        .select('listing_id')
+                        .eq('user_id', currentUser.id);
+                    if (!likesErr && likes) {
+                        userLikes = likes.map(l => l.listing_id);
+                    }
+                }
 
                 renderMarketplaceShops(allMarketplaceShops);
                 renderMarketplaceListings(allMarketplaceListings);
@@ -2051,6 +2063,60 @@
             }).join('');
         }
 
+        async function toggleLike(listingId) {
+            if (!currentUser) {
+                alert("Please log in to like creations.");
+                return;
+            }
+            const btn = document.getElementById(`like-btn-${listingId}`);
+            if (!btn) return;
+            const icon = btn.querySelector('i');
+            if (!icon) return;
+
+            const isCurrentlyLiked = userLikes.includes(listingId);
+            
+            // Optimistic UI Update
+            if (isCurrentlyLiked) {
+                userLikes = userLikes.filter(id => id !== listingId);
+                icon.className = 'far fa-heart';
+                btn.style.color = 'var(--brand-slate)';
+            } else {
+                userLikes.push(listingId);
+                icon.className = 'fas fa-heart';
+                btn.style.color = '#ef4444';
+                btn.style.transform = 'scale(1.3)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            }
+
+            try {
+                if (isCurrentlyLiked) {
+                    const { error } = await supabaseClient
+                        .from('marketplace_likes')
+                        .delete()
+                        .eq('user_id', currentUser.id)
+                        .eq('listing_id', listingId);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient
+                        .from('marketplace_likes')
+                        .insert([{ user_id: currentUser.id, listing_id: listingId }]);
+                    if (error) throw error;
+                }
+            } catch (err) {
+                console.error("Failed to toggle like:", err);
+                // Revert
+                if (isCurrentlyLiked) {
+                    userLikes.push(listingId);
+                    icon.className = 'fas fa-heart';
+                    btn.style.color = '#ef4444';
+                } else {
+                    userLikes = userLikes.filter(id => id !== listingId);
+                    icon.className = 'far fa-heart';
+                    btn.style.color = 'var(--brand-slate)';
+                }
+            }
+        }
+
         function renderMarketplaceListings(listings) {
             const container = document.getElementById('marketplace-listings-container');
             if (!container) return;
@@ -2071,14 +2137,13 @@
                     ? `<img src="${avatarImgUrl}" style="width:16px; height:16px; border-radius:50%; object-fit:cover; margin-right:6px; border: 1px solid var(--brand-gold); vertical-align: middle;">`
                     : `<i class="fas fa-store" style="color:var(--brand-gold); margin-right:4px; vertical-align: middle;"></i>`;
 
-                // Calculate listing rating from reviews
-                const listingReviews = allMarketplaceReviews.filter(r => r.listing_id === list.id);
-                const avgRating = listingReviews.length > 0
-                    ? (listingReviews.reduce((sum, r) => sum + r.rating, 0) / listingReviews.length).toFixed(1)
-                    : null;
-                const ratingTag = avgRating
-                    ? `<span style="color: var(--brand-gold); font-size: 0.82em; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Average customer rating"><i class="fas fa-star"></i> ${avgRating} (${listingReviews.length})</span>`
-                    : `<span style="color: var(--brand-slate); font-size: 0.8em; font-style: italic;">No reviews</span>`;
+                const isLiked = userLikes.includes(list.id);
+                const heartIcon = isLiked ? 'fas fa-heart' : 'far fa-heart';
+                const heartColor = isLiked ? '#ef4444' : 'var(--brand-slate)';
+                const likeBtn = `
+                    <button class="like-btn" onclick="event.stopPropagation(); toggleLike('${list.id}')" style="background:transparent; border:none; color:${heartColor}; cursor:pointer; font-size:1.15em; padding:4px; display:inline-flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'" id="like-btn-${list.id}">
+                        <i class="${heartIcon}"></i>
+                    </button>`;
 
                 return `
                     <div class="card listing-card">
@@ -2089,7 +2154,7 @@
                         <div class="card-body" style="padding-top: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;">
                                 <h3 class="card-title" style="font-size:1.2em; margin-bottom: 0; line-height: 1.2;">${list.title}</h3>
-                                ${ratingTag}
+                                ${likeBtn}
                             </div>
                             
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap: 8px; margin-top: 5px;">
