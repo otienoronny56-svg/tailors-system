@@ -1476,9 +1476,12 @@
                                 ${ratingDisplay}
                             </div>
                             <p class="listing-desc">${list.description || 'Handcrafted bespoke garment designed and fit perfectly for you.'}</p>
-                            <div class="listing-footer">
-                                <span class="price-text">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
-                                <button type="button" class="listing-select-btn" onclick="selectListingForInquiry('${list.id}', '${list.title.replace(/'/g, "\\'")}')">Inquire</button>
+                            <div class="listing-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                    <span class="price-text" style="color: var(--brand-gold); font-weight: 700; font-size: 1.1em;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                    <span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate);"><i class="fas fa-eye" style="margin-right:3px;"></i>${list.views || 0}</span>
+                                </div>
+                                <button type="button" class="listing-select-btn" onclick="event.stopPropagation(); trackListingView('${list.id}', () => selectListingForInquiry('${list.id}', '${list.title.replace(/'/g, "\\'")}'))">Inquire</button>
                             </div>
                         </div>
                     </div>`;
@@ -1524,6 +1527,23 @@
                     message.focus();
                 }
             }, 120);
+        }
+
+        // Track a listing card click — increments view counter via DB function
+        async function trackListingView(listingId, callback) {
+            if (listingId && supabaseClient && !listingId.startsWith('mock')) {
+                // Optimistically update the UI to fix BFCache stale values
+                const viewSpan = document.getElementById(`view-count-${listingId}`);
+                if (viewSpan) {
+                    const currentViews = parseInt(viewSpan.innerText.replace(/[^0-9]/g, '')) || 0;
+                    viewSpan.innerHTML = `<i class="fas fa-eye" style="margin-right:3px;"></i>${currentViews + 1}`;
+                }
+
+                try {
+                    await supabaseClient.rpc('increment_listing_views', { listing_id: listingId });
+                } catch (e) { /* silent — don't block interaction */ }
+            }
+            if (callback) callback();
         }
 
         function switchShopTab(tabName) {

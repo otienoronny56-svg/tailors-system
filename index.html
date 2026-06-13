@@ -1848,10 +1848,10 @@
             const container = document.getElementById('teaser-listings-container');
             if (!container) return;
             const isLogged = document.getElementById('nav-auth-area')?.querySelector('.nav-user-name') !== null;
-            const linkTarget = isLogged ? '/views/client/client-dashboard.html' : 'login.html';
             const actionText = isLogged ? 'View Details' : 'Sign Up to Inquire';
 
             container.innerHTML = listings.map(list => {
+                const linkTarget = isLogged && list.shop_id ? `/views/manager/shop.html?id=${list.shop_id}` : 'login.html';
                 const imgUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url
                     || 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=400';
                 const isFeatured = !!list.is_featured;
