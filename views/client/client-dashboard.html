@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard | Tailors Marketplace</title>
+    <link rel="icon" type="image/png" href="../../logo.png?v=2">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --brand-navy: #0a192f;
+            --brand-navy-light: #112240;
+            --brand-gold: #D4AF37;
+            --brand-gold-hover: #f39c12;
+            --brand-white: #ffffff;
+            --brand-slate: #8892b0;
+            --brand-light-slate: #a8b2d1;
+            --bg-dark: #060c18;
+            --card-bg: rgba(17, 34, 64, 0.7);
+            --glass-border: rgba(212, 175, 55, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--brand-white);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        header {
+            width: 100%;
+            padding: 15px 5%;
+            background: rgba(6, 12, 24, 0.95);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 75px;
+            z-index: 100;
+        }
+
+        .logo-group {
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.3em;
+            color: var(--brand-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .logo-sub {
+            font-size: 0.55em;
+            letter-spacing: 3px;
+            color: var(--brand-white);
+            text-transform: uppercase;
+        }
+
+        .user-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-marketplace {
+            color: var(--brand-light-slate);
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .btn-marketplace:hover {
+            color: var(--brand-gold);
+        }
+
+        /* --- Workspace Layout --- */
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 70px 350px 1fr;
+            grid-template-rows: 100%;
+            min-height: 0;
+            /* Let flexbox control the height */
+            overflow: hidden;
+        }
+
+        /* --- Far Left Column: Dock Nav --- */
+        .dock-nav {
+            background: #040913;
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 20px;
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        .dock-item {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--brand-slate);
+            font-size: 1.25em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dock-item:hover {
+            color: var(--brand-gold);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .dock-item.active {
+            color: var(--brand-gold);
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- Left Column: Threads --- */
+        .threads-sidebar {
+            background: rgba(10, 25, 47, 0.8);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            min-height: 0;
+            /* Prevents grid cell overflow */
+        }
+
+        .threads-title {
+            padding: 20px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3em;
+            color: var(--brand-white);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .thread-item {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .thread-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .thread-item.active {
+            background: rgba(212, 175, 55, 0.08);
+            border-left: 4px solid var(--brand-gold);
+        }
+
+        .shop-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--brand-navy-light);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--brand-gold);
+            font-size: 1.3em;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .thread-details {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .thread-shop-name {
+            font-weight: 700;
+            font-size: 0.95em;
+            color: var(--brand-white);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .thread-subject {
+            font-size: 0.8em;
+            color: var(--brand-slate);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* --- Right Column: Chat Box --- */
+        .chat-pane {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-dark);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            /* Fix chat container overflow */
+            min-height: 0;
+            /* Prevents flex from expanding cell */
+        }
+
+        /* --- Settings Panel --- */
+        .settings-pane {
+            grid-column: 2 / span 2;
+            /* Ensures settings panel spans the correct tracks when inbox sidebar is hidden */
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--bg-dark);
+            height: 100%;
+            padding: 30px;
+            min-height: 0;
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 15px;
+        }
+
+        .settings-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        .settings-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            max-width: 1000px;
+        }
+
+        @media (max-width: 768px) {
+            .settings-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .settings-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .settings-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25em;
+            color: var(--brand-gold);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--brand-light-slate);
+        }
+
+        .form-group input {
+            background: rgba(6, 12, 24, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 12px 15px;
+            color: var(--brand-white);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--brand-gold);
+        }
+
+        .btn-save-settings {
+            background: var(--brand-gold);
+            border: none;
+            color: var(--brand-navy);
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .btn-save-settings:hover {
+            background: var(--brand-gold-hover);
+            transform: scale(1.02);
+        }
+
+        .success-msg {
+            font-size: 0.85em;
+            color: #10b981;
+            margin-top: 5px;
+        }
+
+        .error-msg {
+            font-size: 0.85em;
+            color: #ef4444;
+            margin-top: 5px;
+        }
+
+        .inquiry-summary-item {
+            background: rgba(6, 12, 24, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .inquiry-summary-item:hover {
+            border-color: var(--glass-border);
+        }
+
+        .inquiry-summary-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .inquiry-summary-shop {
+            font-weight: 700;
+            font-size: 0.95em;
+            color: var(--brand-white);
+        }
+
+        .inquiry-summary-msg {
+            font-size: 0.85em;
+            color: var(--brand-slate);
+        }
+
+        .inquiry-summary-date {
+            font-size: 0.75em;
+            color: var(--brand-light-slate);
+        }
+
+        .inquiry-status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .inquiry-status-badge.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .inquiry-status-badge.accepted {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .inquiry-status-badge.completed {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .inquiry-status-badge.ignored {
+            background: rgba(107, 114, 128, 0.15);
+            color: #9ca3af;
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        .chat-header {
+            padding: 15px 30px;
+            background: rgba(17, 34, 64, 0.4);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .chat-header-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25em;
+            font-weight: 600;
+        }
+
+        .chat-history {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 0;
+            /* Ensures the container shrinks to fit the flex space and doesn't push the input area out */
+        }
+
+        .message-bubble {
+            max-width: 65%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 0.95em;
+            line-height: 1.45;
+            position: relative;
+            animation: bubbleFade 0.3s ease-out;
+        }
+
+        @keyframes bubbleFade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Message from Client (Me) */
+        .message-bubble.me {
+            background: var(--brand-gold);
+            color: var(--brand-navy);
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        /* Message from Tailor (Them) */
+        .message-bubble.them {
+            background: var(--brand-navy-light);
+            color: var(--brand-white);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .message-time {
+            font-size: 0.7em;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+            display: block;
+        }
+
+        .chat-input-area {
+            padding: 20px 30px;
+            background: rgba(6, 12, 24, 0.95);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .input-form {
+            display: flex;
+            gap: 15px;
+        }
+
+        .input-form input {
+            flex-grow: 1;
+            background: rgba(17, 34, 64, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 14px 20px;
+            color: var(--brand-white);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95em;
+        }
+
+        .input-form input:focus {
+            outline: none;
+            border-color: var(--brand-gold);
+        }
+
+        .btn-send {
+            background: var(--brand-gold);
+            border: none;
+            color: var(--brand-navy);
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            transition: all 0.3s;
+        }
+
+        .btn-send:hover {
+            background: var(--brand-gold-hover);
+            transform: scale(1.03);
+        }
+
+        .chat-placeholder {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--brand-slate);
+            text-align: center;
+            padding: 40px;
+        }
+
+        .chat-placeholder i {
+            font-size: 4em;
+            color: var(--brand-gold);
+            margin-bottom: 20px;
+        }
+
+        /* Scrollbar */
+        .chat-history::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-history::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-history::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 3px;
+        }
+
+        /* --- Marketplace Tab Pane --- */
+        .marketplace-pane {
+            grid-column: 2 / span 2;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-dark);
+            padding: 40px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .marketplace-header-banner {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(17, 34, 64, 0.5));
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .marketplace-header-banner h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2em;
+            color: var(--brand-gold);
+            margin-bottom: 8px;
+        }
+
+        .marketplace-header-banner p {
+            color: var(--brand-slate);
+            font-size: 1.05em;
+            margin-bottom: 20px;
+        }
+
+        .marketplace-search-row {
+            display: flex;
+            gap: 15px;
+            background: rgba(6, 12, 24, 0.6);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .search-input-group {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            padding: 0 12px;
+            gap: 10px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-input-group:last-child {
+            border-right: none;
+        }
+
+        .search-input-group i {
+            color: var(--brand-gold);
+        }
+
+        .search-input-group input {
+            background: transparent;
+            border: none;
+            color: var(--brand-white);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95em;
+            width: 100%;
+            padding: 10px 0;
+            outline: none;
+        }
+
+        .search-input-group input:-webkit-autofill,
+        .search-input-group input:-webkit-autofill:hover,
+        .search-input-group input:-webkit-autofill:focus,
+        .search-input-group input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0px 1000px rgba(6, 12, 24, 0.9) inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            font-weight: 600;
+            color: var(--brand-white);
+            margin: 30px 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--glass-border), transparent);
+        }
+
+        .grid-shops,
+        .grid-listings {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-banner-wrap {
+            height: 160px;
+            overflow: hidden;
+            position: relative;
+            border-radius: 12px 12px 0 0;
+            background-color: var(--brand-navy-light);
+        }
+
+        .card-banner {
+            height: 100%;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover .card-banner {
+            transform: scale(1.06);
+        }
+
+        .card-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid var(--brand-gold);
+            background-color: var(--brand-navy);
+            position: absolute;
+            top: 130px;
+            left: 20px;
+            z-index: 2;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--brand-gold);
+            font-size: 1.6em;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-body {
+            padding: 40px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .listing-card .card-body {
+            padding: 20px;
+        }
+
+        /* Custom layout overrides for Marketplace Listings */
+        .listing-card .card-banner-wrap {
+            height: 280px;
+            /* Taller image space for portrait clothing listings */
+            position: relative;
+            background-color: #060c18;
+        }
+
+        .listing-card .card-banner-blur {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background-size: cover;
+            background-position: center;
+            filter: blur(15px) brightness(0.5);
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        .listing-card .card-banner {
+            position: relative;
+            background-size: contain;
+            /* Show the entire photo without truncation */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: transparent;
+            z-index: 2;
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25em;
+            color: var(--brand-white);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .card-location {
+            font-size: 0.85em;
+            color: var(--brand-gold);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-desc {
+            font-size: 0.88em;
+            color: var(--brand-slate);
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-badge {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--brand-gold);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-btn {
+            background: var(--brand-gold);
+            border: none;
+            color: var(--brand-navy);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .card-btn:hover {
+            background: var(--brand-gold-hover);
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .price-tag {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: var(--brand-gold);
+        }
+
+        /* --- Tab Switcher/Toggles for Marketplace --- */
+        .marketplace-toggle-container {
+            display: flex;
+            gap: 10px;
+            margin: 0px 0 25px;
+            padding: 4px;
+            background: rgba(17, 34, 64, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            width: fit-content;
+        }
+
+        .mkt-toggle-btn {
+            background: transparent;
+            border: none;
+            color: var(--brand-slate);
+            padding: 10px 22px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9em;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mkt-toggle-btn:hover {
+            color: var(--brand-white);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .mkt-toggle-btn.active {
+            color: var(--brand-navy);
+            background: var(--brand-gold);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+    </style>
+    <link rel="manifest" href="../../manifest.json">
+</head>
+
+<body>
+
+    <header>
+        <div class="logo-group" onclick="location.href='../../index.html'">
+            <span class="logo-text">Tailors.co.ke</span>
+            <span class="logo-sub">Customer Inbox</span>
+        </div>
+        <div class="user-meta">
+            <span id="client-name-display" style="font-weight:600; color: var(--brand-gold);">Customer</span>
+            <button class="btn-logout" onclick="clientSignOut()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <!-- 🧭 FAR LEFT NAV DOCK -->
+        <nav class="dock-nav">
+            <div class="dock-item active" id="tab-btn-marketplace" onclick="switchTab('marketplace')"
+                title="Browse Marketplace">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="dock-item" id="tab-btn-inbox" onclick="switchTab('inbox')" title="Inbox Messages">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="dock-item" id="tab-btn-orders" onclick="switchTab('orders')" title="My Orders">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="dock-item" id="tab-btn-settings" onclick="switchTab('settings')" title="Account Settings">
+                <i class="fas fa-user-cog"></i>
+            </div>
+        </nav>
+
+        <!-- 🛒 MARKETPLACE PANE -->
+        <section class="marketplace-pane" id="marketplace-pane">
+            <!-- Sleek Top Header Row -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.1); padding-bottom: 15px;">
+                <div>
+                    <h2
+                        style="font-family: 'Playfair Display', serif; font-size: 1.8em; color: var(--brand-white); margin-bottom: 4px;">
+                        Bespoke Marketplace</h2>
+                    <p style="font-size: 0.85em; color: var(--brand-slate);">Browse directories, discover custom
+                        designs, and hire expert tailors.</p>
+                </div>
+
+                <!-- Compact Search Bar -->
+                <div class="marketplace-search-row"
+                    style="margin-bottom: 0; min-width: 450px; flex-shrink: 0; background: rgba(17, 34, 64, 0.5); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--glass-border); display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="search-input-group"
+                        style="border-right: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; gap: 8px; padding-right: 10px; flex: 1; min-width: 140px;">
+                        <i class="fas fa-search" style="font-size: 0.85em; color: var(--brand-gold);"></i>
+                        <input type="text" id="marketplace-search-query" placeholder="Search creations..."
+                            autocomplete="off" onkeyup="filterMarketplace()"
+                            style="font-size: 0.85em; padding: 6px 0; background: transparent; border: none; color: white; outline: none; width: 100%;">
+                    </div>
+                    <div class="search-input-group"
+                        style="border-right: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 8px; padding-right: 10px; flex: 1; min-width: 130px;">
+                        <i class="fas fa-map-marker-alt" style="font-size: 0.85em; color: var(--brand-gold);"></i>
+                        <input type="text" id="marketplace-search-location" placeholder="City / Location..."
+                            autocomplete="off" onkeyup="filterMarketplace()"
+                            style="font-size: 0.85em; padding: 6px 0; background: transparent; border: none; color: white; outline: none; width: 100%;">
+                    </div>
+                    <div class="search-input-group"
+                        style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 140px;">
+                        <i class="fas fa-tags" style="font-size: 0.85em; color: var(--brand-gold);"></i>
+                        <select id="marketplace-category-filter" onchange="filterMarketplace()"
+                            style="font-size: 0.82em; padding: 6px 0; background: transparent; border: none; color: white; outline: none; width: 100%; cursor: pointer;">
+                            <option value="" style="background:#1e293b;">All Categories</option>
+                            <optgroup label="— Tailored Clothing —" style="background:#1e293b;">
+                                <option value="Suits" style="background:#1e293b;">Suits</option>
+                                <option value="Senator Wear" style="background:#1e293b;">Senator Wear</option>
+                                <option value="Dresses" style="background:#1e293b;">Dresses</option>
+                                <option value="Shirts" style="background:#1e293b;">Shirts</option>
+                                <option value="Trousers" style="background:#1e293b;">Trousers</option>
+                                <option value="Coats" style="background:#1e293b;">Coats</option>
+                                <option value="Alterations" style="background:#1e293b;">Alterations</option>
+                            </optgroup>
+                            <optgroup label="— Ready-made Clothing —" style="background:#1e293b;">
+                                <option value="Jumpsuits &amp; Rompers" style="background:#1e293b;">Jumpsuits &amp;
+                                    Rompers</option>
+                                <option value="Hoodies &amp; Sweatshirts" style="background:#1e293b;">Hoodies &amp;
+                                    Sweatshirts</option>
+                                <option value="T-Shirts &amp; Polos" style="background:#1e293b;">T-Shirts &amp; Polos
+                                </option>
+                                <option value="Jeans &amp; Denim" style="background:#1e293b;">Jeans &amp; Denim</option>
+                                <option value="Jackets &amp; Cardigans" style="background:#1e293b;">Jackets &amp;
+                                    Cardigans</option>
+                                <option value="Ready-to-Wear Dresses" style="background:#1e293b;">Ready-to-Wear Dresses
+                                </option>
+                                <option value="Activewear" style="background:#1e293b;">Activewear</option>
+                            </optgroup>
+                            <optgroup label="— Accessories —" style="background:#1e293b;">
+                                <option value="Watches" style="background:#1e293b;">Watches</option>
+                                <option value="Glasses &amp; Shades" style="background:#1e293b;">Glasses &amp; Shades
+                                </option>
+                                <option value="Ties &amp; Bowties" style="background:#1e293b;">Ties &amp; Bowties
+                                </option>
+                                <option value="Scarves &amp; Capes" style="background:#1e293b;">Scarves &amp; Capes
+                                </option>
+                                <option value="Belts" style="background:#1e293b;">Belts</option>
+                                <option value="Hats &amp; Caps" style="background:#1e293b;">Hats &amp; Caps</option>
+                                <option value="Bags &amp; Clutches" style="background:#1e293b;">Bags &amp; Clutches
+                                </option>
+                                <option value="Jewellery" style="background:#1e293b;">Jewellery</option>
+                            </optgroup>
+                            <optgroup label="— Footwear —" style="background:#1e293b;">
+                                <option value="Shoes" style="background:#1e293b;">Shoes</option>
+                                <option value="Sandals &amp; Slippers" style="background:#1e293b;">Sandals &amp;
+                                    Slippers</option>
+                                <option value="Boots" style="background:#1e293b;">Boots</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🎛️ Toggle Switcher to manage scroll spacing -->
+            <div class="marketplace-toggle-container">
+                <button class="mkt-toggle-btn active" id="mkt-btn-listings" onclick="setMarketplaceMode('listings')">
+                    <i class="fas fa-cut"></i> Creations & Designs
+                </button>
+                <button class="mkt-toggle-btn" id="mkt-btn-shops" onclick="setMarketplaceMode('shops')">
+                    <i class="fas fa-store"></i> Featured Tailoring Shops
+                </button>
+            </div>
+
+            <div id="mkt-section-shops" style="display: none;">
+                <h3 class="section-title" style="margin-top: 10px;"><i class="fas fa-store"></i> Featured Tailoring
+                    Shops</h3>
+                <div class="grid-shops" id="marketplace-shops-container">
+                    <div style="grid-column: 1/-1; text-align: center; color: var(--brand-slate); padding: 40px;">
+                        <i class="fas fa-spinner fa-spin"
+                            style="font-size: 2em; color: var(--brand-gold); margin-bottom: 10px;"></i>
+                        <p>Loading shops...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mkt-section-listings">
+                <h3 class="section-title" style="margin-top: 10px;"><i class="fas fa-cut"></i> Premium Creations &
+                    Designs</h3>
+                <div class="grid-listings" id="marketplace-listings-container">
+                    <div style="grid-column: 1/-1; text-align: center; color: var(--brand-slate); padding: 40px;">
+                        <i class="fas fa-spinner fa-spin"
+                            style="font-size: 2em; color: var(--brand-gold); margin-bottom: 10px;"></i>
+                        <p>Loading designs...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 💬 MIDDLE COLUMN: ACTIVE DISCUSSIONS -->
+        <aside class="threads-sidebar" style="display: none;">
+            <h2 class="threads-title"><i class="fas fa-comments"></i> Conversations</h2>
+            <div id="threads-container">
+                <!-- Loaded dynamically -->
+                <div style="text-align: center; padding: 40px; color: var(--brand-slate);">
+                    <i class="fas fa-spinner fa-spin"
+                        style="color:var(--brand-gold); font-size: 1.5em; margin-bottom: 10px;"></i>
+                    <p>Loading chats...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 💬 RIGHT COLUMN: CHAT INTERFACE -->
+        <section class="chat-pane" id="chat-pane" style="display: none;">
+            <div class="chat-placeholder">
+                <i class="fas fa-comments"></i>
+                <h2>Your Messaging Center</h2>
+                <p style="max-width: 450px; margin-top: 10px;">Select an active inquiry from the left panel to start
+                    chatting in real-time with the tailoring shop.</p>
+            </div>
+        </section>
+
+        <!-- 📦 MY ORDERS PANE -->
+        <section class="workspace-section" id="orders-pane" style="display: none; padding: 40px 5%; overflow-y: auto; background: var(--bg-dark); flex: 1; grid-column: 2 / span 2;">
+            <div style="max-width: 900px; margin: 0 auto;">
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 2em; color: var(--brand-gold); margin-bottom: 5px;">My Orders</h2>
+                <p style="color: var(--brand-slate); margin-bottom: 30px;">Track the status of your tailored garments</p>
+
+                <div id="client-orders-container" style="display: flex; flex-direction: column; gap: 20px;">
+                    <div style="text-align: center; padding: 40px; color: var(--brand-slate);">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2em; color: var(--brand-gold);"></i>
+                        <p style="margin-top: 15px;">Loading your orders...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ⚙️ SETTINGS PANE -->
+        <section class="settings-pane" id="settings-pane" style="display: none;">
+            <div class="settings-header">
+                <i class="fas fa-user-cog" style="color: var(--brand-gold); margin-right: 15px; font-size: 1.6em;"></i>
+                <h2>Account Settings</h2>
+            </div>
+            <div class="settings-content">
+                <!-- Card 1: Profile Details -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-id-card"></i> Profile Details</h3>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="settings-name" placeholder="Your Full Name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="settings-email" disabled style="opacity: 0.6; cursor: not-allowed;">
+                    </div>
+                    <button class="btn-save-settings" onclick="saveProfileSettings()">Save Details</button>
+                    <p id="profile-success-msg" style="display: none;"></p>
+                </div>
+
+                <!-- Card 2: Password Update -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-lock"></i> Password & Security</h3>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="settings-password" placeholder="Min 6 characters">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="settings-confirm-password" placeholder="Repeat new password">
+                    </div>
+                    <button class="btn-save-settings" onclick="changeUserPassword()">Update Password</button>
+                    <p id="password-success-msg" style="display: none;"></p>
+                </div>
+
+                <!-- Card 3: Inquiries Summary (Full Width) -->
+                <div class="settings-card" style="grid-column: span 2;">
+                    <h3><i class="fas fa-folder-open"></i> My Submitted Inquiries</h3>
+                    <p style="color: var(--brand-slate); font-size: 0.85em; margin-bottom: 10px;">Track the status of
+                        all your tailor inquiries submitted through our marketplace catalog.</p>
+                    <div id="inquiries-summary-list">
+                        <div style="text-align: center; padding: 20px; color: var(--brand-slate);">
+                            <i class="fas fa-spinner fa-spin" style="color:var(--brand-gold); margin-right:6px;"></i>
+                            Loading inquiries...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 📐 MEASUREMENT FILL MODAL -->
+    <div id="measurement-fill-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(6,12,24,0.85); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000; padding:20px;">
+        <div
+            style="background:var(--brand-navy-light); border:1px solid var(--brand-gold); border-radius:16px; padding:30px; width:100%; max-width:550px; max-height:90vh; overflow-y:auto; box-shadow:0 10px 25px rgba(0,0,0,0.5); position:relative;">
+            <h3
+                style="font-family:'Playfair Display', serif; font-size:1.6em; color:var(--brand-white); margin-bottom:5px; display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-ruler-combined" style="color:var(--brand-gold);"></i> Fit Profile Builder
+            </h3>
+            <p style="color:var(--brand-slate); font-size:0.85em; margin-bottom:20px;">Please enter your measurements in
+                inches below. Leave blank if unsure.</p>
+            <div id="modal-garment-title"
+                style="font-weight:700; color:var(--brand-gold); font-size:1em; margin-bottom:15px; text-transform:uppercase;">
+                Garment Type: Suit</div>
+            <form id="measurement-fill-form" onsubmit="submitClientMeasurements(event)">
+                <input type="hidden" id="modal-garment-type">
+                <input type="hidden" id="modal-inquiry-id">
+                <div id="modal-measurement-fields-container"
+                    style="display:flex; flex-direction:column; gap:20px; margin-bottom:25px;">
+                    <!-- Populated dynamically -->
+                </div>
+                <div style="display:flex; gap:15px; justify-content:flex-end;">
+                    <button type="button"
+                        style="background:transparent; border:1px solid var(--brand-slate); color:var(--brand-slate); padding:10px 20px; border-radius:8px; cursor:pointer;"
+                        onclick="closeMeasurementModal()">Cancel</button>
+                    <button type="submit"
+                        style="background:var(--brand-gold); border:none; color:var(--brand-navy); padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer;">Submit
+                        measurements</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../../js/core/config.js?v=1781343492375"></script>
+    <script>
+        let supabaseClient;
+        let currentUser = null;
+        let activeThread = null; // Storing selected shop group
+        let threads = []; // Array of grouped conversations
+        let messages = []; // Used inside activeThread.allMessages
+        let messageSubscription = null;
+
+        const GARMENT_MEASUREMENTS = {
+            'Suit': {
+                Coat: ['Shoulder', 'Chest', 'Bodice', 'Waist', 'Bicep', 'Sleeve', 'Length', 'Hips'],
+                Shirt: ['Shoulder', 'Chest', 'Bodice', 'Waist', 'Sleeve', 'Length', 'Neck', 'Cuff'],
+                Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
+            },
+            'Kaunda/Senator Suit': {
+                Top: ['Shoulder', 'Sleeve', 'Arm', 'Chest', 'Waist', 'Hips', 'Length', 'Neck'],
+                Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
+            },
+            'Trouser': {
+                Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
+            },
+            'Shirt': {
+                Shirt: ['Shoulder', 'Chest', 'Bust', 'Bodice', 'Waist', 'Long Sleeve', 'Short Sleeve', 'Length', 'Neck', 'Cuff']
+            },
+            'Dress': {
+                Dress: ['Shoulder', 'Bust', 'Waist', 'Hips', 'Length', 'Sleeve']
+            },
+            'Coat': {
+                Coat: ['Shoulder', 'Chest', 'Waist', 'Sleeve', 'Length', 'Hips']
+            },
+            'Half Coat': {
+                Coat: ['Shoulder', 'Chest', 'Waist', 'Length']
+            },
+            'Standard Size': {
+                'Standard Size': ['Top/Shirt Size (e.g. S/M/L/XL)', 'Bottom/Trouser Size (e.g. 30/32/34/36)', 'Chest Size (inches)', 'Waist Size (inches)', 'Height (feet/inches)', 'Weight (kg/lbs)']
+            },
+            'Shoes': {
+                'Shoes': ['Shoe Size (UK/US/EU)', 'Foot Length (inches)', 'Foot Width (inches/Standard/Wide)']
+            },
+            'Accessories': {
+                'Accessories': ['Wrist/Watch Size (inches)', 'Cap/Hat Size (inches or S/M/L)', 'Belt Size (inches)', 'Scarf/Neck Size (inches)', 'Preferred Tie Type (Slim/Standard)']
+            }
+        };
+
+        // Initialize Supabase client
+        if (typeof window.supabase !== 'undefined' && typeof APP_CONFIG !== 'undefined') {
+            supabaseClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+            checkClientSession();
+        }
+
+        async function checkClientSession() {
+            try {
+                const { data: { user }, error } = await supabaseClient.auth.getUser();
+                if (error || !user) {
+                    location.href = '/login.html';
+                    return;
+                }
+                currentUser = user;
+
+                // Set name display
+                const fullName = user.user_metadata?.full_name || 'Customer';
+                document.getElementById('client-name-display').textContent = fullName;
+
+                await loadClientThreads();
+                subscribeToGlobalMessages();
+
+                // Initialize default tab
+                switchTab('marketplace');
+            } catch (err) {
+                console.error("Session lookup failed:", err);
+                location.href = '/login.html';
+            }
+        }
+
+        async function loadClientThreads() {
+            try {
+                // Fetch inquiries submitted by this user's email
+                const { data: inquiries, error: inqErr } = await supabaseClient
+                    .from('marketplace_inquiries')
+                    .select('*, shops(id, name, profile_image, location_name), marketplace_listings(title, image_urls)')
+                    .eq('client_email', currentUser.email);
+
+                if (inqErr) throw inqErr;
+                const inqs = inquiries || [];
+
+                if (inqs.length === 0) {
+                    threads = [];
+                    renderThreadsList();
+                    return;
+                }
+
+                // Fetch all messages linked to these inquiries
+                const inquiryIds = inqs.map(i => i.id);
+                const { data: dbMessages, error: msgErr } = await supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .in('inquiry_id', inquiryIds)
+                    .order('created_at', { ascending: true });
+
+                if (msgErr) throw msgErr;
+                const dbMsgs = dbMessages || [];
+
+                // Group inquiries and messages by shop_id
+                const shopGroups = {};
+                inqs.forEach(inq => {
+                    const shopId = inq.shop_id;
+                    if (!shopGroups[shopId]) {
+                        const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
+                        let sImg = inq.shops?.profile_image || '';
+                        if (sImg && !sImg.startsWith('http')) sImg = STORAGE_URL + sImg;
+
+                        shopGroups[shopId] = {
+                            shopId: shopId,
+                            shopName: inq.shops?.name || 'Tailoring Shop',
+                            shopImage: sImg,
+                            inquiries: [],
+                            messages: [],
+                            allMessages: [],
+                            lastMessage: 'Inquiry submitted',
+                            lastMessageTime: inq.created_at
+                        };
+                    }
+                    shopGroups[shopId].inquiries.push(inq);
+                });
+
+                // Distribute messages
+                dbMsgs.forEach(msg => {
+                    const inquiry = inqs.find(i => i.id === msg.inquiry_id);
+                    if (inquiry) {
+                        const shopId = inquiry.shop_id;
+                        if (shopGroups[shopId]) {
+                            shopGroups[shopId].messages.push(msg);
+                        }
+                    }
+                });
+
+                // Merge inquiries and messages into unified chat timeline for each shop
+                Object.values(shopGroups).forEach(group => {
+                    // Sort inquiries chronologically
+                    group.inquiries.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+                    // Map inquiries to virtual messages
+                    const virtualInqs = group.inquiries.map(inq => {
+                        return {
+                            id: 'inq-' + inq.id,
+                            inquiry_id: inq.id,
+                            sender_id: null,
+                            is_inquiry: true,
+                            message_text: inq.message,
+                            listing: inq.marketplace_listings,
+                            created_at: inq.created_at
+                        };
+                    });
+
+                    // Combine and sort
+                    const allMessages = [...virtualInqs, ...group.messages];
+                    allMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    group.allMessages = allMessages;
+
+                    if (allMessages.length > 0) {
+                        const last = allMessages[allMessages.length - 1];
+                        group.lastMessage = last.message_text;
+                        group.lastMessageTime = last.created_at;
+                    }
+                });
+
+                threads = Object.values(shopGroups);
+
+                // Sort threads by latest activity time
+                threads.sort((a, b) => {
+                    const timeA = a.lastMessageTime ? new Date(a.lastMessageTime) : new Date(0);
+                    const timeB = b.lastMessageTime ? new Date(b.lastMessageTime) : new Date(0);
+                    return timeB - timeA;
+                });
+
+                renderThreadsList();
+
+                // If activeThread is set, refresh it
+                if (activeThread) {
+                    const updatedActive = threads.find(t => t.shopId === activeThread.shopId);
+                    if (updatedActive) {
+                        activeThread = updatedActive;
+                        renderChatHistory();
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading threads:", err);
+                const container = document.getElementById('threads-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 30px; color: #ef4444; font-size: 0.9em;">
+                            Failed to load threads. Please try refreshing.
+                        </div>`;
+                }
+            }
+        }
+
+        function renderThreadsList() {
+            const container = document.getElementById('threads-container');
+            if (!container) return;
+
+            if (threads.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: var(--brand-slate); font-size: 0.9em;">
+                        <i class="fas fa-inbox" style="font-size: 2em; margin-bottom: 8px; color: var(--brand-gold);"></i>
+                        <p>No active conversations. Send an inquiry to a shop to start chatting!</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = threads.map(thread => {
+                const avatarIcon = `<i class="fas fa-store"></i>`;
+                const avatarStyle = thread.shopImage ? `background-image: url('${thread.shopImage}')` : '';
+                const activeClass = activeThread && activeThread.shopId === thread.shopId ? 'active' : '';
+
+                // Last message time display
+                let timeStr = '';
+                if (thread.lastMessageTime) {
+                    const date = new Date(thread.lastMessageTime);
+                    timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+
+                return `
+                    <div class="thread-item ${activeClass}" onclick="openChatThread('${thread.shopId}')">
+                        <div class="shop-icon" style="${avatarStyle}">
+                            ${thread.shopImage ? '' : avatarIcon}
+                        </div>
+                        <div class="thread-details">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <h4 class="thread-shop-name" style="margin:0;">${thread.shopName}</h4>
+                                <span style="font-size:0.7em; color:var(--brand-slate);">${timeStr}</span>
+                            </div>
+                            <p class="thread-subject">${escapeHTML(thread.lastMessage.substring(0, 32))}${thread.lastMessage.length > 32 ? '...' : ''}</p>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        async function openChatThread(shopId) {
+            activeThread = threads.find(t => t.shopId === shopId);
+            renderThreadsList(); // Re-render to show active styling
+
+            const chatPane = document.getElementById('chat-pane');
+
+            chatPane.innerHTML = `
+                <div class="chat-header">
+                    <div class="shop-icon" style="${activeThread.shopImage ? `background-image: url('${activeThread.shopImage}')` : ''}">
+                        ${activeThread.shopImage ? '' : '<i class="fas fa-store"></i>'}
+                    </div>
+                    <div class="chat-header-name">${activeThread.shopName}</div>
+                </div>
+                <div class="chat-history" id="chat-history">
+                </div>
+                <div class="chat-input-area">
+                    <form class="input-form" onsubmit="sendChatMessage(event)">
+                        <input type="text" id="chat-message-input" required placeholder="Type your message here...">
+                        <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>`;
+
+            renderChatHistory();
+            scrollToBottom();
+
+            // Pre-fetch and cache the recipient (shop owner) ID for this thread
+            if (!activeThread.recipientId) {
+                try {
+                    const { data: shop } = await supabaseClient
+                        .from('shops')
+                        .select('organization_id')
+                        .eq('id', shopId)
+                        .single();
+
+                    if (shop && shop.organization_id) {
+                        // Try shop-specific manager first
+                        const { data: shopManager } = await supabaseClient
+                            .from('user_profiles')
+                            .select('id')
+                            .eq('shop_id', shopId)
+                            .in('role', ['manager', 'owner'])
+                            .limit(1);
+
+                        if (shopManager && shopManager[0]) {
+                            activeThread.recipientId = shopManager[0].id;
+                        } else {
+                            const { data: owner } = await supabaseClient
+                                .from('user_profiles')
+                                .select('id')
+                                .eq('organization_id', shop.organization_id)
+                                .eq('role', 'owner')
+                                .limit(1);
+                            activeThread.recipientId = owner && owner[0] ? owner[0].id : null;
+                        }
+                    }
+                    // Final fallback: look in previous message history
+                    if (!activeThread.recipientId && activeThread.messages && activeThread.messages.length > 0) {
+                        const tailorMsg = activeThread.messages.find(m => m.sender_id && m.sender_id !== currentUser.id);
+                        if (tailorMsg) activeThread.recipientId = tailorMsg.sender_id;
+                    }
+                } catch (e) {
+                    console.warn("Pre-fetch recipientId failed:", e);
+                }
+            }
+        }
+
+        function renderChatHistory() {
+            const history = document.getElementById('chat-history');
+            if (!history) return;
+
+            const messagesToRender = activeThread.allMessages || [];
+
+            if (messagesToRender.length === 0) {
+                history.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--brand-slate); font-style: italic; font-size: 0.9em;">
+                        No messages yet. Send a greeting to start the conversation!
+                    </div>`;
+                return;
+            }
+
+            history.innerHTML = messagesToRender.map(msg => {
+                const isMe = msg.is_inquiry || msg.sender_id === currentUser.id;
+                const bubbleClass = isMe ? 'me' : 'them';
+                const timeStr = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const inquiryLabel = msg.is_inquiry ? `<strong style="display:block; font-size:0.8em; color:var(--brand-gold); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">Your Inquiry</strong>` : '';
+                const bubbleStyle = msg.is_inquiry ? `border-right: 4px solid var(--brand-gold); max-width: 80%; background: var(--brand-navy); color: white;` : '';
+
+                let listingInfo = '';
+                if (msg.is_inquiry && msg.listing) {
+                    const list = msg.listing;
+                    const imgUrl = list.image_urls && list.image_urls.length > 0 ? (typeof list.image_urls === 'string' ? JSON.parse(list.image_urls)[0] : list.image_urls[0]) : null;
+                    if (imgUrl) {
+                        listingInfo = `<div style="display:flex; align-items:center; gap:10px; margin-bottom:8px; padding:8px; background:rgba(255,255,255,0.05); border-radius:6px; border:1px solid rgba(255,255,255,0.1);"><div style="width:40px; height:40px; border-radius:4px; background-image:url('${imgUrl}'); background-size:cover; background-position:center; flex-shrink:0;"></div><div style="font-size:0.85em; color:var(--brand-gold); font-weight:600; line-height:1.2;">Inquiring about:<br><span style="color:#fff; font-weight:400;">${list.title}</span></div></div>`;
+                    } else if (list.title) {
+                        listingInfo = `<div style="font-size:0.85em; color:var(--brand-gold); font-weight:600; line-height:1.2; margin-bottom:8px;">Inquiring about: <span style="color:#fff; font-weight:400;">${list.title}</span></div>`;
+                    }
+                }
+
+                let msgContent = escapeHTML(msg.message_text);
+                let extraStyle = '';
+                if (msg.message_text.startsWith('[MEASUREMENT_REQUEST:')) {
+                    const garment = msg.message_text.split(':')[1].replace(']', '');
+                    msgContent = `
+                        <div style="text-align:center; padding:10px;">
+                            <div style="font-weight:600; color:var(--brand-gold); margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                <i class="fas fa-ruler-combined"></i> Measurement Request
+                            </div>
+                            <p style="font-size:0.85em; color:var(--brand-slate); margin-bottom:12px;">The tailor requested measurements for a <strong>${escapeHTML(garment)}</strong>.</p>
+                            <button onclick="openMeasurementModal('${escapeHTML(garment)}', '${msg.inquiry_id}')" style="background:var(--brand-gold); border:none; color:var(--brand-navy); font-weight:700; padding:6px 12px; border-radius:6px; font-size:0.85em; cursor:pointer; width:100%; transition:background 0.2s;">Provide Measurements</button>
+                        </div>
+                    `;
+                    extraStyle = 'background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--brand-gold); width: 80%;';
+                } else if (msg.message_text.startsWith('[MEASUREMENT_SUBMISSION:')) {
+                    try {
+                        const parts = msg.message_text.split(':');
+                        const garment = parts[1];
+                        let jsonStr = parts.slice(2).join(':');
+                        if (jsonStr.endsWith(']')) {
+                            jsonStr = jsonStr.slice(0, -1);
+                        }
+                        const data = JSON.parse(jsonStr);
+                        let tableHtml = `<div style="font-weight:600; color:var(--brand-gold); margin-bottom:8px;"><i class="fas fa-check-circle"></i> Submitted ${escapeHTML(garment)} Measurements:</div>`;
+                        tableHtml += `<table style="width:100%; border-collapse:collapse; font-size:0.85em; text-align:left; color:white;">`;
+                        for (const [comp, fields] of Object.entries(data)) {
+                            tableHtml += `<tr style="border-bottom:1px solid rgba(255,255,255,0.08);"><td colspan="2" style="font-weight:600; padding:4px 0; color:#cbd5e1; padding-top: 8px;">${escapeHTML(comp)}</td></tr>`;
+                            for (const [k, v] of Object.entries(fields)) {
+                                const sizeTypes = ['Standard Size', 'Shoes', 'Accessories'];
+                                const inchSuffix = sizeTypes.includes(garment) ? '' : '"';
+                                tableHtml += `<tr><td style="padding:2px 0; color:#94a3b8;">${escapeHTML(k)}</td><td style="text-align:right; font-weight:600; color:var(--brand-gold);">${escapeHTML(v)}${inchSuffix}</td></tr>`;
+                            }
+                        }
+                        tableHtml += `</table>`;
+                        msgContent = tableHtml;
+                        extraStyle = 'background: rgba(16,185,129,0.05); border: 1px solid #10b981; min-width: 220px;';
+                    } catch (e) {
+                        msgContent = 'Submitted measurements: ' + escapeHTML(msg.message_text);
+                    }
+                }
+
+                return `
+                    <div class="message-bubble ${bubbleClass}" style="${bubbleStyle} ${extraStyle}">
+                        ${inquiryLabel}
+                        ${listingInfo}
+                        ${msgContent}
+                        <span class="message-time" style="${msg.is_inquiry ? 'color:rgba(255,255,255,0.7);' : ''}">${timeStr}</span>
+                    </div>`;
+            }).join('');
+        }
+
+        async function sendChatMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-message-input');
+            const text = input.value.trim();
+            if (!text || !activeThread) return;
+
+            input.value = '';
+
+            try {
+                // Link message to the latest inquiry of this shop
+                const latestInquiry = activeThread.inquiries[activeThread.inquiries.length - 1];
+                const inquiryId = latestInquiry.id;
+
+                // Find recipient (shop owner/manager)
+                // Strategy: resolve the shop's organization_id, then find the owner of that org
+                let recipientId = null;
+                try {
+                    // Primary: look up shop → org → owner (most reliable, since shop_id is usually null on user_profiles)
+                    const { data: shop } = await supabaseClient
+                        .from('shops')
+                        .select('organization_id')
+                        .eq('id', activeThread.shopId)
+                        .single();
+
+                    if (shop && shop.organization_id) {
+                        // First try to find a manager assigned to this exact shop
+                        const { data: shopManager } = await supabaseClient
+                            .from('user_profiles')
+                            .select('id')
+                            .eq('shop_id', activeThread.shopId)
+                            .in('role', ['manager', 'owner'])
+                            .limit(1);
+
+                        if (shopManager && shopManager[0]) {
+                            recipientId = shopManager[0].id;
+                        } else {
+                            // Fall back to org owner
+                            const { data: owner } = await supabaseClient
+                                .from('user_profiles')
+                                .select('id')
+                                .eq('organization_id', shop.organization_id)
+                                .eq('role', 'owner')
+                                .limit(1);
+
+                            recipientId = owner && owner[0] ? owner[0].id : null;
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Recipient query failed:", err);
+                }
+
+                if (!recipientId) {
+                    // Fallback: Check if any previous messages in this thread came from the tailor (a sender that is NOT me)
+                    if (activeThread.messages && activeThread.messages.length > 0) {
+                        const tailorMsg = activeThread.messages.find(m => m.sender_id && m.sender_id !== currentUser.id);
+                        if (tailorMsg) {
+                            recipientId = tailorMsg.sender_id;
+                            console.log("Resolved recipientId from message history fallback:", recipientId);
+                        }
+                    }
+                }
+
+                if (!recipientId) {
+                    alert("Cannot send message: Could not find the shop owner. Please try again or contact support.");
+                    return;
+                }
+
+                // Cache recipientId on the thread for future messages in this chat
+                activeThread.recipientId = recipientId;
+
+                // Insert message
+                const { data, error } = await supabaseClient
+                    .from('messages')
+                    .insert([{
+                        inquiry_id: inquiryId,
+                        sender_id: currentUser.id,
+                        recipient_id: recipientId,
+                        message_text: text
+                    }])
+                    .select();
+
+                if (error) throw error;
+
+                // Add to local state and re-render instantly
+                if (data && data[0]) {
+                    activeThread.messages.push(data[0]);
+
+                    // Rebuild allMessages timeline
+                    const virtualInqs = activeThread.inquiries.map(inq => ({
+                        id: 'inq-' + inq.id,
+                        inquiry_id: inq.id,
+                        sender_id: null,
+                        is_inquiry: true,
+                        message_text: inq.message,
+                        created_at: inq.created_at
+                    }));
+                    activeThread.allMessages = [...virtualInqs, ...activeThread.messages];
+                    activeThread.allMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+                    activeThread.lastMessage = data[0].message_text;
+                    activeThread.lastMessageTime = data[0].created_at;
+
+                    renderChatHistory();
+                    scrollToBottom();
+                    renderThreadsList();
+                }
+            } catch (err) {
+                alert("Could not send message: " + err.message);
+            }
+        }
+
+        function subscribeToGlobalMessages() {
+            messageSubscription = supabaseClient
+                .channel('chat-room')
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages'
+                }, payload => {
+                    const newMsg = payload.new;
+                    // Check if this matches any of our inquiries
+                    threads.forEach(thread => {
+                        const hasInquiry = thread.inquiries.some(i => i.id === newMsg.inquiry_id);
+                        if (hasInquiry) {
+                            if (!thread.messages.find(m => m.id === newMsg.id)) {
+                                thread.messages.push(newMsg);
+
+                                // Rebuild timeline
+                                const virtualInqs = thread.inquiries.map(inq => ({
+                                    id: 'inq-' + inq.id,
+                                    inquiry_id: inq.id,
+                                    sender_id: null,
+                                    is_inquiry: true,
+                                    message_text: inq.message,
+                                    created_at: inq.created_at
+                                }));
+                                thread.allMessages = [...virtualInqs, ...thread.messages];
+                                thread.allMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+                                thread.lastMessage = newMsg.message_text;
+                                thread.lastMessageTime = newMsg.created_at;
+
+                                if (activeThread && activeThread.shopId === thread.shopId) {
+                                    renderChatHistory();
+                                    scrollToBottom();
+                                }
+                                renderThreadsList();
+                            }
+                        }
+                    });
+                })
+                .subscribe();
+        }
+
+        let allMarketplaceShops = [];
+        let allMarketplaceListings = [];
+        let allMarketplaceReviews = []; // Store reviews globally
+
+        async function loadMarketplaceData() {
+            const shopsContainer = document.getElementById('marketplace-shops-container');
+            const listingsContainer = document.getElementById('marketplace-listings-container');
+
+            if (allMarketplaceShops.length > 0 && allMarketplaceListings.length > 0) {
+                renderMarketplaceShops(allMarketplaceShops);
+                renderMarketplaceListings(allMarketplaceListings);
+                return;
+            }
+
+            try {
+                // Fetch public shops
+                let { data: shops, error: shopsErr } = await supabaseClient
+                    .from('shops')
+                    .select('*')
+                    .eq('is_public', true);
+                if (shopsErr || !shops) {
+                    const fallback = await supabaseClient.from('shops').select('*');
+                    shops = fallback.data || [];
+                }
+                allMarketplaceShops = shops;
+
+                // Fetch active listings
+                let { data: listings, error: listingsErr } = await supabaseClient
+                    .from('marketplace_listings')
+                    .select('*, shops(name, profile_image)')
+                    .eq('status', 'active');
+                if (listingsErr || !listings || listings.length === 0) {
+                    allMarketplaceListings = getMockListings();
+                } else {
+                    allMarketplaceListings = listings;
+                }
+
+                // Fetch reviews from privacy-preserving view
+                let { data: reviews, error: reviewsErr } = await supabaseClient
+                    .from('vw_marketplace_reviews')
+                    .select('*');
+                allMarketplaceReviews = reviews || [];
+
+                renderMarketplaceShops(allMarketplaceShops);
+                renderMarketplaceListings(allMarketplaceListings);
+            } catch (err) {
+                console.error("Error loading marketplace data:", err);
+                if (shopsContainer) shopsContainer.innerHTML = `<p style="color:red; text-align:center;">Failed to load shops.</p>`;
+            }
+        }
+
+        function renderMarketplaceShops(shops) {
+            const container = document.getElementById('marketplace-shops-container');
+            if (!container) return;
+            if (shops.length === 0) {
+                container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--brand-slate);">No shops found.</div>`;
+                return;
+            }
+            const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
+            container.innerHTML = shops.map(shop => {
+                const hasBanner = shop.banner_image && shop.banner_image.trim() !== '' && !shop.banner_image.endsWith('/');
+                const bannerUrl = hasBanner ? (shop.banner_image.startsWith('http') ? shop.banner_image : STORAGE_URL + shop.banner_image) : null;
+                const bannerStyle = bannerUrl ? `background-image: url('${bannerUrl}')` : `background: linear-gradient(135deg, var(--brand-navy, #0a192f) 0%, var(--brand-navy-light, #112240) 100%); border-bottom: 1px solid rgba(212,175,55,0.15);`;
+                const avatarIcon = `<i class="fas fa-store"></i>`;
+                const avatarUrl = shop.profile_image ? (shop.profile_image.startsWith('http') ? shop.profile_image : STORAGE_URL + shop.profile_image) : '';
+                const avatarStyle = avatarUrl ? `background-image: url('${avatarUrl}'); border-color: var(--brand-gold);` : '';
+
+                // Capitalize and format location name
+                const rawLoc = shop.location_name || shop.location || 'Nairobi, Kenya';
+                const formattedLoc = rawLoc.split(',').map(s => s.trim().replace(/\b\w/g, c => c.toUpperCase())).join(', ');
+
+                // Calculate dynamic rating from reviews
+                const shopReviews = allMarketplaceReviews.filter(r => r.shop_id === shop.id);
+                const avgRating = shopReviews.length > 0
+                    ? (shopReviews.reduce((sum, r) => sum + r.rating, 0) / shopReviews.length).toFixed(1)
+                    : null;
+                const ratingBadge = avgRating
+                    ? `<span class="card-badge"><i class="fas fa-star" style="color: var(--brand-gold);"></i> ${avgRating} (${shopReviews.length})</span>`
+                    : `<span class="card-badge" style="background: rgba(255,255,255,0.05); color: var(--brand-slate);"><i class="far fa-star"></i> New Shop</span>`;
+
+                return `
+                    <div class="card">
+                        <div class="card-banner-wrap">
+                            <div class="card-banner" style="${bannerStyle}"></div>
+                        </div>
+                        <div class="card-avatar" style="${avatarStyle}">
+                            ${shop.profile_image ? '' : avatarIcon}
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title">${shop.name}</h3>
+                            <div class="card-location">
+                                <i class="fas fa-map-marker-alt"></i> ${formattedLoc}
+                            </div>
+                            <p class="card-desc">${shop.description || 'Premium custom design shop.'}</p>
+                            <div class="card-footer">
+                                ${ratingBadge}
+                                <a href="../../views/manager/shop.html?id=${shop.id}" class="card-btn">Visit Shop <i class="fas fa-chevron-right"></i></a>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderMarketplaceListings(listings) {
+            const container = document.getElementById('marketplace-listings-container');
+            if (!container) return;
+            if (listings.length === 0) {
+                container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--brand-slate);">No designs found.</div>`;
+                return;
+            }
+            container.innerHTML = listings.map(list => {
+                const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=400`;
+                // Try the joined shop name and profile image first, then look up from the already-fetched shops list, then fallback
+                const shopFromCache = allMarketplaceShops.find(s => s.id === list.shop_id);
+                const shopName = list.shops?.name || shopFromCache?.name || 'Shop';
+                const shopProfileImg = list.shops?.profile_image || shopFromCache?.profile_image;
+
+                const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
+                const avatarImgUrl = shopProfileImg ? (shopProfileImg.startsWith('http') ? shopProfileImg : STORAGE_URL + shopProfileImg) : null;
+                const avatarIconHtml = avatarImgUrl 
+                    ? `<img src="${avatarImgUrl}" style="width:16px; height:16px; border-radius:50%; object-fit:cover; margin-right:6px; border: 1px solid var(--brand-gold); vertical-align: middle;">`
+                    : `<i class="fas fa-store" style="color:var(--brand-gold); margin-right:4px; vertical-align: middle;"></i>`;
+
+                // Calculate listing rating from reviews
+                const listingReviews = allMarketplaceReviews.filter(r => r.listing_id === list.id);
+                const avgRating = listingReviews.length > 0
+                    ? (listingReviews.reduce((sum, r) => sum + r.rating, 0) / listingReviews.length).toFixed(1)
+                    : null;
+                const ratingTag = avgRating
+                    ? `<span style="color: var(--brand-gold); font-size: 0.82em; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Average customer rating"><i class="fas fa-star"></i> ${avgRating} (${listingReviews.length})</span>`
+                    : `<span style="color: var(--brand-slate); font-size: 0.8em; font-style: italic;">No reviews</span>`;
+
+                return `
+                    <div class="card listing-card">
+                        <div class="card-banner-wrap">
+                            <div class="card-banner-blur" style="background-image: url('${imageUrl}')"></div>
+                            <div class="card-banner" style="background-image: url('${imageUrl}')"></div>
+                        </div>
+                        <div class="card-body" style="padding-top: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;">
+                                <h3 class="card-title" style="font-size:1.2em; margin-bottom: 0; line-height: 1.2;">${list.title}</h3>
+                                ${ratingTag}
+                            </div>
+                            
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap: 8px; margin-top: 5px;">
+                                <span class="card-badge">${list.category || 'Senator Wear'}</span>
+                                <span style="font-size:0.8em; color:var(--brand-slate); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display: inline-flex; align-items: center;" title="${shopName}">
+                                    ${avatarIconHtml}${shopName}
+                                </span>
+                            </div>
+
+                            <p class="card-desc" style="font-size: 0.85em; margin-bottom: 15px;">${list.description || 'Individually crafted.'}</p>
+                            <div class="card-footer">
+                                <span class="price-tag" style="color: var(--brand-gold); font-weight: 700; font-size: 1.1em;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                <a href="../../views/manager/shop.html?id=${list.shop_id}" class="card-btn">Inquire Now <i class="fas fa-envelope"></i></a>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function filterMarketplace() {
+            const query = document.getElementById('marketplace-search-query').value.toLowerCase().trim();
+            const location = document.getElementById('marketplace-search-location').value.toLowerCase().trim();
+            const categoryFilterEl = document.getElementById('marketplace-category-filter');
+            const category = categoryFilterEl ? categoryFilterEl.value : '';
+
+            const filteredShops = allMarketplaceShops.filter(shop => {
+                const nameMatch = !query ||
+                    (shop.name && shop.name.toLowerCase().includes(query)) ||
+                    (shop.description && shop.description.toLowerCase().includes(query));
+
+                const locMatch = !location ||
+                    (shop.location_name && shop.location_name.toLowerCase().includes(location)) ||
+                    (shop.location && shop.location.toLowerCase().includes(location));
+
+                return nameMatch && locMatch;
+            });
+
+            const filteredListings = allMarketplaceListings.filter(list => {
+                const titleMatch = !query ||
+                    (list.title && list.title.toLowerCase().includes(query)) ||
+                    (list.description && list.description.toLowerCase().includes(query)) ||
+                    (list.category && list.category.toLowerCase().includes(query));
+
+                const categoryMatch = !category || list.category === category;
+
+                const shop = allMarketplaceShops.find(s => s.id === list.shop_id);
+                const locMatch = !location || (shop && (
+                    (shop.location_name && shop.location_name.toLowerCase().includes(location)) ||
+                    (shop.location && shop.location.toLowerCase().includes(location))
+                ));
+
+                return titleMatch && categoryMatch && locMatch;
+            });
+
+            renderMarketplaceShops(filteredShops);
+            renderMarketplaceListings(filteredListings);
+        }
+
+        function getMockListings() {
+            return [
+                {
+                    id: "mock-list-1",
+                    shop_id: allMarketplaceShops[0]?.id || "mock-shop-1",
+                    title: "Royal Double-Breasted Slim Fit Suit",
+                    description: "Handcrafted, customized wool suit including coat and matching trouser. Perfect for weddings and executive meetings.",
+                    price: 25000,
+                    category: "Suits",
+                    image_url: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=400"
+                },
+                {
+                    id: "mock-list-2",
+                    shop_id: allMarketplaceShops[0]?.id || "mock-shop-1",
+                    title: "Bespoke Senator Wear with Embroidered Detail",
+                    description: "Traditional senator top and trouser set. Soft premium fabric with unique embroidery on the collar.",
+                    price: 8500,
+                    category: "Senator Wear",
+                    image_url: "https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=400"
+                },
+                {
+                    id: "mock-list-3",
+                    shop_id: allMarketplaceShops[1]?.id || "mock-shop-2",
+                    title: "Luxurious Emerald Evening Dress",
+                    description: "Elegant silk gown tailored specifically to your silhouette. Perfect styling for formal events.",
+                    price: 18000,
+                    category: "Dresses",
+                    image_url: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400"
+                }
+            ];
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.dock-item').forEach(item => item.classList.remove('active'));
+            document.getElementById(`tab-btn-${tabName}`).classList.add('active');
+
+            const panes = ['marketplace-pane', 'settings-pane', 'orders-pane'];
+            panes.forEach(pane => {
+                const el = document.getElementById(pane);
+                if (el) el.style.display = 'none';
+            });
+            document.querySelector('.threads-sidebar').style.display = 'none';
+            document.getElementById('chat-pane').style.display = 'none';
+
+            if (tabName === 'marketplace') {
+                document.getElementById('marketplace-pane').style.display = 'flex';
+                loadMarketplaceData();
+            } else if (tabName === 'inbox') {
+                document.querySelector('.threads-sidebar').style.display = 'flex';
+                document.getElementById('chat-pane').style.display = 'flex';
+            } else if (tabName === 'settings') {
+                document.getElementById('settings-pane').style.display = 'flex';
+                // Populate inputs
+                document.getElementById('settings-name').value = currentUser.user_metadata?.full_name || '';
+                document.getElementById('settings-email').value = currentUser.email || '';
+                renderInquiriesSummaryList();
+            } else if (tabName === 'orders') {
+                document.getElementById('orders-pane').style.display = 'block';
+                loadClientOrders();
+            }
+        }
+
+        function renderInquiriesSummaryList() {
+            const container = document.getElementById('inquiries-summary-list');
+            if (!container) return;
+
+            let allInquiries = [];
+            threads.forEach(t => {
+                t.inquiries.forEach(inq => {
+                    allInquiries.push({
+                        ...inq,
+                        shopName: t.shopName
+                    });
+                });
+            });
+
+            allInquiries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            if (allInquiries.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--brand-slate);">No inquiries submitted yet.</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                    ${allInquiries.map(inq => {
+                const dateStr = new Date(inq.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+                const statusClass = (inq.status || 'pending').toLowerCase();
+                return `
+                            <div class="inquiry-summary-item">
+                                <div class="inquiry-summary-details">
+                                    <span class="inquiry-summary-shop"><i class="fas fa-store" style="color:var(--brand-gold); margin-right:6px;"></i>${escapeHTML(inq.shopName)}</span>
+                                    <span class="inquiry-summary-msg">"${escapeHTML(inq.message)}"</span>
+                                    <span class="inquiry-summary-date">${dateStr}</span>
+                                </div>
+                                <div>
+                                    <span class="inquiry-status-badge ${statusClass}">${statusClass}</span>
+                                </div>
+                            </div>
+                        `;
+            }).join('')}
+                </div>
+            `;
+        }
+
+        async function saveProfileSettings() {
+            const nameInput = document.getElementById('settings-name');
+            const newName = nameInput.value.trim();
+            const msgEl = document.getElementById('profile-success-msg');
+            if (!newName) return;
+
+            try {
+                const { error: authError } = await supabaseClient.auth.updateUser({
+                    data: { full_name: newName }
+                });
+                if (authError) throw authError;
+
+                const { error: profileError } = await supabaseClient
+                    .from('user_profiles')
+                    .update({ full_name: newName })
+                    .eq('id', currentUser.id);
+                if (profileError) throw profileError;
+
+                currentUser.user_metadata = { ...currentUser.user_metadata, full_name: newName };
+                document.getElementById('client-name-display').textContent = newName;
+
+                msgEl.textContent = "✅ Profile updated successfully!";
+                msgEl.className = "success-msg";
+                msgEl.style.display = "block";
+                setTimeout(() => msgEl.style.display = "none", 4000);
+            } catch (err) {
+                console.error("Profile update failed:", err);
+                msgEl.textContent = "❌ Error: " + err.message;
+                msgEl.className = "error-msg";
+                msgEl.style.display = "block";
+            }
+        }
+
+        async function changeUserPassword() {
+            const passInput = document.getElementById('settings-password');
+            const confirmInput = document.getElementById('settings-confirm-password');
+            const msgEl = document.getElementById('password-success-msg');
+
+            const password = passInput.value.trim();
+            const confirmPassword = confirmInput.value.trim();
+
+            if (!password) {
+                msgEl.textContent = "❌ Please enter a new password.";
+                msgEl.className = "error-msg";
+                msgEl.style.display = "block";
+                return;
+            }
+
+            if (password.length < 6) {
+                msgEl.textContent = "❌ Password must be at least 6 characters.";
+                msgEl.className = "error-msg";
+                msgEl.style.display = "block";
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                msgEl.textContent = "❌ Passwords do not match.";
+                msgEl.className = "error-msg";
+                msgEl.style.display = "block";
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient.auth.updateUser({ password: password });
+                if (error) throw error;
+
+                passInput.value = '';
+                confirmInput.value = '';
+
+                msgEl.textContent = "✅ Password updated successfully!";
+                msgEl.className = "success-msg";
+                msgEl.style.display = "block";
+                setTimeout(() => msgEl.style.display = "none", 4000);
+            } catch (err) {
+                console.error("Password update failed:", err);
+                msgEl.textContent = "❌ Error: " + err.message;
+                msgEl.className = "error-msg";
+                msgEl.style.display = "block";
+            }
+        }
+
+        function scrollToBottom() {
+            const history = document.getElementById('chat-history');
+            if (history) {
+                history.scrollTop = history.scrollHeight;
+            }
+        }
+
+        function openMeasurementModal(garmentType, inquiryId) {
+            const modal = document.getElementById('measurement-fill-modal');
+            const title = document.getElementById('modal-garment-title');
+            const typeInput = document.getElementById('modal-garment-type');
+            const inqIdInput = document.getElementById('modal-inquiry-id');
+            const container = document.getElementById('modal-measurement-fields-container');
+
+            if (!modal || !title || !typeInput || !inqIdInput || !container) return;
+
+            title.textContent = `Garment Type: ${garmentType}`;
+            typeInput.value = garmentType;
+            inqIdInput.value = inquiryId || '';
+
+            const measurements = GARMENT_MEASUREMENTS[garmentType];
+            if (!measurements) {
+                container.innerHTML = '<p style="color:var(--brand-slate);">No standard measurements needed for this garment type.</p>';
+                modal.style.display = 'flex';
+                return;
+            }
+
+            // Size-based types use text inputs (not numeric inches)
+            const sizeBasedTypes = ['Standard Size', 'Shoes', 'Accessories'];
+            const isTextBased = sizeBasedTypes.includes(garmentType);
+
+            let html = '';
+            for (const [component, fields] of Object.entries(measurements)) {
+                html += `<div style="border-bottom:1px solid rgba(212,175,55,0.1); padding-bottom:15px;">
+                    <h4 style="font-size:0.9em; text-transform:uppercase; letter-spacing:1px; color:var(--brand-white); margin-bottom:10px;">${component}</h4>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(${isTextBased ? '200px' : '130px'}, 1fr)); gap:15px;">`;
+
+                fields.forEach(field => {
+                    // For size-based types, use text input; for traditional tailoring, use number
+                    const inputType = isTextBased ? 'text' : 'number';
+                    const stepAttr = isTextBased ? '' : 'step="0.1"';
+                    // Smart placeholder: extract the hint in parentheses from field name if available
+                    const hintMatch = field.match(/\(([^)]+)\)/);
+                    const placeholder = isTextBased
+                        ? (hintMatch ? hintMatch[1] : 'Enter value')
+                        : 'inches';
+
+                    html += `
+                        <div style="display:flex; flex-direction:column; gap:5px;">
+                            <label style="font-size:0.75em; color:var(--brand-slate);">${field}</label>
+                            <input type="${inputType}" ${stepAttr} placeholder="${placeholder}" 
+                                   data-component="${component}" data-measurement="${field}"
+                                   style="background:rgba(6,12,24,0.5); border:1px solid var(--glass-border); padding:8px; border-radius:6px; color:white; outline:none; font-size:0.9em; width:100%;">
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
+            }
+            container.innerHTML = html;
+            modal.style.display = 'flex';
+        }
+
+        function closeMeasurementModal() {
+            const modal = document.getElementById('measurement-fill-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function submitClientMeasurements(e) {
+            e.preventDefault();
+            if (!activeThread || !currentUser) return;
+
+            const garmentType = document.getElementById('modal-garment-type').value;
+            const inquiryId = document.getElementById('modal-inquiry-id').value;
+            const container = document.getElementById('modal-measurement-fields-container');
+            const inputs = container.querySelectorAll('input');
+
+            const values = {};
+            inputs.forEach(input => {
+                const comp = input.dataset.component;
+                const meas = input.dataset.measurement;
+                const val = input.value.trim();
+                if (val) {
+                    if (!values[comp]) values[comp] = {};
+                    values[comp][meas] = val;
+                }
+            });
+
+            // If no fields are filled, warn the user
+            if (Object.keys(values).length === 0) {
+                alert("Please enter at least one measurement value before submitting.");
+                return;
+            }
+
+            const subText = `[MEASUREMENT_SUBMISSION:${garmentType}:${JSON.stringify(values)}]`;
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Submitting...";
+
+            try {
+                // Find recipient (shop manager/owner)
+                let recipientId = activeThread.recipientId;
+                if (!recipientId) {
+                    // Find recipient (shop owner/manager) via org lookup
+                    try {
+                        const { data: shop } = await supabaseClient
+                            .from('shops')
+                            .select('organization_id')
+                            .eq('id', activeThread.shopId)
+                            .single();
+
+                        if (shop && shop.organization_id) {
+                            // Try shop-specific manager first
+                            const { data: shopManager } = await supabaseClient
+                                .from('user_profiles')
+                                .select('id')
+                                .eq('shop_id', activeThread.shopId)
+                                .in('role', ['manager', 'owner'])
+                                .limit(1);
+
+                            if (shopManager && shopManager[0]) {
+                                recipientId = shopManager[0].id;
+                            } else {
+                                const { data: owner } = await supabaseClient
+                                    .from('user_profiles')
+                                    .select('id')
+                                    .eq('organization_id', shop.organization_id)
+                                    .eq('role', 'owner')
+                                    .limit(1);
+
+                                recipientId = owner && owner[0] ? owner[0].id : null;
+                            }
+                        }
+                    } catch (err) {
+                        console.warn("Recipient query failed:", err);
+                    }
+
+                    if (!recipientId) {
+                        // Fallback: Check if any previous messages in this thread came from the tailor (a sender that is NOT me)
+                        if (activeThread.messages && activeThread.messages.length > 0) {
+                            const tailorMsg = activeThread.messages.find(m => m.sender_id && m.sender_id !== currentUser.id);
+                            if (tailorMsg) {
+                                recipientId = tailorMsg.sender_id;
+                                console.log("Resolved recipientId from message history fallback:", recipientId);
+                            }
+                        }
+                    }
+                }
+
+                // Safely resolve the inquiry ID to a valid UUID string
+                let targetInqId = null;
+                if (inquiryId && inquiryId !== 'undefined' && inquiryId !== 'null' && inquiryId !== '') {
+                    targetInqId = inquiryId;
+                }
+                if ((!targetInqId) && activeThread && activeThread.inquiries && activeThread.inquiries.length > 0) {
+                    targetInqId = activeThread.inquiries[0].id;
+                }
+
+                if (!targetInqId) {
+                    throw new Error("Could not resolve a valid Inquiry ID for submission.");
+                }
+
+                // Call server-side sync RPC directly in the background (no await, so it won't block message sending)
+                supabaseClient.rpc('sync_client_measurements', {
+                    p_inquiry_id: targetInqId,
+                    p_garment_type: garmentType,
+                    p_measurements: values
+                }).then(res => {
+                    if (res.error) {
+                        console.warn("Direct RPC sync error:", res.error);
+                    } else {
+                        console.log("Auto-populated client database record via RPC:", res.data);
+                    }
+                }).catch(rpcErr => {
+                    console.warn("Direct RPC sync network failure:", rpcErr);
+                });
+
+                // Send submission as a chat message
+                const { data: msgData, error: msgErr } = await supabaseClient
+                    .from('messages')
+                    .insert([{
+                        inquiry_id: targetInqId,
+                        sender_id: currentUser.id,
+                        recipient_id: recipientId,
+                        message_text: subText
+                    }])
+                    .select();
+
+                if (msgErr) throw msgErr;
+
+                if (msgData && msgData[0]) {
+                    // Locally push message into timeline
+                    if (!activeThread.messages) activeThread.messages = [];
+                    activeThread.messages.push(msgData[0]);
+
+                    // Re-compile allMessages
+                    const virtualInqs = activeThread.inquiries.map(inq => ({
+                        id: 'inq-' + inq.id,
+                        inquiry_id: inq.id,
+                        sender_id: null,
+                        is_inquiry: true,
+                        message_text: inq.message,
+                        listing: inq.marketplace_listings,
+                        created_at: inq.created_at
+                    }));
+
+                    const allMessages = [...virtualInqs, ...activeThread.messages];
+                    allMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    activeThread.allMessages = allMessages;
+
+                    renderChatHistory();
+                    scrollToBottom();
+                }
+
+                closeMeasurementModal();
+            } catch (err) {
+                alert("Error sending measurements: " + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit measurements";
+            }
+        }
+
+        async function clientSignOut() {
+            await supabaseClient.auth.signOut();
+            location.href = '/';
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g,
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        function setMarketplaceMode(mode) {
+            const btnListings = document.getElementById('mkt-btn-listings');
+            const btnShops = document.getElementById('mkt-btn-shops');
+            const sectionListings = document.getElementById('mkt-section-listings');
+            const sectionShops = document.getElementById('mkt-section-shops');
+
+            if (!btnListings || !btnShops || !sectionListings || !sectionShops) return;
+
+            if (mode === 'listings') {
+                btnListings.classList.add('active');
+                btnShops.classList.remove('active');
+                sectionListings.style.display = 'block';
+                sectionShops.style.display = 'none';
+            } else {
+                btnListings.classList.remove('active');
+                btnShops.classList.add('active');
+                sectionListings.style.display = 'none';
+                sectionShops.style.display = 'block';
+            }
+        }
+
+        async function loadClientOrders() {
+            const container = document.getElementById('client-orders-container');
+            if (!currentUser || !currentUser.phone) {
+                container.innerHTML = '<div style="text-align:center; color:#ef4444; padding:40px;">Please ensure your phone number is registered in account settings to track orders.</div>';
+                return;
+            }
+
+            try {
+                // Find all orders linked to this user's phone number
+                const { data: orders, error } = await supabaseClient
+                    .from('orders')
+                    .select('id, garment_type, status, price, amount_paid, due_date, created_at, shops(name)')
+                    .eq('customer_phone', currentUser.phone)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; color:var(--brand-slate); padding:40px;">You have no recorded orders yet.</div>';
+                    return;
+                }
+
+                const STATUS_MAP = {
+                    1: { title: "Assigned", color: "#64748b" },
+                    2: { title: "In Progress", color: "#3b82f6" },
+                    3: { title: "QA Check", color: "#8b5cf6" },
+                    4: { title: "Ready", color: "#eab308" },
+                    5: { title: "Collected", color: "#2ecc71" },
+                    6: { title: "Closed", color: "#94a3b8" }
+                };
+
+                container.innerHTML = orders.map(order => {
+                    const shopName = order.shops ? order.shops.name : 'Tailor Shop';
+                    const sMap = STATUS_MAP[order.status] || { title: "Unknown", color: "#64748b" };
+                    const dueDate = order.due_date ? new Date(order.due_date).toLocaleDateString() : 'TBD';
+                    const createdDate = order.created_at ? new Date(order.created_at).toLocaleDateString() : 'TBD';
+                    const trackLink = `${window.location.origin}/track.html?id=${order.id}`;
+
+                    return `
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; position: relative;">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <h3 style="color: var(--brand-gold); margin-bottom: 5px;">${order.garment_type || 'Custom Garment'}</h3>
+                                    <div style="font-size: 0.85em; color: var(--brand-light-slate);">Ordered from: <strong>${shopName}</strong></div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="display: inline-block; background: ${sMap.color}22; color: ${sMap.color}; border: 1px solid ${sMap.color}55; padding: 5px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
+                                        <i class="fas fa-circle" style="font-size: 0.6em; vertical-align: middle; margin-right: 4px;"></i> ${sMap.title}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                                <div>
+                                    <div style="font-size: 0.7em; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 1px;">Date Ordered</div>
+                                    <div style="font-weight: 500;">${createdDate}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.7em; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 1px;">Due Date</div>
+                                    <div style="font-weight: 500; color: var(--brand-white);">${dueDate}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.7em; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 1px;">Total Price</div>
+                                    <div style="font-weight: 500;">Ksh ${parseFloat(order.price || 0).toLocaleString()}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.7em; color: var(--brand-slate); text-transform: uppercase; letter-spacing: 1px;">Amount Paid</div>
+                                    <div style="font-weight: 500; color: #2ecc71;">Ksh ${parseFloat(order.amount_paid || 0).toLocaleString()}</div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
+                                <a href="${trackLink}" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: transparent; border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 8px 16px; border-radius: 6px; font-size: 0.85em; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='var(--brand-gold)'; this.style.color='var(--brand-navy)';" onmouseout="this.style.background='transparent'; this.style.color='var(--brand-gold)';">
+                                    <i class="fas fa-external-link-alt"></i> View Live Tracking
+                                </a>
+                            </div>
+
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error("Error loading client orders:", err);
+                container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:40px;">Error loading orders: ${err.message}</div>`;
+            }
+        }
+    </script>
+</body>
+
+</html>

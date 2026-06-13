@@ -1,0 +1,261 @@
+// ==========================================
+// 📦 INVENTORY MANAGEMENT SYSTEM
+// ==========================================
+
+let ALL_INVENTORY = [];
+
+async function loadInventoryScreen() {
+    logDebug("Loading Inventory Screen...", null, 'info');
+    
+    try {
+        // Load shops for the dropdown
+        const { data: shops } = await supabaseClient
+            .from('shops')
+            .select('id, name')
+            .eq('organization_id', USER_PROFILE.organization_id);
+        
+        const shopSelect = document.getElementById('inv-shop-select');
+        if (shopSelect && shops) {
+            shopSelect.innerHTML = '<option value="">-- Select Shop --</option>';
+            shops.forEach(s => {
+                shopSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+            });
+            // Auto-select if only one shop
+            if (shops.length === 1) {
+                shopSelect.value = shops[0].id;
+            }
+        }
+
+        // Load inventory items
+        const { data: items, error } = await supabaseClient
+            .from('inventory_items')
+            .select('*')
+            .eq('organization_id', USER_PROFILE.organization_id)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        ALL_INVENTORY = items || [];
+
+        // Build a shop name map
+        const shopMap = {};
+        if (shops) shops.forEach(s => shopMap[s.id] = s.name);
+
+        // Update stats
+        const totalItems = ALL_INVENTORY.length;
+        const inStock = ALL_INVENTORY.filter(i => i.stock_quantity > i.low_stock_threshold).length;
+        const lowStock = ALL_INVENTORY.filter(i => i.stock_quantity > 0 && i.stock_quantity <= i.low_stock_threshold).length;
+        const totalValue = ALL_INVENTORY.reduce((sum, i) => sum + (i.price * i.stock_quantity), 0);
+
+        const elTotal = document.getElementById('stat-total-items');
+        const elInStock = document.getElementById('stat-in-stock');
+        const elLowStock = document.getElementById('stat-low-stock');
+        const elValue = document.getElementById('stat-total-value');
+        
+        if (elTotal) elTotal.textContent = totalItems;
+        if (elInStock) elInStock.textContent = inStock;
+        if (elLowStock) elLowStock.textContent = lowStock;
+        if (elValue) elValue.textContent = formatCurrency(totalValue);
+
+        // Render table
+        renderInventoryTable(ALL_INVENTORY, shopMap);
+
+        // Setup form handler
+        const addForm = document.getElementById('inv-add-form');
+        if (addForm) {
+            addForm.onsubmit = async (e) => {
+                e.preventDefault();
+                await addInventoryItem();
+            };
+        }
+
+    } catch (err) {
+        logDebug("Inventory load error:", err, 'error');
+        const tbody = document.getElementById('inv-table-body');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#ef4444;">Error loading inventory: ${err.message}</td></tr>`;
+        }
+    }
+}
+
+function renderInventoryTable(items, shopMap) {
+    const tbody = document.getElementById('inv-table-body');
+    if (!tbody) return;
+
+    if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#94a3b8;">
+            <i class="fas fa-box-open" style="font-size:2em; margin-bottom:10px; display:block;"></i>
+            No inventory items yet. Add your first item above!
+        </td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = items.map(item => {
+        let stockClass = 'in-stock';
+        let stockLabel = 'In Stock';
+        if (item.stock_quantity === 0) {
+            stockClass = 'out-of-stock';
+            stockLabel = 'Out of Stock';
+        } else if (item.stock_quantity <= item.low_stock_threshold) {
+            stockClass = 'low-stock';
+            stockLabel = 'Low Stock';
+        }
+
+        return `<tr data-id="${item.id}" data-name="${item.name.toLowerCase()}" data-category="${item.category}" data-stock="${stockClass}">
+            <td><strong>${item.name}</strong></td>
+            <td><span class="category-tag">${item.category}</span></td>
+            <td>${formatCurrency(item.price)}</td>
+            <td><strong>${item.stock_quantity}</strong></td>
+            <td><span class="stock-badge ${stockClass}">${stockLabel}</span></td>
+            <td style="font-size:0.85em; color:#64748b;">${shopMap[item.shop_id] || 'N/A'}</td>
+            <td class="inv-actions">
+                <button class="btn-restock" title="Restock" onclick="openRestockModal('${item.id}', '${item.name.replace(/'/g, "\\'")}')"><i class="fas fa-plus"></i></button>
+                <button class="btn-edit" title="Edit" onclick="openEditInventoryItem('${item.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn-delete" title="Delete" onclick="deleteInventoryItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function addInventoryItem() {
+    const name = document.getElementById('inv-name').value.trim();
+    const category = document.getElementById('inv-category').value;
+    const price = parseFloat(document.getElementById('inv-price').value) || 0;
+    const qty = parseInt(document.getElementById('inv-qty').value) || 0;
+    const shopId = document.getElementById('inv-shop-select').value;
+    const msgEl = document.getElementById('inv-add-msg');
+
+    if (!name || !shopId) {
+        if (msgEl) { msgEl.textContent = '❌ Please fill in name and select a shop.'; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+        return;
+    }
+
+    try {
+        const { error } = await supabaseClient.from('inventory_items').insert([{
+            organization_id: USER_PROFILE.organization_id,
+            shop_id: shopId,
+            name: name,
+            category: category,
+            price: price,
+            stock_quantity: qty
+        }]);
+
+        if (error) throw error;
+
+        if (msgEl) { msgEl.textContent = `✅ "${name}" added to inventory!`; msgEl.style.color = '#10b981'; msgEl.style.display = 'block'; }
+        
+        // Reset form
+        document.getElementById('inv-name').value = '';
+        document.getElementById('inv-price').value = '';
+        document.getElementById('inv-qty').value = '';
+
+        // Reload
+        await loadInventoryScreen();
+
+        setTimeout(() => { if (msgEl) msgEl.style.display = 'none'; }, 3000);
+
+    } catch (err) {
+        if (msgEl) { msgEl.textContent = '❌ Error: ' + err.message; msgEl.style.color = '#ef4444'; msgEl.style.display = 'block'; }
+    }
+}
+
+function openEditInventoryItem(itemId) {
+    const item = ALL_INVENTORY.find(i => i.id === itemId);
+    if (!item) return;
+
+    document.getElementById('edit-inv-id').value = item.id;
+    document.getElementById('edit-inv-name').value = item.name;
+    document.getElementById('edit-inv-category').value = item.category;
+    document.getElementById('edit-inv-price').value = item.price;
+    document.getElementById('edit-inv-qty').value = item.stock_quantity;
+    document.getElementById('edit-inv-threshold').value = item.low_stock_threshold || 5;
+
+    document.getElementById('inv-edit-modal').classList.add('active');
+}
+
+async function saveInventoryEdit() {
+    const id = document.getElementById('edit-inv-id').value;
+    const name = document.getElementById('edit-inv-name').value.trim();
+    const category = document.getElementById('edit-inv-category').value;
+    const price = parseFloat(document.getElementById('edit-inv-price').value) || 0;
+    const qty = parseInt(document.getElementById('edit-inv-qty').value) || 0;
+    const threshold = parseInt(document.getElementById('edit-inv-threshold').value) || 5;
+
+    try {
+        const { error } = await supabaseClient.from('inventory_items').update({
+            name, category, price, stock_quantity: qty, low_stock_threshold: threshold, updated_at: new Date().toISOString()
+        }).eq('id', id);
+
+        if (error) throw error;
+
+        document.getElementById('inv-edit-modal').classList.remove('active');
+        await loadInventoryScreen();
+        alert('✅ Item updated successfully!');
+    } catch (err) {
+        alert('❌ Error updating item: ' + err.message);
+    }
+}
+
+async function deleteInventoryItem(itemId, itemName) {
+    if (!confirm(`Are you sure you want to delete "${itemName}"? This cannot be undone.`)) return;
+
+    try {
+        const { error } = await supabaseClient.from('inventory_items').delete().eq('id', itemId);
+        if (error) throw error;
+        await loadInventoryScreen();
+        alert(`✅ "${itemName}" has been deleted.`);
+    } catch (err) {
+        alert('❌ Error deleting item: ' + err.message);
+    }
+}
+
+function openRestockModal(itemId, itemName) {
+    document.getElementById('restock-inv-id').value = itemId;
+    document.getElementById('restock-item-name').textContent = itemName;
+    document.getElementById('restock-qty').value = 1;
+    document.getElementById('inv-restock-modal').classList.add('active');
+}
+
+async function saveRestock() {
+    const id = document.getElementById('restock-inv-id').value;
+    const addQty = parseInt(document.getElementById('restock-qty').value) || 0;
+    if (addQty <= 0) { alert('Please enter a valid quantity.'); return; }
+
+    const item = ALL_INVENTORY.find(i => i.id === id);
+    if (!item) return;
+
+    try {
+        const newQty = item.stock_quantity + addQty;
+        const { error } = await supabaseClient.from('inventory_items').update({
+            stock_quantity: newQty,
+            updated_at: new Date().toISOString()
+        }).eq('id', id);
+
+        if (error) throw error;
+
+        document.getElementById('inv-restock-modal').classList.add('active');
+        await loadInventoryScreen();
+        alert(`✅ Restocked! ${item.name} now has ${newQty} units.`);
+    } catch (err) {
+        alert('❌ Error restocking: ' + err.message);
+    }
+}
+
+function filterInventoryTable() {
+    const search = (document.getElementById('inv-search').value || '').toLowerCase();
+    const catFilter = document.getElementById('inv-cat-filter').value;
+    const stockFilter = document.getElementById('inv-stock-filter').value;
+
+    const rows = document.querySelectorAll('#inv-table-body tr[data-id]');
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name') || '';
+        const cat = row.getAttribute('data-category') || '';
+        const stock = row.getAttribute('data-stock') || '';
+
+        let show = true;
+        if (search && !name.includes(search)) show = false;
+        if (catFilter && cat !== catFilter) show = false;
+        if (stockFilter && stock !== stockFilter) show = false;
+
+        row.style.display = show ? '' : 'none';
+    });
+}

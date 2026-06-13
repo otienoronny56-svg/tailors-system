@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Client Database | Sir's 'n' Suits</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="../../manifest.json">
+</head>
+
+<body>
+    <div class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">&nbsp;</h1>
+                    <span class="sidebar-subtitle">&nbsp;</span>
+                </div>
+            </div>
+
+            <p id="user-info">Logged in as: Owner</p>
+                        <nav>
+                <a href="admin-dashboard.html" id="nav-dashboard" ><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin Dashboard</a>
+                
+                <a href="admin-orders.html" id="nav-orders"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global Orders</a>
+                
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-address-book" style="margin-right: 8px;"></i> Clients &amp; Inbox</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="admin-clients.html" id="nav-clients" class="active"><i class="fas fa-users" style="margin-right: 8px;"></i> Client Database</a>
+                        <a href="admin-messages.html" id="nav-messages"><i class="fas fa-comments" style="margin-right: 8px;"></i> Messages Inbox</a>
+                    </div>
+                </div>
+
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Products &amp; Stock</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="admin-inventory.html" id="nav-inventory"><i class="fas fa-box-open" style="margin-right: 8px;"></i> Inventory</a>
+                        <a href="admin-listings.html" id="nav-listings"><i class="fas fa-tags" style="margin-right: 8px;"></i> Marketplace Catalog</a>
+                    </div>
+                </div>
+
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-wallet" style="margin-right: 8px;"></i> Finance &amp; Analytics</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="financial-overview.html" id="nav-finance"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial Overview</a>
+                        <a href="admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics &amp; AI</a>
+                        <a href="admin-transactions.html" id="nav-transactions"><i class="fas fa-list-ul" style="margin-right: 8px;"></i> Transactions</a>
+                        <a href="admin-expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
+                    </div>
+                </div>
+
+                <a href="admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
+
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+            </nav>
+            <script>
+                if (typeof window.toggleSidebarDropdown !== 'function') {
+                    window.toggleSidebarDropdown = function(button) {
+                        const event = window.event || (arguments.length > 1 ? arguments[1] : null);
+                        if (event) {
+                            event.alreadyHandledDropdown = true;
+                        }
+                        const dropdown = button.closest('.sidebar-dropdown');
+                        if (dropdown) {
+                            dropdown.classList.toggle('open');
+                        }
+                    };
+                }
+            </script>
+        </aside>
+
+        <main class="main-content">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div>
+                    <h1 style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">Client Management (Global)</h1>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">View and manage clients from all shops.</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="openNewClientModal()"
+                        style="background: var(--brand-navy); border: none; color: var(--brand-gold); padding: 0 15px; height: 42px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s;">
+                        <i class="fas fa-user-plus"></i> New Client
+                    </button>
+                    <button onclick="loadClients()" title="Refresh Data"
+                        style="background: transparent; border: 1px solid #ccc; color: #333; height: 42px; width: 42px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button onclick="handleLogout()" title="Logout"
+                        style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="filter-bar">
+                <div class="search-box" style="flex: 1; position: relative;">
+                    <i class="fas fa-search"
+                        style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                    <input type="text" id="client-search" placeholder="Search across all shops..."
+                        style="padding-left: 45px; width: 100%;" oninput="loadClients()">
+                </div>
+            </div>
+
+            <section class="order-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Last Item</th>
+                            <th>Last Visit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clients-tbody">
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:20px;">Loading clients...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <div id="order-modal" class="modal">
+        <div class="modal-content"></div>
+    </div>
+
+    <!-- New Client Modal -->
+    <div id="new-client-modal" class="modal"
+        style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
+        <div class="modal-content"
+            style="background-color: white; margin: 5% auto; padding: 0; border-radius: 12px; width: 620px; max-width: 95%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+
+            <!-- Modal Header -->
+            <div style="padding: 20px 30px; border-bottom: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fff;">
+                <h2 style="margin: 0; color: var(--brand-navy); font-size: 1.5em;">
+                    <i class="fas fa-user-plus" style="color: var(--brand-gold);"></i> Add New Client
+                </h2>
+                <span class="close" onclick="closeNewClientModal()"
+                    style="font-size: 28px; font-weight: bold; color: #94a3b8; cursor: pointer;">&times;</span>
+            </div>
+
+            <form id="new-client-form" onsubmit="saveNewClient(event)"
+                style="flex: 1; overflow-y: auto; padding: 30px;">
+
+                <!-- Name + Phone -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Full Name *</label>
+                        <input type="text" id="new-client-name" required placeholder="e.g. John Doe"
+                            style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">Phone Number *</label>
+                        <input type="tel" id="new-client-phone" required placeholder="e.g. 0712345678"
+                            style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <!-- Garment type for measurements -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">
+                        Initial Garment Type
+                        <span style="color:#94a3b8; font-weight:400;">(optional — to capture first measurements)</span>
+                    </label>
+                    <select id="new-client-garment-type" onchange="generateNewClientMeasurementFields()"
+                        style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; background: white;">
+                        <option value="">-- Skip measurements for now --</option>
+                        <option value="Suit">Suit</option>
+                        <option value="Shirt">Shirt</option>
+                        <option value="Trouser">Trouser</option>
+                        <option value="Dress">Dress</option>
+                        <option value="Skirt">Skirt</option>
+                        <option value="Blouse">Blouse</option>
+                        <option value="Coat">Coat</option>
+                        <option value="Half Coat">Half Coat</option>
+                        <option value="Kanzu">Kanzu</option>
+                        <option value="Buibui">Buibui</option>
+                    </select>
+                </div>
+
+                <!-- Dynamic measurement fields injected by JS -->
+                <div id="new-client-measurements-container"></div>
+
+                <!-- Notes -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #64748b;">
+                        Notes <span style="color:#94a3b8; font-weight:400;">(optional)</span>
+                    </label>
+                    <textarea id="new-client-notes" rows="2" placeholder="Any preferences or special instructions..."
+                        style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; resize: vertical;"></textarea>
+                </div>
+
+                <!-- Actions -->
+                <div style="display: flex; gap: 10px; padding-bottom: 10px;">
+                    <button type="button" onclick="closeNewClientModal()"
+                        style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancel</button>
+                    <button type="submit"
+                        style="flex: 2; background: var(--brand-navy); color: var(--brand-gold); border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fas fa-user-plus"></i> Save Client
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="admin-dashboard.html" class="nav-item">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dash</span>
+        </a>
+        <a href="admin-orders.html" class="nav-item">
+            <i class="fas fa-bolt"></i>
+            <span>Active</span>
+        </a>
+        <a href="admin-order-form.html" class="nav-item center-fab">
+            <div class="fab-circle">
+                <i class="fas fa-plus"></i>
+            </div>
+        </a>
+        <a href="admin-clients.html" class="nav-item active">
+            <i class="fas fa-address-book"></i>
+            <span>Clients</span>
+        </a>
+        <a href="admin-management.html" class="nav-item">
+            <i class="fas fa-cogs"></i>
+            <span>Setup</span>
+        </a>
+    </nav>
+
+    <script src="../../js/core/config.js?v=1781343492375"></script>
+    
+    <!-- Core & Utils -->
+    <script src="../../js/utils/helpers.js?v=1781343492375"></script>
+    <script src="../../js/ui/theme.js?v=1781343492375"></script>
+    <script src="../../js/core/globals.js?v=1781343492375"></script>
+    <script src="../../js/core/init.js?v=1781343492375"></script>
+    <script src="../../js/core/auth.js?v=1781343492375"></script>
+    <script src="../../js/ui/sidebar.js?v=1781343492375"></script>
+    <script src="../../js/ui/modals.js?v=1781343492375"></script>
+    <script src="../../js/features/inventory.js?v=1781343492375"></script>
+    <script src="../../js/features/clients.js?v=1781343492375"></script>
+    
+    <script src="../../js/features/orders.js?v=1781343492375"></script>
+    <script src="../../js/features/payments.js?v=1781343492375"></script>
+    <script src="../../js/features/analytics.js?v=1781343492375"></script>
+    <script src="../../js/features/messaging.js?v=1781343492375"></script>
+    <script src="../../js/features/management.js?v=1781343492375"></script>
+    <script src="../../app.js?v=1781343492375"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof initApp === 'function') initApp();
+        });
+    </script>
+    <script src="../../mobile-nav.js?v=1781343492375"></script>
+</body>
+
+</html>

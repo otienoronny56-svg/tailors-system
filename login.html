@@ -299,11 +299,12 @@
             color: var(--brand-gold);
         }
     </style>
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
     <div class="login-card">
-        <div class="logo-section" onclick="location.href='index.html'">
+        <div class="logo-section" onclick="location.href="../../views/null/index.html"">
             <h1 class="brand-logo">Tailors.co.ke</h1>
             <span class="brand-sub">Unified Access Portal</span>
         </div>
@@ -410,11 +411,28 @@
             <p id="signup-message" class="error-message"></p>
         </div>
 
-        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home / Marketplace</a>
+        <a href="../../views/null/index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home / Marketplace</a>
     </div>
 
-    <script src="config.js"></script>
-    <script src="app.js"></script>
+    <script src="js/core/config.js?v=1781343492375"></script>
+    
+    <!-- Core & Utils -->
+    <script src="js/utils/helpers.js?v=1781343492375"></script>
+    <script src="js/ui/theme.js?v=1781343492375"></script>
+    <script src="js/core/globals.js?v=1781343492375"></script>
+    <script src="js/core/init.js?v=1781343492375"></script>
+    <script src="js/core/auth.js?v=1781343492375"></script>
+    <script src="js/ui/sidebar.js?v=1781343492375"></script>
+    <script src="js/ui/modals.js?v=1781343492375"></script>
+    <script src="js/features/inventory.js?v=1781343492375"></script>
+    <script src="js/features/clients.js?v=1781343492375"></script>
+    
+    <script src="js/features/orders.js?v=1781343492375"></script>
+    <script src="js/features/payments.js?v=1781343492375"></script>
+    <script src="js/features/analytics.js?v=1781343492375"></script>
+    <script src="js/features/messaging.js?v=1781343492375"></script>
+    <script src="js/features/management.js?v=1781343492375"></script>
+    <script src="app.js?v=1781343492375"></script>
     <script>
         let currentMode = 'signin';
         let currentSignupRole = 'client';
@@ -517,7 +535,7 @@
                 }
 
                 alert("Client Account created successfully! Redirecting to marketplace...");
-                location.href = 'client-dashboard.html';
+                location.href = '/views/client/client-dashboard.html';
             } catch (err) {
                 console.error("Client Signup Error:", err);
                 messageEl.textContent = "❌ " + err.message;
@@ -592,7 +610,7 @@
                 if (profileError) throw profileError;
 
                 alert("Shop registered successfully! Awaiting administrator approval.");
-                window.location.href = 'admin-dashboard.html';
+                window.location.href = '/views/admin/admin-dashboard.html';
             } catch (err) {
                 console.error("Tailor Signup Error:", err);
                 messageEl.textContent = "❌ " + err.message;

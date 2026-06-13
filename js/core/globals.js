@@ -1,0 +1,69 @@
+
+// ==========================================
+// 🌐 GLOBAL VARIABLES & CONSTANTS
+// ==========================================
+let USER_PROFILE = null;
+let CURRENT_ORDER_ID = null;
+let ALL_SHOPS = {};
+let analyticsCharts = {};
+
+let lastDashboardLoad = 0;
+const DEBOUNCE_DELAY = 500;
+let dataCache = {
+    shops: null,
+    workers: null,
+    orders: null,
+    expenses: null,
+    cacheTime: 0
+};
+const CACHE_TTL = 60000;
+
+const STATUS_MAP = {
+    1: 'Assigned',
+    2: 'In Progress',
+    3: 'QA Check',
+    4: 'Ready',
+    5: 'Collected (Pending)',
+    6: 'Closed'
+};
+
+const GARMENT_MEASUREMENTS = {
+    'Suit': {
+        Coat: ['Shoulder', 'Chest', 'Bodice', 'Waist', 'Bicep', 'Sleeve', 'Length', 'Hips'],
+        Shirt: ['Shoulder', 'Chest', 'Bodice', 'Waist', 'Sleeve', 'Length', 'Neck', 'Cuff'],
+        Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
+    },
+    'Kaunda/Senator Suit': {
+        Top: ['Shoulder', 'Sleeve', 'Arm', 'Chest', 'Waist', 'Hips', 'Length', 'Neck'],
+        Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
+    },
+    'Trouser': {
+        Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
+    },
+    'Shirt': {
+        Shirt: [
+            'Shoulder', 'Chest', 'Bust', 'Bodice', 'Waist', 'Long Sleeve', 'Short Sleeve', 'Length', 'Neck', 'Cuff'
+        ]
+    },
+    'Dress': {
+        Dress: ['Shoulder', 'Bust', 'Waist', 'Hips', 'Length', 'Sleeve']
+    },
+    'Coat': {
+        Coat: ['Shoulder', 'Chest', 'Waist', 'Sleeve', 'Length', 'Hips']
+    },
+    'Half Coat': {
+        Coat: ['Shoulder', 'Chest', 'Waist', 'Length']
+    },
+    'Standard Size': {
+        'Standard Size': ['Top/Shirt Size (e.g. S/M/L/XL)', 'Bottom/Trouser Size (e.g. 30/32/34/36)', 'Chest Size (inches)', 'Waist Size (inches)', 'Height (feet/inches)', 'Weight (kg/lbs)']
+    },
+    'Shoes': {
+        'Shoes': ['Shoe Size (UK/US/EU)', 'Foot Length (inches)', 'Foot Width (inches/Standard/Wide)']
+    },
+    'Accessories': {
+        'Accessories': ['Wrist/Watch Size (inches)', 'Cap/Hat Size (inches or S/M/L)', 'Belt Size (inches)', 'Scarf/Neck Size (inches)', 'Preferred Tie Type (Slim/Standard)']
+    },
+    'Alteration': {
+        Notes: ['Description']
+    }
+};
