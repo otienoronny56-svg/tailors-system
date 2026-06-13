@@ -1140,6 +1140,47 @@
                 width: 100% !important;
                 margin-bottom: 2px !important;
             }
+            .shop-card .card-title {
+                font-size: 1.05em !important;
+                margin-bottom: 2px !important;
+            }
+            .shop-card .card-location {
+                font-size: 0.75em !important;
+                margin-bottom: 4px !important;
+            }
+            .shop-card .card-desc {
+                display: none !important;
+            }
+            .shop-card .card-banner-wrap {
+                height: 120px !important;
+            }
+            .shop-card .card-avatar {
+                top: 90px !important;
+                width: 48px !important;
+                height: 48px !important;
+                font-size: 1.2em !important;
+            }
+            .shop-card .card-body {
+                padding: 26px 12px 12px !important;
+            }
+            .shop-card .card-footer {
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                margin-top: 5px !important;
+                gap: 8px !important;
+            }
+            .shop-card .card-badge {
+                font-size: 0.65em !important;
+                padding: 3px 6px !important;
+            }
+            .shop-card .card-btn {
+                padding: 6px 12px !important;
+                font-size: 0.75em !important;
+                border-radius: 4px !important;
+                width: auto !important;
+                margin-top: 0 !important;
+            }
         }
     </style>
     <link rel="manifest" href="../../manifest.json">
@@ -2074,7 +2115,7 @@
                     : `<span class="card-badge" style="background: rgba(255,255,255,0.05); color: var(--brand-slate);"><i class="far fa-star"></i> New Shop</span>`;
 
                 return `
-                    <div class="card">
+                    <div class="card shop-card">
                         <div class="card-banner-wrap">
                             <div class="card-banner" style="${bannerStyle}"></div>
                         </div>
