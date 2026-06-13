@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=2">
     <!-- Google Fonts -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap"
         rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,27 +20,24 @@
     <style>
         /* ===== DESIGN TOKENS ===== */
         :root {
-            --navy: #06101e;
-            --navy-mid: #0d1f38;
-            --navy-light: #122342;
-            --gold: #C9A84C;
-            --gold-bright: #E8C96A;
-            --gold-dim: #8a6f2e;
-            --gold-glow: rgba(201, 168, 76, 0.18);
-            --emerald: #1a6b4a;
-            --emerald-mid: #27a870;
-            --emerald-dim: rgba(39, 168, 112, 0.15);
-            --burgundy: #7c1d2e;
-            --white: #ffffff;
-            --off-white: #f0ede5;
-            --slate: #7e8dac;
-            --light-slate: #a8b2cd;
-            --glass: rgba(13, 31, 56, 0.72);
-            --glass-border: rgba(201, 168, 76, 0.18);
-            --card-bg: rgba(13, 31, 56, 0.75);
+            --bg-deep: #030712;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --bg-card-hover: rgba(31, 41, 55, 0.85);
+            --gold: #d4af37;
+            --gold-light: #f3cd57;
+            --gold-glow: rgba(212, 175, 55, 0.15);
+            --gold-border: rgba(212, 175, 55, 0.25);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-slate: #d1d5db;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.5);
+            --font-display: 'Playfair Display', serif;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* ===== RESET ===== */
+        /* ===== RESET & BASE ===== */
         *,
         *::before,
         *::after {
@@ -51,32 +48,36 @@
 
         html {
             scroll-behavior: smooth;
+            overflow-x: hidden;
+            width: 100%;
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--navy);
-            color: var(--white);
-            line-height: 1.65;
+            font-family: var(--font-sans);
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            line-height: 1.6;
             overflow-x: hidden;
         }
 
-        /* Custom Scrollbar */
+        /* Custom Premium Scrollbar */
         ::-webkit-scrollbar {
-            width: 7px;
+            width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--navy);
+            background: var(--bg-deep);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--gold);
+            background: var(--gold-border);
             border-radius: 4px;
+            border: 2px solid var(--bg-deep);
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--gold-bright);
+            background: var(--gold);
         }
 
         /* ===== HEADER ===== */
@@ -85,151 +86,270 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 18px 7%;
-            background: rgba(6, 16, 30, 0.88);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            padding: 20px 8%;
+            background: rgba(3, 7, 18, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
-            border-bottom: 1px solid var(--glass-border);
-            transition: padding 0.3s;
+            border-bottom: 1px solid var(--border-glass);
+            transition: var(--transition-smooth);
+        }
+
+        header.scrolled {
+            padding: 14px 8%;
+            background: rgba(3, 7, 18, 0.9);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .logo-group {
             display: flex;
             flex-direction: column;
+            text-decoration: none;
         }
 
         .logo-text {
-            font-family: 'Playfair Display', serif;
+            font-family: var(--font-display);
             font-weight: 700;
-            font-size: 1.45em;
+            font-size: 1.55em;
             color: var(--gold);
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
         .logo-sub {
-            font-size: 0.58em;
-            letter-spacing: 4px;
-            color: var(--light-slate);
+            font-size: 0.6em;
+            letter-spacing: 3px;
+            color: var(--text-muted);
             text-transform: uppercase;
-            font-weight: 500;
+            font-weight: 600;
+            margin-top: -2px;
         }
 
         nav {
             display: flex;
             align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
             gap: 28px;
         }
 
-        nav a {
-            color: var(--light-slate);
+        .nav-links a {
+            color: var(--text-slate);
             text-decoration: none;
             font-weight: 500;
             font-size: 0.92em;
-            transition: color 0.3s;
-            white-space: nowrap;
+            transition: var(--transition-smooth);
+            position: relative;
+            padding: 4px 0;
         }
 
-        nav a:hover {
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--gold);
+            transition: var(--transition-smooth);
+        }
+
+        .nav-links a:hover {
             color: var(--gold);
         }
 
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        #nav-auth-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
         .btn-login {
-            color: var(--light-slate);
+            color: var(--text-slate);
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9em;
-            transition: color 0.3s;
-            padding: 9px 5px;
+            transition: var(--transition-smooth);
+            padding: 10px 16px;
+            border-radius: 8px;
         }
 
         .btn-login:hover {
             color: var(--gold);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .btn-signup {
             background: var(--gold);
             border: none;
-            color: var(--navy);
-            padding: 10px 24px;
-            border-radius: 6px;
+            color: var(--bg-deep);
+            padding: 10px 22px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 700;
             font-size: 0.9em;
             cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 0.3px;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2);
         }
 
         .btn-signup:hover {
-            background: var(--gold-bright);
-            box-shadow: 0 4px 18px rgba(201, 168, 76, 0.45);
-            transform: translateY(-2px);
+            background: var(--gold-light);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.45);
+            transform: translateY(-1px);
         }
 
         .btn-portal {
             background: transparent;
-            border: 1px solid var(--gold);
+            border: 1px solid var(--gold-border);
             color: var(--gold);
-            padding: 9px 20px;
-            border-radius: 6px;
+            padding: 10px 20px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9em;
-            transition: all 0.3s;
+            transition: var(--transition-smooth);
         }
 
         .btn-portal:hover {
             background: var(--gold);
-            color: var(--navy);
-            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3);
+            color: var(--bg-deep);
+            border-color: var(--gold);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
         }
 
         .nav-user-pill {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .nav-user-name {
             font-size: 0.9em;
             font-weight: 600;
-            color: var(--gold);
+            color: var(--gold-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-signout {
             background: transparent;
-            border: 1px solid rgba(239, 68, 68, 0.5);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             color: #ef4444;
             padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 0.8em;
+            border-radius: 8px;
+            font-size: 0.82em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
+            transition: var(--transition-smooth);
         }
 
         .btn-signout:hover {
             background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
         }
 
-        /* ===== HERO ===== */
-        .hero {
-            position: relative;
-            min-height: 100vh;
+        /* Mobile Hamburger Icon */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 4px;
+            z-index: 1010;
+            transition: var(--transition-smooth);
+        }
+
+        .mobile-menu-btn:hover {
+            color: var(--gold);
+        }
+
+        /* ===== MOBILE DRAWER MENU ===== */
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 80%;
+            max-width: 320px;
+            height: 100vh;
+            background: rgba(10, 15, 30, 0.98);
+            backdrop-filter: blur(25px);
+            z-index: 1005;
+            padding: 100px 30px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            border-left: 1px solid var(--border-glass);
+            transform: translateX(100%);
+            transition: var(--transition-smooth);
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .mobile-drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1004;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-smooth);
+        }
+
+        .mobile-drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-drawer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .mobile-drawer-links a {
+            color: var(--text-slate);
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            overflow: hidden;
-            padding: 130px 7% 100px;
+            gap: 12px;
+            transition: var(--transition-smooth);
         }
 
-        /* ---- Slideshow ---- */
+        .mobile-drawer-links a:hover {
+            color: var(--gold);
+            transform: translateX(5px);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            position: relative;
+            min-height: 95vh;
+            display: flex;
+            align-items: center;
+            padding: 140px 8% 80px;
+            overflow: hidden;
+        }
+
         .hero-slideshow {
             position: absolute;
             inset: 0;
@@ -240,240 +360,230 @@
             position: absolute;
             inset: 0;
             background-size: cover;
-            background-position: center center;
+            background-position: center;
             background-repeat: no-repeat;
             opacity: 0;
-            transition: opacity 1.4s ease-in-out;
-            filter: brightness(0.65) saturate(1.2);
-            transform: scale(1.03);
-            animation: none;
-            transform-origin: center center;
+            transition: opacity 1.5s ease-in-out;
+            filter: brightness(0.4) saturate(1.1);
+            transform: scale(1.05);
         }
 
         .hero-slide.active {
             opacity: 1;
-            animation: kenBurns 9s ease-in-out forwards;
+            transform: scale(1.0);
+            animation: zoomSlow 10s ease-in-out forwards;
         }
 
-        .hero-slide.exit {
-            opacity: 0;
-            transition: opacity 1.4s ease-in-out;
+        @keyframes zoomSlow {
+            from { transform: scale(1.05); }
+            to { transform: scale(1.0); }
         }
 
-        @keyframes kenBurns {
-            from {
-                transform: scale(1.03);
-            }
-
-            to {
-                transform: scale(1.0);
-            }
-        }
-
-        /* Gradient overlay - dark center band for text, lighter sides to show subjects */
         .hero-overlay {
             position: absolute;
             inset: 0;
-            background:
-                radial-gradient(ellipse 55% 100% at 42% 50%, rgba(6, 16, 30, 0.82) 0%, rgba(6, 16, 30, 0.35) 65%, transparent 100%),
-                linear-gradient(to top, rgba(6, 16, 30, 0.9) 0%, rgba(6, 16, 30, 0.2) 35%, transparent 60%),
-                linear-gradient(to bottom, rgba(6, 16, 30, 0.7) 0%, transparent 20%);
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(3, 7, 18, 0.4), rgba(3, 7, 18, 0.95)),
+                linear-gradient(to top, var(--bg-deep) 0%, transparent 40%),
+                linear-gradient(to bottom, var(--bg-deep) 0%, transparent 20%);
             z-index: 1;
         }
-
-        /* Slide dot indicators */
-        .slide-dots {
-            position: absolute;
-            bottom: 38px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 3;
-        }
-
-        .slide-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            cursor: pointer;
-            transition: all 0.4s;
-        }
-
-        .slide-dot.active {
-            background: var(--gold);
-            border-color: var(--gold);
-            width: 26px;
-            border-radius: 4px;
-        }
-
-
 
         .hero-content {
             position: relative;
             z-index: 2;
-            max-width: 620px;
+            max-width: 680px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
         .hero-eyebrow {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(201, 168, 76, 0.12);
-            border: 1px solid rgba(201, 168, 76, 0.3);
-            color: var(--gold);
-            font-size: 0.75em;
+            gap: 8px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--gold-border);
+            color: var(--gold-light);
+            font-size: 0.76em;
             font-weight: 700;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            padding: 7px 18px;
-            border-radius: 40px;
-            margin-bottom: 28px;
-        }
-
-        .hero-eyebrow i {
-            font-size: 0.9em;
+            padding: 8px 16px;
+            border-radius: 50px;
+            margin-bottom: 24px;
         }
 
         .hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2.4em, 5vw, 3.8em);
+            font-family: var(--font-display);
+            font-size: clamp(2.3em, 6vw, 4em);
             font-weight: 700;
-            color: var(--white);
-            margin-bottom: 24px;
-            line-height: 1.18;
+            line-height: 1.15;
+            color: var(--text-main);
+            margin-bottom: 20px;
         }
 
         .hero h1 em {
-            font-style: italic;
             color: var(--gold);
+            font-style: italic;
         }
 
         .hero p {
-            color: var(--light-slate);
-            font-size: 1.08em;
+            color: var(--text-slate);
+            font-size: clamp(0.95em, 2vw, 1.15em);
+            margin-bottom: 36px;
+            line-height: 1.7;
             max-width: 600px;
-            margin-bottom: 42px;
-            line-height: 1.75;
         }
 
         .hero-cta {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
+            width: 100%;
         }
 
         .btn-hero-primary {
             background: var(--gold);
-            color: var(--navy);
-            padding: 16px 38px;
+            color: var(--bg-deep);
+            padding: 16px 36px;
             border-radius: 50px;
-            font-weight: 800;
-            font-size: 1em;
+            font-weight: 700;
+            font-size: 0.95em;
             text-decoration: none;
-            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 6px 30px rgba(201, 168, 76, 0.35);
+            transition: var(--transition-smooth);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
         }
 
         .btn-hero-primary:hover {
-            background: var(--gold-bright);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 40px rgba(201, 168, 76, 0.5);
+            background: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.55);
         }
 
         .btn-hero-secondary {
-            background: rgba(255, 255, 255, 0.06);
-            color: var(--white);
-            padding: 16px 38px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            padding: 16px 36px;
             border-radius: 50px;
-            font-weight: 700;
-            font-size: 1em;
+            font-weight: 600;
+            font-size: 0.95em;
             text-decoration: none;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-glass);
+            transition: var(--transition-smooth);
         }
 
         .btn-hero-secondary:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: var(--gold);
-            color: var(--gold);
-            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--gold-light);
+            color: var(--gold-light);
+            transform: translateY(-2px);
         }
 
-        /* Trust badges row */
-        .hero-trust {
-            position: relative;
-            z-index: 2;
+        /* slide indicators */
+        .slide-dots {
+            position: absolute;
+            bottom: 40px;
+            right: 8%;
             display: flex;
-            gap: 32px;
-            flex-wrap: wrap;
-            margin-top: 60px;
-            padding-top: 28px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 8px;
+            z-index: 3;
         }
 
-        .trust-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.82em;
-            color: var(--light-slate);
+        .slide-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: var(--transition-smooth);
         }
 
-        .trust-item i {
+        .slide-dot.active {
+            background: var(--gold);
+            width: 20px;
+            border-radius: 4px;
+        }
+
+        /* ===== INFINITE FASHION STRIP ===== */
+        .fashion-strip {
+            background: #02040a;
+            border-top: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border-glass);
+            overflow: hidden;
+            padding: 16px 0;
+            user-select: none;
+        }
+
+        .fashion-row-inner {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        .fashion-word {
+            font-family: var(--font-display);
+            font-size: 1.05em;
+            color: var(--text-slate);
+            letter-spacing: 0.5px;
+            padding: 0 16px;
+        }
+
+        .fashion-word.highlight {
             color: var(--gold);
-            font-size: 1.1em;
+            font-weight: 500;
         }
 
-        .trust-item strong {
-            color: var(--white);
+        .fashion-sep {
+            color: var(--gold-border);
+            font-size: 0.8em;
+            padding: 0 4px;
         }
 
-        /* ===== SECTION COMMONS ===== */
+        /* ===== SECTIONS COMMON ===== */
         section.content-section {
-            padding: 90px 7%;
-            max-width: 1380px;
+            padding: 100px 8%;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
         .section-eyebrow {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             color: var(--gold);
-            font-size: 0.72em;
+            font-size: 0.74em;
             font-weight: 700;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .section-eyebrow::before {
             content: '';
-            width: 28px;
+            width: 20px;
             height: 2px;
             background: var(--gold);
-            border-radius: 2px;
         }
 
         .section-heading {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(1.8em, 3vw, 2.6em);
+            font-family: var(--font-display);
+            font-size: clamp(1.8em, 4vw, 2.6em);
             font-weight: 700;
-            color: var(--white);
+            color: var(--text-main);
             margin-bottom: 16px;
-            line-height: 1.2;
+            line-height: 1.25;
         }
 
         .section-heading em {
@@ -482,10 +592,10 @@
         }
 
         .section-subtext {
-            color: var(--slate);
-            font-size: 1em;
-            max-width: 560px;
-            line-height: 1.75;
+            color: var(--text-muted);
+            font-size: 1.02em;
+            max-width: 600px;
+            line-height: 1.7;
         }
 
         .section-header-row {
@@ -497,322 +607,181 @@
             flex-wrap: wrap;
         }
 
-        /* ===== CATEGORIES STRIP ===== */
+        /* ===== CATEGORIES SECTION ===== */
         .categories-section {
-            padding: 50px 7% 20px;
-            max-width: 1380px;
+            padding: 70px 8% 40px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
         .categories-label {
-            text-align: center;
-            font-size: 0.72em;
+            font-size: 0.74em;
             font-weight: 700;
-            letter-spacing: 4px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            color: var(--slate);
-            margin-bottom: 30px;
-            opacity: 0;
-            transform: translateY(12px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .categories-label.visible {
-            opacity: 1;
-            transform: translateY(0);
+            color: var(--text-muted);
+            margin-bottom: 24px;
         }
 
         .categories-grid {
             display: flex;
-            gap: 12px;
-            justify-content: flex-start;
-            flex-wrap: nowrap;
+            gap: 16px;
             overflow-x: auto;
-            padding-bottom: 8px;
-            /* Hide scrollbar but keep scroll */
+            padding: 10px 0 20px;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch;
         }
 
         .categories-grid::-webkit-scrollbar {
             display: none;
         }
 
-        /* Entry state — hidden before animation */
         .cat-pill {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 10px;
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
+            gap: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
             border-radius: 16px;
-            padding: 22px 28px;
-            cursor: pointer;
-            min-width: 110px;
+            padding: 18px 24px;
             text-decoration: none;
-            color: var(--light-slate);
-            backdrop-filter: blur(8px);
-            /* Animation entry state */
-            opacity: 0;
-            transform: translateY(28px) scale(0.92);
-            transition:
-                opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.55s cubic-bezier(0.4, 0, 0.2, 1),
-                border-color 0.3s,
-                background 0.3s,
-                box-shadow 0.3s,
-                color 0.3s;
-        }
-
-        .cat-pill.visible {
-            opacity: 1;
-            transform: translateY(0) scale(1);
+            color: var(--text-main);
+            min-width: 210px;
+            flex-shrink: 0;
+            transition: var(--transition-smooth);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .cat-pill:hover {
             border-color: var(--gold);
-            background: rgba(201, 168, 76, 0.1);
-            color: var(--gold);
-            transform: translateY(-6px) scale(1.04);
-            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(201, 168, 76, 0.2);
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
         }
 
         .cat-pill i {
-            font-size: 1.6em;
+            font-size: 1.5em;
             color: var(--gold);
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            animation: iconIdle 3s ease-in-out infinite;
+            background: rgba(212, 175, 55, 0.08);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
         }
 
-        /* Subtle floating idle animation on icon */
-        @keyframes iconIdle {
-
-            0%,
-            100% {
-                transform: translateY(0);
-                filter: drop-shadow(0 0 0px rgba(201, 168, 76, 0));
-            }
-
-            50% {
-                transform: translateY(-3px);
-                filter: drop-shadow(0 0 6px rgba(201, 168, 76, 0.55));
-            }
-        }
-
-        /* On hover — bounce the icon up with spring */
         .cat-pill:hover i {
-            animation: none;
-            transform: translateY(-6px) scale(1.22);
-            filter: drop-shadow(0 0 10px rgba(201, 168, 76, 0.7));
+            background: var(--gold);
+            color: var(--bg-deep);
+            transform: scale(1.1);
         }
 
         .cat-pill span {
-            font-size: 0.78em;
+            font-size: 0.88em;
             font-weight: 600;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* ===== PREMIUM FASHION STRIP ===== */
-        .fashion-strip {
-            background: rgba(6, 16, 30, 0.97);
-            border-top: 1px solid rgba(201, 168, 76, 0.35);
-            border-bottom: 1px solid rgba(201, 168, 76, 0.35);
-            overflow: hidden;
-            padding: 0;
-            user-select: none;
-        }
-
-        .fashion-row {
-            display: flex;
-            width: max-content;
-            padding: 13px 0;
-        }
-
-        .fashion-row-inner {
-            display: inline-flex;
-            gap: 0;
-            animation: runLeft 35s linear infinite;
-            white-space: nowrap;
-        }
-
-        .fashion-row-inner:hover {
-            animation-play-state: paused;
-        }
-
-        @keyframes runLeft {
-            from {
-                transform: translateX(0);
-            }
-
-            to {
-                transform: translateX(-50%);
-            }
-        }
-
-        @keyframes runRight {
-            from {
-                transform: translateX(-50%);
-            }
-
-            to {
-                transform: translateX(0);
-            }
-        }
-
-        .fashion-word {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-size: 0.95em;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.75);
-            letter-spacing: 1px;
-            padding: 0 10px;
-            transition: color 0.3s;
-        }
-
-        .fashion-word:hover {
-            color: var(--gold);
-        }
-
-        .fashion-sep {
-            color: var(--gold);
-            font-size: 0.7em;
-            padding: 0 6px;
-            display: inline-flex;
-            align-items: center;
-            opacity: 0.8;
-        }
-
-        /* Highlight alternating words */
-        .fashion-word.highlight {
-            color: var(--gold);
-            font-weight: 600;
+            line-height: 1.3;
         }
 
         /* ===== PROVIDER CARDS ===== */
         .providers-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 28px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
         }
 
         .provider-card {
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
             overflow: hidden;
+            text-decoration: none;
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
-            cursor: pointer;
-            text-decoration: none;
             backdrop-filter: blur(10px);
-            /* Entry animation state */
-            opacity: 0;
-            transform: translateY(36px);
-            transition:
-                opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                border-color 0.35s,
-                box-shadow 0.35s;
-        }
-
-        .provider-card.visible {
-            opacity: 1;
-            transform: translateY(0);
+            -webkit-backdrop-filter: blur(10px);
+            transition: var(--transition-smooth);
         }
 
         .provider-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(201, 168, 76, 0.5);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(201, 168, 76, 0.12);
+            border-color: var(--gold-border);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-premium);
         }
 
         .provider-banner {
-            height: 175px;
-            background: var(--navy-mid);
+            height: 180px;
             background-size: cover;
             background-position: center;
             position: relative;
+            background-color: #0c1222;
         }
 
         .provider-banner::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(6, 16, 30, 0.7) 0%, transparent 60%);
+            background: linear-gradient(to top, rgba(3, 7, 18, 0.85) 0%, transparent 60%);
         }
 
         .provider-avatar {
-            width: 64px;
-            height: 64px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             border: 3px solid var(--gold);
-            background: var(--navy-mid);
+            background: #0f172a;
             position: absolute;
-            bottom: -32px;
-            left: 20px;
+            bottom: -35px;
+            left: 24px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--gold);
-            font-size: 1.6em;
+            font-size: 1.8em;
             background-size: cover;
             background-position: center;
-            z-index: 1;
-        }
-
-        .provider-category-tag {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            background: rgba(6, 16, 30, 0.8);
-            border: 1px solid var(--glass-border);
-            color: var(--gold);
-            font-size: 0.7em;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            padding: 5px 12px;
-            border-radius: 20px;
-            backdrop-filter: blur(8px);
-            z-index: 1;
+            z-index: 2;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
         }
 
         .provider-body {
-            padding: 46px 22px 24px;
+            padding: 50px 24px 28px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
 
         .provider-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2em;
-            color: var(--white);
+            font-family: var(--font-display);
+            font-size: 1.3em;
             font-weight: 600;
-            margin-bottom: 4px;
+            color: var(--text-main);
+            margin-bottom: 6px;
         }
 
         .provider-location {
             font-size: 0.82em;
-            color: var(--gold);
+            color: var(--gold-light);
             display: flex;
             align-items: center;
-            gap: 5px;
-            margin-bottom: 12px;
+            gap: 6px;
+            margin-bottom: 16px;
+            font-weight: 500;
         }
 
         .provider-desc {
-            font-size: 0.87em;
-            color: var(--slate);
+            font-size: 0.88em;
+            color: var(--text-muted);
             line-height: 1.6;
             flex-grow: 1;
+            margin-bottom: 24px;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -821,64 +790,68 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 18px;
-            padding-top: 14px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 18px;
+            border-top: 1px solid var(--border-glass);
         }
 
         .provider-rating {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 0.82em;
+            gap: 6px;
+            font-size: 0.85em;
             color: var(--gold);
             font-weight: 600;
         }
 
         .btn-visit {
-            background: var(--gold);
-            color: var(--navy);
+            background: var(--gold-glow);
+            border: 1px solid var(--gold-border);
+            color: var(--gold-light);
             padding: 8px 18px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 700;
-            font-size: 0.82em;
-            text-decoration: none;
-            transition: all 0.3s;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: var(--transition-smooth);
         }
 
-        .btn-visit:hover {
-            background: var(--gold-bright);
-            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4);
+        .provider-card:hover .btn-visit {
+            background: var(--gold);
+            color: var(--bg-deep);
+            border-color: var(--gold);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
         }
 
-        /* ===== SHOWCASE CARDS (listings) ===== */
+        /* ===== SHOWCASE LISTINGS (Teaser Listings) ===== */
         .listings-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 26px;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 30px;
         }
 
         .listing-card {
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
             overflow: hidden;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: var(--transition-smooth);
         }
 
         .listing-card:hover {
+            border-color: var(--gold-border);
             transform: translateY(-8px);
-            border-color: rgba(201, 168, 76, 0.4);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+            box-shadow: var(--shadow-premium);
         }
 
         .listing-img-wrap {
             position: relative;
-            height: 260px;
-            background: var(--navy-mid);
+            height: 280px;
+            background: #090f1e;
             overflow: hidden;
         }
 
@@ -887,54 +860,61 @@
             inset: -20px;
             background-size: cover;
             background-position: center;
-            filter: blur(18px) brightness(0.45);
+            filter: blur(20px) brightness(0.35);
         }
 
         .listing-img {
             position: absolute;
             inset: 0;
-            background-size: contain;
+            background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
+            transition: var(--transition-smooth);
+        }
+
+        .listing-card:hover .listing-img {
+            transform: scale(1.04);
         }
 
         .listing-badge {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(201, 168, 76, 0.18);
-            border: 1px solid rgba(201, 168, 76, 0.4);
-            color: var(--gold);
+            top: 16px;
+            left: 16px;
+            background: rgba(3, 7, 18, 0.75);
+            border: 1px solid var(--border-glass);
+            color: var(--gold-light);
             font-size: 0.68em;
             font-weight: 700;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 6px 14px;
+            border-radius: 40px;
             backdrop-filter: blur(8px);
-            z-index: 2;
+            z-index: 3;
         }
 
         .listing-body {
-            padding: 20px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
         }
 
         .listing-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.1em;
+            font-family: var(--font-display);
+            font-size: 1.25em;
             font-weight: 600;
-            color: var(--white);
-            margin-bottom: 8px;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            line-height: 1.3;
         }
 
         .listing-desc {
-            font-size: 0.84em;
-            color: var(--slate);
+            font-size: 0.88em;
+            color: var(--text-muted);
             line-height: 1.6;
             flex-grow: 1;
+            margin-bottom: 24px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -945,122 +925,128 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 16px;
-            padding-top: 14px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 18px;
+            border-top: 1px solid var(--border-glass);
         }
 
         .listing-price {
-            font-weight: 700;
-            font-size: 1.05em;
-            color: var(--gold);
+            font-weight: 800;
+            font-size: 1.15em;
+            color: var(--gold-light);
         }
 
         .btn-inquire {
             background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 7px 16px;
-            border-radius: 6px;
-            font-size: 0.8em;
+            border: 1px solid var(--gold-border);
+            color: var(--gold-light);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.82em;
             font-weight: 700;
             text-decoration: none;
-            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition-smooth);
             cursor: pointer;
         }
 
         .btn-inquire:hover {
             background: var(--gold);
-            color: var(--navy);
+            color: var(--bg-deep);
+            border-color: var(--gold);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
         }
 
         /* ===== HOW IT WORKS ===== */
         .hiw-section {
-            background: linear-gradient(135deg, rgba(13, 31, 56, 0.6) 0%, rgba(6, 16, 30, 0.9) 100%);
-            border-top: 1px solid var(--glass-border);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 90px 7%;
+            background: linear-gradient(180deg, var(--bg-deep) 0%, rgba(13, 19, 33, 0.6) 100%);
+            border-top: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 100px 8%;
         }
 
         .hiw-inner {
-            max-width: 1380px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
         .hiw-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 28px;
-            margin-top: 55px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin-top: 60px;
             position: relative;
-        }
-
-        .hiw-grid::before {
-            content: '';
-            position: absolute;
-            top: 35px;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(to right, transparent, var(--glass-border), transparent);
         }
 
         .hiw-step {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 40px 30px;
             text-align: center;
-            padding: 32px 20px;
+            transition: var(--transition-smooth);
             position: relative;
         }
 
+        .hiw-step:hover {
+            border-color: var(--gold-border);
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-5px);
+        }
+
         .hiw-number {
-            width: 54px;
-            height: 54px;
+            width: 58px;
+            height: 58px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-            color: var(--navy);
+            background: linear-gradient(135deg, var(--gold), #8a6f2e);
+            color: var(--bg-deep);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2em;
+            font-size: 1.25em;
             font-weight: 800;
-            margin: 0 auto 20px;
-            box-shadow: 0 6px 20px rgba(201, 168, 76, 0.4);
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
         }
 
         .hiw-step h4 {
-            color: var(--white);
+            color: var(--text-main);
             font-weight: 700;
-            margin-bottom: 10px;
-            font-size: 1em;
+            font-size: 1.1em;
+            margin-bottom: 12px;
         }
 
         .hiw-step p {
-            color: var(--slate);
-            font-size: 0.86em;
-            line-height: 1.65;
+            color: var(--text-muted);
+            font-size: 0.88em;
+            line-height: 1.6;
         }
 
-        /* ===== VALUE PROPS ===== */
+        /* ===== VALUE PROPOSITION ===== */
         .value-section {
-            padding: 90px 7%;
-            max-width: 1380px;
+            padding: 100px 8%;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
         .value-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 28px;
-            margin-top: 55px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 36px;
+            margin-top: 60px;
         }
 
         .value-card {
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            padding: 36px 32px;
-            transition: all 0.3s;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 45px 40px;
+            transition: var(--transition-smooth);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .value-card::before {
@@ -1069,116 +1055,122 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
+            height: 4px;
             background: linear-gradient(to right, var(--gold), transparent);
         }
 
         .value-card:hover {
-            border-color: rgba(201, 168, 76, 0.35);
+            border-color: var(--gold-border);
             transform: translateY(-5px);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow-premium);
         }
 
         .value-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
+            width: 58px;
+            height: 58px;
+            border-radius: 14px;
             background: var(--gold-glow);
-            border: 1px solid rgba(201, 168, 76, 0.25);
+            border: 1px solid var(--gold-border);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--gold);
-            font-size: 1.4em;
-            margin-bottom: 24px;
+            font-size: 1.5em;
+            margin-bottom: 30px;
         }
 
         .value-card h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3em;
-            color: var(--white);
-            margin-bottom: 14px;
+            font-family: var(--font-display);
+            font-size: 1.45em;
+            color: var(--text-main);
+            margin-bottom: 20px;
         }
 
         .value-card ul {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
+            margin-bottom: 36px;
+            flex-grow: 1;
         }
 
         .value-card ul li {
-            color: var(--light-slate);
-            font-size: 0.9em;
+            color: var(--text-slate);
+            font-size: 0.94em;
             display: flex;
             align-items: flex-start;
-            gap: 10px;
-            line-height: 1.55;
+            gap: 12px;
+            line-height: 1.6;
         }
 
         .value-card ul li i {
             color: var(--gold);
-            margin-top: 3px;
+            margin-top: 4px;
             flex-shrink: 0;
         }
 
         .value-card .card-action {
             display: block;
             text-align: center;
-            margin-top: 28px;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 10px;
             font-weight: 700;
-            font-size: 0.9em;
+            font-size: 0.92em;
             text-decoration: none;
-            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: var(--transition-smooth);
         }
 
         .value-card .card-action.gold {
             background: var(--gold);
-            color: var(--navy);
+            color: var(--bg-deep);
         }
 
         .value-card .card-action.gold:hover {
-            background: var(--gold-bright);
-            box-shadow: 0 5px 20px rgba(201, 168, 76, 0.35);
+            background: var(--gold-light);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
         }
 
         .value-card .card-action.outline {
             border: 1px solid var(--gold);
-            color: var(--gold);
+            color: var(--gold-light);
             background: transparent;
         }
 
         .value-card .card-action.outline:hover {
             background: var(--gold);
-            color: var(--navy);
+            color: var(--bg-deep);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
         }
 
         /* ===== CTA BANNER ===== */
         .cta-section {
-            margin: 0 7% 90px;
-            border-radius: 24px;
+            margin: 0 8% 100px;
+            border-radius: 30px;
             background:
-                radial-gradient(ellipse at top right, rgba(201, 168, 76, 0.2) 0%, transparent 55%),
-                linear-gradient(135deg, var(--navy-mid) 0%, var(--navy) 100%);
-            border: 1px solid var(--glass-border);
-            padding: 65px 55px;
+                radial-gradient(circle at top right, rgba(212, 175, 55, 0.12), transparent),
+                linear-gradient(135deg, #0f1626 0%, #030712 100%);
+            border: 1px solid var(--border-glass);
+            padding: 80px 40px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .cta-section h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(1.7em, 3vw, 2.3em);
-            color: var(--white);
-            margin-bottom: 14px;
+            font-family: var(--font-display);
+            font-size: clamp(1.8em, 4vw, 2.5em);
+            color: var(--text-main);
+            margin-bottom: 16px;
         }
 
         .cta-section p {
-            color: var(--slate);
-            font-size: 1em;
-            max-width: 500px;
-            margin: 0 auto 32px;
+            color: var(--text-muted);
+            font-size: 1.05em;
+            max-width: 550px;
+            margin: 0 auto 36px;
             line-height: 1.7;
         }
 
@@ -1188,53 +1180,53 @@
 
         /* ===== FOOTER ===== */
         footer {
-            background: #040810;
-            border-top: 1px solid var(--glass-border);
-            padding: 55px 7% 32px;
+            background: #020408;
+            border-top: 1px solid var(--border-glass);
+            padding: 80px 8% 40px;
         }
 
         .footer-inner {
-            max-width: 1380px;
+            max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1.6fr repeat(3, 1fr);
-            gap: 40px;
-            margin-bottom: 40px;
+            grid-template-columns: 1.5fr repeat(3, 1fr);
+            gap: 48px;
+            margin-bottom: 60px;
         }
 
         .footer-brand .logo-text {
-            font-size: 1.3em;
+            font-size: 1.4em;
         }
 
         .footer-brand p {
-            color: var(--slate);
-            font-size: 0.88em;
-            margin-top: 14px;
+            color: var(--text-muted);
+            font-size: 0.9em;
+            margin-top: 16px;
             line-height: 1.7;
-            max-width: 240px;
+            max-width: 280px;
         }
 
         .footer-col h5 {
-            color: var(--white);
+            color: var(--text-main);
             font-weight: 700;
-            font-size: 0.85em;
+            font-size: 0.88em;
             letter-spacing: 1px;
             text-transform: uppercase;
-            margin-bottom: 18px;
+            margin-bottom: 24px;
         }
 
         .footer-col ul {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 14px;
         }
 
         .footer-col ul a {
-            color: var(--slate);
+            color: var(--text-muted);
             text-decoration: none;
-            font-size: 0.88em;
-            transition: color 0.3s;
+            font-size: 0.9em;
+            transition: var(--transition-smooth);
         }
 
         .footer-col ul a:hover {
@@ -1242,218 +1234,222 @@
         }
 
         .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            border-top: 1px solid var(--border-glass);
+            padding-top: 30px;
             text-align: center;
-            color: var(--slate);
+            color: var(--text-muted);
             font-size: 0.85em;
         }
 
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fadeup {
-            animation: fadeUp 0.7s ease both;
-        }
-
-        .delay-1 {
-            animation-delay: 0.1s;
-        }
-
-        .delay-2 {
-            animation-delay: 0.2s;
-        }
-
-        .delay-3 {
-            animation-delay: 0.35s;
-        }
-
-        .delay-4 {
-            animation-delay: 0.5s;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .footer-inner {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            header {
-                padding: 12px 15px;
-            }
-
-            .logo-text { font-size: 1.2em; }
-            .logo-sub { font-size: 0.55em; }
-
-            nav {
-                gap: 8px;
-            }
-
-            nav > a {
-                display: none !important;
-            }
-            
-            #nav-auth-area { gap: 8px; }
-            .btn-login, .btn-signup { padding: 8px 12px; font-size: 0.8em; }
-
-            .hero {
-                padding: 100px 15px 50px;
-            }
-
-            .hero-eyebrow {
-                font-size: 0.6em;
-                padding: 5px 12px;
-                margin-bottom: 20px;
-                line-height: 1.4;
-            }
-            
-            .hero h1 {
-                font-size: 2.2em;
-                margin-bottom: 16px;
-            }
-            
-            .hero p {
-                font-size: 0.95em;
-                margin-bottom: 30px;
-            }
-            
-            .btn-hero-primary, .btn-hero-secondary {
-                width: 100%;
-                justify-content: center;
-                padding: 14px 20px;
-            }
-
-            .hero-trust {
-                flex-direction: column;
-                gap: 12px;
-                margin-top: 40px;
-            }
-
-            .categories-section,
-            .content-section,
-            .value-section {
-                padding-left: 5%;
-                padding-right: 5%;
-            }
-
-            .cta-section {
-                margin: 0 5% 70px;
-                padding: 45px 28px;
-            }
-
-            .hiw-section {
-                padding: 70px 5%;
-            }
-
-            .footer-inner {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-
-            footer {
-                padding-left: 5%;
-                padding-right: 5%;
-            }
-        }
-
-        /* Shimmer skeleton for loading state */
+        /* ===== SHIMMER SKELETONS ===== */
         @keyframes shimmer {
-            0% {
-                background-position: -600px 0;
-            }
-
-            100% {
-                background-position: 600px 0;
-            }
+            0% { background-position: -450px 0; }
+            100% { background-position: 450px 0; }
         }
 
         .skeleton {
-            background: linear-gradient(90deg, var(--navy-mid) 25%, rgba(255, 255, 255, 0.05) 50%, var(--navy-mid) 75%);
-            background-size: 600px 100%;
-            animation: shimmer 1.4s infinite linear;
-            border-radius: 10px;
+            background: linear-gradient(90deg, #111827 25%, #1f2937 50%, #111827 75%);
+            background-size: 900px 100%;
+            animation: shimmer 1.6s infinite linear;
+            border-radius: 8px;
         }
 
         .skeleton-card {
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
             overflow: hidden;
+            height: 440px;
+            display: flex;
+            flex-direction: column;
         }
 
         .skeleton-banner {
-            height: 175px;
+            height: 180px;
         }
 
         .skeleton-body {
-            padding: 52px 22px 24px;
+            padding: 50px 24px 28px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
+            flex-grow: 1;
         }
 
         .skeleton-line {
             height: 14px;
-            border-radius: 6px;
+            border-radius: 4px;
         }
 
-        .skeleton-line.wide {
-            width: 70%;
+        .skeleton-line.w-70 { width: 70%; }
+        .skeleton-line.w-50 { width: 50%; }
+        .skeleton-line.w-30 { width: 30%; }
+
+        /* ===== RESPONSIVE MEDIA QUERIES ===== */
+        .mobile-actions {
+            display: none;
+            align-items: center;
+            gap: 16px;
         }
 
-        .skeleton-line.medium {
-            width: 50%;
+        .mobile-auth-icon {
+            color: var(--text-slate);
+            font-size: 1.55em;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .skeleton-line.narrow {
-            width: 35%;
+        .mobile-auth-icon:hover {
+            color: var(--gold);
         }
-        @media (max-width: 600px) {
+
+        @media (max-width: 1200px) {
+            header {
+                padding: 16px 5%;
+            }
+            header.scrolled {
+                padding: 12px 5%;
+            }
+
+            .nav-links {
+                display: none !important;
+            }
+
+            #nav-auth-area {
+                display: none !important;
+            }
+
+            .mobile-actions {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .providers-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
             .listings-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .value-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-inner {
                 grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 120px 5% 60px;
+                min-height: 85vh;
+            }
+
+            .hero h1 {
+                font-size: 2.3em;
+            }
+
+            .hero p {
+                font-size: 0.95em;
+                margin-bottom: 28px;
+            }
+
+            .btn-hero-primary,
+            .btn-hero-secondary {
+                width: 100%;
+                justify-content: center;
+                padding: 15px 24px;
+            }
+
+            section.content-section,
+            .categories-section,
+            .value-section {
+                padding-left: 5%;
+                padding-right: 5%;
+                padding-top: 60px;
+                padding-bottom: 60px;
+            }
+
+            .cta-section {
+                margin: 0 5% 60px;
+                padding: 50px 20px;
+            }
+
+            footer {
+                padding: 60px 5% 30px;
+            }
+
+            .footer-inner {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .hiw-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .providers-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            /* Showcase listings customized mobile grid: 2 columns */
+            .listings-grid {
+                grid-template-columns: repeat(2, 1fr);
                 gap: 12px;
             }
+
             .listing-card .listing-img-wrap {
                 height: 180px;
             }
+
             .listing-card .listing-body {
-                padding: 12px;
+                padding: 14px;
             }
+
             .listing-card .listing-title {
                 font-size: 0.95em;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                margin-bottom: 6px;
             }
+
             .listing-card .listing-desc {
                 display: none;
             }
+
             .listing-card .listing-footer {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 8px;
+                padding-top: 10px;
             }
-            .listing-card .listing-footer > span {
-                font-size: 0.85em;
+
+            .listing-card .listing-price {
+                font-size: 0.95em;
             }
+
             .listing-card .btn-inquire {
                 width: 100%;
                 text-align: center;
+                justify-content: center;
                 padding: 8px;
-                font-size: 0.85em;
-                margin-top: 4px;
+                font-size: 0.78em;
             }
         }
     </style>
@@ -1463,39 +1459,61 @@
 <body>
 
     <!-- ===== HEADER ===== -->
-    <header>
-        <div class="logo-group">
+    <header id="main-header">
+        <a href="#" class="logo-group">
             <span class="logo-text">Tailors.co.ke</span>
             <span class="logo-sub">Kenya's Style Marketplace</span>
-        </div>
+        </a>
+        
         <nav id="main-nav">
-            <a href="#categories-section">Categories</a>
-            <a href="#providers-section">Providers</a>
-            <a href="#showcase-section">Showcase</a>
-            <a href="#hiw-section">How It Works</a>
+            <div class="nav-links">
+                <a href="#categories-section">Categories</a>
+                <a href="#providers-section">Providers</a>
+                <a href="#showcase-section">Showcase</a>
+                <a href="#hiw-section">How It Works</a>
+            </div>
+            
             <div id="nav-auth-area">
-                <a href="../../views/null/login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
-                <a href="../../views/null/login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
+                <a href="./login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                <a href="./login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
+            </div>
+
+            <div class="mobile-actions">
+                <div id="mobile-quick-auth">
+                    <a href="./login.html" class="mobile-auth-icon" aria-label="Log In"><i class="fas fa-user-circle"></i></a>
+                </div>
+                <button class="mobile-menu-btn" id="mobile-toggle-btn" aria-label="Toggle Navigation Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
         </nav>
     </header>
 
-    <!-- ===== HERO ===== -->
+    <!-- ===== MOBILE DRAWER MENU ===== -->
+    <div class="mobile-drawer-overlay" id="mobile-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="mobile-drawer-links">
+            <a href="#categories-section" onclick="closeDrawer()"><i class="fas fa-th-large"></i> Categories</a>
+            <a href="#providers-section" onclick="closeDrawer()"><i class="fas fa-store"></i> Providers</a>
+            <a href="#showcase-section" onclick="closeDrawer()"><i class="fas fa-image"></i> Showcase</a>
+            <a href="#hiw-section" onclick="closeDrawer()"><i class="fas fa-info-circle"></i> How It Works</a>
+        </div>
+        <div id="mobile-drawer-auth" style="display:flex; flex-direction:column; gap:16px;">
+            <a href="./login.html" class="btn-login" style="text-align:center; display:block;"><i class="fas fa-sign-in-alt"></i> Log In</a>
+            <a href="./login.html?mode=signup" class="btn-signup" style="text-align:center; display:block;"><i class="fas fa-user-plus"></i> Sign Up</a>
+        </div>
+    </div>
+
+    <!-- ===== HERO SECTION ===== -->
     <section class="hero">
-        <!-- Auto Slideshow -->
         <div class="hero-slideshow" id="heroSlideshow">
-            <div class="hero-slide active" style="background-image:url('hero_bg.png')" data-label="Gen Z Fashion"
-                data-icon="fa-tshirt"></div>
-            <div class="hero-slide" style="background-image:url('hero_slide2.png')" data-label="Luxury Watches & Bags"
-                data-icon="fa-clock"></div>
-            <div class="hero-slide" style="background-image:url('hero_slide3.png')" data-label="Bespoke Suits & Gowns"
-                data-icon="fa-user-tie"></div>
-            <div class="hero-slide"
-                style="background-image:url('https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=1600')"
-                data-label="Casual, Sneakers & Capes" data-icon="fa-shoe-prints"></div>
+            <div class="hero-slide active" style="background-image:url('hero_bg.png')" data-label="Gen Z Fashion" data-icon="fa-tshirt"></div>
+            <div class="hero-slide" style="background-image:url('hero_slide2.png')" data-label="Luxury Watches & Bags" data-icon="fa-clock"></div>
+            <div class="hero-slide" style="background-image:url('hero_slide3.png')" data-label="Bespoke Suits & Gowns" data-icon="fa-user-tie"></div>
+            <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=1600')" data-label="Casual, Sneakers & Capes" data-icon="fa-shoe-prints"></div>
         </div>
         <div class="hero-overlay"></div>
-        <!-- Dot nav -->
+        
         <div class="slide-dots" id="slideDots">
             <div class="slide-dot active" onclick="goToSlide(0)"></div>
             <div class="slide-dot" onclick="goToSlide(1)"></div>
@@ -1503,122 +1521,91 @@
             <div class="slide-dot" onclick="goToSlide(3)"></div>
         </div>
 
-
         <div class="hero-content">
-            <div class="hero-eyebrow animate-fadeup delay-1">
-                <i class="fas fa-map-marker-alt"></i>
-                Kenya's Premier Fashion &amp; Style Marketplace
+            <div class="hero-eyebrow">
+                <i class="fas fa-crown"></i>
+                Kenya's Premier Fashion &amp; Style Hub
             </div>
 
-            <h1 class="animate-fadeup delay-2">
+            <h1>
                 One Marketplace.<br>
                 Every Style. <em>Your Fit.</em>
             </h1>
 
-            <p class="animate-fadeup delay-3">
-                From hand-stitched bespoke suits and ready-made fashion to luxury watches, premium shoes, hats, and
-                accessories — discover and connect with Kenya's finest style providers in one place.
+            <p>
+                Discover bespoke tailoring, premium ready-made outfits, luxury timepieces, hand-crafted footwear, and accessories. Connect directly with Kenya's most skilled artisans.
             </p>
 
-            <div class="hero-cta animate-fadeup delay-4">
+            <div class="hero-cta">
                 <a href="views/client/marketplace.html" class="btn-hero-primary" id="main-cta-btn">
-                    <i class="fas fa-shopping-bag"></i> Browse Marketplace
+                    <i class="fas fa-compass"></i> Explore Marketplace
                 </a>
-                <a href="../../views/null/login.html" class="btn-hero-secondary">
+                <a href="./login.html" class="btn-hero-secondary" id="provider-portal-btn">
                     <i class="fas fa-store"></i> Provider Portal
                 </a>
-            </div>
-
-            <div class="hero-trust animate-fadeup delay-4">
-                <div class="trust-item">
-                    <i class="fas fa-users"></i>
-                    <span><strong>500+</strong> Verified Providers</span>
-                </div>
-                <div class="trust-item">
-                    <i class="fas fa-tags"></i>
-                    <span><strong>8</strong> Fashion Categories</span>
-                </div>
-                <div class="trust-item">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span><strong>All Counties</strong> Covered</span>
-                </div>
-                <div class="trust-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <span><strong>Trusted</strong> &amp; Vetted</span>
-                </div>
             </div>
         </div>
     </section>
 
-    <!-- ===== PREMIUM FASHION STRIP ===== -->
+    <!-- ===== INFINITE MARQUEE STRIP ===== -->
     <div class="fashion-strip" aria-hidden="true">
-        <!-- Row 1: scrolls left -->
-        <div class="fashion-row">
-            <div class="fashion-row-inner">
-                <span class="fashion-word highlight">Bespoke Tailoring</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Luxury Watches</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Premium Shoes</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Ready-Made Fashion</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Hats &amp; Caps</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Accessories</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Senator Wear</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Dresses &amp; Gowns</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Sneakers</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Capes &amp; Outerwear</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Casual Wear</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Bags &amp; Leather Goods</span><span class="fashion-sep">✦</span>
-                <!-- duplicate -->
-                <span class="fashion-word highlight">Bespoke Tailoring</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Luxury Watches</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Premium Shoes</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Ready-Made Fashion</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Hats &amp; Caps</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Accessories</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Senator Wear</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Dresses &amp; Gowns</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Sneakers</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Capes &amp; Outerwear</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word highlight">Casual Wear</span><span class="fashion-sep">✦</span>
-                <span class="fashion-word">Bags &amp; Leather Goods</span><span class="fashion-sep">✦</span>
-            </div>
+        <div class="fashion-row-inner">
+            <span class="fashion-word highlight">Bespoke Suits</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word">Luxury Timepieces</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word highlight">Premium Footwear</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word">Senator Wear</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word highlight">Designer Dresses</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word">Handmade Accessories</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word highlight">Senator Wear</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word">Streetwear Sneakers</span><span class="fashion-sep">✦</span>
+            
+            <!-- duplicated for layout seamlessness -->
+            <span class="fashion-word highlight">Bespoke Suits</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word">Luxury Timepieces</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word highlight">Premium Footwear</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word">Senator Wear</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word highlight">Designer Dresses</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word">Handmade Accessories</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word highlight">Senator Wear</span><span class="fashion-sep">✦</span>
+            <span class="fashion-word">Streetwear Sneakers</span><span class="fashion-sep">✦</span>
         </div>
     </div>
 
-    <!-- ===== CATEGORIES ===== -->
+    <!-- ===== CATEGORIES SECTION ===== -->
     <div class="categories-section" id="categories-section">
-        <p class="categories-label" id="cat-label">Explore by Category</p>
+        <p class="categories-label">Explore Style Categories</p>
         <div class="categories-grid" id="cat-grid">
-            <a href="views/client/marketplace.html?category=Suits" class="cat-pill" data-index="0">
+            <a href="views/client/marketplace.html?category=Suits" class="cat-pill">
                 <i class="fas fa-cut"></i>
                 <span>Bespoke<br>Tailoring</span>
             </a>
-            <a href="views/client/marketplace.html?category=Ready-to-Wear%20Dresses" class="cat-pill" data-index="1">
-                <i class="fas fa-tshirt"></i>
-                <span>Ready-Made<br>Fashion</span>
+            <a href="views/client/marketplace.html?category=Ready-to-Wear%20Dresses" class="cat-pill">
+                <i class="fas fa-shirt"></i>
+                <span>Ready-to-Wear<br>Outfits</span>
             </a>
-            <a href="views/client/marketplace.html?category=Watches" class="cat-pill" data-index="2">
+            <a href="views/client/marketplace.html?category=Watches" class="cat-pill">
                 <i class="fas fa-clock"></i>
-                <span>Luxury<br>Watches</span>
+                <span>Luxury<br>Timepieces</span>
             </a>
-            <a href="views/client/marketplace.html?category=Shoes" class="cat-pill" data-index="3">
+            <a href="views/client/marketplace.html?category=Shoes" class="cat-pill">
                 <i class="fas fa-shoe-prints"></i>
-                <span>Shoes &amp;<br>Footwear</span>
+                <span>Premium<br>Footwear</span>
             </a>
-            <a href="views/client/marketplace.html?category=Hats%20%26%20Caps" class="cat-pill" data-index="4">
+            <a href="views/client/marketplace.html?category=Hats%20%26%20Caps" class="cat-pill">
                 <i class="fas fa-hat-cowboy"></i>
-                <span>Hats &amp;<br>Caps</span>
+                <span>Custom<br>Hats &amp; Caps</span>
             </a>
-            <a href="views/client/marketplace.html?category=Belts" class="cat-pill" data-index="5">
+            <a href="views/client/marketplace.html?category=Belts" class="cat-pill">
                 <i class="fas fa-gem"></i>
-                <span>Accessories</span>
+                <span>Designer<br>Accessories</span>
             </a>
-            <a href="views/client/marketplace.html?category=Senator%20Wear" class="cat-pill" data-index="6">
+            <a href="views/client/marketplace.html?category=Senator%20Wear" class="cat-pill">
                 <i class="fas fa-user-tie"></i>
-                <span>Senator<br>Wear</span>
+                <span>Senator<br>Fashion</span>
             </a>
-            <a href="views/client/marketplace.html?category=Dresses" class="cat-pill" data-index="7">
+            <a href="views/client/marketplace.html?category=Dresses" class="cat-pill">
                 <i class="fas fa-female"></i>
-                <span>Dresses &amp;<br>Gowns</span>
+                <span>Evening<br>Gowns</span>
             </a>
         </div>
     </div>
@@ -1627,35 +1614,35 @@
     <section class="content-section" id="providers-section">
         <div class="section-header-row">
             <div>
-                <span class="section-eyebrow">Service Providers</span>
-                <h2 class="section-heading">Meet Our <em>Featured</em> Providers</h2>
-                <p class="section-subtext">Tailors, designers, watchmakers, cobblers, hatters and more — all in one
-                    marketplace, all for you.</p>
+                <span class="section-eyebrow">Aesthetic Shops</span>
+                <h2 class="section-heading">Featured <em>Artisans</em> &amp; Shops</h2>
+                <p class="section-subtext">Connect with verified local designers and creators across Kenya.</p>
             </div>
-            <a href="views/client/marketplace.html?tab=shops" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All
-                Providers <i class="fas fa-arrow-right"></i></a>
+            <a href="views/client/marketplace.html?tab=shops" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">
+                All Shops <i class="fas fa-arrow-right" style="margin-left:6px;"></i>
+            </a>
         </div>
 
         <div class="providers-grid" id="providers-container">
-            <!-- Populated by JS from Supabase real shops -->
+            <!-- Dynamically populated via Supabase -->
         </div>
     </section>
 
-    <!-- ===== SHOWCASE LISTINGS ===== -->
+    <!-- ===== DESIGN SHOWCASE ===== -->
     <section class="content-section" id="showcase-section" style="padding-top: 0;">
         <div class="section-header-row">
             <div>
-                <span class="section-eyebrow">Design Showcase</span>
-                <h2 class="section-heading">Handcrafted <em>Pieces</em> for You</h2>
-                <p class="section-subtext">Browse premium garments, accessories and styles crafted by verified providers
-                    across Kenya.</p>
+                <span class="section-eyebrow">Curated Pieces</span>
+                <h2 class="section-heading">Featured <em>Designs</em></h2>
+                <p class="section-subtext">Browse gorgeous handpicked garments and accessories ready for inquiry.</p>
             </div>
-            <a href="views/client/marketplace.html?tab=listings" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">View All Listings
-                <i class="fas fa-arrow-right"></i></a>
+            <a href="views/client/marketplace.html?tab=listings" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">
+                All Designs <i class="fas fa-arrow-right" style="margin-left:6px;"></i>
+            </a>
         </div>
 
         <div class="listings-grid" id="teaser-listings-container">
-            <!-- Populated by JS or static fallback below -->
+            <!-- Dynamically populated via Supabase -->
         </div>
     </section>
 
@@ -1663,31 +1650,31 @@
     <div class="hiw-section" id="hiw-section">
         <div class="hiw-inner">
             <div style="text-align:center; margin-bottom:8px;">
-                <span class="section-eyebrow" style="justify-content:center;">Simple Process</span>
-                <h2 class="section-heading" style="text-align:center;">How the <em>Marketplace</em> Works</h2>
-                <p class="section-subtext" style="margin: 0 auto; text-align:center;">Getting your perfect style is
-                    straightforward — whether it's a suit, a watch, or a pair of bespoke shoes.</p>
+                <span class="section-eyebrow" style="justify-content:center;">Simple Steps</span>
+                <h2 class="section-heading" style="text-align:center;">How It <em>Works</em></h2>
+                <p class="section-subtext" style="margin: 0 auto; text-align:center;">Acquiring custom pieces is seamless and tailored to your tastes.</p>
             </div>
+            
             <div class="hiw-grid">
                 <div class="hiw-step">
                     <div class="hiw-number">1</div>
-                    <h4>Create Your Account</h4>
-                    <p>Sign up for free in under a minute using email or Google login.</p>
+                    <h4>Explore Pieces</h4>
+                    <p>Browse beautiful items or search for specific verified style creators.</p>
                 </div>
                 <div class="hiw-step">
                     <div class="hiw-number">2</div>
-                    <h4>Browse Providers</h4>
-                    <p>Explore tailors, cobblers, watchmakers, designers and accessory providers by category.</p>
+                    <h4>Inquire &amp; Discuss</h4>
+                    <p>Submit inquiries, share references, and align details via real-time inbox chat.</p>
                 </div>
                 <div class="hiw-step">
                     <div class="hiw-number">3</div>
-                    <h4>Send an Inquiry</h4>
-                    <p>Chat directly, share photos, submit measurements, and agree on designs in real time.</p>
+                    <h4>Custom Orders</h4>
+                    <p>Add precise measurements and track the custom craftsmanship progress.</p>
                 </div>
                 <div class="hiw-step">
                     <div class="hiw-number">4</div>
-                    <h4>Track & Receive</h4>
-                    <p>Monitor production progress and receive your perfect piece delivered or ready for pickup.</p>
+                    <h4>Delivery</h4>
+                    <p>Receive your customized garment right at your doorstep.</p>
                 </div>
             </div>
         </div>
@@ -1695,52 +1682,42 @@
 
     <!-- ===== VALUE PROPS ===== -->
     <section class="value-section">
-        <div style="text-align:center; margin-bottom:8px;">
-            <span class="section-eyebrow" style="justify-content:center;">Why Tailors.co.ke</span>
-            <h2 class="section-heading" style="text-align:center;">Built for <em>Kenya's</em> Style Community</h2>
+        <div style="text-align:center; margin-bottom:12px;">
+            <span class="section-eyebrow" style="justify-content:center;">Built for Kenya</span>
+            <h2 class="section-heading" style="text-align:center;">Designed for the <em>Style Ecosystem</em></h2>
         </div>
         <div class="value-grid">
             <div class="value-card">
-                <div class="value-icon"><i class="fas fa-user-circle"></i></div>
+                <div class="value-icon"><i class="fas fa-users"></i></div>
                 <h3>For Clients</h3>
                 <ul>
-                    <li><i class="fas fa-check"></i> Discover bespoke tailors, watchmakers, shoe designers, hatters and
-                        more — all in one place.</li>
-                    <li><i class="fas fa-check"></i> Real-time chat with providers, share inspiration photos and get
-                        instant quotes.</li>
-                    <li><i class="fas fa-check"></i> Save your measurements profile for fast, accurate orders every
-                        time.</li>
-                    <li><i class="fas fa-check"></i> End-to-end order tracking from first stitch to final delivery.</li>
+                    <li><i class="fas fa-check"></i> Discover bespoke tailors, custom watchmakers, and shoe designers.</li>
+                    <li><i class="fas fa-check"></i> Submit custom measurements profile once and reuse for future fits.</li>
+                    <li><i class="fas fa-check"></i> Message shops directly with photo inspiration and design requirements.</li>
+                    <li><i class="fas fa-check"></i> Secure payment milestones and end-to-end status tracking.</li>
                 </ul>
-                <a href="../../views/null/login.html?mode=signup" class="card-action gold">Join as a Client <i
-                        class="fas fa-arrow-right"></i></a>
+                <a href="./login.html?mode=signup" class="card-action gold">Sign Up to Order <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="value-card">
                 <div class="value-icon"><i class="fas fa-store"></i></div>
-                <h3>For Providers</h3>
+                <h3>For Businesses</h3>
                 <ul>
-                    <li><i class="fas fa-check"></i> List your shop — tailors, watch sellers, shoe designers, accessory
-                        vendors all welcome.</li>
-                    <li><i class="fas fa-check"></i> Publish your catalog, set prices, and manage inquiries from a smart
-                        dashboard.</li>
-                    <li><i class="fas fa-check"></i> Reach thousands of style-conscious Kenyans actively looking for
-                        your craft.</li>
-                    <li><i class="fas fa-check"></i> Team tools: manage staff, track orders and grow your revenue
-                        online.</li>
+                    <li><i class="fas fa-check"></i> List your shop and items to thousands of active style-conscious visitors.</li>
+                    <li><i class="fas fa-check"></i> Manage team members, assignments, orders, and inbox threads easily.</li>
+                    <li><i class="fas fa-check"></i> Build reputation with verified client reviews and high-quality catalog images.</li>
+                    <li><i class="fas fa-check"></i> Track orders, payments, and work progress inside one sleek portal.</li>
                 </ul>
-                <a href="../../views/null/login.html" class="card-action outline">Register Your Business <i
-                        class="fas fa-arrow-right"></i></a>
+                <a href="./login.html" class="card-action outline">Register Business <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     </section>
 
     <!-- ===== CTA BANNER ===== -->
     <div class="cta-section">
-        <h2>Kenya's Style, All in One Place</h2>
-        <p>Join thousands of Kenyans already discovering bespoke fashion, luxury accessories, and premium style from
-            trusted local providers.</p>
-        <a href="../../views/null/login.html?mode=signup" class="btn-hero-primary" style="display:inline-flex;">
-            <i class="fas fa-shopping-bag"></i> Get Started Free
+        <h2>Premium Style, Tailored For You</h2>
+        <p>Join thousands of style-focused Kenyans already discovering bespoke tailoring and custom accessories from trusted local creators.</p>
+        <a href="./login.html?mode=signup" class="btn-hero-primary" style="display:inline-flex;">
+            <i class="fas fa-compass"></i> Start Your Journey
         </a>
     </div>
 
@@ -1752,47 +1729,77 @@
                     <span class="logo-text">Tailors.co.ke</span>
                     <span class="logo-sub">Kenya's Style Marketplace</span>
                 </div>
-                <p>Connecting Kenya's finest tailors, designers, watchmakers, cobblers and accessory vendors with
-                    style-conscious clients everywhere.</p>
+                <p>Empowering Kenya's creative fashion ecosystem by connecting clients with verified custom designers and tailors.</p>
             </div>
             <div class="footer-col">
-                <h5>Marketplace</h5>
+                <h5>Explore</h5>
                 <ul>
-                    <li><a href="views/client/marketplace.html?tab=shops">Browse Providers</a></li>
-                    <li><a href="views/client/marketplace.html">Bespoke Tailoring</a></li>
-                    <li><a href="views/client/marketplace.html">Ready-Made Fashion</a></li>
-                    <li><a href="views/client/marketplace.html?category=Watches">Watches &amp; Accessories</a></li>
-                    <li><a href="views/client/marketplace.html?category=Shoes">Shoes &amp; Hats</a></li>
+                    <li><a href="views/client/marketplace.html?tab=shops">Browse Shops</a></li>
+                    <li><a href="views/client/marketplace.html">Bespoke Design</a></li>
+                    <li><a href="views/client/marketplace.html?category=Watches">Luxury Watches</a></li>
+                    <li><a href="views/client/marketplace.html?category=Shoes">Custom Shoes</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h5>For Providers</h5>
+                <h5>Business Portals</h5>
                 <ul>
-                    <li><a href="../../views/null/login.html">Provider Login</a></li>
-                    <li><a href="../../views/null/login.html">Register a Shop</a></li>
-                    <li><a href="../../views/null/login.html">Provider Dashboard</a></li>
-                    <li><a href="../../views/null/login.html">Manage Listings</a></li>
+                    <li><a href="./login.html">Provider Login</a></li>
+                    <li><a href="./login.html?mode=signup">Register Shop</a></li>
+                    <li><a href="./login.html">Order Management</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h5>Company</h5>
                 <ul>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">How It Works</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Contact</a></li>
+                    <li><a href="#hiw-section">How It Works</a></li>
+                    <li><a href="#">Privacy Terms</a></li>
+                    <li><a href="#">Support Center</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 Tailors.co.ke. All Rights Reserved. Kenya's premier fashion &amp; style marketplace.</p>
+            <p>&copy; 2026 Tailors.co.ke. All Rights Reserved. Crafted with care in Kenya.</p>
         </div>
     </footer>
 
     <!-- ===== SCRIPTS ===== -->
     <script src="js/core/config.js?v=1781343492375"></script>
     <script>
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile drawer toggles
+        const mobileToggleBtn = document.getElementById('mobile-toggle-btn');
+        const mobileDrawer = document.getElementById('mobile-drawer');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        if (mobileToggleBtn) {
+            mobileToggleBtn.addEventListener('click', () => {
+                mobileDrawer.classList.toggle('open');
+                mobileOverlay.classList.toggle('open');
+                const isOpen = mobileDrawer.classList.contains('open');
+                mobileToggleBtn.innerHTML = isOpen ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+            });
+        }
+
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeDrawer);
+        }
+
+        function closeDrawer() {
+            mobileDrawer.classList.remove('open');
+            mobileOverlay.classList.remove('open');
+            mobileToggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+
+        // Supabase interaction
         let supabaseClient;
         let allListings = [];
 
@@ -1801,7 +1808,6 @@
             initMarketplace();
             checkUserSession();
         } else {
-            // No Supabase: just render mock data
             allListings = getMockListings();
             renderTeaserListings(allListings);
         }
@@ -1815,13 +1821,21 @@
 
         async function checkUserSession() {
             const authArea = document.getElementById('nav-auth-area');
-            if (!authArea || !supabaseClient) return;
+            const mobileAuthArea = document.getElementById('mobile-drawer-auth');
+            const mobQuickAuth = document.getElementById('mobile-quick-auth');
+            if (!supabaseClient) return;
+
             try {
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) {
-                    authArea.innerHTML = `
-                        <a href="../../views/null/login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
-                        <a href="../../views/null/login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>`;
+                    const guestNav = `
+                        <a href="./login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                        <a href="./login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>`;
+                    if (authArea) authArea.innerHTML = guestNav;
+                    if (mobileAuthArea) mobileAuthArea.innerHTML = guestNav;
+                    if (mobQuickAuth) {
+                        mobQuickAuth.innerHTML = `<a href="./login.html" class="mobile-auth-icon" aria-label="Log In"><i class="fas fa-user-circle"></i></a>`;
+                    }
                     return;
                 }
                 const { data: profile } = await supabaseClient
@@ -1830,12 +1844,21 @@
                 const name = profile?.full_name || user.user_metadata?.full_name || 'Account';
                 const firstName = name.split(' ')[0];
 
-                // Dynamically redirect all auth/login/signup links to dashboard/next target since user is logged in
-                const dashUrl = role === 'superadmin' ? '/views/superadmin/superadmin-dashboard.html'
-                    : role === 'owner' ? '/views/admin/admin-dashboard.html'
-                    : role === 'client' ? '/views/client/client-dashboard.html'
-                    : '/views/manager/manager-dashboard.html';
-                document.querySelectorAll('a[href^="client-signup.html"], a[href^="login.html"]').forEach(a => {
+                const dashUrl = role === 'superadmin' ? './views/superadmin/superadmin-dashboard.html'
+                    : role === 'owner' ? './views/admin/admin-dashboard.html'
+                    : role === 'client' ? './views/client/client-dashboard.html'
+                    : './views/manager/manager-dashboard.html';
+
+                // Update mobile quick auth icon
+                if (mobQuickAuth) {
+                    mobQuickAuth.innerHTML = `
+                        <a href="${dashUrl}" class="mobile-auth-icon" style="color:var(--gold);" aria-label="Dashboard">
+                            <i class="fas ${role === 'client' ? 'fa-user-circle' : 'fa-user-tie'}"></i>
+                        </a>`;
+                }
+
+                // Update redirection for all guest buttons
+                document.querySelectorAll('a[href^="login.html"]').forEach(a => {
                     try {
                         const url = new URL(a.href, window.location.origin);
                         const next = url.searchParams.get('next');
@@ -1847,28 +1870,41 @@
 
                 if (role === 'client') {
                     const mainCta = document.getElementById('main-cta-btn');
-                    if (mainCta) { mainCta.innerHTML = '<i class="fas fa-th-large"></i> Go to Marketplace App'; mainCta.href = '/views/client/client-dashboard.html'; }
-                    authArea.innerHTML = `
+                    if (mainCta) { 
+                        mainCta.innerHTML = '<i class="fas fa-th-large"></i> Go to Marketplace'; 
+                        mainCta.href = './views/client/client-dashboard.html'; 
+                    }
+                    const activeNav = `
                         <div class="nav-user-pill">
                             <span class="nav-user-name"><i class="fas fa-user-circle"></i> ${escapeHTML(firstName)}</span>
-                            <a href="views/client/client-dashboard.html" class="btn-portal"><i class="fas fa-comments"></i> My Inbox</a>
+                            <a href="./views/client/client-dashboard.html" class="btn-portal"><i class="fas fa-comments"></i> My Inbox</a>
                             <button class="btn-signout" onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                         </div>`;
-                    renderTeaserListings(allListings);
+                    if (authArea) authArea.innerHTML = activeNav;
+                    if (mobileAuthArea) mobileAuthArea.innerHTML = activeNav;
                 } else {
-                    const dashUrl = role === 'superadmin' ? '/views/superadmin/superadmin-dashboard.html'
-                        : role === 'owner' ? '/views/admin/admin-dashboard.html'
-                            : '/views/manager/manager-dashboard.html';
+                    const dashUrlReal = role === 'superadmin' ? './views/superadmin/superadmin-dashboard.html'
+                        : role === 'owner' ? './views/admin/admin-dashboard.html'
+                        : './views/manager/manager-dashboard.html';
+                    
                     const mainCta = document.getElementById('main-cta-btn');
-                    if (mainCta) { mainCta.innerHTML = '<i class="fas fa-th-large"></i> Go to Dashboard'; mainCta.href = dashUrl; }
-                    authArea.innerHTML = `
+                    if (mainCta) { 
+                        mainCta.innerHTML = '<i class="fas fa-th-large"></i> Dashboard'; 
+                        mainCta.href = dashUrlReal; 
+                    }
+                    
+                    const activeNav = `
                         <div class="nav-user-pill">
                             <span class="nav-user-name"><i class="fas fa-user-tie"></i> ${escapeHTML(firstName)}</span>
-                            <a href="${dashUrl}" class="btn-portal"><i class="fas fa-th-large"></i> Dashboard</a>
+                            <a href="${dashUrlReal}" class="btn-portal"><i class="fas fa-th-large"></i> Dashboard</a>
                             <button class="btn-signout" onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                         </div>`;
+                    if (authArea) authArea.innerHTML = activeNav;
+                    if (mobileAuthArea) mobileAuthArea.innerHTML = activeNav;
                 }
-            } catch (err) { console.warn('Nav session check failed:', err); }
+            } catch (err) { 
+                console.warn('Nav session check failed:', err); 
+            }
         }
 
         async function signOutUser() {
@@ -1878,8 +1914,6 @@
 
         async function initMarketplace() {
             try {
-                // Smart ranking: featured first, then by views desc, then by completeness
-                // Columns is_featured & views added via add_showcase_ranking.sql
                 const { data, error } = await supabaseClient
                     .from('marketplace_listings')
                     .select('*, shops(name, profile_image)')
@@ -1890,15 +1924,11 @@
                     .limit(6);
 
                 if (!error && data && data.length > 0) {
-                    // Client-side quality sort as tiebreaker
                     data.sort((a, b) => {
-                        // Featured always first
                         const featDiff = (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0);
                         if (featDiff !== 0) return featDiff;
-                        // Then views
                         const viewDiff = (b.views || 0) - (a.views || 0);
                         if (viewDiff !== 0) return viewDiff;
-                        // Then listing completeness (has desc > 20 chars)
                         const aDesc = !!(a.description && a.description.length > 20);
                         const bDesc = !!(b.description && b.description.length > 20);
                         return (bDesc ? 1 : 0) - (aDesc ? 1 : 0);
@@ -1907,7 +1937,9 @@
                 } else {
                     allListings = getMockListings();
                 }
-            } catch { allListings = getMockListings(); }
+            } catch { 
+                allListings = getMockListings(); 
+            }
             renderTeaserListings(allListings);
         }
 
@@ -1915,30 +1947,29 @@
             const container = document.getElementById('teaser-listings-container');
             if (!container) return;
             const isLogged = document.getElementById('nav-auth-area')?.querySelector('.nav-user-name') !== null;
-            const actionText = isLogged ? 'View Details' : 'Sign Up to Inquire';
+            const actionText = isLogged ? 'View Details' : 'Inquire Now';
 
             container.innerHTML = listings.map(list => {
-                const linkTarget = isLogged && list.shop_id ? `/views/manager/shop.html?id=${list.shop_id}&listing=${list.id}` : 'login.html';
-                const imgUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url
-                    || 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=400';
+                const linkTarget = isLogged && list.shop_id ? `./views/manager/shop.html?id=${list.shop_id}&listing=${list.id}` : './login.html';
+                const imgUrls = list.image_urls ? (typeof list.image_urls === 'string' ? JSON.parse(list.image_urls) : list.image_urls) : null;
+                const imgUrl = (imgUrls && imgUrls[0]) || list.image_url || 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=400';
                 const isFeatured = !!list.is_featured;
                 const views = list.views || 0;
-                // Inline score for tooltip display
-                const hasDesc = !!(list.description && list.description.length > 20);
+
                 return `
-                <div class="listing-card" style="cursor:pointer; position:relative;" onclick="trackListingView('${list.id || ''}', '${linkTarget}')">
-                    ${isFeatured ? `<div style="position:absolute;top:10px;right:10px;z-index:2;background:#D4AF37;color:#0a192f;border-radius:20px;padding:3px 10px;font-size:0.72em;font-weight:800;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(212,175,55,0.4);">&#9733; FEATURED</div>` : ''}
+                <div class="listing-card" style="cursor:pointer;" onclick="trackListingView('${list.id || ''}', '${linkTarget}')">
                     <div class="listing-img-wrap">
+                        ${isFeatured ? `<div style="position:absolute;top:16px;right:16px;z-index:4;background:var(--gold);color:var(--bg-deep);border-radius:40px;padding:4px 12px;font-size:0.7em;font-weight:800;letter-spacing:1px;">FEATURED</div>` : ''}
                         <div class="listing-img-blur" style="background-image:url('${imgUrl}')"></div>
                         <div class="listing-img" style="background-image:url('${imgUrl}')"></div>
-                        <span class="listing-badge">${list.category || 'Fashion'}</span>
+                        <span class="listing-badge">${escapeHTML(list.category || 'Fashion')}</span>
                     </div>
                     <div class="listing-body">
-                        <div class="listing-title">${list.title}</div>
-                        <div class="listing-desc">${list.description || 'Crafted with premium materials to your exact specifications.'}</div>
+                        <div class="listing-title">${escapeHTML(list.title)}</div>
+                        <div class="listing-desc">${escapeHTML(list.description || 'Crafted with premium materials to your exact specifications.')}</div>
                         <div class="listing-footer">
                             <span class="listing-price">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
-                            <span id="view-count-${list.id}" style="font-size:0.75em;color:#94a3b8;"><i class="fas fa-eye" style="margin-right:3px;"></i>${views}</span>
+                            <span id="view-count-${list.id}" style="font-size:0.8em;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><i class="fas fa-eye"></i>${views}</span>
                             <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '${linkTarget}'); return false;">${actionText} <i class="fas fa-chevron-right"></i></a>
                         </div>
                     </div>
@@ -1946,21 +1977,17 @@
             }).join('');
         }
 
-        // Track a listing card click — increments view counter via DB function
         async function trackListingView(listingId, fallbackUrl) {
             if (listingId && supabaseClient && !listingId.startsWith('mock')) {
-                // Optimistically update the UI to fix stale browser back/forward cache (BFCache)
                 const viewSpan = document.getElementById(`view-count-${listingId}`);
                 if (viewSpan) {
                     const currentViews = parseInt(viewSpan.innerText.replace(/[^0-9]/g, '')) || 0;
-                    viewSpan.innerHTML = `<i class="fas fa-eye" style="margin-right:3px;"></i>${currentViews + 1}`;
+                    viewSpan.innerHTML = `<i class="fas fa-eye"></i>${currentViews + 1}`;
                 }
-
                 try {
                     await supabaseClient.rpc('increment_listing_views', { listing_id: listingId });
-                } catch (e) { /* silent — don't block navigation */ }
+                } catch (e) {}
             }
-            // Navigate to the action page after tracking
             setTimeout(() => window.location.href = fallbackUrl, 120);
         }
 
@@ -2009,37 +2036,19 @@
         (function () {
             const slides = document.querySelectorAll('.hero-slide');
             const dots = document.querySelectorAll('.slide-dot');
-            const label = document.getElementById('slideLabel');
             let current = 0;
             let timer = null;
 
             function goToSlide(n) {
                 slides[current].classList.remove('active');
-                slides[current].classList.add('exit');
                 dots[current].classList.remove('active');
 
-                // Force reflow to restart Ken Burns on next active
+                // Force layout reflow to restart zoom animation
                 void slides[n].offsetWidth;
-
-                slides[current].addEventListener('transitionend', function cleanup() {
-                    slides[current].classList.remove('exit');
-                    this.removeEventListener('transitionend', cleanup);
-                }, { once: true });
 
                 current = n;
                 slides[current].classList.add('active');
                 dots[current].classList.add('active');
-
-                // Update label
-                const lbl = slides[current].dataset.label;
-                const icon = slides[current].dataset.icon;
-                if (label) {
-                    label.style.opacity = '0';
-                    setTimeout(() => {
-                        label.innerHTML = `<i class="fas ${icon}"></i> ${lbl}`;
-                        label.style.opacity = '1';
-                    }, 400);
-                }
             }
 
             function nextSlide() {
@@ -2051,10 +2060,11 @@
                 timer = setInterval(nextSlide, 6000);
             }
 
-            // Expose to inline onclick
-            window.goToSlide = function (n) { goToSlide(n); startTimer(); };
+            window.goToSlide = function (n) { 
+                goToSlide(n); 
+                startTimer(); 
+            };
 
-            // Pause on hover
             const hero = document.querySelector('.hero');
             if (hero) {
                 hero.addEventListener('mouseenter', () => clearInterval(timer));
@@ -2064,67 +2074,19 @@
             startTimer();
         })();
 
-        // ===== SCROLL-TRIGGERED ANIMATIONS (Category Pills + Provider Cards) =====
+        // ===== LIVE FEATURED PROVIDERS =====
         (function () {
-            const STAGGER = 90; // ms between each item
-
-            function animateOnScroll(selector, parentSelector) {
-                const parent = document.querySelector(parentSelector);
-                if (!parent) return;
-                const label = parent.querySelector('.categories-label');
-                const items = parent.querySelectorAll(selector);
-
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (!entry.isIntersecting) return;
-                        // Animate label first
-                        if (label) {
-                            setTimeout(() => label.classList.add('visible'), 0);
-                        }
-                        // Stagger items
-                        items.forEach(item => {
-                            const idx = parseInt(item.dataset.index || 0);
-                            setTimeout(() => item.classList.add('visible'), idx * STAGGER + 120);
-                        });
-                        observer.disconnect();
-                    });
-                }, { threshold: 0.15 });
-
-                observer.observe(parent);
-            }
-
-            // Category pills
-            animateOnScroll('.cat-pill', '#categories-section');
-
-            // Provider cards (no label)
-            const provGrid = document.querySelector('#providers-container');
-            if (provGrid) {
-                const provObs = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (!entry.isIntersecting) return;
-                        provGrid.querySelectorAll('.provider-card').forEach(card => {
-                            const idx = parseInt(card.dataset.index || 0);
-                            setTimeout(() => card.classList.add('visible'), idx * 130 + 80);
-                        });
-                        provObs.disconnect();
-                    });
-                }, { threshold: 0.1 });
-                provObs.observe(provGrid);
-            }
-            // ===== LIVE PROVIDER CARDS FROM SUPABASE =====
             async function loadFeaturedProviders() {
                 const container = document.getElementById('providers-container');
                 if (!container) return;
 
-                // Show shimmer skeletons while loading
                 container.innerHTML = `
-                <div class="skeleton-card" data-index="0"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>
-                <div class="skeleton-card" data-index="1"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>
-                <div class="skeleton-card" data-index="2"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line wide"></div><div class="skeleton skeleton-line medium"></div><div class="skeleton skeleton-line narrow"></div></div></div>`;
+                <div class="skeleton-card"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line w-70"></div><div class="skeleton skeleton-line w-50"></div><div class="skeleton skeleton-line w-30"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line w-70"></div><div class="skeleton skeleton-line w-50"></div><div class="skeleton skeleton-line w-30"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton skeleton-banner"></div><div class="skeleton-body"><div class="skeleton skeleton-line w-70"></div><div class="skeleton skeleton-line w-50"></div><div class="skeleton skeleton-line w-30"></div></div></div>`;
 
                 if (typeof APP_CONFIG === 'undefined' || !supabaseClient) {
-                    console.warn('Supabase config or client not found. Falling back.');
-                    container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--slate);">Providers loading soon...</div>`;
+                    container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Providers loading soon...</div>`;
                     return;
                 }
 
@@ -2132,7 +2094,6 @@
                     const SB_URL = APP_CONFIG.supabaseUrl;
                     const SB_KEY = APP_CONFIG.supabaseKey;
 
-                    // Check session in parallel with the fetch
                     const [shopsRes, reviewsRes, { data: { user } }] = await Promise.all([
                         fetch(
                             `${SB_URL}/rest/v1/shops?is_public=eq.true&select=id,name,location_name,description,banner_image,profile_image`,
@@ -2151,16 +2112,15 @@
 
                     if (!Array.isArray(shops) || shops.length === 0) {
                         container.innerHTML = `
-                        <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--slate);">
+                        <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);">
                             <i class="fas fa-store" style="font-size:2.5em;color:var(--gold);margin-bottom:18px;display:block;"></i>
-                            <p style="font-size:1.1em;margin-bottom:8px;color:var(--white);">Providers are joining!</p>
+                            <p style="font-size:1.1em;margin-bottom:8px;color:var(--text-main);">Providers are joining!</p>
                             <p style="font-size:0.9em;">Be the first to list your shop on Kenya's premier style marketplace.</p>
-                            <a href="../../views/null/login.html?mode=signup&role=tailor" class="btn-hero-primary" style="display:inline-flex;margin-top:22px;"><i class="fas fa-plus"></i> Join as Provider</a>
+                            <a href="./login.html?mode=signup&role=tailor" class="btn-hero-primary" style="display:inline-flex;margin-top:22px;"><i class="fas fa-plus"></i> Join as Provider</a>
                         </div>`;
                         return;
                     }
 
-                    // Calculate average ratings and review counts
                     const shopStats = {};
                     if (Array.isArray(reviews)) {
                         reviews.forEach(r => {
@@ -2176,13 +2136,11 @@
                         shop.avgRating = stats ? (stats.sum / stats.count) : 0;
                     });
 
-                    // Sort by highest rating first, then by most reviews
                     shops.sort((a, b) => {
                         if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
                         return b.reviewCount - a.reviewCount;
                     });
 
-                    // Take only the top 3
                     shops = shops.slice(0, 3);
 
                     const STORAGE_URL = `${SB_URL}/storage/v1/object/public/marketplace-assets/`;
@@ -2194,7 +2152,7 @@
                             : null;
                         const bannerStyle = banner
                             ? `background-image:url('${banner}')`
-                            : `background:linear-gradient(135deg, #0a192f 0%, #112240 100%); border-bottom:1px solid rgba(212,175,55,0.15);`;
+                            : `background:linear-gradient(135deg, #0a1128 0%, #030712 100%); border-bottom:1px solid rgba(212,175,55,0.15);`;
 
                         const avatar = shop.profile_image
                             ? (shop.profile_image.startsWith('http') ? shop.profile_image : STORAGE_URL + shop.profile_image)
@@ -2205,44 +2163,39 @@
                             : 'A verified provider on Kenya\'s premier style marketplace.';
 
                         const loc = shop.location_name || 'Nairobi, Kenya';
-
-                        // Smart routing: logged-in → direct to shop; guest → login first, then redirect to shop
-                        const shopUrl = `shop.html?id=${encodeURIComponent(shop.id)}`;
-                        const href = isLoggedIn
-                            ? shopUrl
-                            : `login.html?next=${encodeURIComponent(shopUrl)}`;
+                        const shopUrl = `./views/manager/shop.html?id=${encodeURIComponent(shop.id)}`;
+                        const href = isLoggedIn ? shopUrl : `./login.html?next=${encodeURIComponent(shopUrl)}`;
 
                         const ratingText = shop.reviewCount > 0
                             ? `${shop.avgRating.toFixed(1)} (${shop.reviewCount} Reviews)`
                             : 'New Provider';
 
                         return `
-                    <a class="provider-card visible" href="${href}" data-index="${i}" style="transition-delay:${i * 130}ms">
-                        <div class="provider-banner" style="${bannerStyle}">
-                            <div class="provider-avatar" ${avatar ? `style="background-image:url('${avatar}');background-size:cover;"` : ''}>
-                                ${!avatar ? '<i class="fas fa-store"></i>' : ''}
+                        <a class="provider-card" href="${href}">
+                            <div class="provider-banner" style="${bannerStyle}">
+                                <div class="provider-avatar" ${avatar ? `style="background-image:url('${avatar}');"` : ''}>
+                                    ${!avatar ? '<i class="fas fa-store"></i>' : ''}
+                                </div>
                             </div>
-                        </div>
-                        <div class="provider-body">
-                            <div class="provider-name">${escapeHTML(shop.name || 'Style Provider')}</div>
-                            <div class="provider-location"><i class="fas fa-map-marker-alt"></i> ${escapeHTML(loc)}</div>
-                            <div class="provider-desc">${escapeHTML(desc)}</div>
-                            <div class="provider-footer">
-                            <div class="provider-rating"><i class="fas fa-star"></i> ${ratingText}</div>
-                                <span class="btn-visit">Visit Shop</span>
+                            <div class="provider-body">
+                                <div class="provider-name">${escapeHTML(shop.name || 'Style Provider')}</div>
+                                <div class="provider-location"><i class="fas fa-map-marker-alt"></i> ${escapeHTML(loc)}</div>
+                                <div class="provider-desc">${escapeHTML(desc)}</div>
+                                <div class="provider-footer">
+                                    <div class="provider-rating"><i class="fas fa-star"></i> ${ratingText}</div>
+                                    <span class="btn-visit">Visit Shop</span>
+                                </div>
                             </div>
-                        </div>
-                    </a>`;
+                        </a>`;
                     }).join('');
 
                 } catch (err) {
                     console.warn('Provider fetch failed:', err);
-                    container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--slate);">Providers loading soon...</div>`;
+                    container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Providers loading soon...</div>`;
                 }
             }
 
             loadFeaturedProviders();
-
         })();
     </script>
 </body>
