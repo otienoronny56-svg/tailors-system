@@ -532,6 +532,7 @@
             font-weight: 700;
             color: var(--brand-gold);
             font-size: 1.05em;
+            white-space: nowrap !important;
         }
 
         .listing-select-btn {
@@ -632,7 +633,10 @@
             .listing-card .listing-footer {
                 flex-direction: column !important;
                 align-items: stretch !important;
-                gap: 6px !important;
+                gap: 4px !important;
+                margin-top: 8px !important;
+                padding-top: 8px !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
             }
             .listing-card .price-text {
                 font-size: 0.88em !important;
@@ -1657,9 +1661,16 @@
                     ? (itemReviews.reduce((sum, r) => sum + r.rating, 0) / itemReviews.length).toFixed(1)
                     : null;
 
+                const viewsHtml = `<span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-eye"></i> ${list.views || 0}</span>`;
                 const ratingDisplay = avgRating
-                    ? `<span onclick="openReviewModalForListing('${list.id}')" style="color: var(--brand-gold); font-size: 0.8em; font-weight: 600; cursor: pointer; border-bottom: 1px dashed rgba(212,175,55,0.4); display: inline-flex; align-items: center; gap: 4px;" title="Rate this design"><i class="fas fa-star"></i> ${avgRating} (${itemReviews.length})</span>`
-                    : `<span onclick="openReviewModalForListing('${list.id}')" style="color: var(--brand-slate); font-size: 0.8em; font-style: italic; cursor: pointer; border-bottom: 1px dashed rgba(136,146,176,0.3); display: inline-flex; align-items: center; gap: 4px;" title="Be the first to rate this design"><i class="far fa-star"></i> Rate item</span>`;
+                    ? `<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
+                            <span onclick="openReviewModalForListing('${list.id}')" style="color: var(--brand-gold); font-size: 0.8em; font-weight: 600; cursor: pointer; border-bottom: 1px dashed rgba(212,175,55,0.4); display: inline-flex; align-items: center; gap: 4px;" title="Rate this design"><i class="fas fa-star"></i> ${avgRating}</span>
+                            ${viewsHtml}
+                       </div>`
+                    : `<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
+                            <span onclick="openReviewModalForListing('${list.id}')" style="color: var(--brand-slate); font-size: 0.8em; font-style: italic; cursor: pointer; border-bottom: 1px dashed rgba(136,146,176,0.3); display: inline-flex; align-items: center; gap: 4px;" title="Be the first to rate this design"><i class="far fa-star"></i> Rate</span>
+                            ${viewsHtml}
+                       </div>`;
 
                 let badgeHtml = '';
                 if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
@@ -1698,7 +1709,6 @@
                                     ` : `
                                         <span class="price-text" style="color: var(--brand-gold); font-weight: 700; font-size: 1.1em;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                                     `}
-                                    <span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate);"><i class="fas fa-eye" style="margin-right:3px;"></i>${list.views || 0}</span>
                                 </div>
                                 <button type="button" class="listing-select-btn" onclick="event.stopPropagation(); trackListingView('${list.id}', () => selectListingForInquiry('${list.id}', '${list.title.replace(/'/g, "\\'")}'))">Inquire</button>
                             </div>
