@@ -1095,7 +1095,7 @@
             .listing-card .card-footer {
                 flex-direction: column;
                 align-items: stretch !important;
-                gap: 6px !important;
+                gap: 4px !important;
             }
             .listing-card .price-tag {
                 font-size: 0.82em !important;
@@ -1106,7 +1106,7 @@
                 padding: 6px 10px !important;
                 font-size: 0.75em !important;
                 border-radius: 4px !important;
-                margin-top: 2px;
+                margin-top: 1px;
             }
             .listing-card .card-badge {
                 font-size: 0.62em !important;
@@ -1124,6 +1124,21 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+            }
+            .listing-card .card-body > div:first-of-type {
+                margin-bottom: 2px !important;
+            }
+            .listing-card .card-body > div:nth-of-type(2) {
+                margin-bottom: 4px !important;
+                margin-top: 2px !important;
+            }
+            .listing-card .price-views-wrap {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                width: 100% !important;
+                margin-bottom: 2px !important;
             }
         }
     </style>
@@ -2184,7 +2199,7 @@
 
                             <p class="card-desc" style="font-size: 0.85em; margin-bottom: 15px;">${list.description || 'Individually crafted.'}</p>
                             <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <div class="price-views-wrap" style="display: flex; flex-direction: column; gap: 2px;">
                                     <span class="price-tag" style="color: var(--brand-gold); font-weight: 700; font-size: 1.1em;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                                     <span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate);"><i class="fas fa-eye" style="margin-right:3px;"></i>${list.views || 0}</span>
                                 </div>
