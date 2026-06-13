@@ -1452,6 +1452,77 @@
                 font-size: 0.78em;
             }
         }
+
+        /* Floating Logged-in Welcome Pill for Mobile */
+        .mobile-logged-pill {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(10, 17, 40, 0.92);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--gold-border);
+            padding: 12px 20px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 9999;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+            width: 90%;
+            max-width: 380px;
+            justify-content: space-between;
+        }
+
+        .mobile-logged-pill.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-logged-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88em;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .mobile-logged-info i {
+            color: var(--gold);
+            font-size: 1.25em;
+        }
+
+        .mobile-logged-btn {
+            background: var(--gold);
+            color: var(--bg-deep);
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.8em;
+            font-weight: 700;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mobile-logged-btn:hover {
+            background: var(--gold-light);
+            transform: scale(1.03);
+        }
+
+        @media (min-width: 769px) {
+            .mobile-logged-pill {
+                display: none !important;
+            }
+        }
     </style>
     <link rel="manifest" href="manifest.json">
 </head>
@@ -1721,6 +1792,15 @@
         </a>
     </div>
 
+    <!-- Floating welcome banner for logged in users on mobile -->
+    <div id="mobile-logged-pill" class="mobile-logged-pill">
+        <div class="mobile-logged-info">
+            <i class="fas fa-circle-user"></i>
+            <span>Welcome back, <strong id="mobile-logged-name" style="color: var(--gold-light);">User</strong></span>
+        </div>
+        <a href="#" id="mobile-logged-link" class="mobile-logged-btn">Dashboard <i class="fas fa-chevron-right" style="font-size:0.85em;"></i></a>
+    </div>
+
     <!-- ===== FOOTER ===== -->
     <footer>
         <div class="footer-inner">
@@ -1901,6 +1981,16 @@
                         </div>`;
                     if (authArea) authArea.innerHTML = activeNav;
                     if (mobileAuthArea) mobileAuthArea.innerHTML = activeNav;
+                }
+
+                // Update and show mobile welcome pill
+                const mobilePill = document.getElementById('mobile-logged-pill');
+                const mobileName = document.getElementById('mobile-logged-name');
+                const mobileLink = document.getElementById('mobile-logged-link');
+                if (mobilePill && mobileName && mobileLink) {
+                    mobileName.textContent = firstName;
+                    mobileLink.href = dashUrl;
+                    mobilePill.classList.add('show');
                 }
             } catch (err) { 
                 console.warn('Nav session check failed:', err); 
