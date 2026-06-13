@@ -1004,8 +1004,8 @@
                 gap: 12px;
             }
             .grid-shops {
-                grid-template-columns: 1fr;
-                gap: 16px;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
             }
             #marketplace-extra-filters {
                 display: none !important;
@@ -1164,22 +1164,24 @@
                 padding: 26px 12px 12px !important;
             }
             .shop-card .card-footer {
-                flex-direction: row !important;
-                align-items: center !important;
-                justify-content: space-between !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                justify-content: flex-start !important;
                 margin-top: 5px !important;
-                gap: 8px !important;
+                gap: 6px !important;
             }
             .shop-card .card-badge {
                 font-size: 0.65em !important;
                 padding: 3px 6px !important;
+                align-self: flex-start;
             }
             .shop-card .card-btn {
                 padding: 6px 12px !important;
                 font-size: 0.75em !important;
                 border-radius: 4px !important;
-                width: auto !important;
-                margin-top: 0 !important;
+                width: 100% !important;
+                text-align: center !important;
+                margin-top: 2px !important;
             }
         }
     </style>
