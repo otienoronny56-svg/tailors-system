@@ -1291,23 +1291,54 @@
 
         @media (max-width: 768px) {
             header {
-                padding: 15px 5%;
+                padding: 12px 15px;
             }
+
+            .logo-text { font-size: 1.2em; }
+            .logo-sub { font-size: 0.55em; }
 
             nav {
-                gap: 16px;
+                gap: 8px;
             }
 
-            nav>a:not(:last-of-type) {
-                display: none;
+            nav > a {
+                display: none !important;
             }
+            
+            #nav-auth-area { gap: 8px; }
+            .btn-login, .btn-signup { padding: 8px 12px; font-size: 0.8em; }
 
             .hero {
-                padding: 120px 5% 70px;
+                padding: 100px 15px 50px;
+            }
+
+            .hero-eyebrow {
+                font-size: 0.6em;
+                padding: 5px 12px;
+                margin-bottom: 20px;
+                line-height: 1.4;
+            }
+            
+            .hero h1 {
+                font-size: 2.2em;
+                margin-bottom: 16px;
+            }
+            
+            .hero p {
+                font-size: 0.95em;
+                margin-bottom: 30px;
+            }
+            
+            .btn-hero-primary, .btn-hero-secondary {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 20px;
             }
 
             .hero-trust {
-                gap: 18px;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 40px;
             }
 
             .categories-section,
