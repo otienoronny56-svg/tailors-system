@@ -180,18 +180,18 @@ async function checkSession() {
             // On the onboarding page: if a COMPLETED profile already exists, redirect to their dashboard.
             // If status is Pending or incomplete, stay here and let them complete the form.
             if (USER_PROFILE && USER_PROFILE.status !== 'Pending' && USER_PROFILE.organization_id) {
-                let redirectTo = 'admin-dashboard.html';
-                if (USER_PROFILE.role === 'client') redirectTo = 'client-dashboard.html';
+                let redirectTo = '/views/admin/admin-dashboard.html';
+                if (USER_PROFILE.role === 'client') redirectTo = '/views/client/client-dashboard.html';
                 window.location.href = redirectTo;
             }
             return; // Always stop here â€” let the onboarding page handle itself
         }
 
         if (path.includes('index.html') || path.includes('login.html') || path === '/' || path.endsWith('/')) {
-            let redirectTo = 'manager-dashboard.html';
-            if (USER_PROFILE.role === 'superadmin') redirectTo = 'superadmin-dashboard.html';
-            else if (USER_PROFILE.role === 'owner') redirectTo = 'admin-dashboard.html';
-            else if (USER_PROFILE.role === 'client') redirectTo = 'client-dashboard.html';
+            let redirectTo = '/views/manager/manager-dashboard.html';
+            if (USER_PROFILE.role === 'superadmin') redirectTo = '/views/superadmin/superadmin-dashboard.html';
+            else if (USER_PROFILE.role === 'owner') redirectTo = '/views/admin/admin-dashboard.html';
+            else if (USER_PROFILE.role === 'client') redirectTo = '/views/client/client-dashboard.html';
             
             window.location.href = redirectTo;
             return;
