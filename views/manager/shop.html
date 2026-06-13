@@ -1485,10 +1485,24 @@
                             </div>
                         </div>
                     </div>`;
-                    </div>`;
             }).join('');
 
-            // Highlight targeted listing if 'listing' parameter exists in URL
+            // Handle direct inquiry targeting
+            const inquireListingId = urlParams.get('inquire');
+            if (inquireListingId) {
+                setTimeout(() => {
+                    const matchedListing = shopListings.find(l => l.id === inquireListingId);
+                    if (matchedListing) {
+                        selectListingForInquiry(inquireListingId, matchedListing.title.replace(/'/g, "\\'"));
+                        
+                        // Remove the inquire parameter from the URL so it doesn't trigger again
+                        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=' + shopId;
+                        window.history.replaceState({ path: newUrl }, '', newUrl);
+                    }
+                }, 300);
+            }
+
+            // Highlight targeted listing if 'listing' parameter exists in URL (for View Details)
             const targetListingId = urlParams.get('listing');
             if (targetListingId) {
                 setTimeout(() => {
