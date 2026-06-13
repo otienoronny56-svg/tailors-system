@@ -800,6 +800,32 @@
             z-index: 2;
         }
 
+        .badge-discount, .badge-new {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 10;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            pointer-events: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .badge-discount {
+            background-color: #ef4444; /* red */
+            color: #ffffff;
+        }
+        .badge-new {
+            background-color: #22c55e; /* green */
+            color: #ffffff;
+        }
+
         .card-title {
             font-family: 'Playfair Display', serif;
             font-size: 1.25em;
@@ -2221,9 +2247,24 @@
                         <i class="${heartIcon}"></i>
                     </button>`;
 
+                let badgeHtml = '';
+                if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
+                    const pct = Math.round(((parseFloat(list.original_price) - parseFloat(list.price)) / parseFloat(list.original_price)) * 100);
+                    badgeHtml = `<span class="badge-discount">${pct}% OFF</span>`;
+                } else if (list.created_at) {
+                    const createdAt = new Date(list.created_at);
+                    const now = new Date();
+                    const diffTime = now - createdAt;
+                    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                    if (diffDays <= 5) {
+                        badgeHtml = `<span class="badge-new">NEW</span>`;
+                    }
+                }
+
                 return `
                     <div class="card listing-card">
                         <div class="card-banner-wrap">
+                            ${badgeHtml}
                             <div class="card-banner-blur" style="background-image: url('${imageUrl}')"></div>
                             <div class="card-banner" style="background-image: url('${imageUrl}')"></div>
                         </div>
@@ -2243,13 +2284,21 @@
                             <p class="card-desc" style="font-size: 0.85em; margin-bottom: 15px;">${list.description || 'Individually crafted.'}</p>
                             <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                                 <div class="price-views-wrap" style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span class="price-tag" style="color: var(--brand-gold); font-weight: 700; font-size: 1.1em;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                    ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
+                                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                            <span style="text-decoration: line-through; color: var(--brand-slate); font-size: 0.85em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
+                                            <span class="price-tag" style="color: #ef4444; font-weight: 700; font-size: 1.1em; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
+                                        </div>
+                                    ` : `
+                                        <span class="price-tag" style="color: var(--brand-gold); font-weight: 700; font-size: 1.1em;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                    `}
                                     <span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate);"><i class="fas fa-eye" style="margin-right:3px;"></i>${list.views || 0}</span>
                                 </div>
                                 <a href="../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}" class="card-btn" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}'); return false;">Inquire Now <i class="fas fa-envelope"></i></a>
                             </div>
                         </div>
                     </div>`;
+
             }).join('');
         }
 

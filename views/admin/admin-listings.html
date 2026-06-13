@@ -225,6 +225,10 @@
                             <input type="number" id="list-price" placeholder="e.g. 15000" required style="margin: 0;">
                         </div>
                         <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Original Price (Ksh) <span style="color:#64748b; font-weight:400; font-size:0.85em;">(Optional)</span></label>
+                            <input type="number" id="list-original-price" placeholder="e.g. 18000" style="margin: 0;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
                             <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Target Shop</label>
                             <select id="list-shop" required style="margin: 0;">
                                 <option value="">-- Select Shop --</option>
@@ -473,7 +477,12 @@
                         <td><img src="${imageUrl}" class="listing-img-thumbnail" alt="thumbnail"></td>
                         <td><strong>${list.title}</strong>${isFeatured ? ' <span style="color:#D4AF37;font-size:0.8em;">★ Pinned</span>' : ''}</td>
                         <td>${list.category || '—'}</td>
-                        <td>Ksh ${parseFloat(list.price || 0).toLocaleString()}</td>
+                        <td>
+                            ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price)
+                                ? `<span style="text-decoration: line-through; color: #94a3b8; font-size: 0.88em; margin-right: 6px;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span><br><strong style="color:#ef4444;">Ksh ${parseFloat(list.price || 0).toLocaleString()}</strong>`
+                                : `<strong>Ksh ${parseFloat(list.price || 0).toLocaleString()}</strong>`
+                            }
+                        </td>
                         <td>${shopMap[list.shop_id] || 'Unknown Shop'}</td>
                         <td style="text-align:center;"><span class="score-pill"><i class="fas fa-bolt" style="font-size:0.7em;"></i> ${score}</span></td>
                         <td style="text-align:center;"><span class="badge-views"><i class="fas fa-eye"></i> ${views}</span></td>
@@ -509,6 +518,8 @@
                 const title = document.getElementById('list-title').value.trim();
                 const category = document.getElementById('list-category').value;
                 const price = parseFloat(document.getElementById('list-price').value);
+                const originalPriceVal = document.getElementById('list-original-price').value.trim();
+                const originalPrice = originalPriceVal ? parseFloat(originalPriceVal) : null;
                 const shopId = document.getElementById('list-shop').value;
                 const desc = document.getElementById('list-desc').value.trim();
                 const fileInput = document.getElementById('list-image-file');
@@ -543,6 +554,7 @@
                         title,
                         category,
                         price,
+                        original_price: originalPrice,
                         description: desc,
                         image_urls: JSON.stringify([publicUrl]),
                         status: 'active'
@@ -619,6 +631,7 @@
             document.getElementById('edit-listing-title').value = listing.title || '';
             document.getElementById('edit-listing-desc').value = listing.description || '';
             document.getElementById('edit-listing-price').value = listing.price || '';
+            document.getElementById('edit-listing-original-price').value = listing.original_price || '';
 
             // Set category select
             const catSelect = document.getElementById('edit-listing-category');
@@ -644,13 +657,15 @@
                 const title = document.getElementById('edit-listing-title').value.trim();
                 const description = document.getElementById('edit-listing-desc').value.trim();
                 const price = parseFloat(document.getElementById('edit-listing-price').value);
+                const originalPriceVal = document.getElementById('edit-listing-original-price').value.trim();
+                const originalPrice = originalPriceVal ? parseFloat(originalPriceVal) : null;
                 const category = document.getElementById('edit-listing-category').value;
 
                 if (!title) throw new Error('Title is required.');
 
                 const { error } = await supabaseClient
                     .from('marketplace_listings')
-                    .update({ title, description, price, category })
+                    .update({ title, description, price, original_price: originalPrice, category })
                     .eq('id', id);
 
                 if (error) throw error;
@@ -689,7 +704,7 @@
                         onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
                 </div>
 
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;">
                     <div>
                         <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Category</label>
                         <select id="edit-listing-category"
@@ -732,6 +747,12 @@
                     <div>
                         <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Price (Ksh)</label>
                         <input type="number" id="edit-listing-price" min="0" step="1"
+                            style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box; transition:border 0.2s;"
+                            onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Original Price (Ksh)</label>
+                        <input type="number" id="edit-listing-original-price" min="0" step="1" placeholder="Optional"
                             style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box; transition:border 0.2s;"
                             onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
                     </div>

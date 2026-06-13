@@ -459,6 +459,32 @@
             transform: scale(1.04);
         }
 
+        .badge-discount, .badge-new {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 10;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            pointer-events: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .badge-discount {
+            background-color: #ef4444; /* red */
+            color: #ffffff;
+        }
+        .badge-new {
+            background-color: #22c55e; /* green */
+            color: #ffffff;
+        }
+
         .listing-body {
             padding: 18px;
             display: flex;
@@ -569,6 +595,44 @@
 
             .form-row .form-group {
                 margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .shop-listings-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+            }
+            .listing-card .listing-img-wrap {
+                height: 180px !important;
+            }
+            .listing-card .listing-body {
+                padding: 10px !important;
+            }
+            .listing-card .listing-title {
+                font-size: 0.9em !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+                height: 2.4em !important;
+            }
+            .listing-card .listing-desc {
+                display: none !important;
+            }
+            .listing-card .listing-footer {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 6px !important;
+            }
+            .listing-card .price-text {
+                font-size: 0.88em !important;
+            }
+            .listing-card .listing-select-btn {
+                width: 100% !important;
+                text-align: center !important;
+                padding: 6px !important;
+                font-size: 0.75em !important;
             }
         }
 
@@ -1588,9 +1652,24 @@
                     ? `<span onclick="openReviewModalForListing('${list.id}')" style="color: var(--brand-gold); font-size: 0.8em; font-weight: 600; cursor: pointer; border-bottom: 1px dashed rgba(212,175,55,0.4); display: inline-flex; align-items: center; gap: 4px;" title="Rate this design"><i class="fas fa-star"></i> ${avgRating} (${itemReviews.length})</span>`
                     : `<span onclick="openReviewModalForListing('${list.id}')" style="color: var(--brand-slate); font-size: 0.8em; font-style: italic; cursor: pointer; border-bottom: 1px dashed rgba(136,146,176,0.3); display: inline-flex; align-items: center; gap: 4px;" title="Be the first to rate this design"><i class="far fa-star"></i> Rate item</span>`;
 
+                let badgeHtml = '';
+                if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
+                    const pct = Math.round(((parseFloat(list.original_price) - parseFloat(list.price)) / parseFloat(list.original_price)) * 100);
+                    badgeHtml = `<span class="badge-discount">${pct}% OFF</span>`;
+                } else if (list.created_at) {
+                    const createdAt = new Date(list.created_at);
+                    const now = new Date();
+                    const diffTime = now - createdAt;
+                    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                    if (diffDays <= 5) {
+                        badgeHtml = `<span class="badge-new">NEW</span>`;
+                    }
+                }
+
                 return `
                     <div class="listing-card" id="listing-card-${list.id}">
                         <div class="listing-img-wrap">
+                            ${badgeHtml}
                             <div class="listing-img-blur" style="background-image: url('${imageUrl}')"></div>
                             <div class="listing-img" style="background-image: url('${imageUrl}')"></div>
                         </div>
@@ -1602,7 +1681,14 @@
                             <p class="listing-desc">${list.description || 'Handcrafted bespoke garment designed and fit perfectly for you.'}</p>
                             <div class="listing-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                                 <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span class="price-text" style="color: var(--brand-gold); font-weight: 700; font-size: 1.1em;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                    ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
+                                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                            <span style="text-decoration: line-through; color: var(--brand-slate); font-size: 0.82em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
+                                            <span class="price-text" style="color: #ef4444; font-weight: 700; font-size: 1.05em; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
+                                        </div>
+                                    ` : `
+                                        <span class="price-text" style="color: var(--brand-gold); font-weight: 700; font-size: 1.1em;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                    `}
                                     <span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate);"><i class="fas fa-eye" style="margin-right:3px;"></i>${list.views || 0}</span>
                                 </div>
                                 <button type="button" class="listing-select-btn" onclick="event.stopPropagation(); trackListingView('${list.id}', () => selectListingForInquiry('${list.id}', '${list.title.replace(/'/g, "\\'")}'))">Inquire</button>
