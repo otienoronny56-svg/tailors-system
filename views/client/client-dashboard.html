@@ -942,6 +942,17 @@
                 padding: 10px 12px;
                 height: 65px;
             }
+            .btn-chat-back {
+                background: transparent;
+                border: none;
+                color: var(--brand-gold);
+                font-size: 1.25em;
+                cursor: pointer;
+                padding: 4px;
+                display: flex;
+                align-items: center;
+                margin-right: 12px;
+            }
             .logo-text {
                 font-size: 1.1em;
             }
@@ -1521,9 +1532,23 @@
             renderThreadsList(); // Re-render to show active styling
 
             const chatPane = document.getElementById('chat-pane');
+            const threadsSidebar = document.querySelector('.threads-sidebar');
+
+            // On mobile, hide threads list and display chat pane
+            if (window.innerWidth <= 600) {
+                if (threadsSidebar) threadsSidebar.style.display = 'none';
+                if (chatPane) chatPane.style.display = 'flex';
+                // Push state to enable native device back button to close chat
+                history.pushState({ chatOpen: true }, '');
+            }
+
+            const backBtnHtml = (window.innerWidth <= 600)
+                ? `<button type="button" class="btn-chat-back" onclick="closeChatThread()"><i class="fas fa-arrow-left"></i></button>`
+                : '';
 
             chatPane.innerHTML = `
                 <div class="chat-header">
+                    ${backBtnHtml}
                     <div class="shop-icon" style="${activeThread.shopImage ? `background-image: url('${activeThread.shopImage}')` : ''}">
                         ${activeThread.shopImage ? '' : '<i class="fas fa-store"></i>'}
                     </div>
@@ -2080,8 +2105,18 @@
                 document.getElementById('marketplace-pane').style.display = 'flex';
                 loadMarketplaceData();
             } else if (tabName === 'inbox') {
-                document.querySelector('.threads-sidebar').style.display = 'flex';
-                document.getElementById('chat-pane').style.display = 'flex';
+                if (window.innerWidth <= 600) {
+                    if (activeThread) {
+                        document.querySelector('.threads-sidebar').style.display = 'none';
+                        document.getElementById('chat-pane').style.display = 'flex';
+                    } else {
+                        document.querySelector('.threads-sidebar').style.display = 'flex';
+                        document.getElementById('chat-pane').style.display = 'none';
+                    }
+                } else {
+                    document.querySelector('.threads-sidebar').style.display = 'flex';
+                    document.getElementById('chat-pane').style.display = 'flex';
+                }
             } else if (tabName === 'settings') {
                 document.getElementById('settings-pane').style.display = 'flex';
                 // Populate inputs
@@ -2578,6 +2613,32 @@
             }
             // Navigate to the action page after tracking
             setTimeout(() => window.location.href = fallbackUrl, 120);
+        }
+
+        // Back history navigation logic for mobile chat threads
+        window.addEventListener('popstate', (event) => {
+            if (window.innerWidth <= 600) {
+                const chatPane = document.getElementById('chat-pane');
+                const threadsSidebar = document.querySelector('.threads-sidebar');
+                if (chatPane && threadsSidebar && chatPane.style.display === 'flex') {
+                    // Close the chat visually and return to the list
+                    activeThread = null;
+                    threadsSidebar.style.display = 'flex';
+                    chatPane.style.display = 'none';
+                    renderThreadsList();
+                }
+            }
+        });
+
+        // Function to explicitly close chat
+        function closeChatThread() {
+            if (window.innerWidth <= 600) {
+                // Hitting UI back button will trigger popstate logic above
+                history.back();
+            } else {
+                activeThread = null;
+                renderThreadsList();
+            }
         }
     </script>
 </body>
