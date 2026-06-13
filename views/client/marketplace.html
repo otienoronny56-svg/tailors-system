@@ -463,7 +463,7 @@
         }
 
         .card-body {
-            padding: 24px 20px;
+            padding: 12px 16px;
             display: flex;
             flex-direction: column;
             flex: 1;
@@ -471,7 +471,7 @@
 
         /* For shop card spacing */
         .shop-card .card-body {
-            padding-top: 45px;
+            padding-top: 20px;
         }
 
         .card-title {
@@ -493,10 +493,10 @@
         .card-desc {
             font-size: 0.88em;
             color: var(--brand-light-slate);
-            margin-bottom: 20px;
-            flex: 1;
+            margin-bottom: 6px;
+            flex: none;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -506,8 +506,14 @@
             justify-content: space-between;
             align-items: center;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 15px;
+            padding-top: 8px;
             margin-top: auto;
+        }
+
+        @media (max-width: 1024px) {
+            .listing-card .card-banner-wrap {
+                height: 200px !important;
+            }
         }
 
         .card-badge {
@@ -721,6 +727,9 @@
             <button class="toggle-btn" id="btn-mode-shops" onclick="setMarketplaceMode('shops')">
                 <i class="fas fa-store"></i> Tailoring Shops
             </button>
+            <button class="toggle-btn" id="btn-mode-favourites" onclick="setMarketplaceMode('favourites')" style="display: none;">
+                <i class="fas fa-heart"></i> Saved Favourites
+            </button>
         </div>
 
         <!-- Creations (Listings) Grid -->
@@ -753,6 +762,8 @@
         let allListings = [];
         let allReviews = [];
         let activeMode = 'listings'; // 'listings' or 'shops'
+        let currentUser;
+        let userLikes = [];
 
         // Apply config branding dynamically
         if (typeof APP_CONFIG !== 'undefined') {
@@ -792,14 +803,46 @@
                     return;
                 }
 
-                const { data: profile } = await supabaseClient
-                    .from('user_profiles')
-                    .select('role, full_name')
-                    .eq('id', user.id)
-                    .single();
+                currentUser = user;
 
-                const role = profile?.role || 'client';
-                const name = profile?.full_name || user.user_metadata?.full_name || 'Account';
+                // Fetch user likes
+                let { data: likes, error: likesErr } = await supabaseClient
+                    .from('marketplace_likes')
+                    .select('listing_id')
+                    .eq('user_id', currentUser.id);
+                if (!likesErr && likes) {
+                    userLikes = likes.map(l => l.listing_id);
+                }
+
+                // Show favourites toggle button
+                const favBtn = document.getElementById('btn-mode-favourites');
+                if (favBtn) favBtn.style.display = 'inline-flex';
+
+                let profileData = null;
+                try {
+                    const { data: profile } = await supabaseClient
+                        .from('user_profiles')
+                        .select('role, full_name')
+                        .eq('id', user.id)
+                        .maybeSingle();
+                    if (profile) {
+                        profileData = profile;
+                    } else {
+                        const { data: worker } = await supabaseClient
+                            .from('workers')
+                            .select('name')
+                            .eq('id', user.id)
+                            .maybeSingle();
+                        if (worker) {
+                            profileData = { role: 'manager', full_name: worker.name };
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Error checking profile in marketplace:", e);
+                }
+
+                const role = profileData?.role || 'client';
+                const name = profileData?.full_name || user.user_metadata?.full_name || 'Account';
                 const firstName = name.split(' ')[0];
 
                 if (role === 'client') {
@@ -810,9 +853,9 @@
                             <button class="btn-signout" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                         </div>`;
                 } else {
-                    const dashUrl = role === 'superadmin' ? 'superadmin-dashboard.html'
-                        : role === 'owner' ? 'admin-dashboard.html'
-                            : 'manager-dashboard.html';
+                    const dashUrl = role === 'superadmin' ? '../superadmin/superadmin-dashboard.html'
+                        : role === 'owner' ? '../admin/admin-dashboard.html'
+                            : '../manager/manager-dashboard.html';
                     authArea.innerHTML = `
                         <div class="nav-user-pill">
                             <span class="nav-user-name"><i class="fas fa-user-tie"></i> ${escapeHTML(firstName)}</span>
@@ -835,24 +878,92 @@
             }
         }
 
+        async function toggleLike(listingId) {
+            if (!currentUser) {
+                alert("Please log in to like creations.");
+                return;
+            }
+            const btn = document.getElementById(`like-btn-${listingId}`);
+            if (!btn) return;
+            const icon = btn.querySelector('i');
+            if (!icon) return;
+
+            const isCurrentlyLiked = userLikes.includes(listingId);
+            
+            // Optimistic UI Update
+            if (isCurrentlyLiked) {
+                userLikes = userLikes.filter(id => id !== listingId);
+                icon.className = 'far fa-heart';
+                btn.style.color = 'var(--brand-slate)';
+            } else {
+                userLikes.push(listingId);
+                icon.className = 'fas fa-heart';
+                btn.style.color = '#ef4444';
+                btn.style.transform = 'scale(1.3)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            }
+
+            if (activeMode === 'favourites') {
+                filterMarketplace();
+            }
+
+            try {
+                if (isCurrentlyLiked) {
+                    const { error } = await supabaseClient
+                        .from('marketplace_likes')
+                        .delete()
+                        .eq('user_id', currentUser.id)
+                        .eq('listing_id', listingId);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient
+                        .from('marketplace_likes')
+                        .insert([{ user_id: currentUser.id, listing_id: listingId }]);
+                    if (error) throw error;
+                }
+            } catch (err) {
+                console.error("Failed to toggle like:", err);
+                // Revert
+                if (isCurrentlyLiked) {
+                    userLikes.push(listingId);
+                    icon.className = 'fas fa-heart';
+                    btn.style.color = '#ef4444';
+                } else {
+                    userLikes = userLikes.filter(id => id !== listingId);
+                    icon.className = 'far fa-heart';
+                    btn.style.color = 'var(--brand-slate)';
+                }
+                if (activeMode === 'favourites') {
+                    filterMarketplace();
+                }
+            }
+        }
+
         // Toggle Active Tab Mode
         function setMarketplaceMode(mode) {
             activeMode = mode;
             const btnListings = document.getElementById('btn-mode-listings');
             const btnShops = document.getElementById('btn-mode-shops');
+            const btnFavourites = document.getElementById('btn-mode-favourites');
             const gridListings = document.getElementById('listings-grid');
             const gridShops = document.getElementById('shops-grid');
 
+            btnListings.classList.remove('active');
+            btnShops.classList.remove('active');
+            if (btnFavourites) btnFavourites.classList.remove('active');
+
             if (mode === 'listings') {
                 btnListings.classList.add('active');
-                btnShops.classList.remove('active');
                 gridListings.style.display = 'grid';
                 gridShops.style.display = 'none';
-            } else {
-                btnListings.classList.remove('active');
+            } else if (mode === 'shops') {
                 btnShops.classList.add('active');
                 gridListings.style.display = 'none';
                 gridShops.style.display = 'grid';
+            } else if (mode === 'favourites') {
+                if (btnFavourites) btnFavourites.classList.add('active');
+                gridListings.style.display = 'grid';
+                gridShops.style.display = 'none';
             }
             filterMarketplace();
         }
@@ -879,6 +990,18 @@
                     .from('vw_marketplace_reviews')
                     .select('*');
                 allReviews = reviews || [];
+
+                // 4. Fetch user likes if logged in
+                currentUser = (await supabaseClient.auth.getUser())?.data?.user;
+                if (currentUser) {
+                    let { data: likes, error: likesErr } = await supabaseClient
+                        .from('marketplace_likes')
+                        .select('listing_id')
+                        .eq('user_id', currentUser.id);
+                    if (!likesErr && likes) {
+                        userLikes = likes.map(l => l.listing_id);
+                    }
+                }
 
                 // Check URL params for category filter trigger
                 const urlParams = new URLSearchParams(window.location.search);
@@ -982,15 +1105,22 @@
                     ? (listingReviews.reduce((sum, r) => sum + r.rating, 0) / listingReviews.length).toFixed(1)
                     : null;
 
-                const viewsHtml = `<span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-eye"></i> ${list.views || 0}</span>`;
-                const ratingTag = avgRating
-                    ? `<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
-                            <span style="color: var(--brand-gold); font-size: 0.82em; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-star"></i> ${avgRating}</span>
-                            ${viewsHtml}
-                       </div>`
-                    : `<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
-                            ${viewsHtml}
-                       </div>`;
+                const isLiked = userLikes.includes(list.id);
+                const heartIcon = isLiked ? 'fas fa-heart' : 'far fa-heart';
+                const heartColor = isLiked ? '#ef4444' : 'var(--brand-slate)';
+                const likeBtn = `
+                    <button class="like-btn" onclick="event.stopPropagation(); toggleLike('${list.id}')" style="background:transparent; border:none; color:${heartColor}; cursor:pointer; font-size:1.15em; padding:4px; display:inline-flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'" id="like-btn-${list.id}">
+                        <i class="${heartIcon}"></i>
+                    </button>`;
+
+                const viewsHtml = `<span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate); display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><i class="fas fa-eye"></i> ${list.views || 0}</span>`;
+                const ratingTag = `
+                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                        ${avgRating ? `<span style="color: var(--brand-gold); font-size: 0.82em; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><i class="fas fa-star"></i> ${avgRating}</span>` : ''}
+                        ${viewsHtml}
+                        ${likeBtn}
+                    </div>
+                `;
 
                 let badgeHtml = '';
                 if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
@@ -1024,7 +1154,7 @@
                                     ${avatarIconHtml}${escapeHTML(shopName)}
                                 </span>
                             </div>
-                            <p class="card-desc" style="font-size: 0.85em; margin-bottom: 15px;">${escapeHTML(list.description || 'Custom crafted.')}</p>
+                            <p class="card-desc" style="font-size: 0.85em; margin-bottom: 6px;">${escapeHTML(list.description || 'Custom crafted.')}</p>
                             <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                                 <div style="display: flex; flex-direction: column; gap: 2px;">
                                     ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
@@ -1064,6 +1194,10 @@
                 renderShops(filteredShops);
             } else {
                 const filteredListings = allListings.filter(list => {
+                    if (activeMode === 'favourites') {
+                        if (!userLikes.includes(list.id)) return false;
+                    }
+
                     const titleMatch = !query || 
                         (list.title && list.title.toLowerCase().includes(query)) ||
                         (list.description && list.description.toLowerCase().includes(query)) ||
@@ -1084,8 +1218,17 @@
         }
 
         // Track a listing card click — increments view counter via DB function
+        const trackedListingClicks = new Set();
         async function trackListingView(listingId, fallbackUrl) {
-            if (listingId && supabaseClient && !listingId.startsWith('mock')) {
+            if (!listingId || trackedListingClicks.has(listingId)) return;
+            trackedListingClicks.add(listingId);
+            setTimeout(() => trackedListingClicks.delete(listingId), 2000);
+
+            const today = new Date().toISOString().split('T')[0];
+            const viewKey = `viewed_${listingId}`;
+            const lastViewed = localStorage.getItem(viewKey);
+
+            if (lastViewed !== today && supabaseClient && !listingId.startsWith('mock')) {
                 // Optimistically update the UI to fix stale browser back/forward cache (BFCache)
                 const viewSpan = document.getElementById(`view-count-${listingId}`);
                 if (viewSpan) {
@@ -1095,6 +1238,7 @@
 
                 try {
                     await supabaseClient.rpc('increment_listing_views', { listing_id: listingId });
+                    localStorage.setItem(viewKey, today);
                 } catch (e) { /* silent — don't block navigation */ }
             }
             // Navigate to the action page after tracking

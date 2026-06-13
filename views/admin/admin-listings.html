@@ -269,6 +269,7 @@
                                 <th>Shop</th>
                                 <th style="text-align:center;" title="Showcase score based on completeness, views & freshness">Score</th>
                                 <th style="text-align:center;">Views</th>
+                                <th style="text-align:center;">Likes</th>
                                 <th style="text-align:center;" title="Pin to homepage showcase">⭐ Featured</th>
                                 <th>Status</th>
                                 <th style="text-align: center;">Actions</th>
@@ -276,7 +277,7 @@
                         </thead>
                         <tbody id="listings-table-body">
                             <tr>
-                                <td colspan="11" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">Loading published catalog...</td>
+                                <td colspan="12" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">Loading published catalog...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -448,7 +449,7 @@
             if (!tbody) return;
 
             if (listings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">
                     No listings found. Add your first marketplace listing above!
                 </td></tr>`;
                 return;
@@ -486,6 +487,11 @@
                         <td>${shopMap[list.shop_id] || 'Unknown Shop'}</td>
                         <td style="text-align:center;"><span class="score-pill"><i class="fas fa-bolt" style="font-size:0.7em;"></i> ${score}</span></td>
                         <td style="text-align:center;"><span class="badge-views"><i class="fas fa-eye"></i> ${views}</span></td>
+                        <td style="text-align:center;">
+                            <span style="display: inline-flex; align-items: center; gap: 4px; background: #fff1f2; color: #e11d48; padding: 3px 8px; border-radius: 20px; font-size: 0.78em; font-weight: 600;" title="${list.like_count || 0} Likes">
+                                <i class="fas fa-heart"></i> ${list.like_count || 0}
+                            </span>
+                        </td>
                         <td style="text-align:center;">
                             <button onclick="toggleFeatured('${list.id}', ${isFeatured})" class="btn-feature ${isFeatured ? 'is-featured' : ''}" title="${isFeatured ? 'Remove from homepage showcase' : 'Pin to homepage showcase'}">
                                 ${isFeatured ? '★' : '☆'}

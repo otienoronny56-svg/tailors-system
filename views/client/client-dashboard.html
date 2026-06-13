@@ -773,7 +773,7 @@
         }
 
         .listing-card .card-body {
-            padding: 20px;
+            padding: 12px 16px;
         }
 
         /* Custom layout overrides for Marketplace Listings */
@@ -856,12 +856,12 @@
         .card-desc {
             font-size: 0.88em;
             color: var(--brand-slate);
-            margin-bottom: 15px;
+            margin-bottom: 6px;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            flex-grow: 1;
+            flex-grow: 0;
         }
 
         .card-footer {
@@ -1357,6 +1357,9 @@
                 <button class="mkt-toggle-btn" id="mkt-btn-shops" onclick="setMarketplaceMode('shops')">
                     <i class="fas fa-store"></i> Featured Tailoring Shops
                 </button>
+                <button class="mkt-toggle-btn" id="mkt-btn-favourites" onclick="setMarketplaceMode('favourites')">
+                    <i class="fas fa-heart"></i> Saved Favourites
+                </button>
             </div>
 
             <div id="mkt-section-shops" style="display: none;">
@@ -1563,7 +1566,7 @@
             try {
                 const { data: { user }, error } = await supabaseClient.auth.getUser();
                 if (error || !user) {
-                    location.href = '/login.html';
+                    location.href = '../../login.html';
                     return;
                 }
                 currentUser = user;
@@ -1579,7 +1582,7 @@
                 switchTab('marketplace');
             } catch (err) {
                 console.error("Session lookup failed:", err);
-                location.href = '/login.html';
+                location.href = '../../login.html';
             }
         }
 
@@ -2205,6 +2208,10 @@
                 setTimeout(() => btn.style.transform = 'scale(1)', 200);
             }
 
+            if (activeMarketplaceMode === 'favourites') {
+                filterMarketplace();
+            }
+
             try {
                 if (isCurrentlyLiked) {
                     const { error } = await supabaseClient
@@ -2230,6 +2237,9 @@
                     userLikes = userLikes.filter(id => id !== listingId);
                     icon.className = 'far fa-heart';
                     btn.style.color = 'var(--brand-slate)';
+                }
+                if (activeMarketplaceMode === 'favourites') {
+                    filterMarketplace();
                 }
             }
         }
@@ -2300,7 +2310,7 @@
                                 </span>
                             </div>
 
-                            <p class="card-desc" style="font-size: 0.85em; margin-bottom: 15px;">${list.description || 'Individually crafted.'}</p>
+                            <p class="card-desc" style="font-size: 0.85em; margin-bottom: 6px;">${list.description || 'Individually crafted.'}</p>
                             <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                                 <div class="price-views-wrap" style="display: flex; flex-direction: column; gap: 2px;">
                                     ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
@@ -2339,6 +2349,10 @@
             });
 
             const filteredListings = allMarketplaceListings.filter(list => {
+                if (activeMarketplaceMode === 'favourites') {
+                    if (!userLikes.includes(list.id)) return false;
+                }
+
                 const titleMatch = !query ||
                     (list.title && list.title.toLowerCase().includes(query)) ||
                     (list.description && list.description.toLowerCase().includes(query)) ||
@@ -2799,24 +2813,36 @@
             );
         }
 
+        let activeMarketplaceMode = 'listings';
         function setMarketplaceMode(mode) {
+            activeMarketplaceMode = mode;
             const btnListings = document.getElementById('mkt-btn-listings');
             const btnShops = document.getElementById('mkt-btn-shops');
+            const btnFavourites = document.getElementById('mkt-btn-favourites');
             const sectionListings = document.getElementById('mkt-section-listings');
             const sectionShops = document.getElementById('mkt-section-shops');
 
             if (!btnListings || !btnShops || !sectionListings || !sectionShops) return;
 
+            btnListings.classList.remove('active');
+            btnShops.classList.remove('active');
+            if (btnFavourites) btnFavourites.classList.remove('active');
+
             if (mode === 'listings') {
                 btnListings.classList.add('active');
-                btnShops.classList.remove('active');
                 sectionListings.style.display = 'block';
                 sectionShops.style.display = 'none';
-            } else {
-                btnListings.classList.remove('active');
+                filterMarketplace();
+            } else if (mode === 'shops') {
                 btnShops.classList.add('active');
                 sectionListings.style.display = 'none';
                 sectionShops.style.display = 'block';
+                filterMarketplace();
+            } else if (mode === 'favourites') {
+                if (btnFavourites) btnFavourites.classList.add('active');
+                sectionListings.style.display = 'block';
+                sectionShops.style.display = 'none';
+                filterMarketplace();
             }
         }
 
@@ -2909,8 +2935,17 @@
         }
 
         // Track a listing card click — increments view counter via DB function
+        const trackedListingClicks = new Set();
         async function trackListingView(listingId, fallbackUrl) {
-            if (listingId && supabaseClient && !listingId.startsWith('mock')) {
+            if (!listingId || trackedListingClicks.has(listingId)) return;
+            trackedListingClicks.add(listingId);
+            setTimeout(() => trackedListingClicks.delete(listingId), 2000);
+
+            const today = new Date().toISOString().split('T')[0];
+            const viewKey = `viewed_${listingId}`;
+            const lastViewed = localStorage.getItem(viewKey);
+
+            if (lastViewed !== today && supabaseClient && !listingId.startsWith('mock')) {
                 // Optimistically update the UI to fix stale browser back/forward cache (BFCache)
                 const viewSpan = document.getElementById(`view-count-${listingId}`);
                 if (viewSpan) {
@@ -2920,6 +2955,7 @@
 
                 try {
                     await supabaseClient.rpc('increment_listing_views', { listing_id: listingId });
+                    localStorage.setItem(viewKey, today);
                 } catch (e) { /* silent — don't block navigation */ }
             }
             // Navigate to the action page after tracking
