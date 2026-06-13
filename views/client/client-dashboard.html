@@ -909,6 +909,74 @@
             background: var(--brand-gold);
             box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
         }
+        @media (max-width: 600px) {
+            .workspace {
+                flex-direction: column;
+            }
+            .dock-nav {
+                flex-direction: row;
+                width: 100%;
+                height: 60px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                z-index: 9999;
+                background: var(--brand-navy);
+                border-right: none;
+                border-top: 1px solid rgba(212, 175, 55, 0.2);
+                padding: 0;
+                justify-content: space-around;
+            }
+            .dock-item {
+                margin: 0;
+                width: auto;
+                flex: 1;
+                border-radius: 0;
+                height: 100%;
+            }
+            .marketplace-pane, .inbox-pane, .orders-pane, .settings-pane {
+                padding-bottom: 70px; /* Space for bottom nav */
+                height: calc(100vh - 60px);
+            }
+            header {
+                padding: 10px 15px;
+            }
+            /* Grid and cards */
+            .listings-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .listing-card .card-banner-wrap {
+                height: 180px;
+            }
+            .listing-card .card-body {
+                padding: 12px;
+            }
+            .listing-card .card-body h3 {
+                font-size: 0.95em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .listing-card .card-body p {
+                display: none;
+            }
+            .listing-card .card-footer {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 8px !important;
+            }
+            .listing-card .price-tag {
+                font-size: 0.9em;
+            }
+            .listing-card .card-btn {
+                width: 100%;
+                text-align: center;
+                padding: 8px;
+                font-size: 0.85em;
+                margin-top: 4px;
+            }
+        }
     </style>
     <link rel="manifest" href="../../manifest.json">
 </head>

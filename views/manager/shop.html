@@ -816,6 +816,78 @@
         .shop-filter-row .select-wrap select:focus {
             border-color: rgba(212, 175, 55, 0.3);
         }
+        @media (max-width: 600px) {
+            .shop-container {
+                flex-direction: column;
+                margin-top: -30px;
+                padding: 10px;
+            }
+            .shop-info-sidebar {
+                width: 100%;
+            }
+            .shop-profile-card {
+                padding: 20px;
+                align-items: center;
+                text-align: center;
+            }
+            .shop-description-text, .shop-meta-info {
+                text-align: center;
+            }
+            .meta-row {
+                justify-content: center;
+            }
+            .shop-listings-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .listing-card .listing-img-wrap {
+                height: 180px;
+            }
+            .listing-card .listing-body {
+                padding: 12px;
+            }
+            .listing-card .listing-title {
+                font-size: 0.95em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .listing-card .listing-desc {
+                display: none;
+            }
+            .listing-card .listing-footer {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 8px !important;
+            }
+            .listing-card .price-text {
+                font-size: 0.9em !important;
+            }
+            .listing-card .listing-select-btn {
+                width: 100%;
+                text-align: center;
+                padding: 8px;
+                font-size: 0.85em;
+                margin-top: 4px;
+            }
+            .shop-nav-tabs {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .shop-tab-btn {
+                padding: 10px 15px;
+                font-size: 0.85em;
+                flex: 1 1 auto;
+                text-align: center;
+            }
+            .shop-filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-wrap, .shop-filter-row select {
+                width: 100%;
+            }
+        }
     </style>
     <link rel="manifest" href="../../manifest.json">
 </head>

@@ -1389,6 +1389,42 @@
         .skeleton-line.narrow {
             width: 35%;
         }
+        @media (max-width: 600px) {
+            .listings-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .listing-card .listing-img-wrap {
+                height: 180px;
+            }
+            .listing-card .listing-body {
+                padding: 12px;
+            }
+            .listing-card .listing-title {
+                font-size: 0.95em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .listing-card .listing-desc {
+                display: none;
+            }
+            .listing-card .listing-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .listing-card .listing-footer > span {
+                font-size: 0.85em;
+            }
+            .listing-card .btn-inquire {
+                width: 100%;
+                text-align: center;
+                padding: 8px;
+                font-size: 0.85em;
+                margin-top: 4px;
+            }
+        }
     </style>
     <link rel="manifest" href="manifest.json">
 </head>
