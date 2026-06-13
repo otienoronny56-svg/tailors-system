@@ -1465,7 +1465,7 @@
                     : `<span onclick="openReviewModalForListing('${list.id}')" style="color: var(--brand-slate); font-size: 0.8em; font-style: italic; cursor: pointer; border-bottom: 1px dashed rgba(136,146,176,0.3); display: inline-flex; align-items: center; gap: 4px;" title="Be the first to rate this design"><i class="far fa-star"></i> Rate item</span>`;
 
                 return `
-                    <div class="listing-card">
+                    <div class="listing-card" id="listing-card-${list.id}">
                         <div class="listing-img-wrap">
                             <div class="listing-img-blur" style="background-image: url('${imageUrl}')"></div>
                             <div class="listing-img" style="background-image: url('${imageUrl}')"></div>
@@ -1485,7 +1485,34 @@
                             </div>
                         </div>
                     </div>`;
+                    </div>`;
             }).join('');
+
+            // Highlight targeted listing if 'listing' parameter exists in URL
+            const targetListingId = urlParams.get('listing');
+            if (targetListingId) {
+                setTimeout(() => {
+                    const targetCard = document.getElementById(`listing-card-${targetListingId}`);
+                    if (targetCard) {
+                        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetCard.style.transition = 'all 0.5s ease';
+                        targetCard.style.boxShadow = '0 0 25px 5px rgba(212, 175, 55, 0.6)';
+                        targetCard.style.transform = 'scale(1.02)';
+                        targetCard.style.border = '1px solid var(--brand-gold)';
+                        
+                        // Revert the glow after 3 seconds
+                        setTimeout(() => {
+                            targetCard.style.boxShadow = '';
+                            targetCard.style.transform = '';
+                            targetCard.style.border = '';
+                        }, 3000);
+
+                        // Remove the listing parameter from the URL so it doesn't trigger again on subsequent renders
+                        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=' + shopId;
+                        window.history.replaceState({ path: newUrl }, '', newUrl);
+                    }
+                }, 300);
+            }
         }
 
         function populateInquiryDropdown() {
