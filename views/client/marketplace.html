@@ -916,9 +916,12 @@
                                 </span>
                             </div>
                             <p class="card-desc" style="font-size: 0.85em; margin-bottom: 15px;">${escapeHTML(list.description || 'Custom crafted.')}</p>
-                            <div class="card-footer">
-                                <span class="price-tag">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
-                                <a href="../../views/manager/shop.html?id=${list.shop_id}" class="card-btn">Inquire Now <i class="fas fa-envelope"></i></a>
+                            <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                    <span class="price-tag">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                    <span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate);"><i class="fas fa-eye" style="margin-right:3px;"></i>${list.views || 0}</span>
+                                </div>
+                                <a href="../../views/manager/shop.html?id=${list.shop_id}" class="card-btn" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '../../views/manager/shop.html?id=${list.shop_id}'); return false;">Inquire Now <i class="fas fa-envelope"></i></a>
                             </div>
                         </div>
                     </div>`;
@@ -963,6 +966,24 @@
                 });
                 renderListings(filteredListings);
             }
+        }
+
+        // Track a listing card click — increments view counter via DB function
+        async function trackListingView(listingId, fallbackUrl) {
+            if (listingId && supabaseClient && !listingId.startsWith('mock')) {
+                // Optimistically update the UI to fix stale browser back/forward cache (BFCache)
+                const viewSpan = document.getElementById(`view-count-${listingId}`);
+                if (viewSpan) {
+                    const currentViews = parseInt(viewSpan.innerText.replace(/[^0-9]/g, '')) || 0;
+                    viewSpan.innerHTML = `<i class="fas fa-eye" style="margin-right:3px;"></i>${currentViews + 1}`;
+                }
+
+                try {
+                    await supabaseClient.rpc('increment_listing_views', { listing_id: listingId });
+                } catch (e) { /* silent — don't block navigation */ }
+            }
+            // Navigate to the action page after tracking
+            setTimeout(() => window.location.href = fallbackUrl, 120);
         }
     </script>
 </body>
