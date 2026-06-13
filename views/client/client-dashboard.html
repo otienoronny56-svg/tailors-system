@@ -2059,6 +2059,15 @@
             document.querySelectorAll('.dock-item').forEach(item => item.classList.remove('active'));
             document.getElementById(`tab-btn-${tabName}`).classList.add('active');
 
+            // Dynamically update header logo subtitle based on active tab
+            const subTitleEl = document.querySelector('.logo-sub');
+            if (subTitleEl) {
+                if (tabName === 'marketplace') subTitleEl.textContent = 'Marketplace';
+                else if (tabName === 'inbox') subTitleEl.textContent = 'Customer Inbox';
+                else if (tabName === 'settings') subTitleEl.textContent = 'Account Settings';
+                else if (tabName === 'orders') subTitleEl.textContent = 'My Orders';
+            }
+
             const panes = ['marketplace-pane', 'settings-pane', 'orders-pane'];
             panes.forEach(pane => {
                 const el = document.getElementById(pane);
