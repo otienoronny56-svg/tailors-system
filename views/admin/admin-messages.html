@@ -475,11 +475,16 @@
                     return;
                 }
 
-                // Query inquiries
+                // Query inquiries (received or sent)
+                let queryFilter = `client_email.eq.${USER_PROFILE.email}`;
+                if (shopIds.length > 0) {
+                    queryFilter = `shop_id.in.(${shopIds.join(',')}),${queryFilter}`;
+                }
+
                 const { data: inquiries, error } = await supabaseClient
                     .from('marketplace_inquiries')
                     .select('*, shops(name), marketplace_listings(title, image_urls)')
-                    .in('shop_id', shopIds)
+                    .or(queryFilter)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
@@ -510,12 +515,14 @@
 
             container.innerHTML = threads.map(inq => {
                 const isActive = activeThread && activeThread.id === inq.id ? 'active' : '';
+                const isSent = inq.client_email === USER_PROFILE.email;
+                const displayName = isSent ? `<i class="fas fa-paper-plane" style="color:var(--brand-gold); margin-right:4px;"></i> To: ${inq.shops?.name || 'Shop'}` : escapeHTML(inq.client_name);
                 return `
                     <div class="thread-card ${isActive}" onclick="openChatThread('${inq.id}')">
-                        <h4 class="thread-client-name">${escapeHTML(inq.client_name)}</h4>
+                        <h4 class="thread-client-name">${displayName}</h4>
                         <div class="thread-meta">
                             <span>Subject: ${inq.message.substring(0, 18)}...</span>
-                            <span style="font-size:0.85em; color:var(--brand-gold); font-weight:600;">${inq.shops?.name || 'Shop'}</span>
+                            ${isSent ? '<span style="font-size:0.8em; color:var(--brand-slate);">Sent Inquiry</span>' : `<span style="font-size:0.85em; color:var(--brand-gold); font-weight:600;">${inq.shops?.name || 'Shop'}</span>`}
                         </div>
                     </div>`;
             }).join('');
@@ -526,13 +533,16 @@
             renderThreadsList(); // Toggle active state styling
 
             const container = document.getElementById('chat-container-pane');
+            const isSent = activeThread.client_email === USER_PROFILE.email;
+            const titleName = isSent ? `To: ${activeThread.shops?.name || 'Tailor Shop'}` : activeThread.client_name;
+            const subtitleInfo = isSent ? `Inquiry regarding: ${activeThread.marketplace_listings?.title || 'Custom Garment'}` : `Phone: ${activeThread.client_phone} | Email: ${activeThread.client_email || 'N/A'}`;
 
             // Render basic container first with loading indicators
             container.innerHTML = `
                 <div class="chat-pane-header" style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <div class="client-info-title">${escapeHTML(activeThread.client_name)}</div>
-                        <div class="client-info-sub">Phone: ${activeThread.client_phone} | Email: ${activeThread.client_email || 'N/A'}</div>
+                        <div class="client-info-title">${escapeHTML(titleName)}</div>
+                        <div class="client-info-sub">${escapeHTML(subtitleInfo)}</div>
                     </div>
                     <div id="header-action-container"></div>
                 </div>
@@ -549,42 +559,63 @@
 
             await fetchChatLogs();
 
-            // Try to resolve clientUid
-            let clientUid = null;
-            if (activeThread.client_email) {
+            // Try to resolve otherPartyUid
+            let otherPartyUid = null;
+            if (isSent) {
                 try {
-                    const { data: profile } = await supabaseClient
+                    const { data: shopManager } = await supabaseClient
                         .from('user_profiles')
                         .select('id')
-                        .eq('email', activeThread.client_email)
-                        .maybeSingle();
+                        .eq('shop_id', activeThread.shop_id)
+                        .in('role', ['manager', 'owner'])
+                        .limit(1);
 
-                    if (profile) {
-                        clientUid = profile.id;
+                    if (shopManager && shopManager[0]) {
+                        otherPartyUid = shopManager[0].id;
+                    } else {
+                        const tailorMsg = messages.find(m => m.sender_id && m.sender_id !== USER_PROFILE.id);
+                        if (tailorMsg) {
+                            otherPartyUid = tailorMsg.sender_id;
+                        }
                     }
                 } catch (err) {
-                    console.warn("Could not query client profile:", err);
+                    console.warn("Could not query shop manager profile:", err);
+                }
+            } else {
+                if (activeThread.client_email) {
+                    try {
+                        const { data: profile } = await supabaseClient
+                            .from('user_profiles')
+                            .select('id')
+                            .eq('email', activeThread.client_email)
+                            .maybeSingle();
+
+                        if (profile) {
+                            otherPartyUid = profile.id;
+                        }
+                    } catch (err) {
+                        console.warn("Could not query client profile:", err);
+                    }
+                }
+
+                if (!otherPartyUid && messages && messages.length > 0) {
+                    const clientMsg = messages.find(m => m.sender_id && m.sender_id !== USER_PROFILE.id);
+                    if (clientMsg) {
+                        otherPartyUid = clientMsg.sender_id;
+                    }
                 }
             }
 
-            // Fallback: Check if any previous messages in this thread came from the client
-            if (!clientUid && messages && messages.length > 0) {
-                const clientMsg = messages.find(m => m.sender_id && m.sender_id !== USER_PROFILE.id);
-                if (clientMsg) {
-                    clientUid = clientMsg.sender_id;
-                    console.log("Resolved clientUid from messages history:", clientUid);
-                }
-            }
+            activeThread.otherPartyUid = otherPartyUid;
 
-            activeThread.clientUid = clientUid;
-
-            // Render components with resolved clientUid
+            // Render components with resolved otherPartyUid
             updateTailorInputControls();
             scrollToBottom();
         }
 
         function updateTailorInputControls() {
-            const clientUid = activeThread ? activeThread.clientUid : null;
+            const otherPartyUid = activeThread ? activeThread.otherPartyUid : null;
+            const isSent = activeThread && activeThread.client_email === USER_PROFILE.email;
             const headerActionContainer = document.getElementById('header-action-container');
             if (headerActionContainer) {
                 // Check if any measurements have been submitted in this thread
@@ -592,40 +623,43 @@
 
                 let headerButtons = '';
 
-                // "Create Order" button — only if measurements were shared
-                if (measurementMsg) {
-                    headerButtons += `
-                        <button onclick="openCreateOrderFromChatModal()" title="Create order from this conversation"
-                                style="padding:8px 14px; font-size:0.85em; background:#16a34a; color:white; border-radius:6px;
-                                       font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer;
-                                       border:none; transition:opacity 0.2s; white-space:nowrap;"
-                                onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-                            <i class="fas fa-folder-plus"></i> Create Order
-                        </button>`;
-                }
+                // Only show order creation and measurement requests on received inquiries
+                if (!isSent) {
+                    // "Create Order" button — only if measurements were shared
+                    if (measurementMsg) {
+                        headerButtons += `
+                            <button onclick="openCreateOrderFromChatModal()" title="Create order from this conversation"
+                                    style="padding:8px 14px; font-size:0.85em; background:#16a34a; color:white; border-radius:6px;
+                                           font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer;
+                                           border:none; transition:opacity 0.2s; white-space:nowrap;"
+                                    onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                                <i class="fas fa-folder-plus"></i> Create Order
+                            </button>`;
+                    }
 
-                if (clientUid) {
-                    headerButtons += `
-                        <div style="position:relative;">
-                            <button class="btn-chat-send" style="padding: 8px 12px; font-size:0.85em; background:var(--brand-gold); color:var(--brand-navy); border-radius:6px; font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer; height:auto; box-shadow:none; border:none;" onclick="toggleMeasurementDropdown(event)">
-                                <i class="fas fa-ruler-combined"></i> Request Measurements
-                            </button>
-                            <div id="measurement-req-dropdown" style="display:none; position:absolute; right:0; top:110%; background:#1e293b; border:1px solid var(--brand-gold); border-radius:6px; width:220px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:100;">
-                                <div style="padding:8px; font-size:0.8em; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Select Garment Type</div>
-                                <div style="padding:4px 8px; font-size:0.7em; color:var(--brand-gold); letter-spacing:0.05em; text-transform:uppercase;">Tailored Clothing</div>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Suit', event)">Suit</a>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Kaunda/Senator Suit', event)">Kaunda/Senator Suit</a>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Trouser', event)">Trouser</a>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Dress', event)">Dress</a>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Shirt', event)">Shirt</a>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Coat', event)">Coat</a>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Half Coat', event)">Half Coat</a>
-                                <div style="padding:4px 8px; font-size:0.7em; color:var(--brand-gold); letter-spacing:0.05em; text-transform:uppercase; border-top:1px solid rgba(255,255,255,0.05); margin-top:4px;">Sizes &amp; Accessories</div>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Standard Size', event)">Standard Size (S/M/L/XL)</a>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Shoes', event)">Shoes</a>
-                                <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Accessories', event)">Accessories (Watches/Belts etc.)</a>
-                            </div>
-                        </div>`;
+                    if (otherPartyUid) {
+                        headerButtons += `
+                            <div style="position:relative;">
+                                <button class="btn-chat-send" style="padding: 8px 12px; font-size:0.85em; background:var(--brand-gold); color:var(--brand-navy); border-radius:6px; font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer; height:auto; box-shadow:none; border:none;" onclick="toggleMeasurementDropdown(event)">
+                                    <i class="fas fa-ruler-combined"></i> Request Measurements
+                                </button>
+                                <div id="measurement-req-dropdown" style="display:none; position:absolute; right:0; top:110%; background:#1e293b; border:1px solid var(--brand-gold); border-radius:6px; width:220px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:100;">
+                                    <div style="padding:8px; font-size:0.8em; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Select Garment Type</div>
+                                    <div style="padding:4px 8px; font-size:0.7em; color:var(--brand-gold); letter-spacing:0.05em; text-transform:uppercase;">Tailored Clothing</div>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Suit', event)">Suit</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Kaunda/Senator Suit', event)">Kaunda/Senator Suit</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Trouser', event)">Trouser</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Dress', event)">Dress</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Shirt', event)">Shirt</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Coat', event)">Coat</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Half Coat', event)">Half Coat</a>
+                                    <div style="padding:4px 8px; font-size:0.7em; color:var(--brand-gold); letter-spacing:0.05em; text-transform:uppercase; border-top:1px solid rgba(255,255,255,0.05); margin-top:4px;">Sizes &amp; Accessories</div>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Standard Size', event)">Standard Size (S/M/L/XL)</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Shoes', event)">Shoes</a>
+                                    <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Accessories', event)">Accessories (Watches/Belts etc.)</a>
+                                </div>
+                            </div>`;
+                    }
                 }
 
                 headerActionContainer.innerHTML = `<div style="display:flex; gap:8px; align-items:center;">${headerButtons}</div>`;
@@ -633,7 +667,7 @@
 
             const inputPaneContainer = document.getElementById('chat-input-pane-container');
             if (inputPaneContainer) {
-                if (clientUid) {
+                if (otherPartyUid || isSent) {
                     inputPaneContainer.innerHTML = `
                         <form class="input-group" onsubmit="sendTailorReply(event)">
                             <input type="text" id="tailor-message-input" required placeholder="Type reply message...">
@@ -990,11 +1024,11 @@
             input.value = '';
 
             try {
-                // Find client recipient ID from cached thread details
-                const clientUid = activeThread.clientUid;
+                // Find recipient ID from cached thread details
+                const otherPartyUid = activeThread.otherPartyUid;
 
-                if (!clientUid) {
-                    alert("Cannot send reply: Client profile user not found. Make sure client has signed up.");
+                if (!otherPartyUid) {
+                    alert("Cannot send reply: Recipient profile user not found.");
                     return;
                 }
 
@@ -1003,7 +1037,7 @@
                     .insert([{
                         inquiry_id: activeThread.id,
                         sender_id: USER_PROFILE.id,
-                        recipient_id: clientUid,
+                        recipient_id: otherPartyUid,
                         message_text: text
                     }])
                     .select();
@@ -1042,9 +1076,9 @@
                             // Keep inbox marked as viewed while we are actively here
                             localStorage.setItem('last_inbox_view_' + USER_PROFILE.id, Date.now().toString());
 
-                            // Real-time Unlock: If clientUid was previously null, re-resolve and unlock tailor input panel!
-                            if (!activeThread.clientUid && newMsg.sender_id && newMsg.sender_id !== USER_PROFILE.id) {
-                                activeThread.clientUid = newMsg.sender_id;
+                            // Real-time Unlock: If otherPartyUid was previously null, re-resolve and unlock tailor input panel!
+                            if (!activeThread.otherPartyUid && newMsg.sender_id && newMsg.sender_id !== USER_PROFILE.id) {
+                                activeThread.otherPartyUid = newMsg.sender_id;
                                 updateTailorInputControls();
                             }
                         }
