@@ -468,13 +468,22 @@
                 font-size: 0.75em;
             }
 
-            .detail-header { flex-direction: column; align-items: flex-start; gap: 6px; }
-            .header-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 4px; }
+            .detail-header { flex-direction: column; align-items: flex-start; gap: 6px; position: relative; }
+            .header-actions { 
+                position: absolute;
+                top: -55px;
+                right: 0;
+                width: auto; 
+                display: flex; 
+                flex-direction: row; 
+                gap: 6px; 
+                flex-wrap: nowrap !important;
+            }
             .btn-header {
-                flex: 1 1 auto;
-                justify-content: center;
-                font-size: 0.7em;
-                padding: 6px 4px;
+                flex: 0 0 auto !important;
+                font-size: 0.65em !important;
+                padding: 8px 10px !important;
+                white-space: nowrap;
             }
             .detail-layout { grid-template-columns: 1fr !important; width: 100%; }
             .form-row { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -505,11 +514,11 @@
                 flex-shrink: 0 !important;
             }
 
-            /* NUCLEAR 4-column measurements on mobile fit */
+            /* NUCLEAR 3-column measurements on mobile fit */
             .measurement-fields { 
-                grid-template-columns: repeat(4, auto) !important; 
+                grid-template-columns: repeat(3, auto) !important; 
                 justify-content: start !important;
-                gap: 18px !important; 
+                gap: 20px !important; 
             }
             .measurement-field input { 
                 padding: 6px 4px !important; 
