@@ -1651,6 +1651,7 @@
                             inquiries: [],
                             messages: [],
                             allMessages: [],
+                            unreadCount: 0,
                             lastMessage: 'Inquiry submitted',
                             lastMessageTime: inq.created_at
                         };
@@ -1665,6 +1666,9 @@
                         const shopId = inquiry.shop_id;
                         if (shopGroups[shopId]) {
                             shopGroups[shopId].messages.push(msg);
+                            if (!msg.is_read && msg.sender_id !== currentUser.id) {
+                                shopGroups[shopId].unreadCount++;
+                            }
                         }
                     }
                 });
@@ -1707,6 +1711,24 @@
                     const timeB = b.lastMessageTime ? new Date(b.lastMessageTime) : new Date(0);
                     return timeB - timeA;
                 });
+
+                // Add or remove glowing dot on the dock navigation
+                const totalUnread = threads.reduce((acc, t) => acc + t.unreadCount, 0);
+                const inboxBtn = document.getElementById('tab-btn-inbox');
+                if (inboxBtn) {
+                    let dot = inboxBtn.querySelector('.unread-dot');
+                    if (totalUnread > 0) {
+                        if (!dot) {
+                            dot = document.createElement('span');
+                            dot.className = 'unread-dot';
+                            dot.style.cssText = 'position:absolute; right:8px; top:8px; width:10px; height:10px; background-color:#ef4444; border-radius:50%; box-shadow: 0 0 8px #ef4444; pointer-events:none;';
+                            inboxBtn.style.position = 'relative';
+                            inboxBtn.appendChild(dot);
+                        }
+                    } else if (dot) {
+                        dot.remove();
+                    }
+                }
 
                 renderThreadsList();
 
@@ -1756,17 +1778,18 @@
                 }
 
                 return `
-                    <div class="thread-item ${activeClass}" onclick="openChatThread('${thread.shopId}')">
+                    <div class="thread-item ${activeClass}" style="position:relative;" onclick="openChatThread('${thread.shopId}')">
                         <div class="shop-icon" style="${avatarStyle}">
                             ${thread.shopImage ? '' : avatarIcon}
                         </div>
                         <div class="thread-details">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                <h4 class="thread-shop-name" style="margin:0;">${thread.shopName}</h4>
+                                <h4 class="thread-shop-name" style="margin:0; ${thread.unreadCount > 0 ? 'font-weight: 700; color: #fff;' : ''}">${thread.shopName}</h4>
                                 <span style="font-size:0.7em; color:var(--brand-slate);">${timeStr}</span>
                             </div>
-                            <p class="thread-subject">${escapeHTML(thread.lastMessage.substring(0, 32))}${thread.lastMessage.length > 32 ? '...' : ''}</p>
+                            <p class="thread-subject" style="${thread.unreadCount > 0 ? 'font-weight: 600; color: #cbd5e1;' : ''}">${escapeHTML(thread.lastMessage.substring(0, 32))}${thread.lastMessage.length > 32 ? '...' : ''}</p>
                         </div>
+                        ${thread.unreadCount > 0 ? `<div style="position:absolute; right:15px; bottom:15px; background:#10b981; color:white; font-size:0.7em; font-weight:bold; border-radius:10px; min-width:20px; height:20px; display:flex; align-items:center; justify-content:center; padding:0 6px;">${thread.unreadCount}</div>` : ''}
                     </div>`;
             }).join('');
         }
@@ -1806,6 +1829,31 @@
                         <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i></button>
                     </form>
                 </div>`;
+
+            // Mark messages as read
+            const unreadIds = activeThread.allMessages
+                .filter(m => !m.is_inquiry && m.sender_id !== currentUser.id && m.is_read === false)
+                .map(m => m.id);
+
+            if (unreadIds.length > 0) {
+                // Update DB without awaiting to not block UI
+                supabaseClient.from('messages').update({ is_read: true }).in('id', unreadIds).then(() => {
+                    // Update local state
+                    activeThread.allMessages.forEach(m => {
+                        if (unreadIds.includes(m.id)) m.is_read = true;
+                    });
+                    activeThread.unreadCount = 0;
+                    
+                    // Update global dot
+                    const totalUnread = threads.reduce((acc, t) => acc + t.unreadCount, 0);
+                    const inboxBtn = document.getElementById('tab-btn-inbox');
+                    if (inboxBtn) {
+                        let dot = inboxBtn.querySelector('.unread-dot');
+                        if (totalUnread === 0 && dot) dot.remove();
+                    }
+                    renderThreadsList(); // clear badge
+                }).catch(err => console.error("Error marking read:", err));
+            }
 
             renderChatHistory();
             scrollToBottom();

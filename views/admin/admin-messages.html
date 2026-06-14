@@ -531,7 +531,44 @@
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-                threads = inquiries || [];
+                
+                // Fetch unread messages for this user
+                const { data: unreadCounts } = await supabaseClient
+                    .from('messages')
+                    .select('inquiry_id')
+                    .eq('is_read', false)
+                    .eq('recipient_id', USER_PROFILE.id);
+                
+                const unreadMap = {};
+                let totalUnread = 0;
+                if (unreadCounts) {
+                    unreadCounts.forEach(row => {
+                        unreadMap[row.inquiry_id] = (unreadMap[row.inquiry_id] || 0) + 1;
+                        totalUnread++;
+                    });
+                }
+
+                // Update notification dot on the main layout if possible
+                const msgNavLink = window.parent.document.querySelector('.sidebar a[href="admin-messages.html"]');
+                if (msgNavLink) {
+                    let dot = msgNavLink.querySelector('.unread-dot');
+                    if (totalUnread > 0) {
+                        if (!dot) {
+                            dot = window.parent.document.createElement('span');
+                            dot.className = 'unread-dot';
+                            dot.style.cssText = 'position:absolute; right:10px; top:50%; transform:translateY(-50%); width:8px; height:8px; background-color:#ef4444; border-radius:50%; box-shadow: 0 0 8px #ef4444;';
+                            msgNavLink.style.position = 'relative';
+                            msgNavLink.appendChild(dot);
+                        }
+                    } else if (dot) {
+                        dot.remove();
+                    }
+                }
+
+                threads = (inquiries || []).map(inq => {
+                    inq.unreadCount = unreadMap[inq.id] || 0;
+                    return inq;
+                });
                 renderThreadsList();
 
                 subscribeToGlobalMessages();
@@ -562,11 +599,12 @@
                 const displayName = isSent ? `<i class="fas fa-paper-plane" style="color:var(--brand-gold); margin-right:4px;"></i> To: ${inq.shops?.name || 'Shop'}` : escapeHTML(inq.client_name);
                 return `
                     <div class="thread-card ${isActive}" style="position:relative;" onclick="openChatThread('${inq.id}')">
-                        <h4 class="thread-client-name">${displayName}</h4>
+                        <h4 class="thread-client-name" style="${inq.unreadCount > 0 ? 'font-weight: 700; color: #1e293b;' : ''}">${displayName}</h4>
                         <div class="thread-meta">
-                            <span>Subject: ${inq.message.substring(0, 18)}...</span>
+                            <span style="${inq.unreadCount > 0 ? 'font-weight: 600; color: #334155;' : ''}">Subject: ${inq.message.substring(0, 18)}...</span>
                             ${isSent ? '<span style="font-size:0.8em; color:var(--brand-slate);">Sent Inquiry</span>' : `<span style="font-size:0.85em; color:var(--brand-gold); font-weight:600;">${inq.shops?.name || 'Shop'}</span>`}
                         </div>
+                        ${inq.unreadCount > 0 ? `<div style="position:absolute; right:35px; top:12px; background:#10b981; color:white; font-size:0.7em; font-weight:bold; border-radius:10px; min-width:20px; height:20px; display:flex; align-items:center; justify-content:center; padding:0 6px;">${inq.unreadCount}</div>` : ''}
                         <button onclick="event.stopPropagation(); deleteThread('${inq.id}')"
                             title="Delete this thread"
                             style="position:absolute; top:8px; right:8px; background:transparent; border:none; color:#94a3b8;
@@ -1027,6 +1065,36 @@
 
                 messages = data || [];
                 renderChatHistory();
+
+                // Mark any unread messages as read
+                const unreadIds = messages
+                    .filter(m => m.recipient_id === USER_PROFILE.id && m.is_read === false)
+                    .map(m => m.id);
+                
+                if (unreadIds.length > 0) {
+                    // update database
+                    await supabaseClient.from('messages').update({ is_read: true }).in('id', unreadIds);
+                    
+                    // mark local as read
+                    messages.forEach(m => {
+                        if (unreadIds.includes(m.id)) m.is_read = true;
+                    });
+                    
+                    // Update local threads array and re-render the list to clear the badge
+                    const tIndex = threads.findIndex(t => t.id === activeThread.id);
+                    if (tIndex !== -1) {
+                        threads[tIndex].unreadCount = 0;
+                        renderThreadsList();
+                        
+                        // Update global notification dot
+                        const remainingUnread = threads.reduce((acc, t) => acc + (t.unreadCount || 0), 0);
+                        const msgNavLink = window.parent.document.querySelector('.sidebar a[href="admin-messages.html"]');
+                        if (msgNavLink) {
+                            let dot = msgNavLink.querySelector('.unread-dot');
+                            if (remainingUnread === 0 && dot) dot.remove();
+                        }
+                    }
+                }
 
                 // Background sync submissions to the clients database
                 messages.forEach(msg => {
