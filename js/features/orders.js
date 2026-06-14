@@ -1145,6 +1145,16 @@ async function loadAdminOrders(mode = 'current') {
             accessoriesByOrder[a.order_id].push(a);
         });
 
+        const isSmallScreen = window.innerWidth <= 768;
+        const thead = document.getElementById('admin-orders-thead');
+        if (thead) {
+             if (isSmallScreen) {
+                 thead.innerHTML = `<tr><th>Customer</th><th>Garment</th><th>Action</th><th>Shop</th><th>References</th><th>Due Date</th><th>Worker</th><th>Status</th><th>Balance Due</th></tr>`;
+             } else {
+                 thead.innerHTML = `<tr><th>Shop</th><th>Customer</th><th>Garment</th><th>References</th><th>Due Date</th><th>Worker</th><th>Status</th><th>Balance Due</th><th>Action</th></tr>`;
+             }
+        }
+
         tbody.innerHTML = orders.map(order => {
             const orderPaymentList = (paymentsByOrder[order.id] || []);
             const activePayments = orderPaymentList.filter(p => !p.deleted_at); // Exclude soft-deleted
@@ -1198,25 +1208,44 @@ async function loadAdminOrders(mode = 'current') {
                 }
             }
 
-            return `
-                <tr>
-                    <td>#${shortId}</td>
-                    <td>${shopName}</td>
-                    <td>${order.customer_name}</td>
-                    <td>${order.garment_type}</td>
-                    <td class="ref-column">${order.customer_preferences || 'None'}</td>
-                    <td>${dueDisplay}</td>
-                    <td>${workerName}${squadBadge}</td>
-                    <td><span class="status-indicator status-${order.status}">${statusText}</span></td>
-                    <td style="color:${balance > 0 ? '#dc3545' : '#28a745'}; font-weight:bold;">Ksh ${balance.toLocaleString()}</td>
-                    <td class="admin-actions-cell">
-                        <button class="btn-compact" title="View Order" onclick="openAdminOrderView('${order.id}')"><i class="fas fa-eye"></i></button>
-                        <button class="btn-compact" title="Edit Order" style="background:var(--brand-gold); color:black;" onclick="window.location.href='/views/admin/admin-order-details.html?id=${order.id}'"><i class="fas fa-edit"></i></button>
-                        <button class="btn-compact" title="Generate Receipt" style="background:var(--profit-green);" onclick="generateAndShareReceipt('${order.id}')"><i class="fas fa-receipt"></i></button>
-                        <button class="btn-compact" title="Share Tracking Link" style="background:#3b82f6;" onclick="shareTrackingLink('${order.id}', '${order.customer_phone || ''}')"><i class="fas fa-location-arrow"></i></button>
-                    </td>
-                </tr>
+            const actionCell = `
+                <td class="admin-actions-cell">
+                    <button class="btn-compact" title="View Order" onclick="openAdminOrderView('${order.id}')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-compact" title="Edit Order" style="background:var(--brand-gold); color:black;" onclick="window.location.href='/views/admin/admin-order-details.html?id=${order.id}'"><i class="fas fa-edit"></i></button>
+                    <button class="btn-compact" title="Generate Receipt" style="background:var(--profit-green);" onclick="generateAndShareReceipt('${order.id}')"><i class="fas fa-receipt"></i></button>
+                    <button class="btn-compact" title="Share Tracking Link" style="background:#3b82f6;" onclick="shareTrackingLink('${order.id}', '${order.customer_phone || ''}')"><i class="fas fa-location-arrow"></i></button>
+                </td>
             `;
+
+            if (isSmallScreen) {
+                return `
+                    <tr>
+                        <td>${order.customer_name}</td>
+                        <td>${order.garment_type}</td>
+                        ${actionCell}
+                        <td>${shopName}</td>
+                        <td class="ref-column">${order.customer_preferences || 'None'}</td>
+                        <td>${dueDisplay}</td>
+                        <td>${workerName}${squadBadge}</td>
+                        <td><span class="status-indicator status-${order.status}">${statusText}</span></td>
+                        <td style="color:${balance > 0 ? '#dc3545' : '#28a745'}; font-weight:bold;">Ksh ${balance.toLocaleString()}</td>
+                    </tr>
+                `;
+            } else {
+                return `
+                    <tr>
+                        <td>${shopName}</td>
+                        <td>${order.customer_name}</td>
+                        <td>${order.garment_type}</td>
+                        <td class="ref-column">${order.customer_preferences || 'None'}</td>
+                        <td>${dueDisplay}</td>
+                        <td>${workerName}${squadBadge}</td>
+                        <td><span class="status-indicator status-${order.status}">${statusText}</span></td>
+                        <td style="color:${balance > 0 ? '#dc3545' : '#28a745'}; font-weight:bold;">Ksh ${balance.toLocaleString()}</td>
+                        ${actionCell}
+                    </tr>
+                `;
+            }
         }).join('');
 
         addRefreshButton();
