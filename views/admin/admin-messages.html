@@ -640,7 +640,10 @@
             } else {
                 if (activeThread.client_email) {
                     try {
-                        const { data: profile } = await supabaseClient
+                        const adminClientForLookup = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
+                            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+                        });
+                        const { data: profile } = await adminClientForLookup
                             .from('user_profiles')
                             .select('id')
                             .eq('email', activeThread.client_email)
