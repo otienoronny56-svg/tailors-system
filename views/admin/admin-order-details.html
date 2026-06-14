@@ -713,20 +713,21 @@
                             <fieldset>
                                 <legend><i class="fas fa-ruler-combined"></i>&nbsp; Measurements &amp; Notes</legend>
                                 <div id="admin-measurement-fields-container"></div>
-                                <div class="form-group" style="margin-top: 14px;">
+                                <div class="form-group" style="margin-top: 8px;">
                                     <label>Customer Preferences / Notes</label>
-                                    <textarea id="edit-preferences" rows="4" placeholder="Special requests, design notes..."></textarea>
+                                    <textarea id="edit-preferences" rows="3" placeholder="Special requests, design notes..."></textarea>
                                 </div>
                             </fieldset>
 
-                            <button type="submit" class="btn-modern btn-save">
-                                <i class="fas fa-save"></i> Save All Changes
-                            </button>
+                            <div class="form-actions-row" style="display: flex; gap: 10px; margin-top: 8px;">
+                                <button type="submit" class="btn-modern btn-save" style="margin-top: 0; flex: 1;">
+                                    <i class="fas fa-save"></i> Save All Changes
+                                </button>
+                                <button type="button" onclick="deleteOrder()" class="btn-modern btn-danger" style="margin-top: 0; flex: 1;">
+                                    <i class="fas fa-trash-alt"></i> Delete Order
+                                </button>
+                            </div>
                         </form>
-
-                        <button onclick="deleteOrder()" class="btn-modern btn-danger">
-                            <i class="fas fa-trash-alt"></i> Delete Order
-                        </button>
                     </div>
                 </div>
 
