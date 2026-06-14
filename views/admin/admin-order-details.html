@@ -480,7 +480,7 @@
             .form-row .form-group input:not([type="checkbox"]),
             .form-row .form-group select,
             .form-group > input:not([type="checkbox"]),
-            .form-group > select { font-size: 0.75em; padding: 6px 4px; min-width: 0 !important; width: 100% !important; }
+            .form-group > select { font-size: 0.75em; padding: 6px 4px; min-width: 0 !important; width: 100% !important; max-width: 155px !important; }
             .form-group label { font-size: 0.65em; margin-bottom: 2px; display: block; }
             .edit-card { padding: 4px 2px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
             fieldset { padding: 4px 2px; margin-bottom: 8px; }
@@ -506,13 +506,16 @@
             /* NUCLEAR 4-column measurements on mobile fit */
             .measurement-fields { 
                 grid-template-columns: repeat(4, minmax(0, 1fr)) !important; 
-                gap: 8px !important; 
+                gap: 6px !important; 
             }
             .measurement-field input { 
                 padding: 6px 4px !important; 
                 font-size: 0.75em !important; 
                 min-width: 0 !important;
                 width: 100% !important; 
+                max-width: 65px !important;
+                margin: 0 auto;
+                display: block;
                 text-align: center;
             }
             .measurement-field label { 
