@@ -3057,8 +3057,11 @@
 
         async function loadClientMeasurements() {
             try {
-                const { data: profile } = await supabaseClient.from('user_profiles').select('measurements').eq('id', currentUser.id).single();
-                window._allSavedMeasurementProfiles = profile?.measurements || {};
+                // Fetch from Supabase auth user_metadata instead of user_profiles to avoid missing column errors
+                const { data: { user }, error } = await supabaseClient.auth.getUser();
+                if (error) throw error;
+                
+                window._allSavedMeasurementProfiles = user?.user_metadata?.measurements || {};
                 
                 const select = document.getElementById('meas-profile-select');
                 select.innerHTML = '<option value="new">+ Add New Measurement Set</option>';
@@ -3149,7 +3152,10 @@
                 const allProfiles = window._allSavedMeasurementProfiles || {};
                 allProfiles[nameInput] = values;
 
-                const { error } = await supabaseClient.from('user_profiles').update({ measurements: allProfiles }).eq('id', currentUser.id);
+                // Update using user_metadata since it natively supports flexible JSON without needing database migrations
+                const { error } = await supabaseClient.auth.updateUser({
+                    data: { measurements: allProfiles }
+                });
                 if (error) throw error;
                 
                 // Keep RPC sync for legacy standard compatibility if needed
