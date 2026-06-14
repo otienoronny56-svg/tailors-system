@@ -336,14 +336,15 @@
 
                 <br>
                 <!-- PENDING CLOSURE LIST -->
-                <section class="order-list" style="background: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;">
+                <section class="order-list" style="background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;">
                     <div
-                        style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
-                        <h2 style="margin: 0; color: var(--brand-navy); font-size: 1.4em; font-family: 'Inter', sans-serif; font-weight: 800;">
-                            Orders Awaiting Final Closure <span style="font-size:0.6em; color:#64748b; font-weight: 600; background: #f1f5f9; padding: 4px 8px; border-radius: 20px; margin-left: 8px;">Status 5</span>
+                        style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">
+                        <h2 style="margin: 0; color: var(--brand-navy); font-size: 1.15em; font-family: 'Inter', sans-serif; font-weight: 800; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            Orders Awaiting Final Closure 
+                            <span style="font-size:0.65em; color:#64748b; font-weight: 600; background: #f1f5f9; padding: 4px 8px; border-radius: 20px;">Status 5</span>
                         </h2>
-                        <div class="filter-bar" style="background: none; padding: 0; box-shadow: none; flex: 1; min-width: 200px; display: flex; justify-content: flex-end;">
-                            <select id="shop-filter" style="width: 100%; max-width: 250px; padding: 10px 15px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.9em; font-weight: 600; color: #475569; background: #f8fafc; cursor: pointer; outline: none;">
+                        <div class="filter-bar" style="background: none; padding: 0; box-shadow: none; width: 100%;">
+                            <select id="shop-filter" style="width: 100%; padding: 10px 15px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.9em; font-weight: 600; color: #475569; background: #f8fafc; cursor: pointer; outline: none;">
                                 <option value="">Filter by Shop (All)</option>
                                 <!-- Shops will be loaded by JS -->
                             </select>
