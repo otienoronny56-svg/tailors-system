@@ -476,25 +476,43 @@
                 padding: 6px 4px;
             }
             .detail-layout { grid-template-columns: 1fr !important; width: 100%; }
-            .form-row { grid-template-columns: min-content min-content; gap: 8px; justify-content: start; }
-            .form-group input,
-            .form-group select { font-size: 0.75em; padding: 4px 4px; min-width: 0 !important; width: 140px !important; }
-            .form-group textarea { width: 100% !important; font-size: 0.75em; }
-            .form-group label { font-size: 0.6em; margin-bottom: 2px; display: block; }
+            .form-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .form-row .form-group input:not([type="checkbox"]),
+            .form-row .form-group select,
+            .form-group > input:not([type="checkbox"]),
+            .form-group > select { font-size: 0.75em; padding: 6px 4px; min-width: 0 !important; width: 100% !important; }
+            .form-group label { font-size: 0.65em; margin-bottom: 2px; display: block; }
             .edit-card { padding: 4px 2px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
             fieldset { padding: 4px 2px; margin-bottom: 8px; }
             .page-title { font-size: 1em; white-space: normal; word-break: break-word; }
 
+            /* Fix Checkbox Layout */
+            #squad-selection-container label {
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                font-size: 0.8em !important;
+                margin-bottom: 6px !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+            }
+            #squad-selection-container input[type="checkbox"] {
+                width: 16px !important;
+                height: 16px !important;
+                margin: 0 !important;
+                flex-shrink: 0 !important;
+            }
+
             /* NUCLEAR 4-column measurements on mobile fit */
             .measurement-fields { 
-                grid-template-columns: repeat(4, auto) !important; 
-                justify-content: start !important;
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important; 
                 gap: 8px !important; 
             }
             .measurement-field input { 
-                padding: 4px !important; 
+                padding: 6px 4px !important; 
                 font-size: 0.75em !important; 
-                width: 50px !important; 
+                min-width: 0 !important;
+                width: 100% !important; 
                 text-align: center;
             }
             .measurement-field label { 
