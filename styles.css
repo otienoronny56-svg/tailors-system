@@ -1975,6 +1975,18 @@ body.dark-mode .control-bar select {
     background-color: #f8fafc;
 }
 
+@media (max-width: 768px) {
+    .leaderboard-table {
+        width: max-content !important;
+        margin: 0 auto !important;
+    }
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 8px 4px !important;
+        font-size: 0.85em !important;
+    }
+}
+
 /* Dark Mode Overrides for BI Dashboard */
 body.dark-mode .scorecard,
 body.dark-mode .bi-card {
