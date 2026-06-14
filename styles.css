@@ -1285,6 +1285,14 @@ button {
         text-align: left;
     }
 
+    .dashboard-header-text {
+        margin-left: 45px !important;
+    }
+
+    .dashboard-header-text .dashboard-main-title {
+        margin-left: 0 !important;
+    }
+
     /* Form inputs larger on very small screens */
     input,
     select,
