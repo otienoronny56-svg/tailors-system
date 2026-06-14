@@ -1467,7 +1467,10 @@ body.dark-mode .entity-header,
 body.dark-mode .entity-actions,
 body.dark-mode .container,
 body.dark-mode .modal-content,
-body.dark-mode table {
+body.dark-mode table,
+body.dark-mode .filter-bar,
+body.dark-mode [style*="background: #fff"],
+body.dark-mode [style*="background:#fff"] {
     background: #1e293b !important;
     border-color: #334155 !important;
     color: #f8fafc !important;
@@ -1487,6 +1490,20 @@ body.dark-mode #user-info {
     background: #1e293b !important;
     color: #cbd5e1 !important;
     border: 1px solid #334155 !important;
+}
+
+body.dark-mode .mobile-menu-btn {
+    background: #020617 !important;
+    color: var(--brand-gold) !important;
+}
+
+body.dark-mode .filter-bar .fa-search {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .metric-card span {
