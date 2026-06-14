@@ -1866,7 +1866,11 @@
             }
 
             history.innerHTML = messagesToRender.map(msg => {
-                const isMe = msg.is_inquiry || msg.sender_id === currentUser.id;
+                const isMe = msg.is_inquiry ? false : (msg.sender_id === currentUser.id);
+                
+                if (isMe && msg.deleted_for_sender) return '';
+                if (!isMe && msg.deleted_for_recipient) return '';
+
                 const bubbleClass = isMe ? 'me' : 'them';
                 const timeStr = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -1886,7 +1890,12 @@
 
                 let msgContent = escapeHTML(msg.message_text);
                 let extraStyle = '';
-                if (msg.message_text.startsWith('[MEASUREMENT_REQUEST:')) {
+                let isUnsent = msg.is_unsent;
+
+                if (isUnsent) {
+                    msgContent = `<i class="fas fa-ban" style="margin-right: 5px; opacity: 0.7;"></i> <em>This message was unsent</em>`;
+                    extraStyle = `opacity: 0.7; font-style: italic; ${isMe ? 'background: rgba(255,255,255,0.05); color: #94a3b8;' : 'background: rgba(255,255,255,0.02); color: #64748b; border: 1px dashed rgba(255,255,255,0.1);'}`;
+                } else if (msg.message_text.startsWith('[MEASUREMENT_REQUEST:')) {
                     const garment = msg.message_text.split(':')[1].replace(']', '');
                     msgContent = `
                         <div style="text-align:center; padding:10px;">
@@ -1925,14 +1934,63 @@
                     }
                 }
 
+                let actionsHtml = '';
+                if (!isUnsent && msg.message_text && !msg.message_text.startsWith('[')) {
+                    actionsHtml = `
+                        <div style="display:flex; gap:10px; margin-top:8px; justify-content:${isMe ? 'flex-end' : 'flex-start'};">
+                            ${isMe ? `<button onclick="unsendMessage('${msg.id}')" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.8em;"><i class="fas fa-undo"></i> Unsend</button>` : ''}
+                            <button onclick="deleteMessageForMe('${msg.id}', ${isMe})" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.8em;"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    `;
+                } else if (msg.id) {
+                    actionsHtml = `
+                        <div style="display:flex; gap:10px; margin-top:8px; justify-content:${isMe ? 'flex-end' : 'flex-start'};">
+                            <button onclick="deleteMessageForMe('${msg.id}', ${isMe})" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.8em;"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    `;
+                }
+
                 return `
-                    <div class="message-bubble ${bubbleClass}" style="${bubbleStyle} ${extraStyle}">
+                    <div class="message-bubble ${bubbleClass}" style="${bubbleStyle} ${extraStyle}; position:relative; min-width: 150px;">
                         ${inquiryLabel}
                         ${listingInfo}
                         ${msgContent}
-                        <span class="message-time" style="${msg.is_inquiry ? 'color:rgba(255,255,255,0.7);' : ''}">${timeStr}</span>
+                        <span class="message-time" style="${msg.is_inquiry ? 'color:rgba(255,255,255,0.7);' : 'position:relative; display:block; text-align:right; margin-top:5px;'}">${timeStr}</span>
+                        ${!msg.is_inquiry ? actionsHtml : ''}
                     </div>`;
             }).join('');
+        }
+
+        async function unsendMessage(msgId) {
+            if (!confirm("Unsend this message? It will be removed for everyone.")) return;
+            try {
+                const { error } = await supabaseClient.from('messages').update({ is_unsent: true }).eq('id', msgId);
+                if (error) throw error;
+                const msg = activeThread.allMessages.find(m => m.id === msgId);
+                if (msg) msg.is_unsent = true;
+                renderChatHistory();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to unsend message");
+            }
+        }
+
+        async function deleteMessageForMe(msgId, isSender) {
+            if (!confirm("Delete this message for yourself? The other person will still see it.")) return;
+            try {
+                const updateData = isSender ? { deleted_for_sender: true } : { deleted_for_recipient: true };
+                const { error } = await supabaseClient.from('messages').update(updateData).eq('id', msgId);
+                if (error) throw error;
+                const msg = activeThread.allMessages.find(m => m.id === msgId);
+                if (msg) {
+                    if (isSender) msg.deleted_for_sender = true;
+                    else msg.deleted_for_recipient = true;
+                }
+                renderChatHistory();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to delete message");
+            }
         }
 
         async function sendChatMessage(e) {
