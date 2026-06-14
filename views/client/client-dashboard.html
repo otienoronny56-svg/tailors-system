@@ -3160,12 +3160,6 @@
                     data: { measurements: allProfiles }
                 });
                 if (error) throw error;
-                
-                // Keep RPC sync for legacy standard compatibility if needed
-                await supabaseClient.rpc('sync_client_measurements', {
-                    p_client_id: currentUser.id,
-                    p_measurements: values
-                });
 
                 window._allSavedMeasurementProfiles = allProfiles;
                 
@@ -3427,20 +3421,7 @@
                     throw new Error("Could not resolve a valid Inquiry ID for submission.");
                 }
 
-                // Call server-side sync RPC directly in the background (no await, so it won't block message sending)
-                supabaseClient.rpc('sync_client_measurements', {
-                    p_inquiry_id: targetInqId,
-                    p_garment_type: garmentType,
-                    p_measurements: values
-                }).then(res => {
-                    if (res.error) {
-                        console.warn("Direct RPC sync error:", res.error);
-                    } else {
-                        console.log("Auto-populated client database record via RPC:", res.data);
-                    }
-                }).catch(rpcErr => {
-                    console.warn("Direct RPC sync network failure:", rpcErr);
-                });
+                // Removed direct RPC sync since the RPC doesn't exist and we just save to auth metadata
 
                 // Send submission as a chat message
                 const { data: msgData, error: msgErr } = await supabaseClient
