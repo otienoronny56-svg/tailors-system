@@ -58,42 +58,10 @@ async function checkSession() {
                     return;
                 }
                 
-                // Automatically create a default client profile for OAuth (e.g. Google Sign-Up) users
-                logDebug("Profile not found. Creating default client profile for OAuth user...", null, 'info');
-                const { error: insertError } = await supabaseClient
-                    .from('user_profiles')
-                    .insert([{
-                        id: user.id,
-                        full_name: user.user_metadata?.full_name || 'User',
-                        role: 'client',
-                        email: user.email,
-                        organization_id: null,
-                        shop_id: null
-                    }]);
-
-                if (insertError) {
-                    logDebug("Failed to create default client profile:", insertError, 'error');
-                    alert("Error: Your account is authenticated but no Profile was found. Contact Support.");
-                    const loginBtn = document.getElementById('login-button');
-                    if (loginBtn) {
-                        loginBtn.disabled = false;
-                        loginBtn.textContent = 'Login to Dashboard';
-                    }
-                    return;
-                }
-
-                // Query the newly created profile
-                const { data: newProfile, error: fetchErr } = await supabaseClient
-                    .from('user_profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
-
-                if (fetchErr || !newProfile) {
-                    alert("Error retrieving new profile. Contact Support.");
-                    return;
-                }
-                USER_PROFILE = newProfile;
+                // Redirect to role selection page if no profile exists
+                logDebug("Profile not found. Redirecting to choose-role.html...", null, 'info');
+                window.location.href = '/choose-role.html';
+                return;
             } else {
                 USER_PROFILE = {
                     ...workerProfile,
@@ -110,6 +78,28 @@ async function checkSession() {
             sessionStorage.setItem('USER_PROFILE_' + user.id, JSON.stringify(USER_PROFILE));
         }
         } // End of if (!USER_PROFILE)
+
+        // 🛑 NEW: Check for pending shop owner approval (Enforcement)
+        if (USER_PROFILE.status === 'Pending' && USER_PROFILE.role === 'owner') {
+            document.body.innerHTML = `
+                <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #060c18; font-family: 'Montserrat', sans-serif; color: white;">
+                    <div style="text-align: center; background: rgba(17, 34, 64, 0.75); border: 1px solid rgba(212, 175, 55, 0.15); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 450px; backdrop-filter: blur(10px);">
+                        <div style="font-size: 50px; color: #D4AF37; margin-bottom: 20px;"><i class="fas fa-store-slash"></i></div>
+                        <h1 style="color: var(--brand-gold); margin-bottom: 15px; font-family: 'Playfair Display', serif;">Awaiting Admin Approval</h1>
+                        <p style="color: var(--brand-slate); line-height: 1.6; margin-bottom: 25px;">
+                            We are setting up your shop! ✂️<br>
+                            Our team is currently verifying your shop details. We will notify you as soon as you are approved (usually within a few hours).
+                        </p>
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 0.95em; text-align: left;">
+                            <strong style="color: var(--brand-gold);">Shop Owner:</strong> ${USER_PROFILE.full_name || ''}<br>
+                            <strong style="color: var(--brand-gold);">Email:</strong> ${USER_PROFILE.email || ''}
+                        </div>
+                        <button onclick="supabaseClient.auth.signOut().then(() => { sessionStorage.clear(); location.href='/index.html'; })" class="small-btn" style="width: 100%; background: #ef4444; color: white; border: none; font-weight: bold; cursor: pointer; padding: 12px; border-radius: 8px; font-size: 1em;">Logout</button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
 
         // 🛑 NEW: Check for suspension (Enforcement)
         if (USER_PROFILE.status === 'Suspended') {

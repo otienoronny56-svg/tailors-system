@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Your Role | Tailors.co.ke</title>
+    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --brand-navy: #0a192f;
+            --brand-navy-light: #112240;
+            --brand-gold: #D4AF37;
+            --brand-gold-hover: #f39c12;
+            --brand-white: #ffffff;
+            --brand-slate: #8892b0;
+            --brand-light-slate: #a8b2d1;
+            --bg-dark: #060c18;
+            --card-bg: rgba(17, 34, 64, 0.75);
+            --glass-border: rgba(212, 175, 55, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--brand-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background-image: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.8) 0%, transparent 100%),
+                              radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .logo-section {
+            margin-bottom: 30px;
+        }
+
+        .brand-logo {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 2.2em;
+            color: var(--brand-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .brand-sub {
+            font-size: 0.75em;
+            letter-spacing: 5px;
+            color: var(--brand-white);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: var(--brand-white);
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: var(--brand-light-slate);
+            line-height: 1.6;
+            margin-bottom: 35px;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        @media (max-width: 600px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .choice-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 35px 25px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .choice-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--brand-gold);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.15);
+        }
+
+        .choice-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            font-size: 3em;
+            color: var(--brand-gold);
+            margin-bottom: 10px;
+            z-index: 1;
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--brand-white);
+            z-index: 1;
+        }
+
+        .card-desc {
+            font-size: 0.82em;
+            color: var(--brand-slate);
+            line-height: 1.5;
+            z-index: 1;
+        }
+
+        .logout-link {
+            display: inline-block;
+            font-size: 0.85em;
+            color: var(--brand-light-slate);
+            text-decoration: none;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .logout-link:hover {
+            color: var(--brand-gold);
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            gap: 15px;
+            transition: opacity 0.4s;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(212, 175, 55, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--brand-gold);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loading-screen" id="loading-screen">
+        <div class="spinner"></div>
+        <p style="font-weight: 600; color: var(--brand-light-slate);">Verifying Authentication...</p>
+    </div>
+
+    <div class="container">
+        <div class="logo-section">
+            <h1 class="brand-logo">Tailors.co.ke</h1>
+            <span class="brand-sub">Account Setup</span>
+        </div>
+
+        <h2 class="title">How will you use the platform?</h2>
+        <p class="subtitle">
+            Welcome! Since this is your first time signing in, please tell us how you would like to set up your account.
+        </p>
+
+        <div class="cards-grid">
+            <!-- Customer Card -->
+            <div class="choice-card" onclick="selectRole('client')">
+                <div class="card-icon"><i class="fas fa-shopping-bag"></i></div>
+                <h3 class="card-title">I am a Customer</h3>
+                <p class="card-desc">I want to browse tailor shops, order custom garments, and message tailors.</p>
+            </div>
+
+            <!-- Tailor Shop Card -->
+            <div class="choice-card" onclick="selectRole('tailor')">
+                <div class="card-icon"><i class="fas fa-scissors"></i></div>
+                <h3 class="card-title">I am a Tailor</h3>
+                <p class="card-desc">I want to set up an online shop, manage customer orders, and list my designs.</p>
+            </div>
+        </div>
+
+        <a class="logout-link" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Cancel & Logout</a>
+    </div>
+
+    <script src="js/core/config.js?v=1781343492375"></script>
+    <script>
+        let supabaseClient = null;
+        let currentUser = null;
+
+        // Initialize client
+        try {
+            supabaseClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+        } catch (e) {
+            console.error("Initialization error:", e);
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!supabaseClient) {
+                alert("Database configuration missing.");
+                return;
+            }
+
+            const { data: { user }, error } = await supabaseClient.auth.getUser();
+            if (error || !user) {
+                location.href = '/login.html';
+                return;
+            }
+            currentUser = user;
+
+            // Check if they already have a profile to prevent duplicate onboarding
+            const { data: profile } = await supabaseClient
+                .from('user_profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                // If they have a profile already, route them correctly
+                if (profile.role === 'client') {
+                    location.href = '/views/client/client-dashboard.html';
+                } else if (profile.role === 'owner' || profile.role === 'superadmin') {
+                    location.href = '/views/admin/admin-dashboard.html';
+                } else {
+                    location.href = '/views/manager/manager-dashboard.html';
+                }
+                return;
+            }
+
+            // Hide loading screen
+            document.getElementById('loading-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+            }, 400);
+        });
+
+        async function selectRole(role) {
+            document.getElementById('loading-screen').style.display = 'flex';
+            document.getElementById('loading-screen').style.opacity = '1';
+
+            try {
+                if (role === 'client') {
+                    // Create customer profile immediately
+                    const { error: profileError } = await supabaseClient.from('user_profiles').insert([{
+                        id: currentUser.id,
+                        full_name: currentUser.user_metadata?.full_name || 'Customer',
+                        role: 'client',
+                        email: currentUser.email,
+                        organization_id: null,
+                        shop_id: null,
+                        status: 'Active'
+                    }]);
+
+                    if (profileError) throw profileError;
+
+                    alert("Welcome! Redirecting you to the client dashboard...");
+                    location.href = '/views/client/client-dashboard.html';
+                } else {
+                    // Redirect to tailor onboarding form
+                    location.href = '/tailor-onboarding.html';
+                }
+            } catch (err) {
+                alert("Setup error: " + err.message);
+                document.getElementById('loading-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading-screen').style.display = 'none';
+                }, 400);
+            }
+        }
+
+        async function handleLogout() {
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
+            location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>
