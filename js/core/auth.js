@@ -21,8 +21,12 @@ async function checkSession() {
         const cachedProfileData = sessionStorage.getItem('USER_PROFILE_' + user.id);
         if (cachedProfileData) {
             try {
-                USER_PROFILE = JSON.parse(cachedProfileData);
-                logDebug("Loaded user profile from cache", null, 'info');
+                const tempProfile = JSON.parse(cachedProfileData);
+                // If the cached profile is Pending, bypass cache to fetch the latest status from DB
+                if (tempProfile && tempProfile.status !== 'Pending') {
+                    USER_PROFILE = tempProfile;
+                    logDebug("Loaded user profile from cache", null, 'info');
+                }
             } catch(e) {}
         }
 
