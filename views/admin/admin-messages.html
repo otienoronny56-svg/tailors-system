@@ -561,12 +561,20 @@
                 const isSent = inq.client_email === USER_PROFILE.email;
                 const displayName = isSent ? `<i class="fas fa-paper-plane" style="color:var(--brand-gold); margin-right:4px;"></i> To: ${inq.shops?.name || 'Shop'}` : escapeHTML(inq.client_name);
                 return `
-                    <div class="thread-card ${isActive}" onclick="openChatThread('${inq.id}')">
+                    <div class="thread-card ${isActive}" style="position:relative;" onclick="openChatThread('${inq.id}')">
                         <h4 class="thread-client-name">${displayName}</h4>
                         <div class="thread-meta">
                             <span>Subject: ${inq.message.substring(0, 18)}...</span>
                             ${isSent ? '<span style="font-size:0.8em; color:var(--brand-slate);">Sent Inquiry</span>' : `<span style="font-size:0.85em; color:var(--brand-gold); font-weight:600;">${inq.shops?.name || 'Shop'}</span>`}
                         </div>
+                        <button onclick="event.stopPropagation(); deleteThread('${inq.id}')"
+                            title="Delete this thread"
+                            style="position:absolute; top:8px; right:8px; background:transparent; border:none; color:#94a3b8;
+                                   padding:4px 6px; font-size:0.8em; border-radius:4px; cursor:pointer; transition:color 0.2s;
+                                   box-shadow:none; text-transform:none; letter-spacing:0;"
+                            onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>`;
             }).join('');
         }
@@ -575,6 +583,41 @@
             document.querySelector('.inbox-layout').classList.remove('chat-active');
             activeThread = null;
             renderThreadsList();
+        }
+
+        async function deleteThread(inquiryId) {
+            if (!confirm('Delete this entire conversation? This will remove it for both you and the client permanently.')) return;
+
+            try {
+                // Delete all messages in this thread first (FK constraint)
+                const { error: msgErr } = await supabaseClient
+                    .from('messages')
+                    .delete()
+                    .eq('inquiry_id', inquiryId);
+
+                if (msgErr) throw msgErr;
+
+                // Now delete the inquiry itself
+                const { error: inqErr } = await supabaseClient
+                    .from('marketplace_inquiries')
+                    .delete()
+                    .eq('id', inquiryId);
+
+                if (inqErr) throw inqErr;
+
+                // If the deleted thread was open, close it
+                if (activeThread && activeThread.id === inquiryId) {
+                    closeChatThread();
+                }
+
+                // Remove from local list and re-render
+                threads = threads.filter(t => t.id !== inquiryId);
+                renderThreadsList();
+
+            } catch (err) {
+                console.error('Delete thread error:', err);
+                alert('Could not delete: ' + err.message);
+            }
         }
 
         async function openChatThread(inquiryId) {
