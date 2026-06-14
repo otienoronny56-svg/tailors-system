@@ -486,14 +486,15 @@
 
             /* NUCLEAR 4-column measurements on mobile fit */
             .measurement-fields { 
-                grid-template-columns: repeat(4, minmax(0, 1fr)) !important; 
-                gap: 1px !important; 
+                grid-template-columns: repeat(4, auto) !important; 
+                justify-content: start !important;
+                gap: 8px !important; 
             }
             .measurement-field input { 
-                padding: 2px 1px !important; 
-                font-size: 0.65em !important; 
-                min-width: 0 !important; 
-                width: 100% !important; 
+                padding: 4px !important; 
+                font-size: 0.75em !important; 
+                width: 50px !important; 
+                text-align: center;
             }
             .measurement-field label { 
                 font-size: 0.5em !important; 
