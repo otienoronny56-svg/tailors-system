@@ -22,7 +22,9 @@
 }
 
 /* --- Base Reset & Typography --- */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -936,9 +938,18 @@ p {
         color: var(--brand-gold);
         border: 1px solid var(--brand-gold);
         border-radius: 4px;
-        padding: 10px;
-        font-size: 1.2em;
+        padding: 8px;
+        font-size: 1.0em;
         cursor: pointer;
+    }
+
+    /* Prevent title overlapping with hamburger menu */
+    .dashboard-main-title {
+        margin-left: 45px !important;
+        /* Push to right of hamburger */
+        font-size: 1.3em !important;
+        line-height: 1.2 !important;
+        text-align: left;
     }
 
     /* Overlay for mobile sidebar */
@@ -980,93 +991,218 @@ p {
         gap: 10px;
     }
 
+    .metrics-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+
     .metric-card {
-        width: 100%;
-        min-width: 100%;
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 10px 6px !important;
+        border-radius: 8px !important;
+        border-left-width: 3px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
     }
 
-    /* Adjust filter bars */
-    .filter-bar {
-        flex-direction: column;
-        gap: 10px;
+    /* Action buttons: 3-column grid layout for mobile */
+    .quick-actions-toolbar {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 5px !important;
     }
 
-    .filter-bar select,
-    .filter-bar button {
-        width: 100%;
+    .quick-actions-toolbar button {
+        width: 100% !important;
+        padding: 8px 2px !important;
+        font-size: 0.55em !important;
+        flex-direction: column !important;
+        text-align: center;
+        gap: 4px !important;
+        justify-content: center !important;
+        white-space: normal !important;
+        line-height: 1.1 !important;
+        min-width: 0 !important;
     }
 
-    .admin-actions-cell {
-        flex-direction: row;
+    .quick-actions-toolbar button i {
+        font-size: 1.4em !important;
+        margin-right: 0 !important;
     }
 
-    .btn-compact {
-        margin-right: 2px;
+    /* Top right header settings icons */
+    .top-header-actions {
+        gap: 4px !important;
+        flex-wrap: nowrap !important;
     }
 
-    /* Adjust form layouts */
-    form fieldset {
-        padding: 15px;
+    .top-header-actions button {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 0.85em !important;
+        padding: 0 !important;
     }
 
-    /* Make buttons larger for touch */
-    button {
-        padding: 15px;
-        font-size: 1em;
+    .metrics-grid .metric-card div[style*="font-size:1.6em"],
+    .metrics-grid .metric-card div[style*="font-size: 1.6em"],
+    .metrics-grid .metric-card #total-revenue,
+    .metrics-grid .metric-card #active-count,
+    .metrics-grid .metric-card #ready-count,
+    .metrics-grid .metric-card #pending-count,
+    .metrics-grid .metric-card #closed-count,
+    .metrics-grid .metric-card #total-unpaid,
+    .metrics-grid .metric-card #total-due-count {
+        font-size: 1.05em !important;
+        font-weight: 800 !important;
+        margin: 4px 0 !important;
     }
 
-    .small-btn {
-        padding: 8px 15px;
-        font-size: 0.9em;
+    .metrics-grid .metric-card span[style*="font-size:0.75em"],
+    .metrics-grid .metric-card span[style*="font-size: 0.75em"] {
+        font-size: 0.55em !important;
+        line-height: 1.1 !important;
+        display: block !important;
     }
 
-    /* Adjust modal for mobile */
-    .modal-content {
-        width: 90%;
-        margin: 10% auto;
-        padding: 20px;
+    .metrics-grid .metric-card i {
+        font-size: 0.85em !important;
+        margin-left: 2px !important;
     }
 
-    /* Login container adjustments */
-    .login-container {
-        margin: 40px auto;
-        width: 90%;
-        padding: 30px 20px;
+    .metrics-grid .metric-card div[style*="font-size:0.7em"],
+    .metrics-grid .metric-card div[style*="font-size: 0.7em"],
+    .metrics-grid .metric-card #revenue-breakdown,
+    .metrics-grid .metric-card #unpaid-breakdown {
+        font-size: 0.55em !important;
+        margin-top: 4px !important;
+        padding-top: 3px !important;
     }
 
-    /* Logo adjustments for mobile */
-    .sidebar-logo {
-        font-size: 1.4em;
+    /* Make the last card (Due Status) span all 3 columns horizontally */
+    .metrics-grid .metric-card:nth-child(7) {
+        grid-column: 1 / -1 !important;
     }
+    .metrics-grid .metric-card:nth-child(7) div[style*="gap: 15px"] {
+        gap: 10px !important;
+        padding-top: 10px !important;
+        margin-top: 5px !important;
+    }
+    .metrics-grid .metric-card:nth-child(7) div[style*="padding-left: 15px"] {
+        padding-left: 10px !important;
+    }
+}
 
-    .sidebar-subtitle {
-        font-size: 0.45em;
-        letter-spacing: 3px;
-    }
+.super-metric-card {
+    padding: 12px 10px !important;
+}
 
-    .brand-logo {
-        font-size: 1.6em;
-    }
+.super-metric-card div[style*="font-size: 2.2em"] {
+    font-size: 1.3em !important;
+}
 
-    .brand-subtitle {
-        font-size: 0.45em;
-        letter-spacing: 3px;
-    }
+/* Adjust filter bars */
+.filter-bar {
+    flex-direction: column;
+    gap: 10px;
+}
 
-    /* Improve spacing in order cards */
-    .order-list h2 {
-        font-size: 1.2em;
-    }
+.filter-bar select,
+.filter-bar button {
+    width: 100%;
+}
 
-    /* Fix sidebar nav spacing on mobile */
-    .sidebar nav {
-        padding: 0 10px;
-    }
+.admin-actions-cell {
+    flex-direction: row;
+}
 
-    .sidebar nav a {
-        padding: 10px 12px;
-        font-size: 0.9em;
-    }
+.btn-compact {
+    margin-right: 2px;
+}
+
+/* Adjust form layouts */
+form fieldset {
+    padding: 15px;
+}
+
+/* Make buttons larger for touch */
+button {
+    padding: 15px;
+    font-size: 1em;
+}
+
+.small-btn {
+    padding: 8px 15px;
+    font-size: 0.9em;
+}
+
+/* Adjust modal for mobile */
+.modal-content {
+    width: 90%;
+    margin: 10% auto;
+    padding: 20px;
+}
+
+/* Login container adjustments */
+.login-container {
+    margin: 40px auto;
+    width: 90%;
+    padding: 30px 20px;
+}
+
+/* Logo adjustments for mobile */
+.sidebar-logo {
+    font-size: 1.4em;
+}
+
+.sidebar-subtitle {
+    font-size: 0.45em;
+    letter-spacing: 3px;
+}
+
+.brand-logo {
+    font-size: 1.6em;
+}
+
+.brand-subtitle {
+    font-size: 0.45em;
+    letter-spacing: 3px;
+}
+
+/* Improve spacing in order cards */
+.order-list h2 {
+    font-size: 1.2em;
+}
+
+/* Fix sidebar nav spacing on mobile */
+.sidebar nav {
+    padding: 0 10px;
+}
+
+.sidebar nav a {
+    padding: 10px 12px;
+    font-size: 0.9em;
+}
+
+/* --- Admin Management Screen Mobile Optimization --- */
+.management-grid,
+.shop-list-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+.shop-card,
+.management-card {
+    padding: 15px !important;
+    margin-bottom: 0 !important;
+}
+
+.management-card h3 {
+    font-size: 1.1em !important;
+    margin-bottom: 10px !important;
+}
 }
 
 @media (max-width: 480px) {
@@ -1094,14 +1230,38 @@ p {
         min-width: 100px;
     }
 
-    /* Stack action buttons vertically */
+    /* Action buttons: 3-column grid layout for mobile */
     .quick-actions-toolbar {
-        flex-direction: column;
-        gap: 10px;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
     }
 
     .quick-actions-toolbar button {
-        width: 100%;
+        width: 100% !important;
+        padding: 5px 2px !important;
+        line-height: 1.1 !important;
+        font-size: 0.5em !important;
+        white-space: normal !important;
+        min-width: 0 !important;
+        flex-direction: column !important;
+        text-align: center;
+        gap: 5px !important;
+        justify-content: center !important;
+    }
+
+    .quick-actions-toolbar button i {
+        font-size: 1.2em !important;
+        margin-right: 0 !important;
+    }
+
+    /* Prevent title overlapping with hamburger menu */
+    .dashboard-main-title {
+        margin-left: 45px !important;
+        /* Push to right of hamburger */
+        font-size: 1.3em !important;
+        line-height: 1.2 !important;
+        text-align: left;
     }
 
     /* Form inputs larger on very small screens */
@@ -1123,6 +1283,26 @@ p {
     .sidebar nav a#logout-btn {
         margin-bottom: 15px;
         padding: 12px;
+    }
+
+    /* Extra compacting for very small screens */
+    .container,
+    .shop-card,
+    .modal-content {
+        padding: 12px !important;
+        border-radius: 12px !important;
+    }
+
+    .management-card .card-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+
+    .management-card .card-actions button {
+        width: 100% !important;
+        padding: 10px 5px !important;
+        font-size: 0.8em !important;
     }
 }
 
@@ -1339,8 +1519,10 @@ body.dark-mode .close-btn:hover {
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    z-index: 1050; /* Above most elements */
-    margin-top: -15px; /* Adjust to sit tightly against the inputs */
+    z-index: 1050;
+    /* Above most elements */
+    margin-top: -15px;
+    /* Adjust to sit tightly against the inputs */
     display: none;
 }
 
@@ -1376,6 +1558,7 @@ body.dark-mode .search-result-item {
 body.dark-mode .search-result-item:hover {
     background: #0f172a;
 }
+
 .mobile-back-btn {
     display: none;
     position: fixed;
@@ -1390,9 +1573,13 @@ body.dark-mode .search-result-item:hover {
     font-size: 1.4em;
     cursor: pointer;
 }
+
 @media (max-width: 768px) {
-    .mobile-back-btn { display: block; }
+    .mobile-back-btn {
+        display: block;
+    }
 }
+
 @media (max-width: 768px) {
     .filter-bar {
         flex-direction: row !important;
@@ -1402,14 +1589,18 @@ body.dark-mode .search-result-item:hover {
         gap: 10px !important;
         padding-bottom: 5px !important;
     }
-    .filter-bar select, .filter-bar input {
+
+    .filter-bar select,
+    .filter-bar input {
         flex: 0 0 auto !important;
         width: 140px !important;
     }
+
     .filter-bar .search-box {
         flex: 0 0 auto !important;
         width: 200px !important;
     }
+
     .filter-bar .search-box input {
         width: 100% !important;
     }
@@ -1726,7 +1917,8 @@ body.dark-mode .leaderboard-table tr:hover td {
     color: #9a3412 !important;
 }
 
-.rank-4, .rank-5 {
+.rank-4,
+.rank-5 {
     background: var(--brand-navy) !important;
     color: var(--brand-gold) !important;
     border: 1px solid rgba(212, 175, 55, 0.3) !important;
@@ -1770,7 +1962,7 @@ body.dark-mode .rank-5 {
     background: white;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     text-align: center;
     transition: transform 0.2s, box-shadow 0.2s;
     border: 1px solid #f1f5f9;
@@ -1778,7 +1970,7 @@ body.dark-mode .rank-5 {
 
 .inv-stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .inv-stat-card .stat-value {
@@ -1788,8 +1980,13 @@ body.dark-mode .rank-5 {
     margin-bottom: 5px;
 }
 
-.inv-stat-card .stat-value.good { color: #10b981; }
-.inv-stat-card .stat-value.low { color: #f59e0b; }
+.inv-stat-card .stat-value.good {
+    color: #10b981;
+}
+
+.inv-stat-card .stat-value.low {
+    color: #f59e0b;
+}
 
 .inv-stat-card .stat-label {
     color: #64748b;
@@ -1803,7 +2000,7 @@ body.dark-mode .rank-5 {
     background: white;
     padding: 24px;
     border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     margin-bottom: 30px;
     border-top: 4px solid var(--brand-gold);
     border: 1px solid #f1f5f9;
@@ -1866,7 +2063,7 @@ body.dark-mode .rank-5 {
 
 .btn-add-item:hover {
     background: #0f172a;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .inv-toolbar {
@@ -1914,7 +2111,7 @@ body.dark-mode .rank-5 {
 .inv-table-wrap {
     background: white;
     border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     overflow-x: auto;
     border: 1px solid #f1f5f9;
 }
@@ -1988,20 +2185,41 @@ body.dark-mode .rank-5 {
     justify-content: center;
 }
 
-.btn-edit { color: #3b82f6; }
-.btn-edit:hover { background: rgba(59, 130, 246, 0.1); border-color: #3b82f6; }
+.btn-edit {
+    color: #3b82f6;
+}
 
-.btn-restock { color: #10b981; }
-.btn-restock:hover { background: rgba(16, 185, 129, 0.1); border-color: #10b981; }
+.btn-edit:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+}
 
-.btn-delete { color: #ef4444; }
-.btn-delete:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; }
+.btn-restock {
+    color: #10b981;
+}
+
+.btn-restock:hover {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10b981;
+}
+
+.btn-delete {
+    color: #ef4444;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
 
 /* Inventory Modals */
 .inv-modal-overlay {
     display: none;
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(4px);
     z-index: 1000;
@@ -2019,14 +2237,17 @@ body.dark-mode .rank-5 {
     padding: 30px;
     width: 90%;
     max-width: 450px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     transform: translateY(20px);
     opacity: 0;
     animation: slideUpIn 0.3s forwards;
 }
 
 @keyframes slideUpIn {
-    to { transform: translateY(0); opacity: 1; }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .inv-modal h3 {

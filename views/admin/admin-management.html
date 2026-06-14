@@ -4,9 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Management</title>
+    <title>Global Admin Dashboard - Management</title>
+    <!-- Prevent caching during development so layout changes stick -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="icon" type="image/png" href="../../logo.png?v=2">
-    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../styles.css?v=20260614_7">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Mobile -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -46,12 +50,166 @@
             }
 
             .main-content {
-                padding: 20px;
-                padding-top: 60px;
+                padding: 10px;
+                padding-top: 55px;
+                box-sizing: border-box !important;
+                width: 100% !important;
+                overflow-x: hidden !important;
+                margin-left: 0 !important;
+            }
+
+            .management-header h1 {
+                margin-left: 50px !important; /* Force clear the hamburger menu */
+                font-size: 1.3em !important;
+                margin-bottom: 0 !important;
+            }
+
+            .header-actions {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                gap: 5px !important;
+            }
+
+            .header-actions button {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 0.9em !important;
             }
 
             .command-grid {
                 grid-template-columns: 1fr;
+            }
+
+            /* Compact Action Panels and Cards */
+            .action-panels {
+                gap: 8px !important;
+                margin-bottom: 10px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .action-card {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                padding: 10px !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+            }
+            .action-card-title {
+                font-size: 1.0em;
+                margin-bottom: 8px !important;
+                padding-bottom: 4px !important;
+            }
+
+            .form-row {
+                gap: 4px !important;
+                margin-bottom: 6px !important;
+            }
+
+            /* Shrink form spaces and fonts */
+            .form-group {
+                margin-bottom: 6px !important;
+            }
+            .form-row .form-group {
+                margin-bottom: 0 !important;
+            }
+            .form-group input,
+            .form-group select {
+                margin: 0 !important;
+                padding: 8px 10px 8px 32px !important;
+                font-size: 0.85em !important;
+                min-width: 0 !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .form-group i {
+                left: 10px;
+                font-size: 0.85em;
+            }
+
+            .btn-modern {
+                padding: 6px !important;
+                font-size: 0.9em !important;
+                margin-top: 2px !important;
+                margin-bottom: 0 !important;
+            }
+
+            .management-header {
+                margin-bottom: 5px !important;
+                padding-bottom: 5px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                padding-top: 40px !important; /* Push text below top buttons */
+                text-align: left;
+                align-items: flex-start !important;
+            }
+            .management-header p {
+                margin-top: 4px !important;
+                margin-bottom: 0 !important;
+                font-size: 0.85em !important;
+                text-align: left;
+            }
+            .management-header h1 {
+                font-size: 1.5em !important;
+                margin-bottom: 0 !important;
+                margin-left: 0 !important;
+                text-align: left;
+            }
+
+            /* Modal overrides for mobile */
+            .modal-content div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            .modal-content div[style*="padding: 30px"] {
+                padding: 12px !important;
+                gap: 12px !important;
+            }
+            .modal-content {
+                padding: 15px 12px !important;
+            }
+            .modal-content h2 {
+                font-size: 1.2em !important;
+                margin-bottom: 10px !important;
+            }
+            .modal-content h3 {
+                font-size: 1.0em !important;
+                padding-bottom: 5px !important;
+                margin-bottom: 8px !important;
+            }
+            .modal-content .form-group {
+                margin-bottom: 10px !important;
+            }
+            .modal-content input, .modal-content select {
+                padding: 8px 10px 8px 32px !important;
+                font-size: 0.85em !important;
+            }
+            .modal-content i[style*="top: 38px"] {
+                top: 29px !important;
+            }
+
+            /* Compact weekly hours selector */
+            .schedule-day-row {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 5px !important;
+            }
+            .schedule-day-row input[type="checkbox"] {
+                margin-left: 0 !important;
+            }
+            .schedule-day-row div[id^="time-inputs"] {
+                width: 100%;
+                justify-content: space-between;
+                gap: 5px !important;
+            }
+            .schedule-day-row div[id^="time-inputs"] input[type="time"] {
+                flex: 1;
+                min-width: 0;
+                padding: 6px 4px !important;
+                font-size: 0.85em !important;
             }
         }
 
@@ -136,14 +294,20 @@
             color: #334155;
             transition: all 0.2s;
             background: #f8fafc;
+            box-sizing: border-box;
         }
 
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #3b82f6;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: var(--brand-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         .btn-modern {
@@ -160,6 +324,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            box-sizing: border-box;
         }
 
         .btn-modern:hover {
@@ -399,13 +564,13 @@
             </script>
         </aside>
 
-        <main class="main-content">
+        <main class="main-content" style="position: relative;">
             <header class="management-header">
                 <div>
                     <h1>Command Center</h1>
-                    <p>Manage Shops, Managers, and Crews globally.</p>
+                    <p>Manage Shops, Managers, and Workers globally.</p>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
                     <button onclick="loadAdminManagementScreen()" title="Refresh Data" class="btn-modern"
                         style="width: 42px; height: 42px; padding: 0; background: white; color: #475569; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
                         <i class="fas fa-sync-alt"></i>
@@ -425,21 +590,25 @@
                     <h3 class="action-card-title"><i class='fas fa-store' style='color: #10b981;'></i> Launch New Shop
                     </h3>
                     <form id="add-shop-form">
-                        <div class="form-group">
-                            <i class="fas fa-signature"></i>
-                            <input type="text" id="new-shop-name" placeholder="Shop Name" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <i class="fas fa-signature"></i>
+                                <input type="text" id="new-shop-name" placeholder="Shop Name" required>
+                            </div>
+                            <div class="form-group">
+                                <i class="fas fa-user-tie"></i>
+                                <input type="text" id="new-manager-name" placeholder="Manager Name" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <i class="fas fa-user-tie"></i>
-                            <input type="text" id="new-manager-name" placeholder="Manager Name" required>
-                        </div>
-                        <div class="form-group">
-                            <i class="fas fa-envelope"></i>
-                            <input type="email" id="new-manager-email" placeholder="Manager Email" required>
-                        </div>
-                        <div class="form-group">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="new-manager-password" placeholder="Initial Password" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="new-manager-email" placeholder="Manager Email" required>
+                            </div>
+                            <div class="form-group">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="new-manager-password" placeholder="Initial Password" required>
+                            </div>
                         </div>
                         <button type="submit" class="btn-modern btn-success">
                             <i class="fas fa-plus-circle"></i> Create Shop & Manager
@@ -450,8 +619,7 @@
 
                 <!-- Worker Creation Section -->
                 <section class="action-card">
-                    <h3 class="action-card-title"><i class='fas fa-user-plus' style='color: #3b82f6;'></i> Onboard Crew
-                        Member</h3>
+                    <h3 class="action-card-title"><i class='fas fa-user-plus' style='color: #3b82f6;'></i> Add Worker to Shop</h3>
                     <form id="admin-add-worker-form">
                         <div class="form-group">
                             <i class="fas fa-building"></i>
@@ -459,15 +627,17 @@
                                 <option value="">-- Select Destination Shop --</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <i class="fas fa-user"></i>
-                            <input type="text" id="admin-new-worker-name" placeholder="Worker Full Name" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="admin-new-worker-name" placeholder="Worker Full Name" required>
+                            </div>
+                            <div class="form-group">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="admin-new-worker-phone" placeholder="Worker Phone Number">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <i class="fas fa-phone"></i>
-                            <input type="tel" id="admin-new-worker-phone" placeholder="Worker Phone Number">
-                        </div>
-                        <button type="submit" class="btn-modern btn-primary" style="margin-top: 15px;">
+                        <button type="submit" class="btn-modern btn-primary">
                             <i class="fas fa-check"></i> Assign Worker
                         </button>
                     </form>
@@ -476,10 +646,9 @@
 
             <!-- SHOP COMMAND CENTER GRID -->
             <section>
-                <h2
-                    style="color: var(--brand-navy); font-family: 'Playfair Display', serif; display: flex; align-items: center; gap: 10px; margin-bottom: 0;">
-                    <i class="fas fa-sitemap" style="color: var(--brand-gold);"></i> Active Directory
-                </h2>
+                <h3 class="action-card-title" style="margin-top: 10px; border-bottom: none;">
+                    <i class="fas fa-sitemap" style="color: var(--brand-gold);"></i> Listed Shops
+                </h3>
                 <div id="shop-command-center" class="command-grid">
                     <p style="color: #64748b; font-style: italic;">Loading network structure...</p>
                 </div>
@@ -489,16 +658,16 @@
 
     <!-- Edit Shop Details Modal -->
     <!-- Edit Shop Details Modal -->
-    <div id="edit-shop-modal" class="modal" style="background: rgba(6, 12, 24, 0.95);">
+    <div id="edit-shop-modal" class="modal" style="background: rgba(15, 23, 42, 0.6);">
         <div class="modal-content"
-            style="width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; padding: 40px 8%; background: #060c18; border: none; border-radius: 0; box-shadow: none; overflow-y: auto; box-sizing: border-box; color: white;">
+            style="width: 100%; height: 100vh; max-width: 100%; max-height: 100vh; padding: 40px 8%; background: #ffffff; border: none; border-radius: 0; box-shadow: none; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; color: #334155;">
             
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 20px;">
-                <h2 style="color: var(--brand-gold); margin: 0; font-family: 'Playfair Display', serif; font-size: 2em; display: flex; align-items: center; gap: 12px;">
-                    <i class="fas fa-store" style="color: var(--brand-gold);"></i> Shop Configuration Workspace
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                <h2 style="color: var(--brand-navy); margin: 0; font-family: 'Playfair Display', serif; font-size: 2em; display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-store" style="color: var(--brand-gold);"></i> Shop Settings
                 </h2>
                 <span class="close-btn" onclick="closeEditShopModal()"
-                    style="font-size: 2.2em; cursor: pointer; color: #8892b0; transition: color 0.2s;"
+                    style="font-size: 2.2em; cursor: pointer; color: #64748b; transition: color 0.2s;"
                     onmouseover="this.style.color='#ef4444'"
                     onmouseout="this.style.color='#8892b0'">&times;</span>
             </div>
@@ -508,19 +677,19 @@
 
                 <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: start;">
                     <!-- LEFT COLUMN: Basic Info & Payments -->
-                    <div style="background: rgba(17, 34, 64, 0.4); border: 1px solid rgba(212, 175, 55, 0.1); padding: 30px; border-radius: 12px; display: flex; flex-direction: column; gap: 20px;">
-                        <h3 style="color: var(--brand-gold); font-family: 'Playfair Display', serif; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> General &amp; Payment Setup</h3>
+                    <div style="background: #ffffff; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.04);; padding: 30px; border-radius: 12px; display: flex; flex-direction: column; gap: 20px;">
+                        <h3 style="color: var(--brand-navy); font-family: 'Playfair Display', serif; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> General &amp; Payment Setup</h3>
                         
                         <div class="form-group" style="position: relative;">
-                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Name *</label>
+                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Name *</label>
                             <i class="fas fa-signature" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="text" id="edit-shop-name" placeholder="Shop Name" required style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                            <input type="text" id="edit-shop-name" placeholder="Shop Name" required style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                         </div>
 
                         <div class="form-group" style="position: relative;">
-                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Payment Method</label>
+                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Payment Method</label>
                             <i class="fas fa-money-bill-wave" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <select id="edit-shop-payment-type" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none; appearance: none; cursor: pointer;">
+                            <select id="edit-shop-payment-type" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none; appearance: none; cursor: pointer;">
                                 <option value="paybill">Paybill</option>
                                 <option value="till">Buy Goods (Till Number)</option>
                                 <option value="pochi">Pochi La Biashara</option>
@@ -530,30 +699,30 @@
 
                         <div id="payment-fields-paybill" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <div class="form-group" style="position: relative;">
-                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Paybill Number</label>
+                                <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Paybill Number</label>
                                 <i class="fas fa-hashtag" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                                <input type="text" id="edit-shop-paybill" placeholder="e.g. 247247" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                                <input type="text" id="edit-shop-paybill" placeholder="e.g. 247247" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                             </div>
                             <div class="form-group" style="position: relative;">
-                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Account Number</label>
+                                <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Account Number</label>
                                 <i class="fas fa-user-circle" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                                <input type="text" id="edit-shop-account" placeholder="e.g. 0110001234" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                                <input type="text" id="edit-shop-account" placeholder="e.g. 0110001234" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                             </div>
                         </div>
 
                         <div id="payment-fields-till" style="display: none; grid-template-columns: 1fr; gap: 20px;">
                             <div class="form-group" style="position: relative;">
-                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Till Number</label>
+                                <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Till Number</label>
                                 <i class="fas fa-store" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                                <input type="text" id="edit-shop-till" placeholder="e.g. 123456" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                                <input type="text" id="edit-shop-till" placeholder="e.g. 123456" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                             </div>
                         </div>
 
                         <div id="payment-fields-pochi" style="display: none; grid-template-columns: 1fr; gap: 20px;">
                             <div class="form-group" style="position: relative;">
-                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Pochi La Biashara Number</label>
+                                <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Pochi La Biashara Number</label>
                                 <i class="fas fa-mobile-alt" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                                <input type="text" id="edit-shop-pochi" placeholder="e.g. 0722000000" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                                <input type="text" id="edit-shop-pochi" placeholder="e.g. 0722000000" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                             </div>
                         </div>
 
@@ -576,41 +745,41 @@
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <div class="form-group" style="position: relative;">
-                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Contact Phone</label>
+                                <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Contact Phone</label>
                                 <i class="fas fa-phone" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                                <input type="text" id="edit-shop-phone" placeholder="e.g. 0722 000 000" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                                <input type="text" id="edit-shop-phone" placeholder="e.g. 0722 000 000" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                             </div>
 
                             <div class="form-group" style="position: relative;">
-                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Receipt Slogan / Slogan</label>
+                                <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Receipt Slogan / Slogan</label>
                                 <i class="fas fa-align-center" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                                <input type="text" id="edit-shop-receipt" placeholder="e.g. The Best Suits in Town" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                                <input type="text" id="edit-shop-receipt" placeholder="e.g. The Best Suits in Town" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                             </div>
                         </div>
 
                         <div class="form-group" style="position: relative;">
-                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Specialization / Services</label>
+                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Shop Specialization / Services</label>
                             <i class="fas fa-cut" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="text" id="edit-shop-specialization" placeholder="e.g. Bespoke Custom Tailoring" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                            <input type="text" id="edit-shop-specialization" placeholder="e.g. Bespoke Custom Tailoring" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                         </div>
 
                         <div class="form-group" style="position: relative;">
-                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Bank Details / Alternative Payment</label>
+                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Bank Details / Alternative Payment</label>
                             <i class="fas fa-university" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="text" id="edit-shop-bank" placeholder="e.g. KCB Bank, Account 1234..." style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                            <input type="text" id="edit-shop-bank" placeholder="e.g. KCB Bank, Account 1234..." style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                         </div>
 
                         <div class="form-group" style="position: relative;">
-                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Upload Shop Logo (Invoice / Header)</label>
+                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Upload Shop Logo (Invoice / Header)</label>
                             <i class="fas fa-image" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="file" id="edit-shop-logo-file" accept="image/*" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;" onchange="const f=this.files[0]; if(f){const p=document.getElementById('edit-shop-logo-preview'); p.src=URL.createObjectURL(f); p.style.display='block';}">
+                            <input type="file" id="edit-shop-logo-file" accept="image/*" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;" onchange="const f=this.files[0]; if(f){const p=document.getElementById('edit-shop-logo-preview'); p.src=URL.createObjectURL(f); p.style.display='block';}">
                             <div style="display: flex; gap: 15px; align-items: center; margin-top: 10px;">
                                 <img id="edit-shop-logo-preview" src="" style="display:none; max-height: 60px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1);">
                                 <div style="display: flex; flex-direction: column; gap: 5px;">
                                     <button type="button" onclick="uploadShopLogoAction()" style="background: var(--brand-navy); border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 700;">
                                         <i class="fas fa-upload"></i> Upload Logo
                                     </button>
-                                    <small style="color: #8892b0;">Recommended: Transparent PNG, under 2MB.</small>
+                                    <small style="color: #64748b;">Recommended: Transparent PNG, under 2MB.</small>
                                 </div>
                             </div>
                             <div id="upload-logo-status" style="margin-top: 10px; font-size: 0.85em; font-weight: 600;"></div>
@@ -618,108 +787,108 @@
                     </div>
 
                     <!-- RIGHT COLUMN: Marketplace Settings -->
-                    <div style="background: rgba(17, 34, 64, 0.4); border: 1px solid rgba(212, 175, 55, 0.1); padding: 30px; border-radius: 12px; display: flex; flex-direction: column; gap: 20px;">
-                        <h3 style="color: var(--brand-gold); font-family: 'Playfair Display', serif; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; margin-bottom: 10px;"><i class="fas fa-globe"></i> Public Marketplace Settings</h3>
+                    <div style="background: #ffffff; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.04);; padding: 30px; border-radius: 12px; display: flex; flex-direction: column; gap: 20px;">
+                        <h3 style="color: var(--brand-navy); font-family: 'Playfair Display', serif; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 10px;"><i class="fas fa-globe"></i> Public Marketplace Settings</h3>
                         
-                        <div style="display: flex; align-items: center; gap: 12px; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); padding: 15px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 12px; background: rgba(212, 175, 55, 0.05); border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;">
                             <input type="checkbox" id="edit-shop-is-public" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--brand-gold);">
-                            <label for="edit-shop-is-public" style="font-size: 0.95em; font-weight: 700; color: white; cursor: pointer; margin: 0; text-transform: none; letter-spacing: 0;">Show on public Marketplace (tailors.co.ke)</label>
+                            <label for="edit-shop-is-public" style="font-size: 0.95em; font-weight: 700; color: #334155; cursor: pointer; margin: 0; text-transform: none; letter-spacing: 0;">Show on public Marketplace (tailors.co.ke)</label>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
                             <div class="form-group" style="position: relative;">
-                                <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Location (e.g. Westlands, Nairobi)</label>
+                                <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Location (e.g. Westlands, Nairobi)</label>
                                 <i class="fas fa-map-marker-alt" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                                <input type="text" id="edit-shop-loc-name" placeholder="e.g. Westlands, Nairobi" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                                <input type="text" id="edit-shop-loc-name" placeholder="e.g. Westlands, Nairobi" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                             </div>
 
                             <div class="form-group">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                                    <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0; display: block;">Weekly Working Hours</label>
-                                    <button type="button" onclick="setOpen247()" style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 4px 12px; border-radius: 4px; font-size: 0.8em; cursor: pointer; font-weight: 700; transition: all 0.2s;" onmouseover="this.style.background='var(--brand-gold)'; this.style.color='var(--brand-navy)';" onmouseout="this.style.background='rgba(212, 175, 55, 0.1)'; this.style.color='var(--brand-gold)';">Set Open 24/7</button>
+                                    <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0; display: block;">Weekly Working Hours</label>
+                                    <button type="button" onclick="setOpen247()" style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 4px 8px; border-radius: 4px; font-size: 0.7em; cursor: pointer; font-weight: 700; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='var(--brand-gold)'; this.style.color='var(--brand-navy)';" onmouseout="this.style.background='rgba(212, 175, 55, 0.1)'; this.style.color='var(--brand-gold)';">Set Open 24/7</button>
                                 </div>
-                                <div id="weekly-hours-selector" style="display: flex; flex-direction: column; gap: 10px; background: rgba(6, 12, 24, 0.6); padding: 15px; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.2);">
+                                <div id="weekly-hours-selector" style="display: flex; flex-direction: column; gap: 10px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
                                     <!-- Monday -->
-                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white; margin: 0; font-size: 0.95em; width: 100px;">
+                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; margin: 0; font-size: 0.95em; width: 100px;">
                                             <input type="checkbox" id="chk-day-Monday" class="day-toggle" checked style="accent-color: var(--brand-gold); width: 18px; height: 18px; cursor: pointer;"> Mon
                                         </label>
                                         <div id="time-inputs-Monday" style="display: flex; align-items: center; gap: 8px;">
-                                            <input type="time" id="time-from-Monday" value="08:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
-                                            <span style="color: #8892b0; font-size: 0.9em;">to</span>
-                                            <input type="time" id="time-to-Monday" value="18:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
+                                            <input type="time" id="time-from-Monday" value="08:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
+                                            <span style="color: #64748b; font-size: 0.9em;">to</span>
+                                            <input type="time" id="time-to-Monday" value="18:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
                                         </div>
                                         <span id="closed-label-Monday" style="display: none; color: #ef4444; font-size: 0.9em; font-weight: 700; padding-right: 15px;">Closed</span>
                                     </div>
                                     <!-- Tuesday -->
-                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white; margin: 0; font-size: 0.95em; width: 100px;">
+                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; margin: 0; font-size: 0.95em; width: 100px;">
                                             <input type="checkbox" id="chk-day-Tuesday" class="day-toggle" checked style="accent-color: var(--brand-gold); width: 18px; height: 18px; cursor: pointer;"> Tue
                                         </label>
                                         <div id="time-inputs-Tuesday" style="display: flex; align-items: center; gap: 8px;">
-                                            <input type="time" id="time-from-Tuesday" value="08:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
-                                            <span style="color: #8892b0; font-size: 0.9em;">to</span>
-                                            <input type="time" id="time-to-Tuesday" value="18:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
+                                            <input type="time" id="time-from-Tuesday" value="08:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
+                                            <span style="color: #64748b; font-size: 0.9em;">to</span>
+                                            <input type="time" id="time-to-Tuesday" value="18:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
                                         </div>
                                         <span id="closed-label-Tuesday" style="display: none; color: #ef4444; font-size: 0.9em; font-weight: 700; padding-right: 15px;">Closed</span>
                                     </div>
                                     <!-- Wednesday -->
-                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white; margin: 0; font-size: 0.95em; width: 100px;">
+                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; margin: 0; font-size: 0.95em; width: 100px;">
                                             <input type="checkbox" id="chk-day-Wednesday" class="day-toggle" checked style="accent-color: var(--brand-gold); width: 18px; height: 18px; cursor: pointer;"> Wed
                                         </label>
                                         <div id="time-inputs-Wednesday" style="display: flex; align-items: center; gap: 8px;">
-                                            <input type="time" id="time-from-Wednesday" value="08:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
-                                            <span style="color: #8892b0; font-size: 0.9em;">to</span>
-                                            <input type="time" id="time-to-Wednesday" value="18:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
+                                            <input type="time" id="time-from-Wednesday" value="08:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
+                                            <span style="color: #64748b; font-size: 0.9em;">to</span>
+                                            <input type="time" id="time-to-Wednesday" value="18:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
                                         </div>
                                         <span id="closed-label-Wednesday" style="display: none; color: #ef4444; font-size: 0.9em; font-weight: 700; padding-right: 15px;">Closed</span>
                                     </div>
                                     <!-- Thursday -->
-                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white; margin: 0; font-size: 0.95em; width: 100px;">
+                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; margin: 0; font-size: 0.95em; width: 100px;">
                                             <input type="checkbox" id="chk-day-Thursday" class="day-toggle" checked style="accent-color: var(--brand-gold); width: 18px; height: 18px; cursor: pointer;"> Thu
                                         </label>
                                         <div id="time-inputs-Thursday" style="display: flex; align-items: center; gap: 8px;">
-                                            <input type="time" id="time-from-Thursday" value="08:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
-                                            <span style="color: #8892b0; font-size: 0.9em;">to</span>
-                                            <input type="time" id="time-to-Thursday" value="18:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
+                                            <input type="time" id="time-from-Thursday" value="08:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
+                                            <span style="color: #64748b; font-size: 0.9em;">to</span>
+                                            <input type="time" id="time-to-Thursday" value="18:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
                                         </div>
                                         <span id="closed-label-Thursday" style="display: none; color: #ef4444; font-size: 0.9em; font-weight: 700; padding-right: 15px;">Closed</span>
                                     </div>
                                     <!-- Friday -->
-                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white; margin: 0; font-size: 0.95em; width: 100px;">
+                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; margin: 0; font-size: 0.95em; width: 100px;">
                                             <input type="checkbox" id="chk-day-Friday" class="day-toggle" checked style="accent-color: var(--brand-gold); width: 18px; height: 18px; cursor: pointer;"> Fri
                                         </label>
                                         <div id="time-inputs-Friday" style="display: flex; align-items: center; gap: 8px;">
-                                            <input type="time" id="time-from-Friday" value="08:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
-                                            <span style="color: #8892b0; font-size: 0.9em;">to</span>
-                                            <input type="time" id="time-to-Friday" value="18:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
+                                            <input type="time" id="time-from-Friday" value="08:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
+                                            <span style="color: #64748b; font-size: 0.9em;">to</span>
+                                            <input type="time" id="time-to-Friday" value="18:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
                                         </div>
                                         <span id="closed-label-Friday" style="display: none; color: #ef4444; font-size: 0.9em; font-weight: 700; padding-right: 15px;">Closed</span>
                                     </div>
                                     <!-- Saturday -->
-                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white; margin: 0; font-size: 0.95em; width: 100px;">
+                                    <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; margin: 0; font-size: 0.95em; width: 100px;">
                                             <input type="checkbox" id="chk-day-Saturday" class="day-toggle" checked style="accent-color: var(--brand-gold); width: 18px; height: 18px; cursor: pointer;"> Sat
                                         </label>
                                         <div id="time-inputs-Saturday" style="display: flex; align-items: center; gap: 8px;">
-                                            <input type="time" id="time-from-Saturday" value="08:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
-                                            <span style="color: #8892b0; font-size: 0.9em;">to</span>
-                                            <input type="time" id="time-to-Saturday" value="18:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
+                                            <input type="time" id="time-from-Saturday" value="08:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
+                                            <span style="color: #64748b; font-size: 0.9em;">to</span>
+                                            <input type="time" id="time-to-Saturday" value="18:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
                                         </div>
                                         <span id="closed-label-Saturday" style="display: none; color: #ef4444; font-size: 0.9em; font-weight: 700; padding-right: 15px;">Closed</span>
                                     </div>
                                     <!-- Sunday -->
                                     <div class="schedule-day-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; padding-bottom: 2px;">
-                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: white; margin: 0; font-size: 0.95em; width: 100px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; margin: 0; font-size: 0.95em; width: 100px;">
                                             <input type="checkbox" id="chk-day-Sunday" class="day-toggle" style="accent-color: var(--brand-gold); width: 18px; height: 18px; cursor: pointer;"> Sun
                                         </label>
                                         <div id="time-inputs-Sunday" style="display: none; align-items: center; gap: 8px;">
-                                            <input type="time" id="time-from-Sunday" value="10:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
-                                            <span style="color: #8892b0; font-size: 0.9em;">to</span>
-                                            <input type="time" id="time-to-Sunday" value="16:00" style="padding: 6px 10px; border: 1px solid rgba(212,175,55,0.2); border-radius: 6px; background: #060c18; color: white; font-size: 0.9em; outline: none;">
+                                            <input type="time" id="time-from-Sunday" value="10:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
+                                            <span style="color: #64748b; font-size: 0.9em;">to</span>
+                                            <input type="time" id="time-to-Sunday" value="16:00" style="padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.9em; outline: none;">
                                         </div>
                                         <span id="closed-label-Sunday" style="color: #ef4444; font-size: 0.9em; font-weight: 700; padding-right: 15px;">Closed</span>
                                     </div>
@@ -761,16 +930,16 @@
                         </script>
 
                         <div class="form-group" style="position: relative;">
-                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Website Link / URL</label>
+                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Website Link / URL</label>
                             <i class="fas fa-globe" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <input type="text" id="edit-shop-website" placeholder="e.g. www.myshop.com" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none;">
+                            <input type="text" id="edit-shop-website" placeholder="e.g. www.myshop.com" style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none;">
                         </div>
 
                         <div class="form-group">
-                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Profile Avatar Image</label>
+                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Profile Avatar Image</label>
                             <div style="display: flex; gap: 15px; align-items: center;">
-                                <input type="file" id="shop-profile-upload" accept="image/png, image/jpeg, image/webp" style="background: rgba(6, 12, 24, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); color: white; padding: 10px; border-radius: 8px; flex-grow: 1; outline: none;">
-                                <button type="button" onclick="uploadShopProfileImage()" class="btn-modern btn-primary" style="width: auto; padding: 12px 20px; margin: 0; background: var(--brand-gold); color: var(--brand-navy); font-weight: 700;">
+                                <input type="file" id="shop-profile-upload" accept="image/png, image/jpeg, image/webp" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 10px; border-radius: 8px; flex-grow: 1; outline: none;">
+                                <button type="button" onclick="uploadShopProfileImage()" class="btn-modern btn-primary" style="width: auto; padding: 6px 12px; margin: 0; background: var(--brand-gold); color: var(--brand-navy); font-weight: 700; font-size: 0.85em; white-space: nowrap;">
                                     <i class="fas fa-upload"></i> Upload
                                 </button>
                             </div>
@@ -779,11 +948,11 @@
                         </div>
 
                         <div class="form-group">
-                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Banner Image (Large Banner)</label>
+                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Banner Image (Large Banner)</label>
                             <div style="display: flex; gap: 15px; align-items: center;">
-                                <input type="file" id="shop-banner-upload" accept="image/png, image/jpeg, image/webp" style="background: rgba(6, 12, 24, 0.6); border: 1px solid rgba(212, 175, 55, 0.2); color: white; padding: 10px; border-radius: 8px; flex-grow: 1; outline: none;">
-                                <button type="button" onclick="uploadShopBannerImage()" class="btn-modern btn-primary" style="width: auto; padding: 12px 20px; margin: 0; background: var(--brand-gold); color: var(--brand-navy); font-weight: 700;">
-                                    <i class="fas fa-upload"></i> Upload Banner
+                                <input type="file" id="shop-banner-upload" accept="image/png, image/jpeg, image/webp" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 10px; border-radius: 8px; flex-grow: 1; outline: none;">
+                                <button type="button" onclick="uploadShopBannerImage()" class="btn-modern btn-primary" style="width: auto; padding: 6px 12px; margin: 0; background: var(--brand-gold); color: var(--brand-navy); font-weight: 700; font-size: 0.85em; white-space: nowrap;">
+                                    <i class="fas fa-upload"></i> Upload
                                 </button>
                             </div>
                             <div id="upload-banner-status" style="margin-top: 10px; font-size: 0.85em; font-weight: 600;"></div>
@@ -792,20 +961,20 @@
                         </div>
 
                         <div class="form-group" style="position: relative;">
-                            <label style="color: #a8b2d1; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Description / Bio</label>
+                            <label style="color: #64748b; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">Marketplace Description / Bio</label>
                             <i class="fas fa-align-left" style="position: absolute; left: 15px; top: 38px; color: var(--brand-gold); z-index: 5;"></i>
-                            <textarea id="edit-shop-desc" rows="3" placeholder="Describe your shop, specializations, and turnaround time..." style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; font-size: 1em; background: rgba(6, 12, 24, 0.6); color: white; outline: none; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+                            <textarea id="edit-shop-desc" rows="3" placeholder="Describe your shop, specializations, and turnaround time..." style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1em; background: #f8fafc; color: #334155; outline: none; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
                         </div>
                     </div>
                 </div>
 
                 <!-- Footer Action Buttons -->
-                <div style="display: flex; gap: 20px; justify-content: flex-end; margin-top: 35px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 25px;">
-                    <button type="button" onclick="closeEditShopModal()" style="background: transparent; border: 1px solid #8892b0; color: #8892b0; padding: 14px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1.05em; transition: all 0.2s;">
-                        <i class="fas fa-times"></i> Cancel &amp; Close
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                    <button type="button" onclick="closeEditShopModal()" style="background: transparent; border: 1px solid #8892b0; color: #64748b; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; white-space: nowrap; transition: all 0.2s;">
+                        <i class="fas fa-times"></i> Cancel
                     </button>
-                    <button type="submit" id="save-shop-btn" style="background: #10b981; border: none; color: white; padding: 14px 45px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1.05em; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25); transition: all 0.2s;">
-                        <i class="fas fa-save"></i> Save Configuration
+                    <button type="submit" id="save-shop-btn" style="background: #10b981; border: none; color: white; padding: 8px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85em; display: flex; align-items: center; gap: 8px; white-space: nowrap; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25); transition: all 0.2s;">
+                        <i class="fas fa-save"></i> Save
                     </button>
                 </div>
             </form>

@@ -1057,14 +1057,14 @@ async function loadShopCommandCenter() {
                     </div>`;
             }
 
-            let workersHtml = '<tr><td colspan="2" style="text-align:center; padding:10px; color:#94a3b8;">No crew members added.</td></tr>';
+            let workersHtml = '<tr><td colspan="2" style="text-align:center; padding:10px; color:#94a3b8;">No workers added.</td></tr>';
             if (workers.length > 0) {
                 workersHtml = workers.map(w => `
                     <li class="worker-item">
                         <span><i class="fas fa-user-tag" style="color:#cbd5e1; margin-right:8px;"></i>${w.name}</span>
                         <div>
                             <span style="font-size:0.85em; background:#f1f5f9; padding:2px 6px; border-radius:4px; margin-right:8px;">${w.role || 'Tailor'}</span>
-                            <button onclick="deleteWorker('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="small-btn" style="background:transparent; color:#ef4444; border:none; padding:4px; font-size:1em; cursor:pointer;" title="Remove Crew Member">
+                            <button onclick="deleteWorker('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="small-btn" style="background:transparent; color:#ef4444; border:none; padding:4px; font-size:1em; cursor:pointer;" title="Remove Worker">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
@@ -1076,17 +1076,17 @@ async function loadShopCommandCenter() {
                 <div class="entity-card">
                     <div class="entity-header">
                         <div class="shop-name"><i class="fas fa-store-alt" style="color:var(--brand-gold);"></i> ${shop.name}</div>
-                        <div>
-                            <span style="font-size:0.7em; background:#e0e7ff; color:#4f46e5; padding:4px 8px; border-radius:12px; font-weight:700; margin-right:5px;">${workers.length} CREW</span>
-                            <button onclick="openEditShopModal('${shop.id}')" class="small-btn" style="background:#f1f5f9; color:var(--brand-navy); border:none; padding:4px 8px; font-size:0.85em; border-radius: 6px; cursor:pointer;" title="Edit Shop Configuration">
-                                <i class="fas fa-cog"></i> Config
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                            <span style="font-size:0.7em; background:#e0e7ff; color:#4f46e5; padding:4px 8px; border-radius:12px; font-weight:700;">${workers.length} WORKERS</span>
+                            <button onclick="openEditShopModal('${shop.id}')" class="small-btn" style="background:#f1f5f9; color:var(--brand-navy); border:none; padding:4px 8px; font-size:0.85em; border-radius: 6px; cursor:pointer;" title="Edit Shop Settings">
+                                <i class="fas fa-cog"></i> Settings
                             </button>
                         </div>
                     </div>
                     <div class="entity-body">
                         ${managerHtml}
                         <div style="margin-top:20px;">
-                            <h4 style="font-size:0.85em; color:#64748b; border-bottom:1px solid #e2e8f0; padding-bottom:5px; margin-bottom:10px; text-transform:uppercase;">Crew Members</h4>
+                            <h4 style="font-size:0.85em; color:#64748b; border-bottom:1px solid #e2e8f0; padding-bottom:5px; margin-bottom:10px; text-transform:uppercase;">Workers</h4>
                             <ul class="worker-list">
                                 ${workersHtml}
                             </ul>
