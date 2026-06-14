@@ -1611,8 +1611,14 @@
                 await loadClientThreads();
                 subscribeToGlobalMessages();
 
-                // Initialize default tab
-                switchTab('marketplace');
+                // Initialize default tab from URL or fallback to marketplace
+                const urlParams = new URLSearchParams(window.location.search);
+                const targetTab = urlParams.get('tab');
+                if (targetTab && ['marketplace', 'inbox', 'orders', 'settings'].includes(targetTab)) {
+                    switchTab(targetTab);
+                } else {
+                    switchTab('marketplace');
+                }
             } catch (err) {
                 console.error("Session lookup failed:", err);
                 location.href = '../../login.html';

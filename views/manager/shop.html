@@ -2138,7 +2138,7 @@
 
                 if (user) {
                     const role = currentUserProfile?.role || 'client';
-                    let inboxUrl = '../../views/client/client-dashboard.html';
+                    let inboxUrl = '../../views/client/client-dashboard.html?tab=inbox';
                     let inboxLabel = 'Go to Inbox Chat';
                     if (role === 'owner') {
                         inboxUrl = '../../views/admin/admin-messages.html';
