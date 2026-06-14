@@ -86,7 +86,7 @@
         <main class="main-content">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                 <div>
-                    <h1 style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">Client Management (Global)</h1>
+                    <h1 class="dashboard-main-title" style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">Client Management (Global)</h1>
                     <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">View and manage clients from all shops.</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
@@ -117,22 +117,24 @@
             </div>
 
             <section class="order-list">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Phone</th>
-                            <th>Last Item</th>
-                            <th>Last Visit</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="clients-tbody">
-                        <tr>
-                            <td colspan="5" style="text-align:center; padding:20px;">Loading clients...</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Last Item</th>
+                                <th>Last Visit</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-tbody">
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:20px;">Loading clients...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </main>
     </div>
