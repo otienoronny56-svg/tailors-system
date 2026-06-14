@@ -608,9 +608,44 @@
             .form-row .form-group {
                 margin-bottom: 20px;
             }
+            
+            header {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+                padding: 15px 5%;
+            }
+            
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
         }
 
         @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                padding: 12px 5%;
+                gap: 12px;
+            }
+            .logo-group {
+                align-items: center;
+            }
+            .logo-text {
+                font-size: 1.3em;
+            }
+            nav {
+                width: 100%;
+                gap: 10px;
+            }
+            nav a {
+                font-size: 0.85em;
+            }
+            .nav-user-pill {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
             .shop-listings-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 12px !important;
