@@ -2755,3 +2755,21 @@ body.dark-mode .measurement-group h4 {
         gap: 10px;
     }
 }
+
+/* --- Dark Mode Form Refinements --- */
+body.dark-mode fieldset {
+    border-color: #334155 !important;
+}
+
+body.dark-mode legend {
+    color: var(--brand-gold) !important;
+}
+
+body.dark-mode label,
+body.dark-mode .form-group label {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .measurement-field label {
+    color: #94a3b8 !important;
+}
