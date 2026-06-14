@@ -1494,20 +1494,20 @@
                 <div class="settings-card" style="grid-column: span 2;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <h3 style="margin-bottom: 0;"><i class="fas fa-ruler-combined"></i> My Saved Measurements</h3>
-                        <button class="btn-save-settings" style="width: auto; padding: 8px 20px; margin-top: 0; background: var(--brand-navy); border: 1px solid var(--brand-gold); color: var(--brand-gold);" onclick="saveClientMeasurements()">Save Profile</button>
+                        <button class="btn-save-settings" style="width: auto; padding: 8px 20px; margin-top: 0; background: var(--brand-navy); border: 1px solid var(--brand-gold); color: var(--brand-gold);" onclick="saveClientMeasurements()">Save Measurement Set</button>
                     </div>
-                    <p style="color: var(--brand-slate); font-size: 0.85em; margin-bottom: 15px;">Save your standard body measurements here. Create multiple profiles (e.g. "My Suit", "My Wife's Dress") to quickly fill measurement requests.</p>
+                    <p style="color: var(--brand-slate); font-size: 0.85em; margin-bottom: 15px;">Save your standard body measurements here. Create multiple sets (e.g. "My Suit", "My Wife's Dress") to quickly fill measurement requests.</p>
                     
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                         <div class="form-group" style="flex: 1; min-width: 200px;">
-                            <label>Select Profile</label>
+                            <label>Select Saved Set</label>
                             <select id="meas-profile-select" onchange="loadSelectedMeasurementProfile()" style="background: rgba(6,12,24,0.5); border: 1px solid var(--glass-border); padding: 10px; border-radius: 6px; color: white; width: 100%;">
-                                <option value="new">+ Create New Profile</option>
+                                <option value="new">+ Add New Measurement Set</option>
                             </select>
                         </div>
                         <div class="form-group" style="flex: 1; min-width: 200px;">
-                            <label>Profile Name</label>
-                            <input type="text" id="meas-profile-name" placeholder="e.g. Default Suit Profile" style="width: 100%;">
+                            <label>Set Name</label>
+                            <input type="text" id="meas-profile-name" placeholder="e.g. Default Suit Measurements" style="width: 100%;">
                         </div>
                     </div>
 
@@ -3055,7 +3055,7 @@
                 window._allSavedMeasurementProfiles = profile?.measurements || {};
                 
                 const select = document.getElementById('meas-profile-select');
-                select.innerHTML = '<option value="new">+ Create New Profile</option>';
+                select.innerHTML = '<option value="new">+ Add New Measurement Set</option>';
                 
                 Object.keys(window._allSavedMeasurementProfiles).forEach(profileName => {
                     const opt = document.createElement('option');
