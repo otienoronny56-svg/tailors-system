@@ -980,6 +980,8 @@
             const btnFavourites = document.getElementById('btn-mode-favourites');
             const gridListings = document.getElementById('listings-grid');
             const gridShops = document.getElementById('shops-grid');
+            const searchInput = document.getElementById('mkt-search-query');
+            const categorySelect = document.getElementById('mkt-category-filter');
 
             btnListings.classList.remove('active');
             btnShops.classList.remove('active');
@@ -989,14 +991,20 @@
                 btnListings.classList.add('active');
                 gridListings.style.display = 'grid';
                 gridShops.style.display = 'none';
+                if (searchInput) searchInput.placeholder = "Search creations...";
+                if (categorySelect && categorySelect.parentElement) categorySelect.parentElement.style.display = 'flex';
             } else if (mode === 'shops') {
                 btnShops.classList.add('active');
                 gridListings.style.display = 'none';
                 gridShops.style.display = 'grid';
+                if (searchInput) searchInput.placeholder = "Search tailoring shops...";
+                if (categorySelect && categorySelect.parentElement) categorySelect.parentElement.style.display = 'none';
             } else if (mode === 'favourites') {
                 if (btnFavourites) btnFavourites.classList.add('active');
                 gridListings.style.display = 'grid';
                 gridShops.style.display = 'none';
+                if (searchInput) searchInput.placeholder = "Search favourites...";
+                if (categorySelect && categorySelect.parentElement) categorySelect.parentElement.style.display = 'flex';
             }
             filterMarketplace();
         }
