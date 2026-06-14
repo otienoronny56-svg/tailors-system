@@ -1173,6 +1173,7 @@
                             if (newMsg.message_text.startsWith('[MEASUREMENT_SUBMISSION:')) {
                                 newMsg.synced = true;
                                 syncSubmissionToClientsTable(newMsg);
+                                updateTailorInputControls(); // Show "Create Order" button immediately
                             }
 
                             // Keep inbox marked as viewed while we are actively here
