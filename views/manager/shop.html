@@ -1113,15 +1113,15 @@
         </nav>
     </header>
 
-    <div class="shop-banner" id="shop-banner-bg"
-        style="background: linear-gradient(135deg, var(--brand-navy) 0%, #112240 100%); border-bottom: 2px solid var(--brand-gold);">
+    <div class="shop-banner" id="shop-banner-bg" onclick="openImageModal(this.style.backgroundImage)"
+        style="cursor: pointer; background: linear-gradient(135deg, var(--brand-navy) 0%, #112240 100%); border-bottom: 2px solid var(--brand-gold);">
     </div>
 
     <div class="shop-container">
         <!-- 👤 LEFT SIDEBAR: PROFILE CARD -->
         <aside class="shop-info-sidebar">
             <div class="shop-profile-card">
-                <div class="shop-logo-large" id="shop-logo-large">
+                <div class="shop-logo-large" id="shop-logo-large" onclick="openImageModal(this.style.backgroundImage)" style="cursor: pointer;" title="View Image">
                     <i class="fas fa-store"></i>
                 </div>
                 <h1 class="shop-name-title" id="shop-name">Loading...</h1>
@@ -1381,6 +1381,12 @@
                 </button>
             </form>
         </div>
+    </div>
+
+    <!-- 🖼️ IMAGE VIEWER MODAL -->
+    <div id="image-viewer-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <span onclick="closeImageModal()" style="position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='var(--brand-gold)'" onmouseout="this.style.color='white'">&times;</span>
+        <img id="image-viewer-img" src="" style="max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
     </div>
 
     <!-- Toast Success Notification -->
@@ -1716,18 +1722,23 @@
             const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
 
             const hasBanner = shopDetails.banner_image && shopDetails.banner_image.trim() !== '' && !shopDetails.banner_image.endsWith('/');
+            const bannerEl = document.getElementById('shop-banner-bg');
             if (hasBanner) {
                 const bannerUrl = shopDetails.banner_image.startsWith('http') ? shopDetails.banner_image : STORAGE_URL + shopDetails.banner_image;
-                document.getElementById('shop-banner-bg').style.backgroundImage = `url('${bannerUrl}')`;
+                bannerEl.style.backgroundImage = `url('${bannerUrl}')`;
+                bannerEl.style.cursor = 'pointer';
+                bannerEl.onclick = () => openImageModal(bannerEl.style.backgroundImage);
             } else {
-                document.getElementById('shop-banner-bg').style.backgroundImage = 'none';
-                document.getElementById('shop-banner-bg').style.background = 'linear-gradient(135deg, var(--brand-navy) 0%, #112240 100%)';
+                bannerEl.style.backgroundImage = 'none';
+                bannerEl.style.background = 'linear-gradient(135deg, var(--brand-navy) 0%, #112240 100%)';
             }
             if (shopDetails.profile_image) {
                 const avatarUrl = shopDetails.profile_image.startsWith('http') ? shopDetails.profile_image : STORAGE_URL + shopDetails.profile_image;
                 const avatar = document.getElementById('shop-logo-large');
                 avatar.style.backgroundImage = `url('${avatarUrl}')`;
                 avatar.style.border = "4px solid var(--brand-gold)";
+                avatar.style.cursor = 'pointer';
+                avatar.onclick = () => openImageModal(avatar.style.backgroundImage);
                 avatar.innerHTML = ""; // Clear icon
             }
 
@@ -1792,7 +1803,7 @@
 
                 return `
                     <div class="listing-card" id="listing-card-${list.id}">
-                        <div class="listing-img-wrap">
+                        <div class="listing-img-wrap" onclick="openImageModal('url(${imageUrl})')" style="cursor:pointer;">
                             ${badgeHtml}
                             <div class="listing-img-blur" style="background-image: url('${imageUrl}')"></div>
                             <div class="listing-img" style="background-image: url('${imageUrl}')"></div>
@@ -2481,6 +2492,24 @@
                 }, 4000);
             }
         }
+
+        // Image Modal Logic
+        function openImageModal(bgImage) {
+            if (!bgImage || bgImage === 'none' || bgImage.includes('linear-gradient')) return;
+            const urlMatch = bgImage.match(/url\(["']?(.*?)["']?\)/);
+            const imageUrl = urlMatch ? urlMatch[1] : bgImage;
+            
+            if (imageUrl) {
+                document.getElementById('image-viewer-img').src = imageUrl;
+                document.getElementById('image-viewer-modal').style.display = 'flex';
+            }
+        }
+
+        function closeImageModal() {
+            document.getElementById('image-viewer-modal').style.display = 'none';
+            document.getElementById('image-viewer-img').src = '';
+        }
+
     </script>
 </body>
 
