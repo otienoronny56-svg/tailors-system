@@ -241,6 +241,30 @@
             flex-grow: 1 !important;
             height: 0 !important;
         }
+
+        /* Mobile specific layout for Inbox */
+        @media (max-width: 768px) {
+            .inbox-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: 220px 1fr;
+            }
+            .inbox-sidebar {
+                border-right: none;
+                border-bottom: 2px solid #e2e8f0;
+            }
+            .msg-bubble {
+                max-width: 90%;
+            }
+            .chat-pane-header {
+                padding: 10px 15px;
+            }
+            .msg-input-pane {
+                padding: 10px 15px;
+            }
+            .chat-messages-stream {
+                padding: 15px;
+            }
+        }
     </style>
     <link rel="manifest" href="../../manifest.json">
 </head>
