@@ -212,6 +212,10 @@
             position: relative;
             z-index: 10;
         }
+        
+        .shop-container > * {
+            min-width: 0; /* Prevents grid items from expanding beyond container */
+        }
 
         /* --- Left Column: Shop Info Card --- */
         .shop-info-sidebar {
@@ -288,6 +292,8 @@
             gap: 12px;
             font-size: 0.88em;
             color: var(--brand-light-slate);
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
         }
 
         .meta-row i {
@@ -300,6 +306,7 @@
             display: flex;
             flex-direction: column;
             gap: 40px;
+            min-width: 0;
         }
 
         .section-header-row {
