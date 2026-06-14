@@ -572,6 +572,13 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                ticks: { backdropColor: 'transparent', color: textColor },
+                                grid: { color: gridColor },
+                                angleLines: { color: gridColor }
+                            }
+                        },
                         plugins: {
                             legend: { position: 'right', labels: { color: textColor } }
                         }
