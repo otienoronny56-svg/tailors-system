@@ -1643,6 +1643,9 @@
                     return;
                 }
                 currentUser = user;
+                
+                // Ensure phone is set globally from metadata if auth.users native phone is empty
+                currentUser.phone = user.phone || user.user_metadata?.phone;
 
                 // Set name display
                 const fullName = user.user_metadata?.full_name || 'Customer';
@@ -3531,7 +3534,9 @@
 
         async function loadClientOrders() {
             const container = document.getElementById('client-orders-container');
-            if (!currentUser || !currentUser.phone) {
+            const userPhone = currentUser?.phone || currentUser?.user_metadata?.phone;
+            
+            if (!userPhone) {
                 container.innerHTML = '<div style="text-align:center; color:#ef4444; padding:40px;">Please ensure your phone number is registered in account settings to track orders.</div>';
                 return;
             }
@@ -3541,7 +3546,7 @@
                 const { data: orders, error } = await supabaseClient
                     .from('orders')
                     .select('id, garment_type, status, price, amount_paid, due_date, created_at, shop_id')
-                    .eq('customer_phone', currentUser.phone)
+                    .eq('customer_phone', userPhone)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
