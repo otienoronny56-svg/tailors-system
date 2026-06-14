@@ -1139,24 +1139,20 @@
                         <a id="shop-website" href="#" target="_blank" style="color: var(--brand-gold); text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--brand-gold)'">Visit Website</a>
                     </div>
                 </div>
+
+                <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
+                    <button onclick="switchShopTab('inquiry')" style="background: var(--brand-gold); border: none; color: var(--bg-dark); padding: 12px; border-radius: 8px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: all 0.3s; font-size: 0.95em;">
+                        <i class="fas fa-calendar-alt"></i> Book Fitting / Inquiry
+                    </button>
+                    <button onclick="switchShopTab('reviews')" style="background: transparent; border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 12px; border-radius: 8px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: all 0.3s; font-size: 0.95em;">
+                        <i class="fas fa-star"></i> Reviews & Ratings
+                    </button>
+                </div>
             </div>
         </aside>
 
-        <!-- 🧵 RIGHT COLUMN: TABBED SYSTEM -->
+        <!-- 🧵 RIGHT COLUMN: CONTENT SYSTEM -->
         <section class="shop-listings-column">
-            <!-- 🎛️ Shop Tabs Navigation -->
-            <div class="shop-nav-tabs">
-                <button class="shop-tab-btn active" id="tab-btn-catalog" onclick="switchShopTab('catalog')">
-                    <i class="fas fa-tags"></i> Shop Catalog
-                </button>
-                <button class="shop-tab-btn" id="tab-btn-inquiry" onclick="switchShopTab('inquiry')">
-                    <i class="fas fa-calendar-alt"></i> Book Fitting / Inquiry
-                </button>
-                <button class="shop-tab-btn" id="tab-btn-reviews" onclick="switchShopTab('reviews')">
-                    <i class="fas fa-star"></i> Reviews & Ratings
-                </button>
-            </div>
-
             <!-- Tab 1: Catalog & Creations -->
             <div id="section-catalog" class="shop-section">
                 <!-- Search & Filters -->
@@ -1216,6 +1212,9 @@
 
             <!-- Tab 2: Inquiry & Booking Form -->
             <div id="section-inquiry" class="shop-section" style="display: none;">
+                <button onclick="switchShopTab('catalog')" style="background: transparent; border: none; color: var(--brand-gold); cursor: pointer; margin-bottom: 20px; font-weight: 600; font-size: 0.95em; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-arrow-left"></i> Back to Shop Catalog
+                </button>
                 <div class="inquiry-form-card" id="inquiry-section" style="margin-top: 0; padding-top: 5px;">
                     <div class="section-header-row" style="border-bottom:none; margin-bottom:15px; padding-bottom:0;">
                         <h2 class="column-section-title" style="margin:0;"><i class="fas fa-envelope"></i> Send Inquiry
@@ -1265,6 +1264,9 @@
 
             <!-- Tab 3: Reviews -->
             <div id="section-reviews" class="shop-section" style="display: none;">
+                <button onclick="switchShopTab('catalog')" style="background: transparent; border: none; color: var(--brand-gold); cursor: pointer; margin-bottom: 20px; font-weight: 600; font-size: 0.95em; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-arrow-left"></i> Back to Shop Catalog
+                </button>
                 <div class="reviews-section-card" id="reviews-section" style="margin-top: 0; padding-top: 5px;">
                     <div class="section-header-row"
                         style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 20px;">
