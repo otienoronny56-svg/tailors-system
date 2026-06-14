@@ -1048,13 +1048,6 @@ function closeAdminModal() {
 
 async function loadAdminOrders(mode = 'current') {
     if (!USER_PROFILE) return;
-    // [NEW] Update Header based on mode
-    const headerTitle = document.querySelector('header h1');
-    if (headerTitle) {
-        if (mode === 'urgent') headerTitle.innerHTML = 'ðŸ”¥ Global Urgent Attention';
-        else if (mode === 'current') headerTitle.textContent = 'Global Active Orders';
-        else headerTitle.textContent = 'Global Order History';
-    }
 
     // [PERF] Debounce rapid calls
     const now = Date.now();

@@ -158,7 +158,7 @@
         <main class="main-content" style="font-family: 'Montserrat', sans-serif;">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div>
-                    <h1 style="margin: 0; font-family: 'Playfair Display', serif;">Global Orders</h1>
+                    <h1 class="dashboard-main-title" style="margin: 0; font-family: 'Playfair Display', serif;">Global Orders</h1>
                     <p style="color: #666; margin: 5px 0 0 0; font-size: 0.9em;" id="orders-subtitle-desc">
                         Manage active production and order history.
                     </p>
@@ -192,7 +192,7 @@
             </header>
 
             <!-- Tabs selector -->
-            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.15); padding-bottom: 12px; flex-wrap: wrap;">
+            <div class="quick-actions-toolbar" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.15); padding-bottom: 12px; flex-wrap: wrap;">
                 <button onclick="switchAdminOrdersTab('current')" id="tab-btn-current" class="tab-btn active">
                     <i class="fas fa-globe"></i> Active Orders
                 </button>
