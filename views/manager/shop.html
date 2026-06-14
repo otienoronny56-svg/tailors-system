@@ -632,26 +632,52 @@
 
         @media (max-width: 600px) {
             header {
-                flex-direction: column;
-                padding: 12px 5%;
-                gap: 12px;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px;
+                gap: 5px;
             }
             .logo-group {
-                align-items: center;
+                align-items: flex-start;
             }
             .logo-text {
-                font-size: 1.3em;
+                font-size: 1.2em;
+            }
+            .logo-sub {
+                font-size: 0.55em;
             }
             nav {
-                width: 100%;
-                gap: 10px;
+                width: auto;
+                gap: 5px;
+                justify-content: flex-end;
             }
-            nav a {
-                font-size: 0.85em;
+            nav > a {
+                display: none;
             }
             .nav-user-pill {
-                flex-wrap: wrap;
-                justify-content: center;
+                flex-wrap: nowrap;
+                justify-content: flex-end;
+                gap: 5px;
+                background: transparent;
+                border: none;
+                padding: 0;
+            }
+            .nav-user-name, 
+            .nav-user-pill .btn-portal, 
+            .nav-user-pill .btn-signout {
+                font-size: 0 !important;
+                padding: 8px !important;
+                min-width: unset !important;
+            }
+            .nav-user-name i, 
+            .nav-user-pill .btn-portal i, 
+            .nav-user-pill .btn-signout i {
+                font-size: 20px !important;
+                margin-right: 0 !important;
+            }
+            .nav-user-name i {
+                color: var(--brand-gold);
             }
             .shop-listings-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
@@ -938,21 +964,6 @@
             border-color: rgba(212, 175, 55, 0.3);
         }
         @media (max-width: 600px) {
-            header {
-                padding: 12px 15px;
-            }
-            .logo-text {
-                font-size: 1.2em;
-            }
-            .logo-sub {
-                font-size: 0.55em;
-            }
-            nav {
-                gap: 10px;
-            }
-            nav > a {
-                display: none; /* Hide text links to save space for auth buttons */
-            }
             .shop-banner {
                 height: 180px;
             }
