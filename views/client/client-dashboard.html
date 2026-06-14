@@ -1537,6 +1537,8 @@
         let supabaseClient;
         let currentUser = null;
         let activeThread = null; // Storing selected shop group
+        let isSelectionMode = false;
+        let selectedMessages = new Set();
         let threads = []; // Array of grouped conversations
         let messages = []; // Used inside activeThread.allMessages
         let messageSubscription = null;
@@ -1820,6 +1822,15 @@
                         ${activeThread.shopImage ? '' : '<i class="fas fa-store"></i>'}
                     </div>
                     <div class="chat-header-name">${activeThread.shopName}</div>
+                    <div style="margin-left:auto;">
+                        <button onclick="toggleSelectionMode()" title="Select multiple messages"
+                                style="padding:6px 12px; font-size:0.8em; background:rgba(212,175,55,0.1); color:var(--brand-gold); border-radius:6px;
+                                       font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer;
+                                       border:1px solid rgba(212,175,55,0.3); transition:background 0.2s; white-space:nowrap;"
+                                onmouseover="this.style.background='rgba(212,175,55,0.2)'" onmouseout="this.style.background='rgba(212,175,55,0.1)'">
+                            <i class="fas fa-check-square"></i> <span class="hide-mobile" style="${window.innerWidth <= 600 ? 'display:none;' : ''}">${isSelectionMode ? 'Cancel Select' : 'Select'}</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="chat-history" id="chat-history">
                 </div>
@@ -1983,14 +1994,21 @@
                 }
 
                 let actionsHtml = '';
-                if (!isUnsent && msg.id) {
+                if (isSelectionMode && !isUnsent && msg.id && !msg.is_inquiry) {
+                    const isChecked = selectedMessages.has(msg.id) ? 'checked' : '';
+                    actionsHtml = `
+                        <div style="display:flex; justify-content:${isMe ? 'flex-end' : 'flex-start'}; margin-top:5px;">
+                            <input type="checkbox" ${isChecked} onchange="toggleMessageSelection('${msg.id}', ${isMe})" style="width:16px; height:16px; cursor:pointer; accent-color: var(--brand-gold);">
+                        </div>
+                    `;
+                } else if (!isUnsent && msg.id) {
                     actionsHtml = `
                         <div style="display:flex; gap:10px; margin-top:8px; justify-content:${isMe ? 'flex-end' : 'flex-start'};">
                             ${isMe ? `<button onclick="unsendMessage('${msg.id}')" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.8em;"><i class="fas fa-undo"></i> Unsend</button>` : ''}
                             <button onclick="deleteMessageForMe('${msg.id}', ${isMe})" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.8em;"><i class="fas fa-trash"></i> Delete</button>
                         </div>
                     `;
-                } else if (msg.id) {
+                } else if (!isSelectionMode && msg.id) {
                     actionsHtml = `
                         <div style="display:flex; gap:10px; margin-top:8px; justify-content:${isMe ? 'flex-end' : 'flex-start'};">
                             <button onclick="deleteMessageForMe('${msg.id}', ${isMe})" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.8em;"><i class="fas fa-trash"></i> Delete</button>
@@ -2007,6 +2025,88 @@
                         ${!msg.is_inquiry ? actionsHtml : ''}
                     </div>`;
             }).join('');
+            if (isSelectionMode) {
+                const count = selectedMessages.size;
+                const selectedArr = Array.from(selectedMessages);
+                const allMine = selectedArr.every(id => {
+                    const m = activeThread.allMessages.find(msg => msg.id === id);
+                    return m && m.sender_id === currentUser.id;
+                });
+
+                history.innerHTML += `
+                    <div style="position:sticky; bottom:10px; left:50%; transform:translateX(-50%); width:max-content; background:var(--brand-navy); padding:12px 20px; border-radius:30px; box-shadow:0 10px 25px rgba(0,0,0,0.5); display:flex; align-items:center; gap:15px; border:1px solid rgba(212,175,55,0.3); z-index:100; margin: 20px auto 0 auto;">
+                        <span style="color:white; font-weight:600; font-size:0.9em;">${count} selected</span>
+                        <button onclick="bulkDeleteMessages()" ${count === 0 ? 'disabled' : ''} style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:20px; font-size:0.8em; font-weight:bold; cursor:${count===0?'not-allowed':'pointer'}; opacity:${count===0?'0.5':'1'};"><i class="fas fa-trash"></i> Delete</button>
+                        <button onclick="bulkUnsendMessages()" ${count === 0 || !allMine ? 'disabled' : ''} style="background:#f59e0b; color:white; border:none; padding:6px 12px; border-radius:20px; font-size:0.8em; font-weight:bold; cursor:${count===0||!allMine?'not-allowed':'pointer'}; opacity:${count===0||!allMine?'0.5':'1'};"><i class="fas fa-undo"></i> Unsend</button>
+                    </div>
+                `;
+            }
+            
+            const inputForm = document.querySelector('.input-form');
+            if (inputForm) {
+                inputForm.style.display = isSelectionMode ? 'none' : 'flex';
+            }
+        }
+
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            if (!isSelectionMode) selectedMessages.clear();
+            
+            const btn = document.querySelector('.chat-header button[title="Select multiple messages"]');
+            if (btn) {
+                btn.innerHTML = `<i class="fas fa-check-square"></i> <span class="hide-mobile" style="${window.innerWidth <= 600 ? 'display:none;' : ''}">${isSelectionMode ? 'Cancel Select' : 'Select'}</span>`;
+            }
+            renderChatHistory();
+        }
+
+        function toggleMessageSelection(msgId, isMe) {
+            if (selectedMessages.has(msgId)) selectedMessages.delete(msgId);
+            else selectedMessages.add(msgId);
+            renderChatHistory();
+        }
+
+        async function bulkDeleteMessages() {
+            if (selectedMessages.size === 0) return;
+            if (!confirm(`Delete ${selectedMessages.size} selected messages for yourself?`)) return;
+            try {
+                const idsArray = Array.from(selectedMessages);
+                for (const id of idsArray) {
+                    const msg = activeThread.allMessages.find(m => m.id === id);
+                    if (!msg) continue;
+                    const isSender = msg.sender_id === currentUser.id;
+                    const updateData = isSender ? { deleted_for_sender: true } : { deleted_for_recipient: true };
+                    await supabaseClient.from('messages').update(updateData).eq('id', id);
+                    if (isSender) msg.deleted_for_sender = true;
+                    else msg.deleted_for_recipient = true;
+                }
+                isSelectionMode = false;
+                selectedMessages.clear();
+                toggleSelectionMode();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to delete messages");
+            }
+        }
+
+        async function bulkUnsendMessages() {
+            if (selectedMessages.size === 0) return;
+            if (!confirm(`Unsend ${selectedMessages.size} selected messages? They will be removed for everyone.`)) return;
+            try {
+                const idsArray = Array.from(selectedMessages);
+                const { error } = await supabaseClient.from('messages').update({ is_unsent: true }).in('id', idsArray);
+                if (error) throw error;
+                
+                activeThread.allMessages.forEach(msg => {
+                    if (idsArray.includes(msg.id)) msg.is_unsent = true;
+                });
+                
+                isSelectionMode = false;
+                selectedMessages.clear();
+                toggleSelectionMode();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to unsend messages");
+            }
         }
 
         async function unsendMessage(msgId) {
@@ -3113,6 +3213,8 @@
 
         // Function to explicitly close chat
         function closeChatThread() {
+            isSelectionMode = false;
+            selectedMessages.clear();
             if (window.innerWidth <= 600) {
                 // Hitting UI back button will trigger popstate logic above
                 history.back();
