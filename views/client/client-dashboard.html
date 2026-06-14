@@ -2907,7 +2907,10 @@
                     const sMap = STATUS_MAP[order.status] || { title: "Unknown", color: "#64748b" };
                     const dueDate = order.due_date ? new Date(order.due_date).toLocaleDateString() : 'TBD';
                     const createdDate = order.created_at ? new Date(order.created_at).toLocaleDateString() : 'TBD';
-                    const trackLink = `${window.location.origin}/views/client/track.html?id=${order.id}`;
+                    const basePath = window.location.pathname.indexOf('/views/') > 0 
+                        ? window.location.pathname.substring(0, window.location.pathname.indexOf('/views/')) 
+                        : '';
+                    const trackLink = `${window.location.origin}${basePath}/views/client/track.html?id=${order.id}`;
 
                     return `
                         <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; position: relative;">

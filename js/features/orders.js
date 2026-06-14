@@ -1261,7 +1261,10 @@ async function loadAdminOrders(mode = 'current') {
 }
 
 function shareTrackingLink(orderId, phone) {
-    const trackingUrl = `${window.location.origin}/views/client/track.html?id=${orderId}`;
+    const basePath = window.location.pathname.indexOf('/views/') > 0 
+        ? window.location.pathname.substring(0, window.location.pathname.indexOf('/views/')) 
+        : '';
+    const trackingUrl = `${window.location.origin}${basePath}/views/client/track.html?id=${orderId}`;
     const text = `Hi! You can track the live status of your custom tailoring order here:\n\n${trackingUrl}`;
     
     // Attempt to open WhatsApp if phone exists
