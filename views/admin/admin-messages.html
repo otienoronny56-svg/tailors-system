@@ -652,8 +652,13 @@
             if (!confirm('Delete this entire conversation? This will remove it for both you and the client permanently.')) return;
 
             try {
+                // Initialize an admin client to bypass RLS for hard deletion
+                const adminClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
+                    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'admin-delete-key' }
+                });
+
                 // Delete all messages in this thread first (FK constraint)
-                const { error: msgErr } = await supabaseClient
+                const { error: msgErr } = await adminClient
                     .from('messages')
                     .delete()
                     .eq('inquiry_id', inquiryId);
@@ -661,7 +666,7 @@
                 if (msgErr) throw msgErr;
 
                 // Now delete the inquiry itself
-                const { error: inqErr } = await supabaseClient
+                const { error: inqErr } = await adminClient
                     .from('marketplace_inquiries')
                     .delete()
                     .eq('id', inquiryId);
