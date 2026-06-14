@@ -1987,6 +1987,42 @@ body.dark-mode .control-bar select {
     }
 }
 
+/* Dark Mode Overrides for Financial Overview */
+body.dark-mode .kpi-card,
+body.dark-mode .chart-container,
+body.dark-mode .control-panel {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .kpi-value,
+body.dark-mode .chart-container h3,
+body.dark-mode .control-panel label {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .kpi-header {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .kpi-subtext {
+    color: #64748b !important;
+}
+
+body.dark-mode .control-group input,
+body.dark-mode .control-group select {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .control-panel > button {
+    background: var(--brand-navy) !important;
+    border: 1px solid #334155 !important;
+    color: #cbd5e1 !important;
+}
+
 /* Dark Mode Overrides for BI Dashboard */
 body.dark-mode .scorecard,
 body.dark-mode .bi-card {
