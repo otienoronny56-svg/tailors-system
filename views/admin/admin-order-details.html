@@ -163,8 +163,11 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
-        .form-row .form-group { margin-bottom: 0; }
+        .form-row { min-width: 0; }
+        .form-row > * { min-width: 0; }
+        .form-row .form-group { margin-bottom: 0; min-width: 0; }
         .form-group { margin-bottom: 14px; }
+
 
         .form-group label {
             display: block;
@@ -179,6 +182,8 @@
         .form-group select,
         .form-group textarea {
             width: 100%;
+            min-width: 0;
+            max-width: 100%;
             padding: 10px 14px;
             border: 1.5px solid #e2e8f0;
             border-radius: 8px;
@@ -189,6 +194,7 @@
             transition: all 0.2s;
             box-sizing: border-box;
         }
+
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
