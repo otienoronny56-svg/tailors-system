@@ -2736,3 +2736,22 @@ body.dark-mode .measurement-group h4 {
         padding: 8px;
     }
 }
+
+/* --- Form Row Layout --- */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-row .form-group {
+    margin-bottom: 0; /* Override default bottom margin inside grid */
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
