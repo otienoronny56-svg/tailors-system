@@ -1441,6 +1441,9 @@ body.dark-mode [style*="background-color:white"],
 body.dark-mode .action-card,
 body.dark-mode .metric-card,
 body.dark-mode .shop-card,
+body.dark-mode .entity-card,
+body.dark-mode .entity-header,
+body.dark-mode .entity-actions,
 body.dark-mode .container,
 body.dark-mode .modal-content,
 body.dark-mode table {
@@ -1454,6 +1457,7 @@ body.dark-mode table {
 body.dark-mode .metric-card div,
 body.dark-mode .action-card h3,
 body.dark-mode .action-card label,
+body.dark-mode .entity-card div,
 body.dark-mode section h2 {
     color: #f8fafc !important;
 }
@@ -1469,14 +1473,18 @@ body.dark-mode .card-red { border-left-color: #ef4444 !important; }
 
 body.dark-mode input,
 body.dark-mode select,
-body.dark-mode textarea {
+body.dark-mode textarea,
+body.dark-mode .form-group input,
+body.dark-mode .form-group select {
     background: #0f172a !important;
     color: #f8fafc !important;
     border: 1px solid #334155 !important;
 }
 
 body.dark-mode input:focus,
-body.dark-mode select:focus {
+body.dark-mode select:focus,
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group select:focus {
     background: #020617 !important;
     border-color: #D4AF37 !important;
 }
