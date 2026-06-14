@@ -1418,59 +1418,83 @@ button {
 /* ============================================ */
 body.dark-mode {
     --bg-light: #0f172a;
-    --text-dark: #f1f5f9;
+    --text-dark: #f8fafc;
     --brand-white: #1e293b;
-    --brand-navy: #020617;
-    /* Darker navy for sidebar/header */
+    --brand-navy: #f8fafc; /* NUCLEAR FIX: Inverts all inline dark-navy text to pure white */
     color: var(--text-dark);
 }
 
 body.dark-mode .main-content {
-    background: linear-gradient(to bottom right, #0f172a, #1a202c);
+    background: #0f172a !important; /* Solid dark background */
 }
 
+body.dark-mode .sidebar {
+    background-color: #020617 !important; /* Explicitly dark navy/black since we inverted --brand-navy */
+    border-right-color: #1e293b !important;
+}
+
+/* NUCLEAR FIX: Force all elements that have inline "background: white" to become dark cards */
+body.dark-mode [style*="background: white"],
+body.dark-mode [style*="background:white"],
+body.dark-mode [style*="background-color: white"],
+body.dark-mode [style*="background-color:white"],
+body.dark-mode .action-card,
 body.dark-mode .metric-card,
 body.dark-mode .shop-card,
 body.dark-mode .container,
 body.dark-mode .modal-content,
 body.dark-mode table {
-    background: #1e293b;
-    border-color: #334155;
-    color: #f1f5f9;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
 }
+
+/* Force all text inside dark cards to be white */
+body.dark-mode .metric-card div,
+body.dark-mode .action-card h3,
+body.dark-mode .action-card label,
+body.dark-mode section h2 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .metric-card span {
+    color: #94a3b8 !important; /* Muted text for labels */
+}
+
+/* Overriding specific card colors so they don't look muddy */
+body.dark-mode .card-gold { border-left-color: #D4AF37 !important; }
+body.dark-mode .card-green { border-left-color: #10b981 !important; }
+body.dark-mode .card-red { border-left-color: #ef4444 !important; }
 
 body.dark-mode input,
 body.dark-mode select,
 body.dark-mode textarea {
-    background: #0f172a;
-    color: #f1f5f9;
-    border-color: #475569;
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
 }
 
 body.dark-mode input:focus,
 body.dark-mode select:focus {
-    background: #1e293b;
+    background: #020617 !important;
+    border-color: #D4AF37 !important;
 }
 
 body.dark-mode th {
-    background: #0f172a;
-    color: var(--brand-gold);
-    border-bottom: 2px solid #334155;
+    background: #0f172a !important;
+    color: var(--brand-gold) !important;
+    border-bottom: 2px solid #334155 !important;
 }
 
 body.dark-mode td {
-    border-bottom-color: #334155;
-    color: #cbd5e1;
+    border-bottom-color: #334155 !important;
+    color: #cbd5e1 !important;
+    background: #1e293b !important;
 }
 
-body.dark-mode tr:hover {
-    background-color: #0f172a;
-}
-
-body.dark-mode .sidebar {
-    background-color: var(--brand-navy);
-    border-right-color: #b8941f;
+body.dark-mode tr:hover td {
+    background-color: #0f172a !important;
 }
 
 body.dark-mode .legend-item {
