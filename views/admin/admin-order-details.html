@@ -288,16 +288,17 @@
         /* Right column info rows */
         .info-row {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f5f9;
+            justify-content: flex-start;
+            align-items: flex-start;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #e2e8f0;
+            margin-bottom: 8px;
             font-size: 0.9em;
-            gap: 8px;
+            gap: 12px;
         }
-        .info-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .info-label { color: #64748b; font-weight: 600; flex-shrink: 0; }
-        .info-val { color: var(--brand-navy); font-weight: 600; text-align: right; }
+        .info-row:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+        .info-label { color: #64748b; font-weight: 600; flex-shrink: 0; width: 115px; }
+        .info-val { color: var(--brand-navy); font-weight: 600; text-align: left; }
 
         .section-heading {
             font-size: 0.82em;
@@ -713,13 +714,13 @@
                             <fieldset>
                                 <legend><i class="fas fa-ruler-combined"></i>&nbsp; Measurements &amp; Notes</legend>
                                 <div id="admin-measurement-fields-container"></div>
-                                <div class="form-group" style="margin-top: 8px;">
+                                <div class="form-group" style="margin-top: 8px; margin-bottom: 0;">
                                     <label>Customer Preferences / Notes</label>
-                                    <textarea id="edit-preferences" rows="3" placeholder="Special requests, design notes..."></textarea>
+                                    <textarea id="edit-preferences" rows="2" placeholder="Special requests, design notes..." style="margin-bottom: 0;"></textarea>
                                 </div>
                             </fieldset>
 
-                            <div class="form-actions-row" style="display: flex; gap: 10px; margin-top: 8px;">
+                            <div class="form-actions-row" style="display: flex; gap: 10px; margin-top: 2px;">
                                 <button type="submit" class="btn-modern btn-save" style="margin-top: 0; flex: 1;">
                                     <i class="fas fa-save"></i> Save All Changes
                                 </button>
