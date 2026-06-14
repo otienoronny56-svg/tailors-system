@@ -444,7 +444,7 @@
             .main-content {
                 display: block !important;
                 width: 100% !important;
-                max-width: 100vw !important;
+                max-width: 100% !important;
                 min-width: 0 !important;
                 margin: 0 !important;
                 padding: 10px !important;
@@ -452,6 +452,14 @@
                 box-sizing: border-box !important;
                 overflow-x: hidden !important;
             }
+
+            /* Prevent long names in checkboxes from breaking grid */
+            #squad-selection-container label {
+                white-space: normal;
+                word-break: break-word;
+                font-size: 0.9em;
+            }
+
 
             .detail-header { flex-direction: column; align-items: flex-start; gap: 10px; }
             .header-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; }
