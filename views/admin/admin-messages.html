@@ -242,16 +242,35 @@
             height: 0 !important;
         }
 
+        .mobile-back-btn {
+            display: none;
+        }
+
         /* Mobile specific layout for Inbox */
         @media (max-width: 768px) {
             .inbox-layout {
                 grid-template-columns: 1fr;
-                grid-template-rows: 220px 1fr;
+                grid-template-rows: 1fr;
             }
             .inbox-sidebar {
                 border-right: none;
-                border-bottom: 2px solid #e2e8f0;
+                border-bottom: none;
+                display: flex;
             }
+            .chat-container {
+                display: none;
+            }
+            
+            .inbox-layout.chat-active .inbox-sidebar {
+                display: none;
+            }
+            .inbox-layout.chat-active .chat-container {
+                display: flex;
+            }
+            .mobile-back-btn {
+                display: block !important;
+            }
+
             .msg-bubble {
                 max-width: 90%;
             }
@@ -552,9 +571,17 @@
             }).join('');
         }
 
+        function closeChatThread() {
+            document.querySelector('.inbox-layout').classList.remove('chat-active');
+            activeThread = null;
+            renderThreadsList();
+        }
+
         async function openChatThread(inquiryId) {
             activeThread = threads.find(t => t.id === inquiryId);
             renderThreadsList(); // Toggle active state styling
+
+            document.querySelector('.inbox-layout').classList.add('chat-active');
 
             const container = document.getElementById('chat-container-pane');
             const isSent = activeThread.client_email === USER_PROFILE.email;
@@ -563,10 +590,15 @@
 
             // Render basic container first with loading indicators
             container.innerHTML = `
-                <div class="chat-pane-header" style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div class="client-info-title">${escapeHTML(titleName)}</div>
-                        <div class="client-info-sub">${escapeHTML(subtitleInfo)}</div>
+                <div class="chat-pane-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button class="mobile-back-btn" onclick="closeChatThread()" style="background:#e2e8f0; border:none; color:var(--brand-navy); padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <div class="client-info-title">${escapeHTML(titleName)}</div>
+                            <div class="client-info-sub">${escapeHTML(subtitleInfo)}</div>
+                        </div>
                     </div>
                     <div id="header-action-container"></div>
                 </div>
