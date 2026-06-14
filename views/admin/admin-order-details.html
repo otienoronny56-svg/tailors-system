@@ -156,7 +156,14 @@
         }
 
         /* Form inputs */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-row .form-group { margin-bottom: 0; }
         .form-group { margin-bottom: 14px; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
         .form-group label {
             display: block;
             margin-bottom: 5px;
@@ -482,36 +489,40 @@
                         <form onsubmit="event.preventDefault(); saveAdminOrder();">
                             <fieldset>
                                 <legend><i class="fas fa-user"></i>&nbsp; Customer Info</legend>
-                                <div class="form-group">
-                                    <label>Full Name</label>
-                                    <input type="text" id="edit-customer-name" placeholder="Customer Name">
-                                </div>
-                                <div class="form-group">
-                                    <label>Phone Number</label>
-                                    <input type="tel" id="edit-customer-phone" placeholder="e.g. 0712345678">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Full Name</label>
+                                        <input type="text" id="edit-customer-name" placeholder="Customer Name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Phone Number</label>
+                                        <input type="tel" id="edit-customer-phone" placeholder="e.g. 0712345678">
+                                    </div>
                                 </div>
                             </fieldset>
 
                             <fieldset>
                                 <legend><i class="fas fa-tshirt"></i>&nbsp; Garment &amp; Status</legend>
-                                <div class="form-group">
-                                    <label>Garment Type</label>
-                                    <select id="edit-garment-type">
-                                        <option value="Suit">Suit</option>
-                                        <option value="Kaunda/Senator Suit">Kaunda/Senator Suit</option>
-                                        <option value="Trouser">Trouser</option>
-                                        <option value="Dress">Dress</option>
-                                        <option value="Shirt">Shirt</option>
-                                        <option value="Coat">Coat</option>
-                                        <option value="Half Coat">Half Coat</option>
-                                        <option value="Alteration">Alteration</option>
-                                    </select>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Garment Type</label>
+                                        <select id="edit-garment-type">
+                                            <option value="Suit">Suit</option>
+                                            <option value="Kaunda/Senator Suit">Kaunda/Senator Suit</option>
+                                            <option value="Trouser">Trouser</option>
+                                            <option value="Dress">Dress</option>
+                                            <option value="Shirt">Shirt</option>
+                                            <option value="Coat">Coat</option>
+                                            <option value="Half Coat">Half Coat</option>
+                                            <option value="Alteration">Alteration</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Due Date</label>
+                                        <input type="date" id="edit-due-date">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Due Date</label>
-                                    <input type="date" id="edit-due-date">
-                                </div>
-                                <div class="form-group">
+                                <div class="form-group" style="margin-top: 12px;">
                                     <label>Production Status</label>
                                     <select id="edit-status">
                                         <option value="1">1. Assigned</option>
@@ -526,17 +537,19 @@
 
                             <fieldset>
                                 <legend><i class="fas fa-users-cog"></i>&nbsp; Assignment</legend>
-                                <div class="form-group">
-                                    <label>Team Lead</label>
-                                    <select id="edit-worker-select">
-                                        <option value="">Select Worker</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label><i class="fas fa-users" style="margin-right:4px;"></i> Support Squad</label>
-                                    <div id="squad-selection-container"
-                                        style="max-height: 150px; overflow-y: auto; border: 1.5px solid #e2e8f0; padding: 12px; background: white; border-radius: 8px;">
-                                        <p style="font-size: 0.85em; color: #94a3b8; text-align: center; margin: 0; font-style: italic;">Loading team members...</p>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Team Lead</label>
+                                        <select id="edit-worker-select">
+                                            <option value="">Select Worker</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label><i class="fas fa-users" style="margin-right:4px;"></i> Support Squad</label>
+                                        <div id="squad-selection-container"
+                                            style="max-height: 120px; overflow-y: auto; border: 1.5px solid #e2e8f0; padding: 10px; background: white; border-radius: 8px; font-size: 0.9em;">
+                                            <p style="font-size: 0.85em; color: #94a3b8; text-align: center; margin: 0; font-style: italic;">Loading team members...</p>
+                                        </div>
                                     </div>
                                 </div>
                             </fieldset>
