@@ -2055,9 +2055,13 @@ body.dark-mode .rank-5 {
 }
 
 @media (max-width: 768px) {
+    .inv-header {
+        margin-bottom: 10px;
+    }
     .inv-stats {
         grid-template-columns: repeat(2, 1fr);
         gap: 6px;
+        margin-bottom: 12px;
     }
     .inv-stat-card {
         padding: 8px 4px;
