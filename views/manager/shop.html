@@ -1513,7 +1513,7 @@
 
                         authArea.innerHTML = `
                             <div class="nav-user-pill">
-                                <span class="nav-user-name"><i class="fas fa-user-circle"></i> ${escapeHTML(firstName)}</span>
+                                <span class="nav-user-name" onclick="location.href='../../views/client/client-dashboard.html'" style="cursor: pointer;" title="Go to Dashboard"><i class="fas fa-user-circle"></i> ${escapeHTML(firstName)}</span>
                                 <a href="../../views/client/client-dashboard.html" class="btn-portal"><i class="fas fa-comments"></i> My Inbox</a>
                                 <button class="btn-signout" onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                             </div>
@@ -1525,7 +1525,7 @@
                                 : 'manager-dashboard.html';
                         authArea.innerHTML = `
                             <div class="nav-user-pill">
-                                <span class="nav-user-name"><i class="fas fa-user-tie"></i> ${escapeHTML(firstName)}</span>
+                                <span class="nav-user-name" onclick="location.href='${dashUrl}'" style="cursor: pointer;" title="Go to Dashboard"><i class="fas fa-user-tie"></i> ${escapeHTML(firstName)}</span>
                                 <a href="${dashUrl}" class="btn-portal"><i class="fas fa-th-large"></i> Dashboard</a>
                                 <button class="btn-signout" onclick="signOutUser()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                             </div>
