@@ -1974,6 +1974,24 @@
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Submitting...`;
 
             try {
+                // --- DUPLICATE CHECK ---
+                // If logged-in user, check if they already have an open inquiry for this listing
+                if (email && listingId) {
+                    const { data: existing } = await supabaseClient
+                        .from('marketplace_inquiries')
+                        .select('id')
+                        .eq('client_email', email)
+                        .eq('listing_id', listingId)
+                        .eq('shop_id', shopId)
+                        .maybeSingle();
+
+                    if (existing) {
+                        // Already inquired — just show success without inserting again
+                        showSuccess(currentUser);
+                        return; // button stays disabled, preventing future re-submits
+                    }
+                }
+
                 // Try submitting to public.marketplace_inquiries table in Supabase
                 const { data, error } = await supabaseClient
                     .from('marketplace_inquiries')
@@ -1992,8 +2010,9 @@
                 }
 
                 showSuccess(currentUser);
+                // Keep button disabled after success so user cannot re-submit the same inquiry
             } catch (err) {
-                console.warn("DB Inquiry Insert failed (might be schema is not updated yet). Simulating success...", err);
+                console.warn("DB Inquiry Insert failed. Simulating success...", err);
 
                 // Keep local log of simulated inquiry so it doesn't get lost in testing
                 const offlineInquiries = JSON.parse(localStorage.getItem('offline_inquiries') || '[]');
@@ -2008,7 +2027,7 @@
                 localStorage.setItem('offline_inquiries', JSON.stringify(offlineInquiries));
 
                 showSuccess(currentUser);
-            } finally {
+                // Re-enable on failure so user can retry
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fas fa-paper-plane"></i> Send Message to Tailor`;
             }
