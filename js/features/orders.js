@@ -1330,42 +1330,42 @@ async function openAdminOrderView(orderId) {
 
         // Create modal content
         const modalContent = `
-            <div style="padding: 20px;">
+            <div style="padding: 15px;">
                 <span class="close-btn" onclick="document.getElementById('order-modal').style.display='none'">&times;</span>
-                <h2 style="border-bottom: 2px solid #d4af37; padding-bottom: 10px; margin-bottom: 20px;">
+                <h2 style="border-bottom: 2px solid #d4af37; padding-bottom: 6px; margin-bottom: 12px; font-size: 1.3em;">
                     Order #${shortId} - ${order.customer_name}
                 </h2>
                 
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:4px 20px; margin-bottom:16px; font-size:0.9em;">
-                    <p style="margin:4px 0;"><strong>Shop:</strong> ${shopName}</p>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:2px 15px; margin-bottom:12px; font-size:0.85em;">
+                    <p style="margin:2px 0;"><strong>Shop:</strong> ${shopName}</p>
                     <p style="margin:4px 0;"><strong>Garment:</strong> ${order.garment_type}</p>
                     <p style="margin:4px 0;"><strong>Worker:</strong> ${workerName}</p>
                     <p style="margin:4px 0;"><strong>Due Date:</strong> ${formatDate(order.due_date)}</p>
                     <p style="margin:4px 0; grid-column:1/-1;"><strong>Status:</strong> <span class="status-indicator status-${order.status}">${STATUS_MAP[order.status] || 'Unknown'}</span></p>
                 </div>
 
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-                    <div style="flex: 1 1 30%; min-width: 80px; background: #000; color: white; padding: 10px; border-radius: 5px; text-align: center;">
-                        <small>Total Price</small>
-                        <p style="margin: 5px 0; font-size: 1.2em; color: #d4af37; font-weight: bold;">
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                    <div style="flex: 1 1 30%; min-width: 80px; background: #000; color: white; padding: 8px; border-radius: 5px; text-align: center;">
+                        <small style="font-size: 0.8em;">Total Price</small>
+                        <p style="margin: 2px 0; font-size: 1.1em; color: #d4af37; font-weight: bold;">
                             Ksh ${totalOrderPrice.toLocaleString()}
                         </p>
                     </div>
-                    <div style="flex: 1 1 30%; min-width: 80px; background: #007bff; color: white; padding: 10px; border-radius: 5px; text-align: center;">
-                        <small>Paid</small>
-                        <p style="margin: 5px 0; font-size: 1.2em; font-weight: bold;">
+                    <div style="flex: 1 1 30%; min-width: 80px; background: #007bff; color: white; padding: 8px; border-radius: 5px; text-align: center;">
+                        <small style="font-size: 0.8em;">Paid</small>
+                        <p style="margin: 2px 0; font-size: 1.1em; font-weight: bold;">
                             Ksh ${paid.toLocaleString()}
                         </p>
                     </div>
-                    <div style="flex: 1 1 30%; min-width: 80px; background: ${balance > 0 ? '#dc3545' : '#28a745'}; color: white; padding: 10px; border-radius: 5px; text-align: center;">
-                        <small>Balance</small>
-                        <p style="margin: 5px 0; font-size: 1.2em; font-weight: bold;">
+                    <div style="flex: 1 1 30%; min-width: 80px; background: ${balance > 0 ? '#dc3545' : '#28a745'}; color: white; padding: 8px; border-radius: 5px; text-align: center;">
+                        <small style="font-size: 0.8em;">Balance</small>
+                        <p style="margin: 2px 0; font-size: 1.1em; font-weight: bold;">
                             Ksh ${balance.toLocaleString()}
                         </p>
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                <div style="display: flex; gap: 6px; margin-bottom: 12px;">
                     <button onclick="window.location.href='/views/admin/admin-order-details.html?id=${order.id}'" 
                             style="flex: 1; background: #000; color: #d4af37; padding: 10px 4px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; font-size: 0.85em; display:flex; align-items:center; justify-content:center; gap:6px;">
                         <i class="fas fa-pen"></i> Edit
@@ -1387,29 +1387,31 @@ async function openAdminOrderView(orderId) {
                     </ul>
                 </div>` : ''}
 
-                <div style="border-top:1px solid #eee; padding-top:12px; margin-bottom:12px;">
-                    <h4 style="margin:0 0 8px 0; font-size:0.9em;"><i class="fas fa-history" style="color:#d4af37;"></i> Payment History</h4>
+                <div style="border-top:1px solid #eee; padding-top:8px; margin-bottom:12px;">
+                    <h4 style="margin:0 0 6px 0; font-size:0.85em;"><i class="fas fa-history" style="color:#d4af37;"></i> Payment History</h4>
+                    <div style="max-height: 80px; overflow-y: auto; padding-right: 4px;">
                     ${payments && payments.filter(p => !p.deleted_at).length > 0 ?
                         payments.filter(p => !p.deleted_at).map(p =>
-                            `<div style="padding:6px 10px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; font-size:0.82em;">
+                            `<div style="padding:4px 6px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; font-size:0.8em;">
                                 <span style="color:#64748b;">${formatDate(p.recorded_at)}${p.edited_at ? ' <i class="fas fa-pen" style="color:#f59e0b;font-size:0.7em;"></i>' : ''}</span>
                                 <span style="font-weight:700; color:#16a34a;">Ksh ${p.amount.toLocaleString()}</span>
                                 <span style="color:#94a3b8;">${p.payment_method || 'cash'}</span>
                             </div>`
                         ).join('')
-                    : '<p style="color:#94a3b8; text-align:center; font-size:0.82em; margin:6px 0;">No payments recorded</p>'}
+                    : '<p style="color:#94a3b8; text-align:center; font-size:0.8em; margin:4px 0;">No payments recorded</p>'}
+                    </div>
                 </div>
 
-                <div style="display:flex; flex-wrap: wrap; gap:10px;">
+                <div style="display:flex; flex-wrap: wrap; gap:8px;">
                     ${balance > 0 ?
                         `<button onclick="quickPay('${order.id}', ${balance})"
-                                style="flex:1; background:#ffc107; color:black; padding:10px; border-radius:4px; border:none; cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
+                                style="flex:1; background:#ffc107; color:black; padding:8px; border-radius:4px; border:none; cursor:pointer; font-weight:600; font-size:0.9em; display:flex; align-items:center; justify-content:center; gap:6px;">
                             <i class="fas fa-money-bill-wave"></i> Pay Ksh ${balance.toLocaleString()}
                         </button>`
-                    : '<button disabled style="flex:1; background:#d1fae5; color:#065f46; padding:10px; border-radius:4px; border:1px solid #6ee7b7; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;"><i class="fas fa-check-circle"></i> Fully Paid</button>'
+                    : '<button disabled style="flex:1; background:#d1fae5; color:#065f46; padding:8px; border-radius:4px; border:1px solid #6ee7b7; font-weight:600; font-size:0.9em; display:flex; align-items:center; justify-content:center; gap:6px;"><i class="fas fa-check-circle"></i> Fully Paid</button>'
                     }
                     <button onclick="updateAdminStatus('${order.id}')"
-                            style="flex:1; background:#17a2b8; color:white; padding:10px; border-radius:4px; border:none; cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
+                            style="flex:1; background:#17a2b8; color:white; padding:8px; border-radius:4px; border:none; cursor:pointer; font-weight:600; font-size:0.9em; display:flex; align-items:center; justify-content:center; gap:6px;">
                         <i class="fas fa-sync-alt"></i> Update Status
                     </button>
                 </div>
