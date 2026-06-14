@@ -2128,6 +2128,13 @@ body.dark-mode .rank-5 {
     align-items: end;
 }
 
+@media (max-width: 768px) {
+    .inv-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+}
+
 .inv-form-grid label {
     display: block;
     font-size: 0.85em;
