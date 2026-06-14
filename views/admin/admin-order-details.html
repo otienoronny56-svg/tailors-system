@@ -454,8 +454,8 @@
                 max-width: 100% !important;
                 min-width: 0 !important;
                 margin: 0 !important;
-                padding: 10px !important;
-                padding-top: 65px !important;
+                padding: 4px !important;
+                padding-top: 60px !important;
                 box-sizing: border-box !important;
                 overflow-x: hidden !important;
             }
@@ -464,30 +464,46 @@
             #squad-selection-container label {
                 white-space: normal;
                 word-break: break-word;
-                font-size: 0.9em;
+                font-size: 0.8em;
             }
 
-
-            .detail-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .header-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; }
+            .detail-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .header-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
             .btn-header {
                 flex: 1 1 auto;
                 justify-content: center;
-                font-size: 0.75em;
-                padding: 9px 8px;
+                font-size: 0.7em;
+                padding: 8px 6px;
             }
             .detail-layout { grid-template-columns: 1fr !important; width: 100%; }
-            .form-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .form-row { grid-template-columns: 1fr 1fr; gap: 4px; }
             .form-row .form-group input,
-            .form-row .form-group select { font-size: 0.8em; padding: 7px 8px; min-width: 0 !important; }
-            .edit-card { padding: 10px; width: 100%; box-sizing: border-box; }
-            fieldset { padding: 8px 6px; margin-bottom: 12px; }
-            .page-title { font-size: 1.25em; }
+            .form-row .form-group select { font-size: 0.75em; padding: 6px 4px; min-width: 0 !important; width: 100%; }
+            .form-group label { font-size: 0.65em; margin-bottom: 2px; }
+            .edit-card { padding: 8px 6px; width: 100%; box-sizing: border-box; }
+            fieldset { padding: 6px 4px; margin-bottom: 10px; }
+            .page-title { font-size: 1.1em; }
 
             /* NUCLEAR 4-column measurements on mobile fit */
-            .measurement-fields { gap: 2px; }
-            .measurement-field input { padding: 4px 2px !important; font-size: 0.7em !important; min-width: 0 !important; width: 100% !important; }
-            .measurement-field label { font-size: 0.55em !important; margin-bottom: 2px; letter-spacing: -0.5px; }
+            .measurement-fields { 
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important; 
+                gap: 2px !important; 
+            }
+            .measurement-field input { 
+                padding: 4px 2px !important; 
+                font-size: 0.7em !important; 
+                min-width: 0 !important; 
+                width: 100% !important; 
+            }
+            .measurement-field label { 
+                font-size: 0.55em !important; 
+                margin-bottom: 2px !important; 
+                letter-spacing: -0.5px !important; 
+                white-space: normal !important;
+                word-break: break-all !important;
+                text-align: center;
+            }
+
         }
 
 
