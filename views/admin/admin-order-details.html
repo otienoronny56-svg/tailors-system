@@ -382,13 +382,19 @@
                 width: 260px;
             }
             .sidebar.active { transform: translateX(0); }
+
+            /* Nuclear fix: undo the global calc(100% - 260px) sidebar offset */
             .main-content {
-                padding: 12px !important;
-                padding-top: 65px !important;
-                width: 100% !important;
+                width: 100vw !important;
                 max-width: 100vw !important;
+                min-width: 0 !important;
+                padding: 14px 14px 14px 14px !important;
+                padding-top: 65px !important;
+                margin-left: 0 !important;
+                box-sizing: border-box !important;
                 overflow-x: hidden !important;
             }
+
             .detail-header { flex-direction: column; align-items: flex-start; gap: 10px; }
             .header-actions { width: 100%; display: flex; flex-wrap: nowrap; gap: 8px; }
             .btn-header {
@@ -408,6 +414,7 @@
             fieldset { padding: 12px 10px; }
             .page-title { font-size: 1.3em; }
         }
+
 
     </style>
     <link rel="manifest" href="../../manifest.json">
