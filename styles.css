@@ -1835,6 +1835,30 @@ body.dark-mode .control-bar select {
     color: #ef4444;
 }
 
+@media (max-width: 768px) {
+    .scorecard-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+    
+    .scorecard {
+        padding: 12px 10px !important;
+        gap: 6px !important;
+    }
+    
+    .score-title {
+        font-size: 0.65em !important;
+    }
+    
+    .score-val {
+        font-size: 1.2em !important;
+    }
+    
+    .score-trend {
+        font-size: 0.6em !important;
+    }
+}
+
 /* Sections Layout */
 .bi-section {
     display: flex;
