@@ -12,11 +12,13 @@
     <style>
         @media (max-width: 768px) {
             .table-responsive table {
-                min-width: 100%;
+                min-width: 650px;
             }
             .table-responsive thead tr, .table-responsive tbody tr {
                 display: grid;
-                grid-template-columns: minmax(100px, 1.5fr) minmax(100px, 1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(80px, 1fr);
+                grid-template-columns: minmax(140px, 1.5fr) minmax(110px, 1fr) max-content minmax(90px, 1fr) minmax(90px, 1fr);
+                gap: 15px;
+                align-items: center;
             }
             .table-responsive th, .table-responsive td {
                 display: block;
