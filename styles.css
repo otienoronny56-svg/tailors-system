@@ -2678,6 +2678,32 @@ body.dark-mode .ex-icon-circle {
     background: rgba(212, 175, 55, 0.15);
 }
 
+/* --- Measurements Grid --- */
+.measurement-fields {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.measurement-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.measurement-group h4 {
+    margin: 15px 0 10px 0;
+    color: var(--brand-navy);
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 5px;
+    font-size: 1.1em;
+}
+
+body.dark-mode .measurement-group h4 {
+    color: #cbd5e1;
+    border-color: #334155;
+}
+
 @media (max-width: 768px) {
     .expense-summary-grid {
         gap: 10px;
@@ -2698,5 +2724,15 @@ body.dark-mode .ex-icon-circle {
     }
     .ex-amount {
         font-size: 1.1em;
+    }
+    .measurement-fields {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    .measurement-field label {
+        font-size: 0.8em;
+    }
+    .measurement-field input {
+        padding: 8px;
     }
 }
