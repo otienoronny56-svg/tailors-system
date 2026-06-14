@@ -1822,15 +1822,6 @@
                         ${activeThread.shopImage ? '' : '<i class="fas fa-store"></i>'}
                     </div>
                     <div class="chat-header-name">${activeThread.shopName}</div>
-                    <div style="margin-left:auto;">
-                        <button onclick="toggleSelectionMode()" title="Select multiple messages"
-                                style="padding:6px 12px; font-size:0.8em; background:rgba(212,175,55,0.1); color:var(--brand-gold); border-radius:6px;
-                                       font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer;
-                                       border:1px solid rgba(212,175,55,0.3); transition:background 0.2s; white-space:nowrap;"
-                                onmouseover="this.style.background='rgba(212,175,55,0.2)'" onmouseout="this.style.background='rgba(212,175,55,0.1)'">
-                            <i class="fas fa-check-square"></i> <span class="hide-mobile" style="${window.innerWidth <= 600 ? 'display:none;' : ''}">${isSelectionMode ? 'Cancel Select' : 'Select'}</span>
-                        </button>
-                    </div>
                 </div>
                 <div class="chat-history" id="chat-history">
                 </div>
@@ -2001,23 +1992,16 @@
                             <input type="checkbox" ${isChecked} onchange="toggleMessageSelection('${msg.id}', ${isMe})" style="width:16px; height:16px; cursor:pointer; accent-color: var(--brand-gold);">
                         </div>
                     `;
-                } else if (!isUnsent && msg.id) {
-                    actionsHtml = `
-                        <div style="display:flex; gap:10px; margin-top:8px; justify-content:${isMe ? 'flex-end' : 'flex-start'};">
-                            ${isMe ? `<button onclick="unsendMessage('${msg.id}')" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.8em;"><i class="fas fa-undo"></i> Unsend</button>` : ''}
-                            <button onclick="deleteMessageForMe('${msg.id}', ${isMe})" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.8em;"><i class="fas fa-trash"></i> Delete</button>
-                        </div>
-                    `;
-                } else if (!isSelectionMode && msg.id) {
-                    actionsHtml = `
-                        <div style="display:flex; gap:10px; margin-top:8px; justify-content:${isMe ? 'flex-end' : 'flex-start'};">
-                            <button onclick="deleteMessageForMe('${msg.id}', ${isMe})" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.8em;"><i class="fas fa-trash"></i> Delete</button>
-                        </div>
-                    `;
                 }
 
                 return `
-                    <div class="message-bubble ${bubbleClass}" style="${bubbleStyle} ${extraStyle}; position:relative; min-width: 150px;">
+                    <div class="message-bubble ${bubbleClass}" style="${bubbleStyle} ${extraStyle}; position:relative; min-width: 150px; cursor: context-menu;"
+                         ${!msg.is_inquiry && !isUnsent ? `
+                         oncontextmenu="showMessageContextMenu(event, '${msg.id}', ${isMe})"
+                         ontouchstart="handleTouchStart(event, '${msg.id}', ${isMe})"
+                         ontouchend="handleTouchEnd(event)"
+                         ontouchmove="handleTouchMove(event)"
+                         ` : ''}>
                         ${inquiryLabel}
                         ${listingInfo}
                         ${msgContent}
@@ -2051,11 +2035,6 @@
         function toggleSelectionMode() {
             isSelectionMode = !isSelectionMode;
             if (!isSelectionMode) selectedMessages.clear();
-            
-            const btn = document.querySelector('.chat-header button[title="Select multiple messages"]');
-            if (btn) {
-                btn.innerHTML = `<i class="fas fa-check-square"></i> <span class="hide-mobile" style="${window.innerWidth <= 600 ? 'display:none;' : ''}">${isSelectionMode ? 'Cancel Select' : 'Select'}</span>`;
-            }
             renderChatHistory();
         }
 
@@ -2107,6 +2086,77 @@
                 console.error(err);
                 alert("Failed to unsend messages");
             }
+        }
+
+        let touchTimeout = null;
+        function handleTouchStart(e, msgId, isMe) {
+            touchTimeout = setTimeout(() => {
+                showMessageContextMenu(e, msgId, isMe, true);
+            }, 600);
+        }
+        function handleTouchEnd(e) { clearTimeout(touchTimeout); }
+        function handleTouchMove(e) { clearTimeout(touchTimeout); }
+
+        function showMessageContextMenu(e, msgId, isMe, isTouch = false) {
+            e.preventDefault();
+            const existing = document.getElementById('msg-context-menu');
+            if (existing) existing.remove();
+
+            const menu = document.createElement('div');
+            menu.id = 'msg-context-menu';
+            menu.style.cssText = `position:fixed; background:var(--brand-navy); border:1px solid rgba(212,175,55,0.3); border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.5); z-index:9999; overflow:hidden; display:flex; flex-direction:column; min-width:140px;`;
+            
+            let x, y;
+            if (isTouch && e.touches && e.touches.length > 0) {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            } else if (e.clientX && e.clientY) {
+                x = e.clientX;
+                y = e.clientY;
+            } else {
+                const rect = e.target.getBoundingClientRect();
+                x = rect.left + 20;
+                y = rect.top + 20;
+            }
+            if (x + 150 > window.innerWidth) x = window.innerWidth - 160;
+            if (y + 120 > window.innerHeight) y = window.innerHeight - 130;
+
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+
+            const btnStyle = `background:none; border:none; padding:12px 16px; color:#f8fafc; font-size:0.85em; text-align:left; cursor:pointer; display:flex; align-items:center; gap:8px; width:100%; transition:background 0.2s;`;
+            
+            let html = `
+                <button onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" style="${btnStyle}" onclick="triggerContextSelect('${msgId}', ${isMe})"><i class="fas fa-check-square" style="color:var(--brand-gold);"></i> Select</button>
+                <div style="height:1px; background:rgba(255,255,255,0.1); width:100%;"></div>
+            `;
+            if (isMe) html += `<button onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" style="${btnStyle}" onclick="document.getElementById('msg-context-menu').remove(); unsendMessage('${msgId}')"><i class="fas fa-undo" style="color:#f59e0b;"></i> Unsend</button>`;
+            html += `<button onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" style="${btnStyle}" onclick="document.getElementById('msg-context-menu').remove(); deleteMessageForMe('${msgId}', ${isMe})"><i class="fas fa-trash" style="color:#ef4444;"></i> Delete</button>`;
+
+            menu.innerHTML = html;
+            document.body.appendChild(menu);
+
+            setTimeout(() => {
+                const closeMenu = (ev) => {
+                    if (!menu.contains(ev.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeMenu);
+                        document.removeEventListener('touchstart', closeMenu);
+                    }
+                };
+                document.addEventListener('click', closeMenu);
+                document.addEventListener('touchstart', closeMenu);
+            }, 10);
+        }
+
+        function triggerContextSelect(msgId, isMe) {
+            document.getElementById('msg-context-menu').remove();
+            if (!isSelectionMode) {
+                isSelectionMode = true;
+                selectedMessages.clear();
+            }
+            selectedMessages.add(msgId);
+            renderChatHistory();
         }
 
         async function unsendMessage(msgId) {
