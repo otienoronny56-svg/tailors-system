@@ -476,11 +476,12 @@
                 padding: 6px 4px;
             }
             .detail-layout { grid-template-columns: 1fr !important; width: 100%; }
-            .form-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .form-row { display: flex; flex-wrap: wrap; gap: 12px; }
+            .form-group { flex: 0 0 auto; min-width: 0 !important; }
             .form-row .form-group input:not([type="checkbox"]),
             .form-row .form-group select,
             .form-group > input:not([type="checkbox"]),
-            .form-group > select { font-size: 0.75em; padding: 6px 4px; min-width: 0 !important; width: 100% !important; max-width: 155px !important; }
+            .form-group > select { font-size: 0.75em; padding: 6px 4px; min-width: 0 !important; width: 145px !important; text-overflow: ellipsis; }
             .form-group label { font-size: 0.65em; margin-bottom: 2px; display: block; }
             .edit-card { padding: 4px 2px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
             fieldset { padding: 4px 2px; margin-bottom: 8px; }
@@ -513,7 +514,7 @@
                 font-size: 0.75em !important; 
                 min-width: 0 !important;
                 width: 100% !important; 
-                max-width: 65px !important;
+                max-width: 55px !important;
                 margin: 0 auto;
                 display: block;
                 text-align: center;
