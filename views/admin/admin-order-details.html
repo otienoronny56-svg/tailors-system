@@ -192,7 +192,7 @@
         .measurement-group h4 { margin-top: 0; margin-bottom: 8px; font-size: 0.9em; color: var(--brand-navy); }
         .measurement-fields {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 10px;
         }
         .measurement-field { min-width: 0; }
@@ -214,8 +214,15 @@
             font-size: 0.85em;
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
+            -moz-appearance: textfield;
+        }
+        .measurement-field input::-webkit-outer-spin-button,
+        .measurement-field input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
         .measurement-field input:focus {
+
             border-color: var(--brand-gold);
             outline: none;
             box-shadow: 0 0 0 3px rgba(212,175,55,0.15);
@@ -472,15 +479,15 @@
             .detail-layout { grid-template-columns: 1fr !important; width: 100%; }
             .form-row { grid-template-columns: 1fr 1fr; gap: 6px; }
             .form-row .form-group input,
-            .form-row .form-group select { font-size: 0.8em; padding: 7px 8px; }
-            .edit-card { padding: 12px; width: 100%; box-sizing: border-box; }
-            fieldset { padding: 10px 8px; margin-bottom: 12px; }
+            .form-row .form-group select { font-size: 0.8em; padding: 7px 8px; min-width: 0 !important; }
+            .edit-card { padding: 10px; width: 100%; box-sizing: border-box; }
+            fieldset { padding: 8px 6px; margin-bottom: 12px; }
             .page-title { font-size: 1.25em; }
 
-            /* 4-column measurements on mobile fit */
-            .measurement-fields { gap: 4px; }
-            .measurement-field input { padding: 6px 4px; font-size: 0.75em; }
-            .measurement-field label { font-size: 0.65em; margin-bottom: 2px; }
+            /* NUCLEAR 4-column measurements on mobile fit */
+            .measurement-fields { gap: 2px; }
+            .measurement-field input { padding: 4px 2px !important; font-size: 0.7em !important; min-width: 0 !important; width: 100% !important; }
+            .measurement-field label { font-size: 0.55em !important; margin-bottom: 2px; letter-spacing: -0.5px; }
         }
 
 
