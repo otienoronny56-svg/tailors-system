@@ -1365,17 +1365,17 @@ async function openAdminOrderView(orderId) {
                     </div>
                 </div>
                 
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
                     <button onclick="window.location.href='/views/admin/admin-order-details.html?id=${order.id}'" 
-                            style="flex: 1; background: #000; color: #d4af37; padding: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
-                        <i class="fas fa-pen"></i> Edit Order
+                            style="flex: 1; background: #000; color: #d4af37; padding: 10px 4px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; font-size: 0.85em; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <i class="fas fa-pen"></i> Edit
                     </button>
                     <button onclick="generateAndShareReceipt('${order.id}')" 
-                            style="flex: 1; background: #28a745; color: white; padding: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
+                            style="flex: 1; background: #28a745; color: white; padding: 10px 4px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; font-size: 0.85em; display:flex; align-items:center; justify-content:center; gap:6px;">
                         <i class="fas fa-receipt"></i> Receipt
                     </button>
                     <button onclick="downloadInvoicePDF('${order.id}')" 
-                            style="flex: 1; background: #3b82f6; color: white; padding: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
+                            style="flex: 1; background: #3b82f6; color: white; padding: 10px 4px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; font-size: 0.85em; display:flex; align-items:center; justify-content:center; gap:6px;">
                         <i class="fas fa-file-invoice"></i> Invoice
                     </button>
                 </div>
