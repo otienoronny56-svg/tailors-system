@@ -84,25 +84,41 @@
         </aside>
 
         <main class="main-content">
-            <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+            <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
                 <div class="dashboard-header-text">
                     <h1 class="dashboard-main-title" style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">Client Management (Global)</h1>
                     <p class="dashboard-subtitle" style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">View and manage clients from all shops.</p>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
+                
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 15px;">
+                    <!-- Top right icon buttons -->
+                    <div class="top-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="toggleTheme()" title="Toggle Dark Mode"
+                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
+                            onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
+                            <i class="fa-solid fa-moon theme-toggle-icon"></i>
+                        </button>
+                        
+                        <button onclick="loadClients()" title="Refresh Data"
+                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
+                            onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
+                        
+                        <button onclick="handleLogout()" title="Logout"
+                            style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                            onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        </button>
+                    </div>
+
+                    <!-- Main action button -->
                     <button onclick="openNewClientModal()"
-                        style="background: var(--brand-navy); border: none; color: var(--brand-gold); padding: 0 15px; height: 42px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s;">
-                        <i class="fas fa-user-plus"></i> New Client
-                    </button>
-                    <button onclick="loadClients()" title="Refresh Data"
-                        style="background: transparent; border: 1px solid #ccc; color: #333; height: 42px; width: 42px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button onclick="handleLogout()" title="Logout"
-                        style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
-                        onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
-                        onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        style="background: var(--brand-navy); border: none; color: var(--brand-gold); padding: 0 15px; height: 42px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; transition: all 0.2s;">
+                        <i class="fas fa-user-plus"></i> NEW CLIENT
                     </button>
                 </div>
             </header>
