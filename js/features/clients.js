@@ -214,12 +214,12 @@ async function viewClientDetails(clientId) {
         if (client.measurements_history && client.measurements_history.length > 0) {
             historyHtml = client.measurements_history.map((h, index) => `
                 <div class="history-item" id="history-item-${index}" style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 12px; align-items: center;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <span style="font-weight: 800; color: var(--brand-navy); font-size: 1.1em; text-transform: uppercase; letter-spacing: 0.5px;">
                             <i class="fas fa-cut" style="margin-right: 8px; color: var(--brand-gold);"></i>${h.garment}
                         </span>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <span style="color: #64748b; font-size: 0.85em; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">${formatDate(h.date)}</span>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <span style="color: #64748b; font-size: 0.85em; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; white-space: nowrap;">${formatDate(h.date)}</span>
                             <button class="small-btn" onclick="editClientMeasurement('${client.id}', ${index})" style="background: #f1f5f9; color: var(--brand-navy); border: none;">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -237,7 +237,7 @@ async function viewClientDetails(clientId) {
             <div style="padding: 15px;">
                 <div id="client-info-header" style="margin-bottom: 25px; position: relative;">
                     <div id="client-info-view">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
                             <div>
                                 <h2 style="color: var(--brand-navy); margin: 0 0 5px 0; font-size: 1.8em;">${client.name}</h2>
                                 <p style="color: #64748b; margin: 0 0 15px 0; font-weight: 500;"><i class="fas fa-phone" style="margin-right: 8px;"></i>${client.phone}</p>
@@ -254,7 +254,7 @@ async function viewClientDetails(clientId) {
                 </div>
                 
                 <div style="margin-bottom: 25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; margin-bottom: 20px;">
                         <h3 style="font-size: 1.1em; color: var(--brand-navy); font-weight: 700; margin: 0;">Measurement History</h3>
                         <button class="small-btn" onclick="addNewMeasurementProfile('${client.id}')" style="background: var(--brand-navy); color: var(--brand-gold); border: none;">
                             <i class="fas fa-plus"></i> Add Garment
@@ -284,7 +284,7 @@ async function viewClientDetails(clientId) {
             modalContent.style.maxHeight = '100vh';
             modalContent.style.display = 'flex';
             modalContent.style.flexDirection = 'column';
-            modalContent.style.padding = '40px 60px'; // Generous padding for full screen
+            modalContent.style.padding = window.innerWidth <= 768 ? '20px 15px' : '40px 60px'; // Generous padding for desktop, smaller for mobile
             modalContent.style.borderRadius = '0';
             modalContent.style.margin = '0';
             modalContent.style.border = 'none';
