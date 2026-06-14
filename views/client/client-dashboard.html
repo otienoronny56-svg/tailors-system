@@ -1703,6 +1703,7 @@
                     if (!shopGroups[shopId]) {
                         const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
                         let sImg = inq.shops?.profile_image || '';
+                        if (sImg === 'undefined' || sImg === 'null') sImg = '';
                         if (sImg && !sImg.startsWith('http')) sImg = STORAGE_URL + sImg;
 
                         shopGroups[shopId] = {
@@ -1834,8 +1835,6 @@
             }
 
             container.innerHTML = threads.map(thread => {
-                const avatarIcon = `<i class="fas fa-store"></i>`;
-                const avatarStyle = thread.shopImage ? `background-image: url('${thread.shopImage}')` : '';
                 const activeClass = activeThread && activeThread.shopId === thread.shopId ? 'active' : '';
                 const isSelected = selectedThreads.has(thread.shopId);
 
@@ -1856,13 +1855,18 @@
                     contextActions = ''; // disable long-press in selection mode
                 }
 
+                let avatarHTML = thread.shopImage 
+                    ? `<img src="${thread.shopImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; position:absolute; top:0; left:0; z-index:2;" onerror="this.style.display='none';">
+                       <i class="fas fa-store" style="position:relative; z-index:1;"></i>`
+                    : `<i class="fas fa-store"></i>`;
+
                 return `
                     <div class="thread-item ${activeClass}" style="position:relative; cursor:${isThreadSelectionMode ? 'pointer' : 'context-menu'}; display:flex; align-items:center;"
                          onclick="${clickAction}"
                          ${contextActions}>
                         ${checkboxHTML}
-                        <div class="shop-icon" style="${avatarStyle} flex-shrink:0;">
-                            ${thread.shopImage ? '' : avatarIcon}
+                        <div class="shop-icon" style="flex-shrink:0; position:relative; overflow:hidden;">
+                            ${avatarHTML}
                         </div>
                         <div class="thread-details" style="flex-grow:1; min-width:0; margin-left:10px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
@@ -1898,8 +1902,11 @@
             chatPane.innerHTML = `
                 <div class="chat-header">
                     ${backBtnHtml}
-                    <div class="shop-icon" style="${activeThread.shopImage ? `background-image: url('${activeThread.shopImage}')` : ''}">
-                        ${activeThread.shopImage ? '' : '<i class="fas fa-store"></i>'}
+                    <div class="shop-icon" style="position:relative; overflow:hidden;">
+                        ${activeThread.shopImage 
+                            ? `<img src="${activeThread.shopImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; position:absolute; top:0; left:0; z-index:2;" onerror="this.style.display='none';">
+                               <i class="fas fa-store" style="position:relative; z-index:1;"></i>`
+                            : `<i class="fas fa-store"></i>`}
                     </div>
                     <div class="chat-header-name">${activeThread.shopName}</div>
                 </div>
