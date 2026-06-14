@@ -76,14 +76,15 @@ function refreshCurrentView() {
         loadAdminOrders('all');
     } else if (path.includes('admin-dashboard')) {
         loadAdminDashboard();
+    } else if (path.includes('admin-order-details')) {
+        loadAdminOrderDetails();
     } else if (path.includes('order-details')) {
         if (USER_PROFILE?.role === 'owner') {
             loadAdminOrderDetails();
         } else {
             loadOrderDetailsScreen();
         }
-    } else if (path.includes('admin-order-details')) {
-        loadAdminOrderDetails();
+
     } else if (path.includes('financial-overview')) {
         loadAnalyticsDashboard();
     } else if (path.includes('admin-management')) {
