@@ -534,21 +534,29 @@
 
                 if (error) throw error;
                 
-                // Fetch unread messages for this user
-                const { data: unreadCounts } = await supabaseClient
-                    .from('messages')
-                    .select('inquiry_id')
-                    .eq('is_read', false)
-                    .eq('recipient_id', USER_PROFILE.id);
+                // Fetch ALL messages for these inquiries to get the latest preview and unread counts
+                const inquiryIds = inquiries ? inquiries.map(i => i.id) : [];
+                let msgs = [];
+                if (inquiryIds.length > 0) {
+                    const { data: dbMessages } = await supabaseClient
+                        .from('messages')
+                        .select('*')
+                        .in('inquiry_id', inquiryIds)
+                        .order('created_at', { ascending: true });
+                    msgs = dbMessages || [];
+                }
                 
                 const unreadMap = {};
+                const lastMsgMap = {};
                 let totalUnread = 0;
-                if (unreadCounts) {
-                    unreadCounts.forEach(row => {
-                        unreadMap[row.inquiry_id] = (unreadMap[row.inquiry_id] || 0) + 1;
+                
+                msgs.forEach(msg => {
+                    if (!msg.is_read && msg.recipient_id === USER_PROFILE.id) {
+                        unreadMap[msg.inquiry_id] = (unreadMap[msg.inquiry_id] || 0) + 1;
                         totalUnread++;
-                    });
-                }
+                    }
+                    lastMsgMap[msg.inquiry_id] = msg;
+                });
 
                 // Update notification dot on the main layout if possible
                 const msgNavLink = window.parent.document.querySelector('.sidebar a[href="admin-messages.html"]');
@@ -569,8 +577,24 @@
 
                 threads = (inquiries || []).map(inq => {
                     inq.unreadCount = unreadMap[inq.id] || 0;
+                    const lastM = lastMsgMap[inq.id];
+                    if (lastM) {
+                        if (lastM.is_unsent) {
+                            inq.previewText = "🚫 Message unsent";
+                        } else {
+                            const prefix = lastM.sender_id === USER_PROFILE.id ? "You: " : "";
+                            inq.previewText = prefix + lastM.message_text;
+                        }
+                        inq.lastActivity = new Date(lastM.created_at);
+                    } else {
+                        const isSent = inq.client_email === USER_PROFILE.email;
+                        inq.previewText = (isSent ? "You: " : "") + inq.message;
+                        inq.lastActivity = new Date(inq.created_at);
+                    }
                     return inq;
                 });
+
+                threads.sort((a, b) => b.lastActivity - a.lastActivity);
                 renderThreadsList();
 
                 subscribeToGlobalMessages();
@@ -608,7 +632,7 @@
                          ontouchmove="handleTouchMove(event)">
                         <h4 class="thread-client-name" style="${inq.unreadCount > 0 ? 'font-weight: 700; color: #1e293b;' : ''}">${displayName}</h4>
                         <div class="thread-meta">
-                            <span style="${inq.unreadCount > 0 ? 'font-weight: 600; color: #334155;' : ''}">Subject: ${inq.message.substring(0, 18)}...</span>
+                            <span style="${inq.unreadCount > 0 ? 'font-weight: 600; color: #334155;' : ''}">${escapeHTML(inq.previewText.substring(0, 32))}${inq.previewText.length > 32 ? '...' : ''}</span>
                             ${isSent ? '<span style="font-size:0.8em; color:var(--brand-slate);">Sent Inquiry</span>' : `<span style="font-size:0.85em; color:var(--brand-gold); font-weight:600;">${inq.shops?.name || 'Shop'}</span>`}
                         </div>
                         ${inq.unreadCount > 0 ? `<div style="position:absolute; right:15px; top:12px; background:#10b981; color:white; font-size:0.7em; font-weight:bold; border-radius:10px; min-width:20px; height:20px; display:flex; align-items:center; justify-content:center; padding:0 6px;">${inq.unreadCount}</div>` : ''}

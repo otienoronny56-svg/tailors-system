@@ -1700,7 +1700,14 @@
 
                     if (allMessages.length > 0) {
                         const last = allMessages[allMessages.length - 1];
-                        group.lastMessage = last.message_text;
+                        if (last.is_inquiry) {
+                            group.lastMessage = "You: " + last.message_text;
+                        } else if (last.is_unsent) {
+                            group.lastMessage = "🚫 Message unsent";
+                        } else {
+                            const prefix = last.sender_id === currentUser.id ? "You: " : "";
+                            group.lastMessage = prefix + last.message_text;
+                        }
                         group.lastMessageTime = last.created_at;
                     }
                 });
