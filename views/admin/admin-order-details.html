@@ -452,60 +452,70 @@
                 display: block !important;
                 width: 100% !important;
                 max-width: 100% !important;
-                min-width: 0 !important;
                 margin: 0 !important;
-                padding: 2px !important;
-                padding-top: 55px !important;
+                padding: 15px !important;
+                padding-top: 70px !important;
                 box-sizing: border-box !important;
-                overflow-x: hidden !important;
             }
 
-            /* Prevent long names in checkboxes from breaking grid */
-            #squad-selection-container label {
-                white-space: normal;
-                word-break: break-word;
-                font-size: 0.75em;
-            }
+            .detail-header { flex-direction: column; align-items: stretch; gap: 12px; }
+            .header-actions { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+            .btn-header { width: 100%; justify-content: center; font-size: 0.9em; padding: 12px; }
 
-            .detail-header { flex-direction: column; align-items: flex-start; gap: 6px; }
-            .header-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 4px; }
-            .btn-header {
-                flex: 1 1 auto;
-                justify-content: center;
-                font-size: 0.7em;
-                padding: 6px 4px;
-            }
             .detail-layout { grid-template-columns: 1fr !important; width: 100%; }
-            .form-row { grid-template-columns: min-content min-content; gap: 8px; justify-content: start; }
-            .form-group input,
-            .form-group select { font-size: 0.75em; padding: 4px 4px; min-width: 0 !important; width: 140px !important; }
-            .form-group textarea { width: 100% !important; font-size: 0.75em; }
-            .form-group label { font-size: 0.6em; margin-bottom: 2px; display: block; }
-            .edit-card { padding: 4px 2px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
-            fieldset { padding: 4px 2px; margin-bottom: 8px; }
-            .page-title { font-size: 1em; white-space: normal; word-break: break-word; }
+            
+            /* Clean Mobile Form Stacking */
+            .form-row { grid-template-columns: 1fr; gap: 12px; }
+            
+            .form-group input:not([type="checkbox"]),
+            .form-group select,
+            .form-group textarea { 
+                width: 100% !important; 
+                font-size: 0.95em; 
+                padding: 10px 12px; 
+            }
+            .form-group label { font-size: 0.8em; margin-bottom: 6px; display: block; }
+            
+            .edit-card { padding: 15px; width: 100%; box-sizing: border-box; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+            fieldset { padding: 15px 12px; margin-bottom: 16px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid var(--brand-gold); }
+            .page-title { font-size: 1.3em; white-space: normal; word-break: break-word; line-height: 1.4; margin-bottom: 10px; }
 
-            /* NUCLEAR 4-column measurements on mobile fit */
+            /* Fix Checkbox Layout */
+            #squad-selection-container label {
+                display: flex !important;
+                align-items: center;
+                gap: 10px;
+                font-size: 0.95em;
+                margin-bottom: 10px !important;
+                color: #334155;
+            }
+            #squad-selection-container input[type="checkbox"] {
+                width: 18px !important;
+                height: 18px !important;
+                margin: 0 !important;
+                flex-shrink: 0;
+            }
+
+            /* Measurements 4-column specifically requested by user */
             .measurement-fields { 
-                grid-template-columns: repeat(4, auto) !important; 
-                justify-content: start !important;
-                gap: 8px !important; 
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important; 
+                gap: 6px !important; 
             }
             .measurement-field input { 
-                padding: 4px !important; 
-                font-size: 0.75em !important; 
-                width: 50px !important; 
+                padding: 8px 4px !important; 
+                font-size: 0.85em !important; 
+                min-width: 0 !important; 
+                width: 100% !important; 
                 text-align: center;
             }
             .measurement-field label { 
-                font-size: 0.5em !important; 
-                margin-bottom: 1px !important; 
-                letter-spacing: -0.5px !important; 
-                white-space: normal !important;
-                word-break: break-all !important;
+                font-size: 0.65em !important; 
+                margin-bottom: 4px !important; 
                 text-align: center;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
             }
-
         }
 
 
