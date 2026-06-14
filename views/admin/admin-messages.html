@@ -278,7 +278,7 @@
                 padding: 10px 15px;
             }
             .msg-input-pane {
-                padding: 10px 15px;
+                padding: 10px 15px 40px 15px; /* Added extra bottom padding to lift the input up */
             }
             .chat-messages-stream {
                 padding: 15px;
@@ -641,7 +641,7 @@
                 if (activeThread.client_email) {
                     try {
                         const adminClientForLookup = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
-                            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+                            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'admin-lookup-key' }
                         });
                         const { data: profile } = await adminClientForLookup
                             .from('user_profiles')
@@ -702,7 +702,7 @@
                                 <button class="btn-chat-send" style="padding: 8px 12px; font-size:0.85em; background:var(--brand-gold); color:var(--brand-navy); border-radius:6px; font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer; height:auto; box-shadow:none; border:none;" onclick="toggleMeasurementDropdown(event)">
                                     <i class="fas fa-ruler-combined"></i> Request Measurements
                                 </button>
-                                <div id="measurement-req-dropdown" style="display:none; position:absolute; right:0; top:110%; background:#1e293b; border:1px solid var(--brand-gold); border-radius:6px; width:220px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:100;">
+                                <div id="measurement-req-dropdown" style="display:none; position:absolute; left:0; top:110%; background:#1e293b; border:1px solid var(--brand-gold); border-radius:6px; width:220px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:100;">
                                     <div style="padding:8px; font-size:0.8em; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Select Garment Type</div>
                                     <div style="padding:4px 8px; font-size:0.7em; color:var(--brand-gold); letter-spacing:0.05em; text-transform:uppercase;">Tailored Clothing</div>
                                     <a href="#" style="display:block; padding:6px 12px; color:white; font-size:0.85em; text-decoration:none; transition:background 0.2s;" onclick="sendMeasurementRequest('Suit', event)">Suit</a>
@@ -1177,7 +1177,7 @@
 
             if (!activeThread || !USER_PROFILE) return;
 
-            const clientUid = activeThread.clientUid;
+            const clientUid = activeThread.otherPartyUid;
             if (!clientUid) return;
 
             try {
