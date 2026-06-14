@@ -33,6 +33,7 @@
             background: radial-gradient(circle at top right, #1a1a2e 0%, var(--bg-dark) 50%, var(--bg-dark) 100%);
             color: var(--brand-white);
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -215,6 +216,7 @@
 
         .card-body {
             padding: 30px;
+            padding-bottom: 50px;
             overflow-y: auto;
             flex: 1;
             min-height: 0;
@@ -358,7 +360,8 @@
             }
             .paid-amount { margin-top: 0; }
             .tracking-card { border-radius: 16px; max-height: 90vh; }
-            .card-header, .card-body { padding: 20px; }
+            .card-header { padding: 20px; }
+            .card-body { padding: 20px; padding-bottom: 60px; }
             .nav-logo span { display: none; } /* Show icon only on small screens */
         }
     </style>
