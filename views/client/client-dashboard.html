@@ -1394,8 +1394,11 @@
         </section>
 
         <!-- 💬 MIDDLE COLUMN: ACTIVE DISCUSSIONS -->
-        <aside class="threads-sidebar" style="display: none;">
-            <h2 class="threads-title"><i class="fas fa-comments"></i> Conversations</h2>
+        <aside class="threads-sidebar" style="position:relative; display: none;">
+            <h2 class="threads-title" style="display:flex; justify-content:space-between; align-items:center;">
+                <span><i class="fas fa-comments"></i> Conversations</span>
+                <button id="btn-thread-select-mode" onclick="toggleThreadSelectionMode()" style="background:none; border:none; color:var(--brand-navy); cursor:pointer; font-size:0.8em; font-weight:600;"><i class="fas fa-check-square"></i> Select</button>
+            </h2>
             <div id="threads-container">
                 <!-- Loaded dynamically -->
                 <div style="text-align: center; padding: 40px; color: var(--brand-slate);">
@@ -1403,6 +1406,10 @@
                         style="color:var(--brand-gold); font-size: 1.5em; margin-bottom: 10px;"></i>
                     <p>Loading chats...</p>
                 </div>
+            </div>
+            <div id="thread-bulk-actions" style="display:none; position:absolute; bottom:0; left:0; width:100%; background:white; border-top:1px solid #e2e8f0; padding:10px; justify-content:space-between; align-items:center; z-index:10;">
+                <span id="thread-selected-count" style="font-size:0.85em; font-weight:bold; color:var(--brand-navy);">0 selected</span>
+                <button onclick="bulkDeleteThreads()" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;"><i class="fas fa-trash"></i> Delete</button>
             </div>
         </aside>
 
@@ -1533,12 +1540,15 @@
     </div>
 
     <script src="../../js/core/config.js?v=1781434537375"></script>
-    <script>
+<script>
         let supabaseClient;
         let currentUser = null;
         let activeThread = null; // Storing selected shop group
         let isSelectionMode = false;
-        let selectedMessages = new Set();
+        const selectedMessages = new Set();
+        
+        let isThreadSelectionMode = false;
+        const selectedThreads = new Set();
         let threads = []; // Array of grouped conversations
         let messages = []; // Used inside activeThread.allMessages
         let messageSubscription = null;
@@ -1778,6 +1788,7 @@
                 const avatarIcon = `<i class="fas fa-store"></i>`;
                 const avatarStyle = thread.shopImage ? `background-image: url('${thread.shopImage}')` : '';
                 const activeClass = activeThread && activeThread.shopId === thread.shopId ? 'active' : '';
+                const isSelected = selectedThreads.has(thread.shopId);
 
                 // Last message time display
                 let timeStr = '';
@@ -1786,24 +1797,32 @@
                     timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 }
 
+                let checkboxHTML = '';
+                let clickAction = `openChatThread('${thread.shopId}')`;
+                let contextActions = `oncontextmenu="showThreadContextMenu(event, '${thread.shopId}')" ontouchstart="handleThreadTouchStart(event, '${thread.shopId}')" ontouchend="handleTouchEnd(event)" ontouchmove="handleTouchMove(event)"`;
+
+                if (isThreadSelectionMode) {
+                    checkboxHTML = `<input type="checkbox" ${isSelected ? 'checked' : ''} style="margin-right:12px; pointer-events:none; transform:scale(1.2);">`;
+                    clickAction = `toggleThreadSelection('${thread.shopId}')`;
+                    contextActions = ''; // disable long-press in selection mode
+                }
+
                 return `
-                    <div class="thread-item ${activeClass}" style="position:relative; cursor:context-menu;"
-                         onclick="openChatThread('${thread.shopId}')"
-                         oncontextmenu="showThreadContextMenu(event, '${thread.shopId}')"
-                         ontouchstart="handleThreadTouchStart(event, '${thread.shopId}')"
-                         ontouchend="handleTouchEnd(event)"
-                         ontouchmove="handleTouchMove(event)">
-                        <div class="shop-icon" style="${avatarStyle}">
+                    <div class="thread-item ${activeClass}" style="position:relative; cursor:${isThreadSelectionMode ? 'pointer' : 'context-menu'}; display:flex; align-items:center;"
+                         onclick="${clickAction}"
+                         ${contextActions}>
+                        ${checkboxHTML}
+                        <div class="shop-icon" style="${avatarStyle} flex-shrink:0;">
                             ${thread.shopImage ? '' : avatarIcon}
                         </div>
-                        <div class="thread-details">
+                        <div class="thread-details" style="flex-grow:1; min-width:0; margin-left:10px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                                 <h4 class="thread-shop-name" style="margin:0; ${thread.unreadCount > 0 ? 'font-weight: 700; color: #fff;' : ''}">${thread.shopName}</h4>
                                 <span style="font-size:0.7em; color:var(--brand-slate);">${timeStr}</span>
                             </div>
                             <p class="thread-subject" style="${thread.unreadCount > 0 ? 'font-weight: 600; color: #cbd5e1;' : ''}">${escapeHTML(thread.lastMessage.substring(0, 32))}${thread.lastMessage.length > 32 ? '...' : ''}</p>
                         </div>
-                        ${thread.unreadCount > 0 ? `<div style="position:absolute; right:15px; bottom:15px; background:#10b981; color:white; font-size:0.7em; font-weight:bold; border-radius:10px; min-width:20px; height:20px; display:flex; align-items:center; justify-content:center; padding:0 6px;">${thread.unreadCount}</div>` : ''}
+                        ${!isThreadSelectionMode && thread.unreadCount > 0 ? `<div style="position:absolute; right:15px; bottom:15px; background:#10b981; color:white; font-size:0.7em; font-weight:bold; border-radius:10px; min-width:20px; height:20px; display:flex; align-items:center; justify-content:center; padding:0 6px;">${thread.unreadCount}</div>` : ''}
                     </div>`;
             }).join('');
         }
@@ -2197,6 +2216,81 @@
             } catch (err) {
                 console.error("Error deleting thread:", err);
                 alert("Failed to delete the thread. Please try again.");
+            }
+        }
+
+        function toggleThreadSelectionMode() {
+            isThreadSelectionMode = !isThreadSelectionMode;
+            selectedThreads.clear();
+            const btn = document.getElementById('btn-thread-select-mode');
+            const bulkActions = document.getElementById('thread-bulk-actions');
+            
+            if (isThreadSelectionMode) {
+                btn.innerHTML = 'Cancel';
+                btn.style.color = '#ef4444';
+                bulkActions.style.display = 'flex';
+                document.getElementById('threads-container').style.paddingBottom = '60px';
+            } else {
+                btn.innerHTML = '<i class="fas fa-check-square"></i> Select';
+                btn.style.color = 'var(--brand-navy)';
+                bulkActions.style.display = 'none';
+                document.getElementById('threads-container').style.paddingBottom = '0';
+            }
+            renderThreadsList();
+        }
+
+        function toggleThreadSelection(id) {
+            if (selectedThreads.has(id)) {
+                selectedThreads.delete(id);
+            } else {
+                selectedThreads.add(id);
+            }
+            document.getElementById('thread-selected-count').innerText = `${selectedThreads.size} selected`;
+            renderThreadsList();
+        }
+
+        async function bulkDeleteThreads() {
+            if (selectedThreads.size === 0) return;
+            if (!confirm(`Delete ${selectedThreads.size} selected conversations? This will remove them permanently.`)) return;
+
+            // Gather all inquiry IDs across all selected threads
+            const selectedShopIds = Array.from(selectedThreads);
+            const inquiryIds = [];
+            selectedShopIds.forEach(shopId => {
+                const t = threads.find(thread => thread.shopId === shopId);
+                if (t && t.inquiries) {
+                    t.inquiries.forEach(inq => inquiryIds.push(inq.id));
+                }
+            });
+
+            if (inquiryIds.length === 0) return;
+
+            try {
+                const adminClient = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
+                    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'client-delete-key' }
+                });
+
+                const { error: msgErr } = await adminClient
+                    .from('messages')
+                    .delete()
+                    .in('inquiry_id', inquiryIds);
+                if (msgErr) throw msgErr;
+
+                const { error: inqErr } = await adminClient
+                    .from('marketplace_inquiries')
+                    .delete()
+                    .in('id', inquiryIds);
+                if (inqErr) throw inqErr;
+
+                if (activeThread && selectedThreads.has(activeThread.shopId)) {
+                    closeChatThread();
+                }
+
+                threads = threads.filter(t => !selectedThreads.has(t.shopId));
+                toggleThreadSelectionMode();
+            } catch (err) {
+                console.error("Bulk delete error:", err);
+                alert("Failed to delete selected threads: " + err.message);
             }
         }
 
