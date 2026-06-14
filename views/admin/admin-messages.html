@@ -685,14 +685,17 @@
 
         async function openChatThread(inquiryId) {
             activeThread = threads.find(t => t.id === inquiryId);
+            if (!activeThread) return;
+            const currentThread = activeThread;
+
             renderThreadsList(); // Toggle active state styling
 
             document.querySelector('.inbox-layout').classList.add('chat-active');
 
             const container = document.getElementById('chat-container-pane');
-            const isSent = activeThread.client_email === USER_PROFILE.email;
-            const titleName = isSent ? `To: ${activeThread.shops?.name || 'Tailor Shop'}` : activeThread.client_name;
-            const subtitleInfo = isSent ? `Inquiry regarding: ${activeThread.marketplace_listings?.title || 'Custom Garment'}` : `Phone: ${activeThread.client_phone} | Email: ${activeThread.client_email || 'N/A'}`;
+            const isSent = currentThread.client_email === USER_PROFILE.email;
+            const titleName = isSent ? `To: ${currentThread.shops?.name || 'Tailor Shop'}` : currentThread.client_name;
+            const subtitleInfo = isSent ? `Inquiry regarding: ${currentThread.marketplace_listings?.title || 'Custom Garment'}` : `Phone: ${currentThread.client_phone} | Email: ${currentThread.client_email || 'N/A'}`;
 
             // Render basic container first with loading indicators
             container.innerHTML = `
@@ -719,7 +722,9 @@
                     </div>
                 </div>`;
 
-            await fetchChatLogs();
+            await fetchChatLogs(currentThread);
+
+            if (!activeThread || activeThread.id !== currentThread.id) return; // User closed or switched thread
 
             // Try to resolve otherPartyUid
             let otherPartyUid = null;
@@ -728,7 +733,7 @@
                     const { data: shopManager } = await supabaseClient
                         .from('user_profiles')
                         .select('id')
-                        .eq('shop_id', activeThread.shop_id)
+                        .eq('shop_id', currentThread.shop_id)
                         .in('role', ['manager', 'owner'])
                         .limit(1);
 
@@ -744,7 +749,7 @@
                     console.warn("Could not query shop manager profile:", err);
                 }
             } else {
-                if (activeThread.client_email) {
+                if (currentThread.client_email) {
                     try {
                         const adminClientForLookup = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
                             auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'admin-lookup-key' }
@@ -1079,14 +1084,16 @@
             }
         }
 
-        async function fetchChatLogs() {
-            if (!activeThread) return;
+        async function fetchChatLogs(threadContext) {
+            if (!threadContext) return;
             try {
                 const { data, error } = await supabaseClient
                     .from('messages')
                     .select('*')
-                    .eq('inquiry_id', activeThread.id)
+                    .eq('inquiry_id', threadContext.id)
                     .order('created_at', { ascending: true });
+
+                if (activeThread && activeThread.id !== threadContext.id) return; // Context switched
 
                 messages = data || [];
                 renderChatHistory();
@@ -1098,26 +1105,27 @@
                 
                 if (unreadIds.length > 0) {
                     // update database
-                    await supabaseClient.from('messages').update({ is_read: true }).in('id', unreadIds);
+                    const { error: updateErr } = await supabaseClient.from('messages').update({ is_read: true }).in('id', unreadIds);
+                    if (updateErr) console.error("Could not update read status:", updateErr);
                     
                     // mark local as read
                     messages.forEach(m => {
                         if (unreadIds.includes(m.id)) m.is_read = true;
                     });
+                }
+
+                // NUCLEAR CLEAR: Always zero out the unread badge for the thread we just opened
+                const tIndex = threads.findIndex(t => t.id === threadContext.id);
+                if (tIndex !== -1) {
+                    threads[tIndex].unreadCount = 0;
+                    renderThreadsList();
                     
-                    // Update local threads array and re-render the list to clear the badge
-                    const tIndex = threads.findIndex(t => t.id === activeThread.id);
-                    if (tIndex !== -1) {
-                        threads[tIndex].unreadCount = 0;
-                        renderThreadsList();
-                        
-                        // Update global notification dot
-                        const remainingUnread = threads.reduce((acc, t) => acc + (t.unreadCount || 0), 0);
-                        const msgNavLink = window.parent.document.querySelector('.sidebar a[href="admin-messages.html"]');
-                        if (msgNavLink) {
-                            let dot = msgNavLink.querySelector('.unread-dot');
-                            if (remainingUnread === 0 && dot) dot.remove();
-                        }
+                    // Update global notification dot
+                    const remainingUnread = threads.reduce((acc, t) => acc + (t.unreadCount || 0), 0);
+                    const msgNavLink = window.parent.document.querySelector('.sidebar a[href="admin-messages.html"]');
+                    if (msgNavLink) {
+                        let dot = msgNavLink.querySelector('.unread-dot');
+                        if (remainingUnread === 0 && dot) dot.remove();
                     }
                 }
 
