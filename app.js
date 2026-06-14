@@ -24,11 +24,11 @@ function formatMeasurements(json) {
 
         let h = '';
         for (let k in m) {
-            h += `<div style="break-inside: avoid; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
-                    <b style="color: var(--brand-navy); font-size: 0.9em; text-transform: uppercase; border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; display: inline-block; margin-bottom: 12px; width: 100%;">${k} Details</b>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">`;
+            h += `<div style="break-inside: avoid; margin-bottom: 6px; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
+                    <b style="color: var(--brand-navy); font-size: 0.9em; text-transform: uppercase; border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; display: inline-block; margin-bottom: 8px; width: 100%;">${k} Details</b>
+                    <div style="display: grid; grid-template-columns: repeat(3, auto); gap: 8px 35px; justify-content: flex-start;">`;
             for (let s in m[k]) {
-                h += `<div style="display: flex; flex-direction: column; border-bottom: 1px dashed #cbd5e1; padding: 4px 0;">
+                h += `<div style="display: flex; flex-direction: column; border-bottom: 1px dashed #cbd5e1; padding: 4px 0; min-width: 60px;">
                         <span style="color:#64748b; font-size: 0.85em; margin-bottom: 2px;">${s}</span> 
                         <b style="color:var(--brand-navy); font-size: 0.95em;">${m[k][s]}"</b>
                       </div>`;

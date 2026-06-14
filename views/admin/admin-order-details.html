@@ -324,12 +324,14 @@
         }
         .balance-row {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
-            padding: 6px 0;
+            margin-bottom: 8px;
             font-size: 0.9em;
             color: #cbd5e1;
+            gap: 15px;
         }
+        .balance-row span:first-child { width: 115px; flex-shrink: 0; }
         .balance-row.total-row {
             border-top: 1px solid rgba(255,255,255,0.15);
             margin-top: 8px;
