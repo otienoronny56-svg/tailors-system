@@ -1490,6 +1490,40 @@
                     </button>
                 </div>
 
+                <!-- Card 2.8: My Saved Measurements -->
+                <div class="settings-card" style="grid-column: span 2;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin-bottom: 0;"><i class="fas fa-ruler-combined"></i> My Saved Measurements</h3>
+                        <button class="btn-save-settings" style="width: auto; padding: 8px 20px; margin-top: 0; background: var(--brand-navy); border: 1px solid var(--brand-gold); color: var(--brand-gold);" onclick="saveClientMeasurements()">Save Profile</button>
+                    </div>
+                    <p style="color: var(--brand-slate); font-size: 0.85em; margin-bottom: 15px;">Save your standard body measurements here. Create multiple profiles (e.g. "My Suit", "My Wife's Dress") to quickly fill measurement requests.</p>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 200px;">
+                            <label>Select Profile</label>
+                            <select id="meas-profile-select" onchange="loadSelectedMeasurementProfile()" style="background: rgba(6,12,24,0.5); border: 1px solid var(--glass-border); padding: 10px; border-radius: 6px; color: white; width: 100%;">
+                                <option value="new">+ Create New Profile</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 200px;">
+                            <label>Profile Name</label>
+                            <input type="text" id="meas-profile-name" placeholder="e.g. Default Suit Profile" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;" id="client-saved-measurements-grid">
+                        <div class="form-group"><label>Shoulder (in)</label><input type="number" step="0.1" id="meas-Shoulder" placeholder="e.g. 18"></div>
+                        <div class="form-group"><label>Chest/Bust (in)</label><input type="number" step="0.1" id="meas-Chest" placeholder="e.g. 40"></div>
+                        <div class="form-group"><label>Waist (in)</label><input type="number" step="0.1" id="meas-Waist" placeholder="e.g. 34"></div>
+                        <div class="form-group"><label>Hips (in)</label><input type="number" step="0.1" id="meas-Hips" placeholder="e.g. 42"></div>
+                        <div class="form-group"><label>Sleeve (in)</label><input type="number" step="0.1" id="meas-Sleeve" placeholder="e.g. 25"></div>
+                        <div class="form-group"><label>Length (in)</label><input type="number" step="0.1" id="meas-Length" placeholder="e.g. 30"></div>
+                        <div class="form-group"><label>Thigh (in)</label><input type="number" step="0.1" id="meas-Thigh" placeholder="e.g. 24"></div>
+                        <div class="form-group"><label>Neck (in)</label><input type="number" step="0.1" id="meas-Neck" placeholder="e.g. 16"></div>
+                    </div>
+                    <p id="measurements-success-msg" style="display: none; color: #10b981; font-size: 0.85em; margin-top: 10px;"><i class="fas fa-check-circle"></i> Profile saved successfully!</p>
+                </div>
+
                 <!-- Card 3: Inquiries Summary (Full Width) -->
                 <div class="settings-card" style="grid-column: span 2;">
                     <h3><i class="fas fa-folder-open"></i> My Submitted Inquiries</h3>
@@ -2928,6 +2962,7 @@
                 document.getElementById('settings-name').value = currentUser?.user_metadata?.full_name || '';
                 document.getElementById('settings-email').value = currentUser?.email || '';
                 document.getElementById('settings-phone').value = currentUser?.phone || currentUser?.user_metadata?.phone || '';
+                loadClientMeasurements();
                 renderInquiriesSummaryList();
             } else if (tabName === 'orders') {
                 document.getElementById('orders-pane').style.display = 'block';
@@ -3014,6 +3049,96 @@
             }
         }
 
+        async function loadClientMeasurements() {
+            try {
+                const { data: profile } = await supabaseClient.from('user_profiles').select('measurements').eq('id', currentUser.id).single();
+                window._allSavedMeasurementProfiles = profile?.measurements || {};
+                
+                const select = document.getElementById('meas-profile-select');
+                select.innerHTML = '<option value="new">+ Create New Profile</option>';
+                
+                Object.keys(window._allSavedMeasurementProfiles).forEach(profileName => {
+                    const opt = document.createElement('option');
+                    opt.value = profileName;
+                    opt.textContent = profileName;
+                    select.appendChild(opt);
+                });
+
+                // Auto select the first profile if exists
+                const profiles = Object.keys(window._allSavedMeasurementProfiles);
+                if (profiles.length > 0) {
+                    select.value = profiles[0];
+                    loadSelectedMeasurementProfile();
+                } else {
+                    document.getElementById('meas-profile-name').value = '';
+                    document.querySelectorAll('#client-saved-measurements-grid input').forEach(inp => inp.value = '');
+                }
+            } catch (err) {
+                console.error("Error loading measurements", err);
+            }
+        }
+
+        function loadSelectedMeasurementProfile() {
+            const select = document.getElementById('meas-profile-select');
+            const nameInput = document.getElementById('meas-profile-name');
+            const inputs = document.querySelectorAll('#client-saved-measurements-grid input');
+            
+            if (select.value === 'new') {
+                nameInput.value = '';
+                inputs.forEach(inp => inp.value = '');
+                return;
+            }
+
+            const profileData = window._allSavedMeasurementProfiles[select.value];
+            if (profileData) {
+                nameInput.value = select.value;
+                inputs.forEach(input => {
+                    const key = input.id.replace('meas-', '');
+                    input.value = profileData[key] || '';
+                });
+            }
+        }
+
+        async function saveClientMeasurements() {
+            const nameInput = document.getElementById('meas-profile-name').value.trim();
+            if (!nameInput) {
+                alert("Please enter a Profile Name (e.g. My Suit).");
+                return;
+            }
+
+            try {
+                const inputs = document.querySelectorAll('#client-saved-measurements-grid input');
+                const values = {};
+                inputs.forEach(input => {
+                    if (input.value) values[input.id.replace('meas-', '')] = parseFloat(input.value);
+                });
+
+                const allProfiles = window._allSavedMeasurementProfiles || {};
+                allProfiles[nameInput] = values;
+
+                const { error } = await supabaseClient.from('user_profiles').update({ measurements: allProfiles }).eq('id', currentUser.id);
+                if (error) throw error;
+                
+                // Keep RPC sync for legacy standard compatibility if needed
+                await supabaseClient.rpc('sync_client_measurements', {
+                    p_client_id: currentUser.id,
+                    p_measurements: values
+                });
+
+                window._allSavedMeasurementProfiles = allProfiles;
+                
+                const msg = document.getElementById('measurements-success-msg');
+                msg.style.display = 'block';
+                setTimeout(() => msg.style.display = 'none', 3000);
+
+                loadClientMeasurements();
+                setTimeout(() => { document.getElementById('meas-profile-select').value = nameInput; }, 500);
+
+            } catch (err) {
+                alert("Error saving measurements: " + err.message);
+            }
+        }
+
         async function changeUserPassword() {
             const passInput = document.getElementById('settings-password');
             const confirmInput = document.getElementById('settings-confirm-password');
@@ -3094,6 +3219,19 @@
             const isTextBased = sizeBasedTypes.includes(garmentType);
 
             let html = '';
+            
+            // Add Profile Selector Dropdown
+            if (window._allSavedMeasurementProfiles && Object.keys(window._allSavedMeasurementProfiles).length > 0) {
+                html += `<div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(212,175,55,0.2);">
+                    <label style="font-size:0.85em; color:var(--brand-gold); display:block; margin-bottom:5px;">Pre-fill from Saved Profile</label>
+                    <select id="modal-profile-auto-fill" style="background:rgba(6,12,24,0.5); border:1px solid var(--brand-gold); padding:8px; border-radius:6px; color:white; width:100%; outline:none;" onchange="autoFillMeasurementModal(this.value)">
+                        <option value="">-- Select a Saved Profile --</option>`;
+                Object.keys(window._allSavedMeasurementProfiles).forEach(pName => {
+                    html += `<option value="${pName}">${pName}</option>`;
+                });
+                html += `</select></div>`;
+            }
+
             for (const [component, fields] of Object.entries(measurements)) {
                 html += `<div style="border-bottom:1px solid rgba(212,175,55,0.1); padding-bottom:15px;">
                     <h4 style="font-size:0.9em; text-transform:uppercase; letter-spacing:1px; color:var(--brand-white); margin-bottom:10px;">${component}</h4>
@@ -3123,6 +3261,28 @@
             }
             container.innerHTML = html;
             modal.style.display = 'flex';
+        }
+
+        function autoFillMeasurementModal(profileName) {
+            if (!profileName || !window._allSavedMeasurementProfiles) return;
+            const profileData = window._allSavedMeasurementProfiles[profileName];
+            if (!profileData) return;
+
+            const container = document.getElementById('modal-measurement-fields-container');
+            const inputs = container.querySelectorAll('input[data-measurement]');
+            
+            inputs.forEach(input => {
+                const fieldName = input.dataset.measurement;
+                if (profileData[fieldName]) {
+                    input.value = profileData[fieldName];
+                } else if (fieldName.includes('Chest') && profileData['Chest']) {
+                    input.value = profileData['Chest'];
+                } else if (fieldName.includes('Bust') && profileData['Chest']) {
+                    input.value = profileData['Chest'];
+                } else if (fieldName.includes('Inseam') && profileData['Length']) {
+                    input.value = profileData['Length'];
+                }
+            });
         }
 
         function closeMeasurementModal() {
