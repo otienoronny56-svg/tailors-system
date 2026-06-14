@@ -2583,5 +2583,104 @@ body.dark-mode .btn-add-item {
 }
 
 body.dark-mode .inv-actions button {
-    border-color: #475569;
+    border-color: #334155;
+}
+
+/* --- Expense Summary Cards --- */
+.expense-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.expense-summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid #f1f5f9;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.expense-summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.ex-icon-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--brand-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    flex-shrink: 0;
+}
+
+.ex-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.9em;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ex-amount {
+    margin: 0 0 3px 0;
+    font-size: 1.4em;
+    font-weight: 800;
+    color: var(--brand-navy);
+}
+
+.ex-count {
+    margin: 0;
+    font-size: 0.8em;
+    color: #94a3b8;
+}
+
+/* Dark Mode Support for Expense Cards */
+body.dark-mode .expense-summary-card {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .ex-info h4,
+body.dark-mode .ex-count {
+    color: #94a3b8;
+}
+
+body.dark-mode .ex-amount {
+    color: #f1f5f9;
+}
+
+body.dark-mode .ex-icon-circle {
+    background: rgba(212, 175, 55, 0.15);
+}
+
+@media (max-width: 768px) {
+    .expense-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .expense-summary-card {
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .ex-icon-circle {
+        width: 35px;
+        height: 35px;
+        font-size: 1em;
+    }
+    .ex-amount {
+        font-size: 1.1em;
+    }
 }
