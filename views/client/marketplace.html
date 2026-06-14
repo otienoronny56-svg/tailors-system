@@ -585,6 +585,39 @@
             animation: fa-spin 1.5s infinite linear;
         }
         @media (max-width: 600px) {
+            header {
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 12px 5%;
+            }
+            .brand-logo {
+                font-size: 1.05em;
+            }
+            .brand-sub {
+                display: none;
+            }
+            nav {
+                width: auto;
+                justify-content: flex-end;
+                flex-wrap: nowrap;
+                gap: 15px;
+            }
+            nav a, .btn-login, .btn-signup, .btn-portal, .nav-user-name, .btn-signout {
+                font-size: 0 !important;
+                padding: 5px !important;
+                background: transparent !important;
+                border: none !important;
+            }
+            nav a i, .btn-login i, .btn-signup i, .btn-portal i, .nav-user-name i, .btn-signout i {
+                font-size: 18px !important;
+            }
+            .nav-user-pill {
+                padding: 4px !important;
+                gap: 12px !important;
+                border: none !important;
+                background: transparent !important;
+            }
             .content-grid {
                 grid-template-columns: 1fr 1fr !important;
                 gap: 12px !important;

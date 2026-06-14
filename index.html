@@ -1393,6 +1393,17 @@
                 min-height: 85vh;
             }
 
+            .hero-slide {
+                background-position: 65% center; /* Shift focus to show outer side content */
+            }
+
+            .hero-overlay {
+                background: 
+                    radial-gradient(circle at 50% 40%, rgba(3, 7, 18, 0.45), rgba(3, 7, 18, 0.9)),
+                    linear-gradient(to top, var(--bg-deep) 0%, transparent 50%),
+                    linear-gradient(to bottom, var(--bg-deep) 0%, transparent 15%);
+            }
+
             .hero h1 {
                 font-size: 2.3em;
             }
@@ -1410,12 +1421,13 @@
             }
 
             section.content-section,
-            .categories-section,
-            .value-section {
-                padding-left: 5%;
-                padding-right: 5%;
-                padding-top: 60px;
-                padding-bottom: 60px;
+            .value-section,
+            .hiw-section {
+                padding: 40px 5%;
+            }
+
+            .categories-section {
+                padding: 40px 5% 10px;
             }
 
             .cta-section {
@@ -1433,15 +1445,87 @@
             }
 
             .hiw-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .hiw-step {
+                padding: 24px 14px;
+            }
+
+            .hiw-number {
+                width: 44px;
+                height: 44px;
+                font-size: 1.1em;
+                margin-bottom: 16px;
+            }
+
+            .hiw-step h4 {
+                font-size: 0.95em;
+                margin-bottom: 8px;
+            }
+
+            .hiw-step p {
+                font-size: 0.75em;
             }
         }
 
         @media (max-width: 600px) {
             .providers-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .provider-banner {
+                height: 120px;
+            }
+
+            .provider-avatar {
+                width: 50px;
+                height: 50px;
+                bottom: -25px;
+                left: 12px;
+                font-size: 1.2em;
+                border-width: 2px;
+            }
+
+            .provider-body {
+                padding: 35px 12px 14px;
+            }
+
+            .provider-name {
+                font-size: 0.95em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-bottom: 4px;
+            }
+
+            .provider-location {
+                font-size: 0.7em;
+                margin-bottom: 10px;
+            }
+
+            .provider-desc {
+                display: none;
+            }
+
+            .provider-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                padding-top: 10px;
+            }
+
+            .provider-rating {
+                font-size: 0.75em;
+                justify-content: center;
+            }
+
+            .btn-visit {
+                text-align: center;
+                padding: 8px 12px;
+                font-size: 0.75em;
             }
 
             /* Showcase listings customized mobile grid: 2 columns */
@@ -1718,26 +1802,8 @@
         </div>
     </div>
 
-    <!-- ===== FEATURED PROVIDERS ===== -->
-    <section class="content-section" id="providers-section">
-        <div class="section-header-row">
-            <div>
-                <span class="section-eyebrow">Aesthetic Shops</span>
-                <h2 class="section-heading">Featured <em>Artisans</em> &amp; Shops</h2>
-                <p class="section-subtext">Connect with verified local designers and creators across Kenya.</p>
-            </div>
-            <a href="views/client/marketplace.html?tab=shops" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">
-                All Shops <i class="fas fa-arrow-right" style="margin-left:6px;"></i>
-            </a>
-        </div>
-
-        <div class="providers-grid" id="providers-container">
-            <!-- Dynamically populated via Supabase -->
-        </div>
-    </section>
-
     <!-- ===== DESIGN SHOWCASE ===== -->
-    <section class="content-section" id="showcase-section" style="padding-top: 0;">
+    <section class="content-section" id="showcase-section">
         <div class="section-header-row">
             <div>
                 <span class="section-eyebrow">Curated Pieces</span>
@@ -1750,6 +1816,24 @@
         </div>
 
         <div class="listings-grid" id="teaser-listings-container">
+            <!-- Dynamically populated via Supabase -->
+        </div>
+    </section>
+
+    <!-- ===== FEATURED PROVIDERS ===== -->
+    <section class="content-section" id="providers-section" style="padding-top: 0;">
+        <div class="section-header-row">
+            <div>
+                <span class="section-eyebrow">Aesthetic Shops</span>
+                <h2 class="section-heading">Featured <em>Artisans</em> &amp; Shops</h2>
+                <p class="section-subtext">Connect with verified local designers and creators across Kenya.</p>
+            </div>
+            <a href="views/client/marketplace.html?tab=shops" class="btn-portal" style="white-space:nowrap; flex-shrink:0;">
+                All Shops <i class="fas fa-arrow-right" style="margin-left:6px;"></i>
+            </a>
+        </div>
+
+        <div class="providers-grid" id="providers-container">
             <!-- Dynamically populated via Supabase -->
         </div>
     </section>
