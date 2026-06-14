@@ -381,7 +381,6 @@
         @media (max-width: 768px) {
             .mobile-menu-btn { display: block; }
 
-            /* NUCLEAR: break the flex layout entirely so fixed sidebar doesn't steal 260px */
             .dashboard-container {
                 display: block !important;
                 width: 100% !important;
@@ -403,34 +402,32 @@
             .main-content {
                 display: block !important;
                 width: 100% !important;
-                max-width: 100% !important;
+                max-width: 100vw !important;
                 min-width: 0 !important;
                 margin: 0 !important;
-                padding: 14px !important;
+                padding: 10px !important;
                 padding-top: 65px !important;
                 box-sizing: border-box !important;
                 overflow-x: hidden !important;
             }
 
             .detail-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .header-actions { width: 100%; display: flex; flex-wrap: nowrap; gap: 8px; }
+            .header-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; }
             .btn-header {
-                flex: 1;
+                flex: 1 1 auto;
                 justify-content: center;
                 font-size: 0.75em;
                 padding: 9px 8px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
             }
             .detail-layout { grid-template-columns: 1fr !important; width: 100%; }
-            .form-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .form-row { grid-template-columns: 1fr 1fr; gap: 6px; }
             .form-row .form-group input,
-            .form-row .form-group select { font-size: 0.85em; padding: 8px 10px; }
-            .edit-card { padding: 14px; width: 100%; box-sizing: border-box; }
-            fieldset { padding: 12px 10px; }
-            .page-title { font-size: 1.3em; }
+            .form-row .form-group select { font-size: 0.8em; padding: 7px 8px; }
+            .edit-card { padding: 12px; width: 100%; box-sizing: border-box; }
+            fieldset { padding: 10px 8px; margin-bottom: 12px; }
+            .page-title { font-size: 1.25em; }
         }
+
 
 
 
