@@ -1336,7 +1336,7 @@ async function openAdminOrderView(orderId) {
                     Order #${shortId} - ${order.customer_name}
                 </h2>
                 
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 20px; margin-bottom:16px; font-size:0.9em;">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:4px 20px; margin-bottom:16px; font-size:0.9em;">
                     <p style="margin:4px 0;"><strong>Shop:</strong> ${shopName}</p>
                     <p style="margin:4px 0;"><strong>Garment:</strong> ${order.garment_type}</p>
                     <p style="margin:4px 0;"><strong>Worker:</strong> ${workerName}</p>
@@ -1344,20 +1344,20 @@ async function openAdminOrderView(orderId) {
                     <p style="margin:4px 0; grid-column:1/-1;"><strong>Status:</strong> <span class="status-indicator status-${order.status}">${STATUS_MAP[order.status] || 'Unknown'}</span></p>
                 </div>
 
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <div style="flex: 1; background: #000; color: white; padding: 15px; border-radius: 5px; text-align: center;">
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                    <div style="flex: 1 1 30%; min-width: 80px; background: #000; color: white; padding: 10px; border-radius: 5px; text-align: center;">
                         <small>Total Price</small>
                         <p style="margin: 5px 0; font-size: 1.2em; color: #d4af37; font-weight: bold;">
                             Ksh ${totalOrderPrice.toLocaleString()}
                         </p>
                     </div>
-                    <div style="flex: 1; background: #007bff; color: white; padding: 15px; border-radius: 5px; text-align: center;">
+                    <div style="flex: 1 1 30%; min-width: 80px; background: #007bff; color: white; padding: 10px; border-radius: 5px; text-align: center;">
                         <small>Paid</small>
                         <p style="margin: 5px 0; font-size: 1.2em; font-weight: bold;">
                             Ksh ${paid.toLocaleString()}
                         </p>
                     </div>
-                    <div style="flex: 1; background: ${balance > 0 ? '#dc3545' : '#28a745'}; color: white; padding: 15px; border-radius: 5px; text-align: center;">
+                    <div style="flex: 1 1 30%; min-width: 80px; background: ${balance > 0 ? '#dc3545' : '#28a745'}; color: white; padding: 10px; border-radius: 5px; text-align: center;">
                         <small>Balance</small>
                         <p style="margin: 5px 0; font-size: 1.2em; font-weight: bold;">
                             Ksh ${balance.toLocaleString()}
@@ -1365,7 +1365,7 @@ async function openAdminOrderView(orderId) {
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
                     <button onclick="window.location.href='/views/admin/admin-order-details.html?id=${order.id}'" 
                             style="flex: 1; background: #000; color: #d4af37; padding: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
                         <i class="fas fa-pen"></i> Edit Order
@@ -1400,7 +1400,7 @@ async function openAdminOrderView(orderId) {
                     : '<p style="color:#94a3b8; text-align:center; font-size:0.82em; margin:6px 0;">No payments recorded</p>'}
                 </div>
 
-                <div style="display:flex; gap:10px;">
+                <div style="display:flex; flex-wrap: wrap; gap:10px;">
                     ${balance > 0 ?
                         `<button onclick="quickPay('${order.id}', ${balance})"
                                 style="flex:1; background:#ffc107; color:black; padding:10px; border-radius:4px; border:none; cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">
@@ -1427,7 +1427,7 @@ async function openAdminOrderView(orderId) {
         }
 
         const mc = modal.querySelector('.modal-content');
-        mc.style.cssText = 'width:600px; max-width:95vw; max-height:90vh; overflow:hidden; border-radius:12px; background:white; box-shadow:0 20px 60px rgba(0,0,0,0.3); position:relative;';
+        mc.style.cssText = 'width:600px; max-width:95vw; max-height:90vh; overflow-y:auto; overflow-x:hidden; border-radius:12px; background:white; box-shadow:0 20px 60px rgba(0,0,0,0.3); position:relative;';
         mc.innerHTML = modalContent;
         modal.style.cssText = 'display:flex; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center;';
 
