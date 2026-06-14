@@ -1116,14 +1116,14 @@
                     }
 
                     let actionsHtml = '';
-                    if (!isUnsent && msg.message_text && !msg.message_text.startsWith('[')) {
+                    if (!isUnsent && msg.id) {
                         actionsHtml = `
                             <div style="display:flex; gap:10px; margin-top:8px; justify-content:${isMe ? 'flex-end' : 'flex-start'};">
                                 ${isMe ? `<button onclick="unsendMessage('${msg.id}')" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:0.8em;"><i class="fas fa-undo"></i> Unsend</button>` : ''}
                                 <button onclick="deleteMessageForMe('${msg.id}', ${isMe})" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:0.8em;"><i class="fas fa-trash"></i> Delete for me</button>
                             </div>
                         `;
-                    } else {
+                    } else if (msg.id) {
                         actionsHtml = `
                             <div style="display:flex; gap:10px; margin-top:8px; justify-content:${isMe ? 'flex-end' : 'flex-start'};">
                                 <button onclick="deleteMessageForMe('${msg.id}', ${isMe})" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:0.8em;"><i class="fas fa-trash"></i> Delete for me</button>
