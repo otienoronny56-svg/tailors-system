@@ -2057,17 +2057,18 @@ body.dark-mode .rank-5 {
 @media (max-width: 768px) {
     .inv-stats {
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+        gap: 6px;
     }
     .inv-stat-card {
-        padding: 12px 6px;
+        padding: 8px 4px;
+        border-radius: 8px;
     }
     .inv-stat-card .stat-value {
-        font-size: 1.3em;
-        margin-bottom: 2px;
+        font-size: 1.1em;
+        margin-bottom: 0px;
     }
     .inv-stat-card .stat-label {
-        font-size: 0.7em;
+        font-size: 0.6em;
     }
 }
 
