@@ -3341,7 +3341,7 @@
                 // Find all orders linked to this user's phone number
                 const { data: orders, error } = await supabaseClient
                     .from('orders')
-                    .select('id, garment_type, status, price, amount_paid, due_date, created_at, shops(name)')
+                    .select('id, garment_type, status, price, amount_paid, due_date, created_at, shop_id')
                     .eq('customer_phone', currentUser.phone)
                     .order('created_at', { ascending: false });
 
@@ -3350,6 +3350,15 @@
                 if (!orders || orders.length === 0) {
                     container.innerHTML = '<div style="text-align:center; color:var(--brand-slate); padding:40px;">You have no recorded orders yet.</div>';
                     return;
+                }
+
+                const shopIds = [...new Set(orders.map(o => o.shop_id).filter(id => id))];
+                let shopsMap = {};
+                if (shopIds.length > 0) {
+                    const { data: shops } = await supabaseClient.from('shops').select('id, name').in('id', shopIds);
+                    if (shops) {
+                        shops.forEach(s => shopsMap[s.id] = s.name);
+                    }
                 }
 
                 const STATUS_MAP = {
@@ -3362,7 +3371,7 @@
                 };
 
                 container.innerHTML = orders.map(order => {
-                    const shopName = order.shops ? order.shops.name : 'Tailor Shop';
+                    const shopName = shopsMap[order.shop_id] || 'Tailor Shop';
                     const sMap = STATUS_MAP[order.status] || { title: "Unknown", color: "#64748b" };
                     const dueDate = order.due_date ? new Date(order.due_date).toLocaleDateString() : 'TBD';
                     const createdDate = order.created_at ? new Date(order.created_at).toLocaleDateString() : 'TBD';
