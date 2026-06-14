@@ -638,6 +638,18 @@ window.addEventListener('DOMContentLoaded', function () {
     window.handleLogin = handleLogin;
     window.handleLogout = handleLogout;
 
+    // GLOBAL REFRESH ANIMATION
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('button[title*="Refresh"]');
+        if (btn) {
+            const icon = btn.querySelector('.fa-sync-alt, .fa-arrows-rotate, .fa-sync');
+            if (icon) {
+                icon.classList.add('fa-spin');
+                setTimeout(() => icon.classList.remove('fa-spin'), 1000);
+            }
+        }
+    });
+
     logDebug("Application initialized successfully", null, 'success');
 });
 
