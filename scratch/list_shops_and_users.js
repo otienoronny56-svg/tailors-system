@@ -1,7 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 
-const configContent = fs.readFileSync('config.js', 'utf8');
+const configContent = fs.readFileSync('js/core/config.js', 'utf8');
 const urlMatch = configContent.match(/supabaseUrl:\s*"([^"]+)"/);
 const keyMatch = configContent.match(/serviceRoleKey:\s*"([^"]+)"/);
 
