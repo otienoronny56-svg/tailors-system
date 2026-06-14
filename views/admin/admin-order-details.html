@@ -476,13 +476,14 @@
                 padding: 6px 4px;
             }
             .detail-layout { grid-template-columns: 1fr !important; width: 100%; }
-            .form-row { grid-template-columns: 1fr 1fr; gap: 2px; }
-            .form-row .form-group input,
-            .form-row .form-group select { font-size: 0.7em; padding: 4px 2px; min-width: 0 !important; width: 100%; }
-            .form-group label { font-size: 0.6em; margin-bottom: 1px; }
-            .edit-card { padding: 4px 2px; width: 100%; box-sizing: border-box; }
+            .form-row { grid-template-columns: min-content min-content; gap: 8px; justify-content: start; }
+            .form-group input,
+            .form-group select { font-size: 0.75em; padding: 4px 4px; min-width: 0 !important; width: 140px !important; }
+            .form-group textarea { width: 100% !important; font-size: 0.75em; }
+            .form-group label { font-size: 0.6em; margin-bottom: 2px; display: block; }
+            .edit-card { padding: 4px 2px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
             fieldset { padding: 4px 2px; margin-bottom: 8px; }
-            .page-title { font-size: 1em; }
+            .page-title { font-size: 1em; white-space: normal; word-break: break-word; }
 
             /* NUCLEAR 4-column measurements on mobile fit */
             .measurement-fields { 
