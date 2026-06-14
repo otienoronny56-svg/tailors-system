@@ -306,20 +306,20 @@
             const statusSelect = document.getElementById('admin-status-filter');
 
             if (mode === 'current') {
-                subtitle.textContent = 'Tracking Status 1-5 (Production & Pending Collection)';
+                subtitle.textContent = 'Active production orders';
                 if (statusWrapper) statusWrapper.style.display = 'block';
                 // Reset select option defaults for active list
                 if (statusSelect) {
                     statusSelect.options[0].text = 'Filter by Status (All Active)';
                 }
             } else if (mode === 'all') {
-                subtitle.textContent = 'View all past and current orders across all shops, including closed ones.';
+                subtitle.textContent = 'All orders history';
                 if (statusWrapper) statusWrapper.style.display = 'block';
                 if (statusSelect) {
                     statusSelect.options[0].text = 'Filter by Status (All)';
                 }
             } else if (mode === 'urgent') {
-                subtitle.textContent = '🔥 Hot List: Production orders due today, tomorrow, or overdue.';
+                subtitle.textContent = '🔥 Hot List: Urgent orders';
                 if (statusWrapper) statusWrapper.style.display = 'none';
             }
 
