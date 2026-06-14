@@ -1462,6 +1462,10 @@ body.dark-mode .sidebar {
     border-right-color: #1e293b !important;
 }
 
+body.dark-mode .sidebar-subtitle {
+    color: #94a3b8 !important; /* Readable light gray on the dark sidebar */
+}
+
 /* NUCLEAR FIX: Force all elements that have inline "background: white" to become dark cards */
 body.dark-mode [style*="background: white"],
 body.dark-mode [style*="background:white"],
