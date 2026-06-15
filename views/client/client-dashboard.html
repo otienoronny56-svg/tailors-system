@@ -2016,7 +2016,7 @@
             }
 
             history.innerHTML = messagesToRender.map(msg => {
-                const isMe = msg.is_inquiry ? false : (msg.sender_id === currentUser.id);
+                const isMe = msg.is_inquiry ? true : (msg.sender_id === currentUser.id);
                 
                 if (isMe && msg.deleted_for_sender) return '';
                 if (!isMe && msg.deleted_for_recipient) return '';
@@ -2025,7 +2025,7 @@
                 const timeStr = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                 const inquiryLabel = msg.is_inquiry ? `<strong style="display:block; font-size:0.8em; color:var(--brand-gold); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">Your Inquiry</strong>` : '';
-                const bubbleStyle = msg.is_inquiry ? `border-right: 4px solid var(--brand-gold); max-width: 80%; background: var(--brand-navy); color: white;` : '';
+                const bubbleStyle = msg.is_inquiry ? `border-left: 4px solid var(--brand-gold); max-width: 80%; background: var(--brand-navy); color: white;` : '';
 
                 let listingInfo = '';
                 if (msg.is_inquiry && msg.listing) {
