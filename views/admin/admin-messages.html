@@ -545,6 +545,27 @@
 
                 if (error) throw error;
                 
+                // Group inquiries by client_email and shop_id to prevent duplicates
+                const uniqueInquiriesMap = {};
+                (inquiries || []).forEach(inq => {
+                    const key = inq.shop_id + '_' + (inq.client_email || inq.client_phone || inq.id);
+                    if (!uniqueInquiriesMap[key]) {
+                        inq.all_inquiry_ids = [inq.id];
+                        uniqueInquiriesMap[key] = inq;
+                    } else {
+                        uniqueInquiriesMap[key].all_inquiry_ids.push(inq.id);
+                        if (new Date(inq.created_at) > new Date(uniqueInquiriesMap[key].created_at)) {
+                            // Keep the newest inquiry metadata but preserve all_inquiry_ids
+                            const allIds = uniqueInquiriesMap[key].all_inquiry_ids;
+                            inq.all_inquiry_ids = allIds;
+                            uniqueInquiriesMap[key] = inq;
+                        }
+                    }
+                });
+                
+                // Replace inquiries with the deduplicated list
+                const unifiedInquiries = Object.values(uniqueInquiriesMap);
+                
                 // Fetch ALL messages for these inquiries to get the latest preview and unread counts
                 const inquiryIds = inquiries ? inquiries.map(i => i.id) : [];
                 let msgs = [];
@@ -562,11 +583,17 @@
                 let totalUnread = 0;
                 
                 msgs.forEach(msg => {
+                    // Find which unified group this message belongs to
+                    const parentInq = unifiedInquiries.find(i => i.all_inquiry_ids.includes(msg.inquiry_id));
+                    if (!parentInq) return;
+
                     if (!msg.is_read && msg.recipient_id === USER_PROFILE.id) {
-                        unreadMap[msg.inquiry_id] = (unreadMap[msg.inquiry_id] || 0) + 1;
+                        unreadMap[parentInq.id] = (unreadMap[parentInq.id] || 0) + 1;
                         totalUnread++;
                     }
-                    lastMsgMap[msg.inquiry_id] = msg;
+                    if (!lastMsgMap[parentInq.id] || new Date(msg.created_at) > new Date(lastMsgMap[parentInq.id].created_at)) {
+                        lastMsgMap[parentInq.id] = msg;
+                    }
                 });
 
                 // Update notification dot on the main layout if possible
@@ -586,7 +613,7 @@
                     }
                 }
 
-                threads = (inquiries || []).map(inq => {
+                threads = unifiedInquiries.map(inq => {
                     inq.unreadCount = unreadMap[inq.id] || 0;
                     const lastM = lastMsgMap[inq.id];
                     if (lastM) {
@@ -1181,10 +1208,11 @@
         async function fetchChatLogs(threadContext) {
             if (!threadContext) return;
             try {
+                const inquiryIdsToFetch = threadContext.all_inquiry_ids || [threadContext.id];
                 const { data, error } = await supabaseClient
                     .from('messages')
                     .select('*')
-                    .eq('inquiry_id', threadContext.id)
+                    .in('inquiry_id', inquiryIdsToFetch)
                     .order('created_at', { ascending: true });
 
                 if (activeThread && activeThread.id !== threadContext.id) return; // Context switched
@@ -1605,7 +1633,7 @@
                 const { data, error } = await supabaseClient
                     .from('messages')
                     .insert([{
-                        inquiry_id: activeThread.id,
+                        inquiry_id: activeThread.all_inquiry_ids ? activeThread.all_inquiry_ids[activeThread.all_inquiry_ids.length - 1] : activeThread.id,
                         sender_id: USER_PROFILE.id,
                         recipient_id: otherPartyUid,
                         message_text: text
@@ -1633,7 +1661,7 @@
                     table: 'messages'
                 }, payload => {
                     const newMsg = payload.new;
-                    if (activeThread && newMsg.inquiry_id === activeThread.id) {
+                    if (activeThread && (activeThread.all_inquiry_ids ? activeThread.all_inquiry_ids.includes(newMsg.inquiry_id) : newMsg.inquiry_id === activeThread.id)) {
                         if (!messages.find(m => m.id === newMsg.id)) {
                             messages.push(newMsg);
                             renderChatHistory();
@@ -1697,7 +1725,7 @@
                 const { data, error } = await supabaseClient
                     .from('messages')
                     .insert([{
-                        inquiry_id: activeThread.id,
+                        inquiry_id: activeThread.all_inquiry_ids ? activeThread.all_inquiry_ids[activeThread.all_inquiry_ids.length - 1] : activeThread.id,
                         sender_id: USER_PROFILE.id,
                         recipient_id: clientUid,
                         message_text: reqText
