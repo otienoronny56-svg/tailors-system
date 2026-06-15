@@ -529,35 +529,58 @@
 
         .listing-footer {
             margin-top: auto;
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px 8px;
             align-items: center;
             padding-top: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            flex-wrap: wrap;
-            gap: 8px;
         }
 
         .footer-prices {
+            grid-column: 1;
+            grid-row: 1;
             display: flex;
             flex-direction: column;
             gap: 2px;
         }
 
-        .footer-actions {
+        .footer-views {
+            grid-column: 2;
+            grid-row: 1;
+            justify-self: end;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
+        }
+
+        .footer-button {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            width: 100%;
+            text-align: center;
+        }
+
+        .footer-button .listing-select-btn {
+            width: 100%;
+            justify-content: center;
         }
 
         @media (min-width: 769px) {
-            .footer-actions {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 6px;
-            }
             .listing-footer {
                 align-items: flex-end;
+                gap: 8px;
+            }
+            .footer-prices {
+                grid-row: 1 / 3;
+            }
+            .footer-button {
+                grid-column: 2;
+                grid-row: 2;
+                width: auto;
+            }
+            .footer-button .listing-select-btn {
+                width: auto;
             }
         }
 
@@ -1930,8 +1953,10 @@
                                         <span class="price-text" style="color: var(--brand-gold); font-weight: 800; font-size: 1.1em; line-height: 1;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                                     `}
                                 </div>
-                                <div class="footer-actions">
+                                <div class="footer-views">
                                     <button type="button" onclick="event.stopPropagation(); toggleLike('${list.id}')" id="like-btn-${list.id}" title="${isLiked ? 'Remove from Favourites' : 'Add to Favourites'}" style="background:transparent; border:none; cursor:pointer; color:${isLiked ? '#ef4444' : 'var(--brand-slate)'}; font-size:1.2em; padding:0; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><i class="${isLiked ? 'fas' : 'far'} fa-heart"></i></button>
+                                </div>
+                                <div class="footer-button">
                                     <button type="button" class="listing-select-btn" onclick="event.stopPropagation(); trackListingView('${list.id}', () => selectListingForInquiry('${list.id}', '${list.title.replace(/'/g, "\\'")}'))">Inquire</button>
                                 </div>
                             </div>

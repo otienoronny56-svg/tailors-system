@@ -957,35 +957,61 @@
         }
 
         .listing-footer {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px 8px;
             align-items: center;
             padding-top: 12px;
             border-top: 1px solid var(--border-glass);
-            flex-wrap: wrap;
-            gap: 8px;
         }
         
         .footer-prices {
+            grid-column: 1;
+            grid-row: 1;
             display: flex;
             flex-direction: column;
             gap: 2px;
         }
-        
-        .footer-actions {
+
+        .footer-views {
+            grid-column: 2;
+            grid-row: 1;
+            justify-self: end;
+            font-size: 0.75em;
+            color: var(--text-muted);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
+            font-weight: 600;
+        }
+        
+        .footer-button {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .footer-button .btn-inquire {
+            width: 100%;
+            justify-content: center;
         }
 
         @media (min-width: 769px) {
-            .footer-actions {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 6px;
-            }
             .listing-footer {
                 align-items: flex-end;
+                gap: 8px;
+            }
+            .footer-prices {
+                grid-row: 1 / 3;
+            }
+            .footer-button {
+                grid-column: 2;
+                grid-row: 2;
+                width: auto;
+            }
+            .footer-button .btn-inquire {
+                width: auto;
             }
         }
 
@@ -2267,8 +2293,10 @@
                                 <span class="listing-price" style="font-weight: 800; line-height: 1;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                             `}
                             </div>
-                            <div class="footer-actions">
-                                <span id="view-count-${list.id}" style="font-size:0.75em; color:var(--text-muted); display:flex; align-items:center; gap:4px; font-weight:600;"><i class="fas fa-eye"></i> ${views} views</span>
+                            <div class="footer-views">
+                                <i class="fas fa-eye"></i> ${views} views
+                            </div>
+                            <div class="footer-button">
                                 <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '${linkTarget}'); return false;">${actionText} <i class="fas fa-chevron-right"></i></a>
                             </div>
                         </div>
