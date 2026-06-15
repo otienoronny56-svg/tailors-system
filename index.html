@@ -1965,6 +1965,7 @@
 
     <!-- ===== SCRIPTS ===== -->
     <script src="js/core/config.js?v=1781434537375"></script>
+    <script src="js/core/algorithm.js"></script>
     <script>
         // Header scroll effect
         window.addEventListener('scroll', () => {
@@ -2143,26 +2144,41 @@
 
         async function initMarketplace() {
             try {
+                // Fetch more listings to rank them properly
                 const { data, error } = await supabaseClient
                     .from('marketplace_listings')
                     .select('*, shops(name, profile_image)')
                     .eq('status', 'active')
                     .order('is_featured', { ascending: false })
                     .order('views', { ascending: false })
-                    .order('created_at', { ascending: false })
-                    .limit(6);
+                    .limit(30);
 
                 if (!error && data && data.length > 0) {
+                    
+                    // Fetch global likes for these listings
+                    let { data: likesData } = await supabaseClient.from('marketplace_likes').select('listing_id');
+                    let globalLikes = {};
+                    if(likesData) {
+                        likesData.forEach(l => { globalLikes[l.listing_id] = (globalLikes[l.listing_id] || 0) + 1; });
+                    }
+
+                    // Fetch reviews
+                    let { data: reviewData } = await supabaseClient.from('vw_marketplace_reviews').select('*');
+                    let reviews = reviewData || [];
+                    
+                    // Fetch shops for profile quality bonus
+                    let { data: shopsData } = await supabaseClient.from('shops').select('*').eq('is_public', true);
+                    let allShopsData = shopsData || [];
+
                     data.sort((a, b) => {
                         const featDiff = (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0);
                         if (featDiff !== 0) return featDiff;
-                        const viewDiff = (b.views || 0) - (a.views || 0);
-                        if (viewDiff !== 0) return viewDiff;
-                        const aDesc = !!(a.description && a.description.length > 20);
-                        const bDesc = !!(b.description && b.description.length > 20);
-                        return (bDesc ? 1 : 0) - (aDesc ? 1 : 0);
+                        if (typeof calculateBespokeScore === 'function') {
+                            return calculateBespokeScore(b, allShopsData, reviews, globalLikes) - calculateBespokeScore(a, allShopsData, reviews, globalLikes);
+                        }
+                        return (b.views || 0) - (a.views || 0);
                     });
-                    allListings = data;
+                    allListings = data.slice(0, 6);
                 } else {
                     allListings = getMockListings();
                 }
@@ -2398,6 +2414,9 @@
                     });
 
                     shops.sort((a, b) => {
+                        if (typeof calculateShopScore === 'function') {
+                            return calculateShopScore(b, Array.isArray(reviews) ? reviews : []) - calculateShopScore(a, Array.isArray(reviews) ? reviews : []);
+                        }
                         if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
                         return b.reviewCount - a.reviewCount;
                     });
