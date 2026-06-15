@@ -627,8 +627,8 @@
                 background: transparent;
             }
             .content-grid {
-                grid-template-columns: 1fr !important;
-                gap: 15px !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
             }
             .listing-card .card-banner-wrap {
                 height: 180px;
@@ -1764,25 +1764,25 @@
                             <h3 class="card-title" style="font-size:1.15em; margin-bottom: 0; line-height: 1.2;">${escapeHTML(list.title)}</h3>
                             ${ratingTag}
                         </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap: 8px; margin-top: 5px;">
-                            <span class="card-badge">${escapeHTML(list.category || 'Senator Wear')}</span>
-                            <span style="font-size:0.8em; color:var(--brand-slate); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 140px; display: inline-flex; align-items: center;" title="${escapeHTML(shopName)}">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap: 6px; margin-top: 5px; flex-wrap: wrap;">
+                            <span class="card-badge" style="white-space: normal; line-height: 1.2; text-align: center;">${escapeHTML(list.category || 'Senator Wear')}</span>
+                            <span style="font-size:0.8em; color:var(--brand-slate); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 100%; display: inline-flex; align-items: center;" title="${escapeHTML(shopName)}">
                                 ${avatarIconHtml}${escapeHTML(shopName)}
                             </span>
                         </div>
                         <p class="card-desc" style="font-size: 0.85em; margin-bottom: 6px;">${escapeHTML(list.description || 'Custom crafted.')}</p>
-                        <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <div class="card-footer" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; flex-direction: column;">
                             <div style="display: flex; flex-direction: column; gap: 2px;">
                                 ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
                                     <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                                         <span style="text-decoration: line-through; color: var(--brand-slate); font-size: 0.82em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
-                                        <span class="price-tag" style="color: #ef4444; font-weight: 700; font-size: 1.05em; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
+                                        <span class="price-tag" style="color: #ef4444; font-weight: 700; font-size: 1.05em; line-height: 1; white-space: normal !important;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
                                     </div>
                                 ` : `
-                                    <span class="price-tag">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                    <span class="price-tag" style="white-space: normal !important;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                                 `}
                             </div>
-                            <a href="../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}" class="card-btn" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}'); return false;">Inquire Now <i class="fas fa-envelope"></i></a>
+                            <a href="../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}" class="card-btn" style="width: 100%; justify-content: center; padding: 6px 10px; font-size: 0.8em;" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}'); return false;">Inquire Now <i class="fas fa-envelope"></i></a>
                         </div>
                     </div>
                 </div>`;
