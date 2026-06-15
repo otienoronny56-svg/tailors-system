@@ -1703,23 +1703,6 @@
                 }, payload => {
                     const newMsg = payload.new;
                     
-                    // NATIVE OS NOTIFICATION
-                    if (newMsg.recipient_id === USER_PROFILE.id && newMsg.sender_id !== USER_PROFILE.id && "Notification" in window && Notification.permission === "granted") {
-                        if (document.visibilityState === "hidden" || !activeThread || (activeThread.all_inquiry_ids ? !activeThread.all_inquiry_ids.includes(newMsg.inquiry_id) : newMsg.inquiry_id !== activeThread.id)) {
-                            const threadData = threads.find(t => t.all_inquiry_ids ? t.all_inquiry_ids.includes(newMsg.inquiry_id) : t.id === newMsg.inquiry_id);
-                            const senderName = threadData ? threadData.client_name : "New Message";
-                            
-                            const notif = new Notification(senderName + " - Tailors", {
-                                body: newMsg.message_text,
-                                icon: '/assets/icon-192x192.png'
-                            });
-                            notif.onclick = function() {
-                                window.focus();
-                                this.close();
-                            };
-                        }
-                    }
-                    
                     const isActiveThread = activeThread && (activeThread.all_inquiry_ids ? activeThread.all_inquiry_ids.includes(newMsg.inquiry_id) : newMsg.inquiry_id === activeThread.id);
                     
                     const threadData = threads.find(t => t.all_inquiry_ids ? t.all_inquiry_ids.includes(newMsg.inquiry_id) : t.id === newMsg.inquiry_id);

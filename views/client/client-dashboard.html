@@ -2584,19 +2584,7 @@
                             if (!thread.messages.find(m => m.id === newMsg.id)) {
                                 thread.messages.push(newMsg);
                                 
-                                // NATIVE OS NOTIFICATION
-                                if (newMsg.sender_id !== currentUser.id && "Notification" in window && Notification.permission === "granted") {
-                                    if (document.visibilityState === "hidden" || (activeThread && activeThread.shopId !== thread.shopId) || currentTab !== 'inbox') {
-                                        const notif = new Notification(thread.shopName || "New Message", {
-                                            body: newMsg.message_text,
-                                            icon: '/assets/icon-192x192.png'
-                                        });
-                                        notif.onclick = function() {
-                                            window.focus();
-                                            this.close();
-                                        };
-                                    }
-                                }
+                                // Re-render logic follows
 
                                 // Rebuild timeline
                                 const virtualInqs = thread.inquiries.map(inq => ({
