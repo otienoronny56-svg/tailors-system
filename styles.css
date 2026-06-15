@@ -2332,6 +2332,12 @@ body.dark-mode .rank-5 {
     flex-wrap: wrap;
 }
 
+.inv-toolbar select,
+.inv-toolbar button {
+    width: auto !important;
+    margin: 0 !important;
+}
+
 .inv-search-wrap {
     position: relative;
     flex-grow: 1;
