@@ -75,7 +75,7 @@ function calculateBespokeScore(list, allShops = [], allReviews = [], globalLikes
     return score;
 }
 
-function calculateShopScore(shop, allReviews = []) {
+function calculateShopScore(shop, allReviews = [], userFavoriteShops = []) {
     if (shopScoreCache.has(shop)) {
         return shopScoreCache.get(shop);
     }
@@ -100,6 +100,11 @@ function calculateShopScore(shop, allReviews = []) {
 
     // Heavy random variance
     score += Math.random() * 20;
+
+    // 3. Favorite Shop Dominance (Guarantee top position)
+    if (userFavoriteShops && userFavoriteShops.includes(shop.id)) {
+        score += 10000;
+    }
 
     shopScoreCache.set(shop, score);
     return score;

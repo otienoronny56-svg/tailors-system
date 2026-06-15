@@ -1467,7 +1467,7 @@
                 }
 
                 if (typeof calculateShopScore === 'function') {
-                    allShops.sort((a, b) => calculateShopScore(b, allReviews) - calculateShopScore(a, allReviews));
+                    allShops.sort((a, b) => calculateShopScore(b, allReviews, userLikes) - calculateShopScore(a, allReviews, userLikes));
                 }
 
                 if (typeof calculateBespokeScore === 'function') {
@@ -2056,7 +2056,7 @@
                 });
 
                 // Sort Shops by Bespoke Score (Reputation + Profile Quality)
-                filteredShops.sort((a, b) => calculateShopScore(b, allReviews) - calculateShopScore(a, allReviews));
+                filteredShops.sort((a, b) => calculateShopScore(b, allReviews, userLikes) - calculateShopScore(a, allReviews, userLikes));
 
                 renderShops(filteredShops);
             } else {

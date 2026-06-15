@@ -2415,7 +2415,7 @@
 
                     shops.sort((a, b) => {
                         if (typeof calculateShopScore === 'function') {
-                            return calculateShopScore(b, Array.isArray(reviews) ? reviews : []) - calculateShopScore(a, Array.isArray(reviews) ? reviews : []);
+                            return calculateShopScore(b, Array.isArray(reviews) ? reviews : [], []) - calculateShopScore(a, Array.isArray(reviews) ? reviews : [], []);
                         }
                         if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
                         return b.reviewCount - a.reviewCount;
