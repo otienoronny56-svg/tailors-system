@@ -297,8 +297,10 @@
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             width: fit-content;
+            max-width: 100%;
             margin-bottom: 30px;
             gap: 5px;
+            flex-wrap: wrap;
         }
 
         .toggle-btn {
@@ -315,6 +317,10 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex: 1;
+            justify-content: center;
+            min-width: 140px;
+            white-space: nowrap;
         }
 
         .toggle-btn.active {
