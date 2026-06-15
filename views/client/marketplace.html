@@ -1685,18 +1685,20 @@
                             ${favBtn}
                             <div class="card-banner" style="${bannerStyle}"></div>
                         </div>
-                        <div class="card-avatar" style="position:relative; overflow:hidden; border-color: ${avatarUrl ? 'var(--brand-gold)' : 'var(--glass-border)'}; display:flex; align-items:center; justify-content:center;">
+                        <div class="card-avatar" style="overflow:hidden; border-color: ${avatarUrl ? 'var(--brand-gold)' : 'var(--glass-border)'}; display:flex; align-items:center; justify-content:center;">
                             ${avatarHTML}
                         </div>
-                        <div class="card-body">
-                            <h3 class="card-title">${escapeHTML(shop.name)}</h3>
-                            <div class="card-location">
+                        <div class="card-body" style="padding-top: 30px;">
+                            <h3 class="card-title" style="white-space: normal; line-height: 1.2; font-size: 1.1em; margin-bottom: 6px;">${escapeHTML(shop.name)}</h3>
+                            <div class="card-location" style="margin-bottom: 8px;">
                                 <i class="fas fa-map-marker-alt"></i> ${escapeHTML(formattedLoc)}
                             </div>
-                            <p class="card-desc">${escapeHTML(shop.description || 'Bespoke designs and luxury tailoring services.')}</p>
-                            <div class="card-footer">
-                                ${ratingBadge}
-                                <a href="../../views/manager/shop.html?id=${shop.id}" class="card-btn">Visit Shop <i class="fas fa-chevron-right"></i></a>
+                            <p class="card-desc" style="font-size: 0.85em; margin-bottom: 15px;">${escapeHTML(shop.description || 'Bespoke designs and luxury tailoring services.')}</p>
+                            <div class="card-footer" style="display: flex; align-items: stretch; justify-content: space-between; gap: 8px; flex-wrap: wrap; flex-direction: column; margin-top: auto;">
+                                <div style="display: flex; justify-content: center; width: 100%;">
+                                    ${ratingBadge}
+                                </div>
+                                <a href="../../views/manager/shop.html?id=${shop.id}" class="card-btn" style="width: 100%; justify-content: center; white-space: normal !important; text-align: center; padding: 8px;">Visit Shop <i class="fas fa-chevron-right"></i></a>
                             </div>
                         </div>
                     </div>`;
