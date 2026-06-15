@@ -18,7 +18,7 @@ function calculateBespokeScore(list, allShops = [], allReviews = [], globalLikes
     const avgRating = shopReviews.length > 0
         ? (shopReviews.reduce((sum, r) => sum + r.rating, 0) / shopReviews.length)
         : 0;
-    
+
     if (avgRating > 0) {
         const ratingScore = (avgRating / 5) * 20; // up to 20 pts
         const volumeBonus = Math.min(shopReviews.length * 0.5, 10); // up to 10 pts
@@ -53,11 +53,11 @@ function calculateShopScore(shop, allReviews = []) {
     let score = 0;
     const shopReviews = allReviews.filter(r => r.shop_id === shop.id);
     const avgRating = shopReviews.length > 0 ? (shopReviews.reduce((sum, r) => sum + r.rating, 0) / shopReviews.length) : 0;
-    
+
     // 1. Reputation (Max 50 pts)
     if (avgRating > 0) {
-        const ratingScore = (avgRating / 5) * 35; 
-        const volumeBonus = Math.min(shopReviews.length * 1, 15); 
+        const ratingScore = (avgRating / 5) * 35;
+        const volumeBonus = Math.min(shopReviews.length * 1, 15);
         score += (ratingScore + volumeBonus);
     } else {
         score += 20; // Baseline for new shops

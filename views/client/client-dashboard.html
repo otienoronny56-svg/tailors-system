@@ -1580,6 +1580,7 @@
     </div>
 
     <script src="../../js/core/config.js?v=1781434537375"></script>
+    <script src="../../js/core/algorithm.js"></script>
 <script>
         let supabaseClient;
         let currentUser = null;
@@ -2651,6 +2652,23 @@
                     if (!likesErr && likes) {
                         userLikes = likes.map(l => l.listing_id);
                     }
+                }
+
+                // Fetch global likes for algorithm
+                let { data: globalLikesData } = await supabaseClient
+                    .from('marketplace_likes')
+                    .select('listing_id');
+                let globalLikesCount = {};
+                if (globalLikesData) {
+                    globalLikesData.forEach(l => { globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1; });
+                }
+
+                if (typeof calculateShopScore === 'function') {
+                    allMarketplaceShops.sort((a, b) => calculateShopScore(b, allMarketplaceReviews) - calculateShopScore(a, allMarketplaceReviews));
+                }
+                
+                if (typeof calculateBespokeScore === 'function') {
+                    allMarketplaceListings.sort((a, b) => calculateBespokeScore(b, allMarketplaceShops, allMarketplaceReviews, globalLikesCount) - calculateBespokeScore(a, allMarketplaceShops, allMarketplaceReviews, globalLikesCount));
                 }
 
                 renderMarketplaceShops(allMarketplaceShops);

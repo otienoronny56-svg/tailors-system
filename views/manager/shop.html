@@ -1407,6 +1407,7 @@
 
     <!-- Scripting -->
     <script src="../../js/core/config.js?v=1781434537375"></script>
+    <script src="../../js/core/algorithm.js"></script>
     <script>
         let supabaseClient;
         let shopId;
@@ -1598,6 +1599,9 @@
 
                 if (!error && data && data.length > 0) {
                     shopListings = data;
+                    if (typeof calculateBespokeScore === 'function') {
+                        shopListings.sort((a, b) => calculateBespokeScore(b, [shopDetails], shopReviews, {}) - calculateBespokeScore(a, [shopDetails], shopReviews, {}));
+                    }
                 } else {
                     shopListings = getMockListings();
                 }
