@@ -553,7 +553,7 @@
 
         /* ===== SECTIONS COMMON ===== */
         section.content-section {
-            padding: 60px 8%;
+            padding: 40px 8%;
             max-width: 1400px;
             margin: 0 auto;
         }
@@ -609,7 +609,7 @@
 
         /* ===== CATEGORIES SECTION ===== */
         .categories-section {
-            padding: 60px 8% 20px;
+            padding: 40px 8% 0px;
             max-width: 1400px;
             margin: 0 auto;
         }
@@ -985,6 +985,10 @@
             font-weight: 600;
         }
         
+        .footer-actions-wrap {
+            display: contents;
+        }
+
         .footer-button {
             grid-column: 1 / -1;
             grid-row: 2;
@@ -999,19 +1003,33 @@
 
         @media (min-width: 769px) {
             .listing-footer {
+                display: flex;
+                justify-content: space-between;
                 align-items: flex-end;
                 gap: 8px;
             }
             .footer-prices {
-                grid-row: 1 / 3;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                flex: 1;
+                min-width: 0; /* allows text truncation if needed */
+            }
+            .footer-actions-wrap {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 6px;
+                flex-shrink: 0;
             }
             .footer-button {
-                grid-column: 2;
-                grid-row: 2;
                 width: auto;
             }
             .footer-button .btn-inquire {
                 width: auto;
+            }
+            .footer-views {
+                justify-self: auto;
             }
         }
 
@@ -1502,16 +1520,21 @@
             section.content-section,
             .value-section,
             .hiw-section {
-                padding: 40px 5%;
+                padding: 24px 5%;
+            }
+
+            .section-header-row {
+                margin-bottom: 24px;
+                gap: 16px;
             }
 
             .categories-section {
-                padding: 40px 5% 10px;
+                padding: 24px 5% 0px;
             }
 
             .cta-section {
-                margin: 0 5% 60px;
-                padding: 50px 20px;
+                margin: 0 5% 40px;
+                padding: 40px 20px;
             }
 
             footer {
@@ -2315,17 +2338,19 @@
                         <div class="listing-footer">
                             <div class="footer-prices">
                             ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
-                                <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.85em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
-                                <span class="listing-price" style="color: #ef4444; font-weight: 800; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
+                                <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
+                                <span class="listing-price" style="color: #ef4444; font-weight: 800; line-height: 1; overflow: hidden; text-overflow: ellipsis;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
                             ` : `
-                                <span class="listing-price" style="font-weight: 800; line-height: 1;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                <span class="listing-price" style="font-weight: 800; line-height: 1; overflow: hidden; text-overflow: ellipsis;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                             `}
                             </div>
-                            <div class="footer-views">
-                                <span id="view-count-${list.id}"><i class="fas fa-eye"></i> ${views}</span>
-                            </div>
-                            <div class="footer-button">
-                                <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '${linkTarget}'); return false;">${actionText} <i class="fas fa-chevron-right"></i></a>
+                            <div class="footer-actions-wrap">
+                                <div class="footer-views">
+                                    <span id="view-count-${list.id}"><i class="fas fa-eye"></i> ${views}</span>
+                                </div>
+                                <div class="footer-button">
+                                    <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '${linkTarget}'); return false;">${actionText} <i class="fas fa-chevron-right"></i></a>
+                                </div>
                             </div>
                         </div>
                     </div>
