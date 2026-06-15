@@ -1694,20 +1694,18 @@
                             ${favBtn}
                             <div class="card-banner" style="${bannerStyle}"></div>
                         </div>
-                        <div class="card-avatar" style="overflow:hidden; border-color: ${avatarUrl ? 'var(--brand-gold)' : 'var(--glass-border)'}; display:flex; align-items:center; justify-content:center;">
+                        <div class="card-avatar" style="width: 50px; height: 50px; top: 115px; left: 12px; overflow:hidden; border-color: ${avatarUrl ? 'var(--brand-gold)' : 'var(--glass-border)'}; display:flex; align-items:center; justify-content:center;">
                             ${avatarHTML}
                         </div>
                         <div class="card-body" style="padding-top: 30px;">
-                            <h3 class="card-title" style="white-space: normal; line-height: 1.2; font-size: 1.1em; margin-bottom: 6px;">${escapeHTML(shop.name)}</h3>
-                            <div class="card-location" style="margin-bottom: 8px;">
+                            <h3 class="card-title" style="white-space: normal; line-height: 1.2; font-size: 0.9em; margin-bottom: 6px; font-weight: 700;">${escapeHTML(shop.name)}</h3>
+                            <div class="card-location" style="margin-bottom: 8px; font-size: 0.8em;">
                                 <i class="fas fa-map-marker-alt"></i> ${escapeHTML(formattedLoc)}
                             </div>
-                            <p class="card-desc" style="font-size: 0.85em; margin-bottom: 15px;">${escapeHTML(shop.description || 'Bespoke designs and luxury tailoring services.')}</p>
-                            <div class="card-footer" style="display: flex; align-items: stretch; justify-content: space-between; gap: 8px; flex-wrap: wrap; flex-direction: column; margin-top: auto;">
-                                <div style="display: flex; justify-content: center; width: 100%;">
-                                    ${ratingBadge}
-                                </div>
-                                <a href="../../views/manager/shop.html?id=${shop.id}" class="card-btn" style="width: 100%; justify-content: center; white-space: normal !important; text-align: center; padding: 8px;">Visit Shop <i class="fas fa-chevron-right"></i></a>
+                            <p class="card-desc" style="font-size: 0.8em; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHTML(shop.description || 'Bespoke designs and luxury tailoring services.')}</p>
+                            <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin-top: auto;">
+                                ${ratingBadge}
+                                <a href="../../views/manager/shop.html?id=${shop.id}" class="card-btn" style="flex: 1; justify-content: center; white-space: nowrap !important; text-align: center; padding: 6px; font-size: 0.75em;">Visit <i class="fas fa-chevron-right"></i></a>
                             </div>
                         </div>
                     </div>`;
