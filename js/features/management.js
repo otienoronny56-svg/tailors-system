@@ -490,7 +490,25 @@ async function loadWorkerAssignments() {
     const params = new URLSearchParams(window.location.search);
     const workerId = params.get('id');
 
-    if (!workerId || !USER_PROFILE?.shop_id) return;
+    if (!workerId) {
+        const header = document.getElementById('worker-header-name');
+        if (header) header.textContent = 'No Worker Selected';
+        const tbody = document.getElementById('assignments-tbody');
+        if (tbody) tbody.innerHTML = `
+            <tr><td colspan="6" style="text-align:center; padding:40px;">
+                <div style="font-size:2em; margin-bottom:10px;">🔍</div>
+                <p style="color:#64748b; margin-bottom:15px;">No worker ID found in the URL.<br>Please go back and click "View Work" on a worker.</p>
+                <button onclick="history.back()" style="background:var(--brand-navy);color:var(--brand-gold);border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;">
+                    ← Back to Workers List
+                </button>
+            </td></tr>`;
+        return;
+    }
+    if (!USER_PROFILE?.shop_id) {
+        const tbody = document.getElementById('assignments-tbody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#ef4444;">Session not ready. Please refresh the page.</td></tr>';
+        return;
+    }
 
     try {
         const [{ data: worker }, { data: orders }] = await Promise.all([
@@ -883,11 +901,29 @@ async function createShopAndManager(e) {
 }
 
 window.openResetPasswordModal = function(userId, userName) {
-    if (!userId) return;
+    console.log("Key Reset Clicked", userId, userName);
+    if (!userId) {
+        alert("Error: No user ID!");
+        return;
+    }
+    const modal = document.getElementById('password-reset-modal');
+    if (!modal) {
+        alert("Error: Modal not found in HTML!");
+        return;
+    }
     document.getElementById('reset-user-id').value = userId;
     document.getElementById('reset-user-name').textContent = userName;
     document.getElementById('new-reset-password').value = '';
-    document.getElementById('password-reset-modal').style.display = 'flex';
+    
+    // Force ALL possible CSS visibility properties
+    modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.visibility = 'visible';
+    modal.style.pointerEvents = 'auto';
+    modal.style.zIndex = '99999999'; 
+    modal.classList.add('active'); // Just in case
+    
+    console.log("Modal display forced to flex with full opacity/visibility");
 }
 
 window.handlePasswordReset = async function() {

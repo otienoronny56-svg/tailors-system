@@ -127,17 +127,59 @@ async function updateSidebarBranding(forcedName = null) {
                 `;
             } else {
                 navHtml = `
-                    <a href="/views/manager/manager-dashboard.html" id="nav-dashboard"><i class="fas fa-list-check" style="margin-right: 8px;"></i> Active Orders</a>
-                    <a href="/views/manager/all-orders.html" id="nav-all-orders"><i class="fas fa-history" style="margin-right: 8px;"></i> All Orders</a>
-                    <a href="/views/client/marketplace.html" id="nav-marketplace-browse" target="_blank"><i class="fas fa-shopping-bag" style="margin-right: 8px;"></i> Browse Marketplace</a>
-                    <a href="/views/worker/worker-management.html" id="nav-workers"><i class="fas fa-users" style="margin-right: 8px;"></i> Tailors Directory</a>
-                    <a href="/views/worker/worker-assignments.html" id="nav-assignments"><i class="fas fa-tasks" style="margin-right: 8px;"></i> Job Assignments</a>
+                    <div class="sidebar-dropdown">
+                        <button class="dropdown-trigger" id="nav-orders-dropdown" onclick="toggleSidebarDropdown(this)">
+                            <span><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Orders</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="/views/manager/manager-dashboard.html" id="nav-dashboard"><i class="fas fa-list-check" style="margin-right: 8px;"></i> Active Orders</a>
+                            <a href="/views/manager/all-orders.html" id="nav-all-orders"><i class="fas fa-history" style="margin-right: 8px;"></i> All Orders</a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-dropdown">
+                        <button class="dropdown-trigger" id="nav-team-dropdown" onclick="toggleSidebarDropdown(this)">
+                            <span><i class="fas fa-users" style="margin-right: 8px;"></i> My Team</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="/views/worker/worker-management.html" id="nav-workers"><i class="fas fa-id-badge" style="margin-right: 8px;"></i> Tailors Directory</a>
+                            <a href="/views/worker/worker-assignments.html" id="nav-assignments"><i class="fas fa-tasks" style="margin-right: 8px;"></i> Job Assignments</a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-dropdown">
+                        <button class="dropdown-trigger" id="nav-clients-dropdown" onclick="toggleSidebarDropdown(this)">
+                            <span><i class="fas fa-comments" style="margin-right: 8px;"></i> Clients &amp; Inbox</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="/views/manager/manager-messages.html" id="nav-messages"><i class="fas fa-envelope" style="margin-right: 8px;"></i> Messages Inbox</a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-dropdown">
+                        <button class="dropdown-trigger" id="nav-products-dropdown" onclick="toggleSidebarDropdown(this)">
+                            <span><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Products &amp; Stock</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="/views/manager/manager-inventory.html" id="nav-inventory"><i class="fas fa-box-open" style="margin-right: 8px;"></i> Shop Inventory</a>
+                            <a href="/views/manager/manager-listings.html" id="nav-listings"><i class="fas fa-tags" style="margin-right: 8px;"></i> Shop Catalog</a>
+                        </div>
+                    </div>
+
                     <a href="/views/manager/expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
-                    
+                    <a href="/views/client/marketplace.html" id="nav-marketplace-browse" target="_blank"><i class="fas fa-shopping-bag" style="margin-right: 8px;"></i> Browse Marketplace</a>
+
                     <a href="/views/manager/order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> Create Order</a>
 
                     <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
                 `;
+
+
+
             }
 
             navEl.innerHTML = navHtml;

@@ -353,6 +353,12 @@ async function routeToPage(path) {
             await loadWorkerScreen();
         } else if (path.includes('worker-assignments')) {
             await loadWorkerAssignments();
+        } else if (path.includes('manager-inventory')) {
+            await loadManagerInventoryScreen();
+        } else if (path.includes('manager-listings')) {
+            await loadManagerListingsScreen();
+        } else if (path.includes('manager-messages')) {
+            // Page handles its own init (inline script like admin-messages)
         } else if (path.includes('order-form')) {
             initOrderForm();
         } else if (path.includes('expenses')) {
@@ -360,6 +366,7 @@ async function routeToPage(path) {
         } else if (path.includes('order-details')) {
             await loadOrderDetailsScreen();
         }
+
     }
 }
 

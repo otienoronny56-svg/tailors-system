@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tailor Inbox | Tailors Management System</title>
+    <title>Shop Inbox | Manager</title>
     <link rel="icon" type="image/png" href="../../logo.png?v=2">
     <link rel="stylesheet" href="../../styles.css">
     <script src="/js/lib/supabase.min.js"></script>
@@ -381,7 +381,7 @@
                 <div>
                     <h1><i class="fas fa-comments" style="color: var(--brand-gold); margin-right: 10px;"></i>In-App
                         Messages</h1>
-                    <p>Communicate directly with marketplace consumers inquiring about your tailored items.</p>
+                    <p>Manage and reply to client messages for your shop specifically.</p>
                 </div>
             </header>
 
@@ -390,7 +390,7 @@
                 <aside class="inbox-sidebar" style="position:relative;">
                     <div class="inbox-sidebar-title" style="display:flex; justify-content:space-between; align-items:center;">
                         <span><i class="fas fa-inbox"></i> Inbox Threads</span>
-                        <button id="btn-thread-select-mode" onclick="toggleThreadSelectionMode()" style="background:none; border:none; color:var(--brand-navy); cursor:pointer; font-size:0.9em; font-weight:600;"><i class="fas fa-check-square"></i> Select</button>
+                        
                     </div>
                     <div class="thread-list" id="thread-list-container">
                         <div style="text-align: center; padding: 40px; color: #94a3b8;">
@@ -490,11 +490,7 @@
                     window.location.href = '/';
                     return;
                 }
-                // If user is a manager, redirect them to their own shop inbox
-                if (USER_PROFILE.role === 'manager') {
-                    window.location.href = '/views/manager/manager-messages.html';
-                    return;
-                }
+                // Manager is allowed here - this IS their inbox page
                 loadInboxScreen();
             } else {
                 console.error("Session load timed out or USER_PROFILE is missing.");
@@ -1231,7 +1227,7 @@
 
                 modal.remove();
                 alert(`Order created for ${name}! Redirecting to orders list.`);
-                window.location.href = '/views/admin/admin-orders.html';
+                window.location.href = '/views/manager/all-orders.html';
 
             } catch (err) {
                 if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fas fa-folder-plus"></i> Create Order & Add to Orders List'; }

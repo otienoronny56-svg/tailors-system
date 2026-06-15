@@ -7,15 +7,46 @@
     <title>Worker Management</title>
     <link rel="icon" type="image/png" href="../../logo.png?v=2">
     <link rel="stylesheet" href="../../styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/lib/supabase.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Sanitized: Mobile overrides moved to styles.css */
+        /* MOBILE HAMBURGER MENU */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: var(--brand-navy);
+            color: var(--brand-gold);
+            border: 1px solid var(--brand-gold);
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                position: fixed;
+                z-index: 999;
+                height: 100%;
+                width: 260px;
+            }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { padding: 20px; padding-top: 60px; }
+        }
     </style>
     <link rel="manifest" href="../../manifest.json">
 </head>
 
 <body>
+    <div class="mobile-menu-btn" id="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+    </div>
 
     <div class="dashboard-container">
         <aside class="sidebar" id="sidebar">
@@ -89,7 +120,23 @@
 
         <main class="main-content">
             <header>
-                <h1>Worker Management</h1>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 15px;">
+                    <h1 class="dashboard-main-title" style="margin: 0; font-size: 1.5em; color: var(--brand-navy);">Worker Management</h1>
+                    <div class="top-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="toggleTheme()" title="Toggle Dark Mode"
+                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
+                            onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
+                            <i class="fa-solid fa-moon theme-toggle-icon"></i>
+                        </button>
+                        <button onclick="handleLogout()" title="Logout"
+                            style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                            onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        </button>
+                    </div>
+                </div>
             </header>
 
             <!-- Add Worker Section -->
@@ -151,26 +198,27 @@
     <nav class="bottom-nav">
         <a href="../../views/manager/manager-dashboard.html" class="nav-item">
             <i class="fas fa-home"></i>
-            <span>Home</span>
+            <span>Active</span>
         </a>
         <a href="../../views/manager/all-orders.html" class="nav-item">
-            <i class="fas fa-list-ul"></i>
-            <span>List</span>
+            <i class="fas fa-folder-open"></i>
+            <span>History</span>
         </a>
         <a href="../../views/manager/order-form.html" class="nav-item center-fab">
             <div class="fab-circle">
                 <i class="fas fa-plus"></i>
             </div>
         </a>
-        <a href="worker-management.html" class="nav-item active">
-            <i class="fas fa-users"></i>
-            <span>Team</span>
+        <a href="../../views/manager/manager-inventory.html" class="nav-item">
+            <i class="fas fa-boxes-stacked"></i>
+            <span>Stock</span>
         </a>
         <a href="../../views/manager/expenses.html" class="nav-item">
             <i class="fas fa-coins"></i>
             <span>Costs</span>
         </a>
     </nav>
+
 
     <script src="../../js/core/config.js?v=1781434537375"></script>
     

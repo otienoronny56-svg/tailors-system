@@ -6,15 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client Database</title>
     <link rel="stylesheet" href="../../styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/lib/supabase.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Sanitized: Mobile overrides moved to styles.css */
+        /* MOBILE HAMBURGER MENU */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: var(--brand-navy);
+            color: var(--brand-gold);
+            border: 1px solid var(--brand-gold);
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                position: fixed;
+                z-index: 999;
+                height: 100%;
+                width: 260px;
+            }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { padding: 20px; padding-top: 20px; }
+        }
     </style>
     <link rel="manifest" href="../../manifest.json">
 </head>
 
-<body>`n    <div class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+<body>
     <div class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></div>
     <div class="dashboard-container">
         <aside class="sidebar" id="sidebar">
@@ -151,6 +179,7 @@
             loadClients();
         });
     </script>
-    <script src="../../mobile-nav.js?v=1781434537375"></script>`n</body>
+    <script src="../../mobile-nav.js?v=1781434537375"></script>
+</body>
 
 </html>
