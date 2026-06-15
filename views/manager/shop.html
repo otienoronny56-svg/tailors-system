@@ -532,8 +532,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 8px;
+            padding-top: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .footer-prices {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .footer-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (min-width: 769px) {
+            .footer-actions {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 6px;
+            }
+            .listing-footer {
+                align-items: flex-end;
+            }
         }
 
         .price-text {
@@ -1896,8 +1921,8 @@
                                 ${ratingDisplay}
                             </div>
                             <p class="listing-desc">${list.description || 'Handcrafted bespoke garment designed and fit perfectly for you.'}</p>
-                            <div class="listing-footer" style="align-items: flex-end; padding-top: 14px;">
-                                <div style="display: flex; flex-direction: column; gap: 2px; justify-content: flex-end; padding-bottom: 4px;">
+                            <div class="listing-footer">
+                                <div class="footer-prices">
                                     ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
                                         <span style="text-decoration: line-through; color: var(--brand-slate); font-size: 0.85em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
                                         <span class="price-text" style="color: #ef4444; font-weight: 800; font-size: 1.05em; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
@@ -1905,11 +1930,9 @@
                                         <span class="price-text" style="color: var(--brand-gold); font-weight: 800; font-size: 1.1em; line-height: 1;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                                     `}
                                 </div>
-                                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                                    <div style="display: flex; align-items: center; gap: 12px;">
-                                        <button type="button" onclick="event.stopPropagation(); toggleLike('${list.id}')" id="like-btn-${list.id}" title="${isLiked ? 'Remove from Favourites' : 'Add to Favourites'}" style="background:transparent; border:none; cursor:pointer; color:${isLiked ? '#ef4444' : 'var(--brand-slate)'}; font-size:1.2em; padding:0; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><i class="${isLiked ? 'fas' : 'far'} fa-heart"></i></button>
-                                        <button type="button" class="listing-select-btn" onclick="event.stopPropagation(); trackListingView('${list.id}', () => selectListingForInquiry('${list.id}', '${list.title.replace(/'/g, "\\'")}'))">Inquire</button>
-                                    </div>
+                                <div class="footer-actions">
+                                    <button type="button" onclick="event.stopPropagation(); toggleLike('${list.id}')" id="like-btn-${list.id}" title="${isLiked ? 'Remove from Favourites' : 'Add to Favourites'}" style="background:transparent; border:none; cursor:pointer; color:${isLiked ? '#ef4444' : 'var(--brand-slate)'}; font-size:1.2em; padding:0; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><i class="${isLiked ? 'fas' : 'far'} fa-heart"></i></button>
+                                    <button type="button" class="listing-select-btn" onclick="event.stopPropagation(); trackListingView('${list.id}', () => selectListingForInquiry('${list.id}', '${list.title.replace(/'/g, "\\'")}'))">Inquire</button>
                                 </div>
                             </div>
                         </div>

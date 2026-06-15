@@ -553,7 +553,7 @@
 
         /* ===== SECTIONS COMMON ===== */
         section.content-section {
-            padding: 100px 8%;
+            padding: 60px 8%;
             max-width: 1400px;
             margin: 0 auto;
         }
@@ -609,7 +609,7 @@
 
         /* ===== CATEGORIES SECTION ===== */
         .categories-section {
-            padding: 70px 8% 40px;
+            padding: 60px 8% 20px;
             max-width: 1400px;
             margin: 0 auto;
         }
@@ -960,8 +960,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 8px;
+            padding-top: 12px;
             border-top: 1px solid var(--border-glass);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .footer-prices {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .footer-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (min-width: 769px) {
+            .footer-actions {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 6px;
+            }
+            .listing-footer {
+                align-items: flex-end;
+            }
         }
 
         .listing-price {
@@ -2233,8 +2258,8 @@
                     <div class="listing-body">
                         <div class="listing-title">${escapeHTML(list.title)}</div>
                         <div class="listing-desc">${escapeHTML(list.description || 'Crafted with premium materials to your exact specifications.')}</div>
-                        <div class="listing-footer" style="align-items: flex-end; padding-top: 14px;">
-                            <div style="display: flex; flex-direction: column; gap: 2px; justify-content: flex-end; padding-bottom: 4px;">
+                        <div class="listing-footer">
+                            <div class="footer-prices">
                             ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
                                 <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.85em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
                                 <span class="listing-price" style="color: #ef4444; font-weight: 800; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
@@ -2242,7 +2267,7 @@
                                 <span class="listing-price" style="font-weight: 800; line-height: 1;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                             `}
                             </div>
-                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                            <div class="footer-actions">
                                 <span id="view-count-${list.id}" style="font-size:0.75em; color:var(--text-muted); display:flex; align-items:center; gap:4px; font-weight:600;"><i class="fas fa-eye"></i> ${views} views</span>
                                 <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '${linkTarget}'); return false;">${actionText} <i class="fas fa-chevron-right"></i></a>
                             </div>
