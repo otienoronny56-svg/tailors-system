@@ -582,12 +582,14 @@
                 const lastMsgMap = {};
                 let totalUnread = 0;
                 
+                const nuclearReadIds = JSON.parse(localStorage.getItem('tailors_nuclear_read_msgs_admin_' + USER_PROFILE.id) || '[]');
+                
                 msgs.forEach(msg => {
                     // Find which unified group this message belongs to
                     const parentInq = unifiedInquiries.find(i => i.all_inquiry_ids.includes(msg.inquiry_id));
                     if (!parentInq) return;
 
-                    if (!msg.is_read && msg.recipient_id === USER_PROFILE.id) {
+                    if (!msg.is_read && msg.recipient_id === USER_PROFILE.id && !nuclearReadIds.includes(msg.id)) {
                         unreadMap[parentInq.id] = (unreadMap[parentInq.id] || 0) + 1;
                         totalUnread++;
                     }
@@ -1226,6 +1228,13 @@
                     .map(m => m.id);
                 
                 if (unreadIds.length > 0) {
+                    // Nuclear Frontend Bypass
+                    const nuclearReadIds = JSON.parse(localStorage.getItem('tailors_nuclear_read_msgs_admin_' + USER_PROFILE.id) || '[]');
+                    unreadIds.forEach(id => {
+                        if (!nuclearReadIds.includes(id)) nuclearReadIds.push(id);
+                    });
+                    localStorage.setItem('tailors_nuclear_read_msgs_admin_' + USER_PROFILE.id, JSON.stringify(nuclearReadIds));
+
                     // update database
                     const { error: updateErr } = await supabaseClient.from('messages').update({ is_read: true }).in('id', unreadIds);
                     if (updateErr) console.error("Could not update read status:", updateErr);
