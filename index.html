@@ -86,7 +86,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 20px 8%;
+            padding: 14px 8%;
             background: rgba(3, 7, 18, 0.75);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -99,7 +99,7 @@
         }
 
         header.scrolled {
-            padding: 14px 8%;
+            padding: 10px 8%;
             background: rgba(3, 7, 18, 0.9);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
@@ -113,15 +113,15 @@
         .logo-text {
             font-family: var(--font-display);
             font-weight: 700;
-            font-size: 1.55em;
+            font-size: 1.35em;
             color: var(--gold);
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
         .logo-sub {
-            font-size: 0.6em;
-            letter-spacing: 3px;
+            font-size: 0.55em;
+            letter-spacing: 2px;
             color: var(--text-muted);
             text-transform: uppercase;
             font-weight: 600;
@@ -1398,10 +1398,10 @@
 
         @media (max-width: 1200px) {
             header {
-                padding: 16px 5%;
+                padding: 12px 5%;
             }
             header.scrolled {
-                padding: 12px 5%;
+                padding: 10px 5%;
             }
 
             .nav-links {
@@ -1439,8 +1439,28 @@
         }
 
         @media (max-width: 768px) {
+            header {
+                padding: 10px 5%;
+            }
+            header.scrolled {
+                padding: 8px 5%;
+            }
+
+            .logo-text {
+                font-size: 1.25em;
+            }
+
+            .logo-sub {
+                font-size: 0.5em;
+                letter-spacing: 1px;
+            }
+
+            .mobile-auth-icon {
+                font-size: 1.3em;
+            }
+
             .hero {
-                padding: 120px 5% 60px;
+                padding: 110px 5% 60px;
                 min-height: 85vh;
             }
 
@@ -1464,11 +1484,19 @@
                 margin-bottom: 28px;
             }
 
+            .hero-cta {
+                flex-wrap: nowrap;
+                gap: 10px;
+            }
+
             .btn-hero-primary,
             .btn-hero-secondary {
-                width: 100%;
+                flex: 1;
                 justify-content: center;
-                padding: 15px 24px;
+                padding: 12px 8px;
+                font-size: 0.85em;
+                text-align: center;
+                white-space: nowrap;
             }
 
             section.content-section,
