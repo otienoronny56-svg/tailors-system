@@ -56,6 +56,26 @@ async function checkUnreadMessages() {
                     const spanEl = navDropdown.querySelector('span');
                     if (spanEl) spanEl.appendChild(outerBadge);
                 }
+                
+                // Add badge to mobile hamburger menu
+                const mobileBtn = document.getElementById('mobile-menu-btn');
+                if (mobileBtn && !mobileBtn.querySelector('.msg-badge-mobile')) {
+                    const mobileBadge = document.createElement('span');
+                    mobileBadge.className = 'msg-badge-mobile';
+                    mobileBadge.style.cssText = 'position:absolute; top: -2px; right: -2px; background:#ef4444; width:12px; height:12px; border-radius:50%; border:2px solid var(--brand-navy); animation: pulse 2s infinite;';
+                    mobileBtn.style.position = 'fixed'; // Ensure it can host absolute children
+                    mobileBtn.appendChild(mobileBadge);
+                }
+                
+                // Add badge to bottom nav
+                const bottomNavClients = document.querySelector('.bottom-nav a[href*="admin-clients.html"] i');
+                if (bottomNavClients && !bottomNavClients.parentElement.querySelector('.msg-badge-bottom')) {
+                    const bottomBadge = document.createElement('span');
+                    bottomBadge.className = 'msg-badge-bottom';
+                    bottomBadge.style.cssText = 'position:absolute; top: 5px; right: 25px; background:#ef4444; width:10px; height:10px; border-radius:50%; border:2px solid white; animation: pulse 2s infinite;';
+                    bottomNavClients.parentElement.style.position = 'relative';
+                    bottomNavClients.parentElement.appendChild(bottomBadge);
+                }
             } else {
                 if (navMsg) {
                     const badge = navMsg.querySelector('.msg-badge');
@@ -64,6 +84,16 @@ async function checkUnreadMessages() {
                 if (navDropdown) {
                     const outerBadge = navDropdown.querySelector('.msg-badge-outer');
                     if (outerBadge) outerBadge.remove();
+                }
+                const mobileBtn = document.getElementById('mobile-menu-btn');
+                if (mobileBtn) {
+                    const mobileBadge = mobileBtn.querySelector('.msg-badge-mobile');
+                    if (mobileBadge) mobileBadge.remove();
+                }
+                const bottomNavClients = document.querySelector('.bottom-nav a[href*="admin-clients.html"] i');
+                if (bottomNavClients) {
+                    const bottomBadge = bottomNavClients.parentElement.querySelector('.msg-badge-bottom');
+                    if (bottomBadge) bottomBadge.remove();
                 }
             }
         }
