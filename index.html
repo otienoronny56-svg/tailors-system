@@ -2294,7 +2294,7 @@
                             `}
                             </div>
                             <div class="footer-views">
-                                <i class="fas fa-eye"></i> ${views} views
+                                <span id="view-count-${list.id}"><i class="fas fa-eye"></i> ${views}</span>
                             </div>
                             <div class="footer-button">
                                 <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '${linkTarget}'); return false;">${actionText} <i class="fas fa-chevron-right"></i></a>
