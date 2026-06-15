@@ -436,18 +436,6 @@ button:hover {
     /* Very subtle boundary */
 }
 
-/* --- Dynamic Suggestion Cards (Bento Layout) --- */
-@media (min-width: 768px) {
-    .wide-suggestion-card {
-        grid-column: span 2;
-    }
-    .wide-suggestion-card .suggestion-btn-container {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-}
-
 /* --- SLEEK METRIC CARDS (New Design) --- */
 .metrics-grid {
     display: grid;
@@ -1118,11 +1106,13 @@ p {
     .metrics-grid .metric-card:nth-child(7) {
         grid-column: 1 / -1 !important;
     }
+
     .metrics-grid .metric-card:nth-child(7) div[style*="gap: 15px"] {
         gap: 10px !important;
         padding-top: 10px !important;
         margin-top: 5px !important;
     }
+
     .metrics-grid .metric-card:nth-child(7) div[style*="padding-left: 15px"] {
         padding-left: 10px !important;
     }
@@ -1462,21 +1452,25 @@ body.dark-mode {
     --bg-light: #0f172a;
     --text-dark: #f8fafc;
     --brand-white: #1e293b;
-    --brand-navy: #f8fafc; /* NUCLEAR FIX: Inverts all inline dark-navy text to pure white */
+    --brand-navy: #f8fafc;
+    /* NUCLEAR FIX: Inverts all inline dark-navy text to pure white */
     color: var(--text-dark);
 }
 
 body.dark-mode .main-content {
-    background: #0f172a !important; /* Solid dark background */
+    background: #0f172a !important;
+    /* Solid dark background */
 }
 
 body.dark-mode .sidebar {
-    background-color: #020617 !important; /* Explicitly dark navy/black since we inverted --brand-navy */
+    background-color: #020617 !important;
+    /* Explicitly dark navy/black since we inverted --brand-navy */
     border-right-color: #1e293b !important;
 }
 
 body.dark-mode .sidebar-subtitle {
-    color: #94a3b8 !important; /* Readable light gray on the dark sidebar */
+    color: #94a3b8 !important;
+    /* Readable light gray on the dark sidebar */
 }
 
 /* NUCLEAR FIX: Force all elements that have inline "background: white" to become dark cards */
@@ -1532,13 +1526,22 @@ body.dark-mode textarea::placeholder {
 }
 
 body.dark-mode .metric-card span {
-    color: #94a3b8 !important; /* Muted text for labels */
+    color: #94a3b8 !important;
+    /* Muted text for labels */
 }
 
 /* Overriding specific card colors so they don't look muddy */
-body.dark-mode .card-gold { border-left-color: #D4AF37 !important; }
-body.dark-mode .card-green { border-left-color: #10b981 !important; }
-body.dark-mode .card-red { border-left-color: #ef4444 !important; }
+body.dark-mode .card-gold {
+    border-left-color: #D4AF37 !important;
+}
+
+body.dark-mode .card-green {
+    border-left-color: #10b981 !important;
+}
+
+body.dark-mode .card-red {
+    border-left-color: #ef4444 !important;
+}
 
 body.dark-mode input,
 body.dark-mode select,
@@ -1689,11 +1692,12 @@ body.dark-mode .search-result-item:hover {
         padding: 10px !important;
     }
 
-    .filter-bar > div:first-child {
-        grid-column: 1 / -1 !important; /* Search bar spans full width */
+    .filter-bar>div:first-child {
+        grid-column: 1 / -1 !important;
+        /* Search bar spans full width */
     }
 
-    .filter-bar > div {
+    .filter-bar>div {
         min-width: 0 !important;
     }
 
@@ -1853,20 +1857,20 @@ body.dark-mode .control-bar select {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 10px !important;
     }
-    
+
     .scorecard {
         padding: 12px 10px !important;
         gap: 6px !important;
     }
-    
+
     .score-title {
         font-size: 0.65em !important;
     }
-    
+
     .score-val {
         font-size: 1.2em !important;
     }
-    
+
     .score-trend {
         font-size: 0.6em !important;
     }
@@ -1925,6 +1929,7 @@ body.dark-mode .control-bar select {
 body.dark-mode .ai-feed {
     background: linear-gradient(135deg, #1e293b 0%, #020617 100%);
 }
+
 .ai-feed .bi-card-title {
     color: var(--brand-gold) !important;
     border-bottom-color: rgba(255, 255, 255, 0.1) !important;
@@ -1996,6 +2001,7 @@ body.dark-mode .ai-feed {
         width: max-content !important;
         margin: 0 auto !important;
     }
+
     .leaderboard-table th,
     .leaderboard-table td {
         padding: 8px 4px !important;
@@ -2033,7 +2039,7 @@ body.dark-mode .control-group select {
     color: #cbd5e1 !important;
 }
 
-body.dark-mode .control-panel > button,
+body.dark-mode .control-panel>button,
 body.dark-mode .control-btn,
 body.dark-mode .chart-container a {
     background: #1e293b !important;
@@ -2041,7 +2047,7 @@ body.dark-mode .chart-container a {
     color: #cbd5e1 !important;
 }
 
-body.dark-mode .control-panel > button:hover,
+body.dark-mode .control-panel>button:hover,
 body.dark-mode .control-btn:hover,
 body.dark-mode .chart-container a:hover {
     background: #334155 !important;
@@ -2155,19 +2161,23 @@ body.dark-mode .rank-5 {
     .inv-header {
         margin-bottom: 10px;
     }
+
     .inv-stats {
         grid-template-columns: repeat(2, 1fr);
         gap: 6px;
         margin-bottom: 12px;
     }
+
     .inv-stat-card {
         padding: 8px 4px;
         border-radius: 8px;
     }
+
     .inv-stat-card .stat-value {
         font-size: 1.1em;
         margin-bottom: 0px;
     }
+
     .inv-stat-card .stat-label {
         font-size: 0.6em;
     }
@@ -2722,6 +2732,7 @@ body.dark-mode .measurement-group h4 {
         gap: 10px;
         scroll-snap-type: x mandatory;
     }
+
     .expense-summary-card {
         padding: 12px;
         flex-direction: column;
@@ -2730,21 +2741,26 @@ body.dark-mode .measurement-group h4 {
         min-width: 140px;
         scroll-snap-align: start;
     }
+
     .ex-icon-circle {
         width: 35px;
         height: 35px;
         font-size: 1em;
     }
+
     .ex-amount {
         font-size: 1.1em;
     }
+
     .measurement-fields {
         grid-template-columns: repeat(3, 1fr);
         gap: 10px;
     }
+
     .measurement-field label {
         font-size: 0.8em;
     }
+
     .measurement-field input {
         padding: 8px;
     }
@@ -2759,7 +2775,8 @@ body.dark-mode .measurement-group h4 {
 }
 
 .form-row .form-group {
-    margin-bottom: 0; /* Override default bottom margin inside grid */
+    margin-bottom: 0;
+    /* Override default bottom margin inside grid */
 }
 
 @media (max-width: 768px) {
