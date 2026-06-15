@@ -1919,20 +1919,23 @@
                 { name: 'Shoes', icon: 'fas fa-shoe-prints' }
             ];
 
-            const itemsPerCard = 4;
-            const startIndex = (chunkIndex * itemsPerCard) % allCategories.length;
-            const chunk = allCategories.slice(startIndex, startIndex + itemsPerCard);
+            const isWide = chunkIndex % 2 !== 0;
+            const currentItemsPerCard = isWide ? 8 : 4; // Wide cards show 8 items
+
+            const startIndex = (chunkIndex * 4) % allCategories.length; // Keep offset logic same to not skip
+            const chunk = allCategories.slice(startIndex, startIndex + currentItemsPerCard);
             
-            if (chunk.length < itemsPerCard) {
-                chunk.push(...allCategories.slice(0, itemsPerCard - chunk.length));
+            if (chunk.length < currentItemsPerCard) {
+                chunk.push(...allCategories.slice(0, currentItemsPerCard - chunk.length));
             }
 
             const gradient = 'linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, var(--card-bg) 100%)';
+            const cardClass = isWide ? 'card suggestion-card wide-suggestion-card' : 'card suggestion-card';
 
             return `
-                <div class="card suggestion-card" style="background: ${gradient}; padding: 16px; display: flex; flex-direction: column; gap: 14px; border: 1px solid rgba(212, 175, 55, 0.3);">
+                <div class="${cardClass}" style="background: ${gradient}; padding: 16px; display: flex; flex-direction: column; gap: 14px; border: 1px solid rgba(212, 175, 55, 0.3);">
                     <h3 style="font-size: 1.15em; color: var(--brand-white); margin-bottom: 2px; font-family: 'Playfair Display', serif;">You may be looking for</h3>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="suggestion-btn-container" style="display: flex; flex-direction: column; gap: 10px; flex: 1;">
                         ${chunk.map(cat => `
                             <button onclick="selectSidebarCategory('${escapeHTML(cat.name)}')" style="display: flex; align-items: center; gap: 12px; background: var(--bg-dark); border: 1px solid rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 30px; cursor: pointer; transition: all 0.2s; width: 100%; text-align: left; color: var(--brand-white); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                                 <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(212, 175, 55, 0.2);">
