@@ -19,7 +19,7 @@ const APP_CONFIG = {
     // === 3. BRANDING IDENTITY ===
     appName: "TAILORS.CO.KE",
     appSubtitle: "KENYA'S STYLE MARKETPLACE",
-    logoPath: "logo.png",
+    logoPath: "logo.jpeg",
 
     // === 4. CONTACT DETAILS (For Receipts) ===
     shopPhone: "0721401495",

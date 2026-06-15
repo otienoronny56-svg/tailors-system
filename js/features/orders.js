@@ -609,6 +609,10 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
                 ${shopConfig.paybill_number ? `<p style="margin: 10px 0 5px 0; font-size: 0.85em; color: #333; font-weight: 600;">Paybill: ${shopConfig.paybill_number}</p>` : ''}
                 ${shopConfig.paybill_account ? `<p style="margin: 0 0 10px 0; font-size: 0.85em; color: #333;">Account: ${shopConfig.paybill_account}</p>` : ''}
                 <p style="margin: 0; font-size: 0.8em; color: #999; font-style: italic; letter-spacing: 0.5px;">Thank you for your business.</p>
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #eee; font-size: 0.75em; color: #aaa;">
+                    Powered by <strong>Stitch &amp; Styles Kenya</strong><br>
+                    <a href="https://stitchandstyle.co.ke" style="color: #D4AF37; text-decoration: none;">www.stitchandstyle.co.ke</a>
+                </div>
             </div>
         </div>
     `;
@@ -666,6 +670,10 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     lines.push(remainingBalance > 0 ? 'Balance Due' : 'âœ… PAID IN FULL');
     lines.push('');
     lines.push('Thank you for your business!');
+    lines.push('');
+    lines.push('---');
+    lines.push('Powered by Stitch & Styles Kenya');
+    lines.push('www.stitchandstyle.co.ke');
     return lines.join('\n');
 }
 
