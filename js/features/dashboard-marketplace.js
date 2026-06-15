@@ -234,7 +234,7 @@ async function loadMarketplaceData() {
         }
 
         if (typeof calculateShopScore === 'function') {
-            allMarketplaceShops.sort((a, b) => calculateShopScore(b, allMarketplaceReviews, userMarketplaceLikes) - calculateShopScore(a, allMarketplaceReviews, userMarketplaceLikes));
+            allMarketplaceShops.sort((a, b) => calculateShopScore(b, allMarketplaceReviews, userFavoriteShops) - calculateShopScore(a, allMarketplaceReviews, userFavoriteShops));
         }
         
         if (typeof calculateBespokeScore === 'function') {
@@ -650,7 +650,7 @@ function filterMarketplace() {
         });
 
         // Sort Shops by Bespoke Score (Reputation + Profile Quality)
-        filteredShops.sort((a, b) => calculateShopScore(b, allMarketplaceReviews, userMarketplaceLikes) - calculateShopScore(a, allMarketplaceReviews, userMarketplaceLikes));
+        filteredShops.sort((a, b) => calculateShopScore(b, allMarketplaceReviews, userFavoriteShops) - calculateShopScore(a, allMarketplaceReviews, userFavoriteShops));
 
         renderMarketplaceShops(filteredShops);
     } else {
