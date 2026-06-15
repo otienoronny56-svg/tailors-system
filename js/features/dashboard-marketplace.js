@@ -551,6 +551,10 @@ function getFeaturedShopsScrollerHtml() {
     `;
 }
 
+// Global state for lazy rendering
+let marketplaceDisplayLimit = 20;
+let marketplaceObserver = null;
+
 // Render Listings Grid
 function renderMarketplaceListings(listings) {
     const container = document.getElementById('marketplace-listings-container');
@@ -562,7 +566,11 @@ function renderMarketplaceListings(listings) {
 
     let html = [];
     let suggestionIndex = 0;
-    listings.forEach((list, index) => {
+    
+    // Slice for lazy rendering
+    const displayedListings = listings.slice(0, marketplaceDisplayLimit);
+    
+    displayedListings.forEach((list, index) => {
         html.push(getListingCardHtml(list));
 
         if (activeMarketplaceMode === 'listings') {
@@ -590,11 +598,31 @@ function renderMarketplaceListings(listings) {
         }
     });
 
+    // Add invisible trigger for intersection observer if there are more items to load
+    if (marketplaceDisplayLimit < listings.length) {
+        html.push(`<div id="marketplace-load-trigger" style="grid-column: 1/-1; height: 20px;"></div>`);
+    }
+
     container.innerHTML = html.join('');
+
+    // Setup Intersection Observer for Infinite Scroll
+    const trigger = document.getElementById('marketplace-load-trigger');
+    if (trigger) {
+        if (marketplaceObserver) marketplaceObserver.disconnect();
+        marketplaceObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                marketplaceDisplayLimit += 20;
+                renderMarketplaceListings(listings); // Re-render with new limit
+            }
+        }, { rootMargin: '200px' });
+        marketplaceObserver.observe(trigger);
+    }
 }
+
 
 // Search & Filter Controller
 function filterMarketplace() {
+    marketplaceDisplayLimit = 20; // Reset pagination on new search
     renderSidebarCategories();
     const query = document.getElementById('marketplace-search-query').value.toLowerCase().trim();
     const location = document.getElementById('marketplace-search-location').value.toLowerCase().trim();
