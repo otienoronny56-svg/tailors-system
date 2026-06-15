@@ -2233,17 +2233,19 @@
                     <div class="listing-body">
                         <div class="listing-title">${escapeHTML(list.title)}</div>
                         <div class="listing-desc">${escapeHTML(list.description || 'Crafted with premium materials to your exact specifications.')}</div>
-                        <div class="listing-footer">
+                        <div class="listing-footer" style="align-items: flex-end; padding-top: 14px;">
+                            <div style="display: flex; flex-direction: column; gap: 2px; justify-content: flex-end; padding-bottom: 4px;">
                             ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
-                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                                    <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.82em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
-                                    <span class="listing-price" style="color: #ef4444; font-weight: 700; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
-                                </div>
+                                <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.85em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
+                                <span class="listing-price" style="color: #ef4444; font-weight: 800; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
                             ` : `
-                                <span class="listing-price">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                <span class="listing-price" style="font-weight: 800; line-height: 1;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
                             `}
-                            <span id="view-count-${list.id}" style="font-size:0.8em;color:var(--text-muted);display:flex;align-items:center;gap:4px;"><i class="fas fa-eye"></i>${views}</span>
-                            <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '${linkTarget}'); return false;">${actionText} <i class="fas fa-chevron-right"></i></a>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                <span id="view-count-${list.id}" style="font-size:0.75em; color:var(--text-muted); display:flex; align-items:center; gap:4px; font-weight:600;"><i class="fas fa-eye"></i> ${views} views</span>
+                                <a href="${linkTarget}" class="btn-inquire" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '${linkTarget}'); return false;">${actionText} <i class="fas fa-chevron-right"></i></a>
+                            </div>
                         </div>
                     </div>
                 </div>`;
