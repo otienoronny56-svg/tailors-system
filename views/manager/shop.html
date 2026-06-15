@@ -1038,49 +1038,70 @@
                 background-position: center !important;
             }
             .shop-container {
+                display: flex;
                 flex-direction: column;
                 margin-top: -65px;
                 padding: 10px;
+                gap: 20px;
+            }
+            .column-section-title {
+                font-size: 1.3em;
+                gap: 8px;
             }
             .shop-info-sidebar {
                 width: 100%;
             }
             .shop-profile-card {
-                padding: 15px;
+                padding: 12px 10px;
                 align-items: center;
                 text-align: center;
             }
             .shop-logo-large {
-                width: 70px;
-                height: 70px;
-                font-size: 1.8em;
-                margin-bottom: 8px;
-            }
-            .shop-name-title {
-                font-size: 1.2em;
-                word-break: break-word;
-                overflow-wrap: break-word;
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
                 margin-bottom: 4px;
             }
+            .shop-name-title {
+                font-size: 1.15em;
+                word-break: break-word;
+                overflow-wrap: break-word;
+                margin-bottom: 0px;
+            }
             .shop-loc-badge {
-                margin-bottom: 12px;
+                margin-bottom: 6px;
                 font-size: 0.85em;
             }
             .shop-description-text, .shop-meta-info {
                 text-align: center;
             }
             .shop-description-text {
-                margin-bottom: 12px;
-                padding-top: 12px;
+                margin-bottom: 8px;
+                padding-top: 8px;
                 font-size: 0.85em;
             }
             .shop-meta-info {
-                gap: 8px;
-                padding-top: 12px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 6px 10px;
+                padding-top: 8px;
+            }
+            .shop-action-buttons {
+                flex-direction: row !important;
+                gap: 8px !important;
+                margin-top: 12px !important;
+                padding-top: 12px !important;
+            }
+            .shop-action-buttons button {
+                flex: 1;
+                font-size: 0.75em !important;
+                padding: 10px 5px !important;
             }
             .meta-row {
                 justify-content: center;
-                font-size: 0.8em;
+                font-size: 0.75em;
+                flex: 0 1 auto;
             }
             .shop-listings-grid {
                 grid-template-columns: 1fr 1fr;
@@ -1216,13 +1237,15 @@
                         <i class="fas fa-phone"></i>
                         <span id="shop-phone">Loading contact...</span>
                     </div>
-                    <div class="meta-row" id="shop-website-row" style="display: none;">
-                        <i class="fas fa-globe"></i>
-                        <a id="shop-website" href="#" target="_blank" style="color: var(--brand-gold); text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--brand-gold)'">Visit Website</a>
+                    <div class="meta-row" id="shop-social-row" style="display: flex; gap: 15px; align-items: center; justify-content: flex-start; padding-top: 10px;">
+                        <a id="shop-website" href="#" target="_blank" title="Visit Website" style="color: var(--brand-gold); font-size: 1.5em; display: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><i class="fas fa-globe"></i></a>
+                        <a id="shop-instagram" href="#" target="_blank" title="Instagram" style="color: #E1306C; font-size: 1.5em; display: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><i class="fab fa-instagram"></i></a>
+                        <a id="shop-tiktok" href="#" target="_blank" title="TikTok" style="color: #ffffff; font-size: 1.5em; display: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><i class="fab fa-tiktok"></i></a>
+                        <a id="shop-whatsapp" href="#" target="_blank" title="WhatsApp" style="color: #25D366; font-size: 1.5em; display: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
 
-                <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
+                <div class="shop-action-buttons" style="margin-top: 25px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
                     <button onclick="switchShopTab('inquiry')" style="background: var(--brand-gold); border: none; color: var(--bg-dark); padding: 12px; border-radius: 8px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: all 0.3s; font-size: 0.95em;">
                         <i class="fas fa-calendar-alt"></i> Book Fitting / Inquiry
                     </button>
@@ -1470,7 +1493,8 @@
     </div>
 
     <footer>
-        <p>&copy; 2026 Stitch & Styles Kenya. Connecting you directly with Kenya's best tailors.</p>
+        <p>&copy; 2026 Stitch & Styles Kenya. Connecting you directly with Kenya's best tailors.<br>
+        <a href="https://wa.me/254745806488" target="_blank" style="color: var(--brand-gold); text-decoration: none; font-size: 0.9em; margin-top: 8px; display: inline-block;">Designed and Engineered by Systems By Ronny</a></p>
     </footer>
 
     <!-- Scripting -->
@@ -1848,19 +1872,60 @@
             }
 
             // Set website link
-            const websiteRow = document.getElementById('shop-website-row');
             const websiteLink = document.getElementById('shop-website');
-            if (websiteRow && websiteLink) {
+            if (websiteLink) {
                 if (shopDetails.website_url && shopDetails.website_url.trim() !== '') {
                     let url = shopDetails.website_url.trim();
                     if (!/^https?:\/\//i.test(url)) {
                         url = 'https://' + url;
                     }
                     websiteLink.href = url;
-                    websiteLink.textContent = shopDetails.website_url.replace(/^(https?:\/\/)?(www\.)?/i, '');
-                    websiteRow.style.display = 'flex';
+                    websiteLink.style.display = 'block';
                 } else {
-                    websiteRow.style.display = 'none';
+                    websiteLink.style.display = 'none';
+                }
+            }
+
+            // Set Instagram link
+            const instaLink = document.getElementById('shop-instagram');
+            if (instaLink) {
+                if (shopDetails.instagram_url && shopDetails.instagram_url.trim() !== '') {
+                    let url = shopDetails.instagram_url.trim();
+                    if (!/^https?:\/\//i.test(url)) {
+                        url = 'https://' + url;
+                    }
+                    instaLink.href = url;
+                    instaLink.style.display = 'block';
+                } else {
+                    instaLink.style.display = 'none';
+                }
+            }
+
+            // Set TikTok link
+            const tiktokLink = document.getElementById('shop-tiktok');
+            if (tiktokLink) {
+                if (shopDetails.tiktok_url && shopDetails.tiktok_url.trim() !== '') {
+                    let url = shopDetails.tiktok_url.trim();
+                    if (!/^https?:\/\//i.test(url)) {
+                        url = 'https://' + url;
+                    }
+                    tiktokLink.href = url;
+                    tiktokLink.style.display = 'block';
+                } else {
+                    tiktokLink.style.display = 'none';
+                }
+            }
+
+            // Set WhatsApp link
+            const whatsappLink = document.getElementById('shop-whatsapp');
+            if (whatsappLink) {
+                if (shopDetails.whatsapp_number && shopDetails.whatsapp_number.trim() !== '') {
+                    let waNum = shopDetails.whatsapp_number.replace(/\D/g, '');
+                    if (waNum.startsWith('0')) waNum = '254' + waNum.substring(1);
+                    whatsappLink.href = `https://wa.me/${waNum}`;
+                    whatsappLink.style.display = 'block';
+                } else {
+                    whatsappLink.style.display = 'none';
                 }
             }
 

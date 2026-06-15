@@ -16,7 +16,7 @@ function calculateBespokeScore(list, allShops = [], allReviews = [], globalLikes
     }
 
     let score = 0;
-    const shop = allShops.find(s => s.id === list.shop_id);
+    const shop = allShops.find(s => s && s.id === list.shop_id);
 
     // 1. Engagement & Popularity (Max 40 pts)
     const views = list.views || 0;

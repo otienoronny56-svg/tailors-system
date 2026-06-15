@@ -30,7 +30,7 @@ async function updateSidebarBranding(forcedName = null) {
     const isSuperadminPage = pathName.includes('superadmin-');
 
     if (isSuperadminPage) {
-        mainTitle = "TAILORS.CO.KE";
+        mainTitle = "STITCH & STYLES KENYA";
         subTitle = "SAAS CONTROL";
     }
 
@@ -53,7 +53,7 @@ async function updateSidebarBranding(forcedName = null) {
 
         // Title and subtitle rules based on role
         if (USER_PROFILE.role === 'superadmin') {
-            mainTitle = "TAILORS.CO.KE";
+            mainTitle = "STITCH & STYLES KENYA";
             subTitle = "SAAS CONTROL";
         } else if (USER_PROFILE.role === 'owner') {
             subTitle = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.appSubtitle) ? APP_CONFIG.appSubtitle : "BY RONNY";

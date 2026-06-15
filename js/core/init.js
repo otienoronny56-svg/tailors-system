@@ -63,3 +63,43 @@ function getAdminClient() {
         }
     });
 }
+
+// Inject global footer for portals
+document.addEventListener('DOMContentLoaded', () => {
+    const existingFooter = document.querySelector('footer');
+    if (!existingFooter && !document.getElementById('global-ronny-footer')) {
+        const footerText = document.createElement('div');
+        footerText.id = 'global-ronny-footer';
+        footerText.style.textAlign = 'center';
+        footerText.style.padding = '20px';
+        footerText.style.marginTop = 'auto';
+        footerText.style.fontSize = '0.85em';
+        footerText.style.color = 'var(--brand-slate, #8892b0)';
+        
+        const hasBottomNav = document.querySelector('.bottom-nav');
+        if (hasBottomNav) {
+            footerText.style.paddingBottom = '80px';
+        }
+        
+        footerText.innerHTML = `&copy; 2026 Stitch & Styles Kenya. All Rights Reserved.<br>
+        <a href="https://wa.me/254745806488" target="_blank" style="color: var(--brand-gold, #D4AF37); text-decoration: none; font-size: 0.9em; margin-top: 8px; display: inline-block;">Designed and Engineered by Systems By Ronny</a>`;
+        
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.appendChild(footerText);
+        } else {
+            const loginCard = document.querySelector('.login-card');
+            if(loginCard) {
+                footerText.style.position = 'absolute';
+                footerText.style.bottom = '15px';
+                footerText.style.left = '0';
+                footerText.style.right = '0';
+                footerText.style.padding = '0';
+                footerText.style.fontSize = '0.75em';
+                document.body.appendChild(footerText);
+            } else {
+                document.body.appendChild(footerText);
+            }
+        }
+    }
+});

@@ -1413,6 +1413,15 @@ window.openEditShopModal = async function(shopId) {
         if (document.getElementById('edit-shop-website')) {
             document.getElementById('edit-shop-website').value = shop.website_url || '';
         }
+        if (document.getElementById('edit-shop-instagram')) {
+            document.getElementById('edit-shop-instagram').value = shop.instagram_url || '';
+        }
+        if (document.getElementById('edit-shop-tiktok')) {
+            document.getElementById('edit-shop-tiktok').value = shop.tiktok_url || '';
+        }
+        if (document.getElementById('edit-shop-whatsapp')) {
+            document.getElementById('edit-shop-whatsapp').value = shop.whatsapp_number || '';
+        }
         if (document.getElementById('edit-shop-banner-img')) {
             document.getElementById('edit-shop-banner-img').value = shop.banner_image || '';
         }
@@ -1541,6 +1550,15 @@ window.saveShopDetails = async function(e) {
 
         if (document.getElementById('edit-shop-website')) {
             updatePayload.website_url = document.getElementById('edit-shop-website').value.trim();
+        }
+        if (document.getElementById('edit-shop-instagram')) {
+            updatePayload.instagram_url = document.getElementById('edit-shop-instagram').value.trim();
+        }
+        if (document.getElementById('edit-shop-tiktok')) {
+            updatePayload.tiktok_url = document.getElementById('edit-shop-tiktok').value.trim();
+        }
+        if (document.getElementById('edit-shop-whatsapp')) {
+            updatePayload.whatsapp_number = document.getElementById('edit-shop-whatsapp').value.trim();
         }
         if (document.getElementById('edit-shop-banner-img')) {
             updatePayload.banner_image = document.getElementById('edit-shop-banner-img').value.trim();

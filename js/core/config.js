@@ -17,8 +17,8 @@ const APP_CONFIG = {
     },
 
     // === 3. BRANDING IDENTITY ===
-    appName: "TAILORS.CO.KE",
-    appSubtitle: "KENYA'S STYLE MARKETPLACE",
+    appName: "STITCH & STYLES KENYA",
+    appSubtitle: "FIND YOUR PERFECT FIT",
     logoPath: "logo.jpeg",
 
     // === 4. CONTACT DETAILS (For Receipts) ===

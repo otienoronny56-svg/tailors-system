@@ -1,0 +1,4 @@
+ALTER TABLE shops 
+ADD COLUMN IF NOT EXISTS tiktok_url TEXT,
+ADD COLUMN IF NOT EXISTS instagram_url TEXT,
+ADD COLUMN IF NOT EXISTS whatsapp_number TEXT;
