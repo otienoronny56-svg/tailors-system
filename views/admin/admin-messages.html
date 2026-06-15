@@ -399,7 +399,7 @@
                             <p>Loading inquiries...</p>
                         </div>
                     </div>
-                    <div id="thread-bulk-actions" style="display:none; position:absolute; bottom:0; left:0; width:100%; background:white; border-top:1px solid #e2e8f0; padding:10px; justify-content:space-between; align-items:center; z-index:10;">
+                    <div id="thread-bulk-actions" style="display:none; position:sticky; bottom:0; left:0; width:100%; background:white; border-top:1px solid #e2e8f0; padding:10px; justify-content:space-between; align-items:center; z-index:20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);">
                         <span id="thread-selected-count" style="font-size:0.85em; font-weight:bold; color:var(--brand-navy);">0 selected</span>
                         <button onclick="bulkDeleteThreads()" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;"><i class="fas fa-trash"></i> Delete</button>
                     </div>
@@ -675,7 +675,7 @@
                 let contextActions = `oncontextmenu="showThreadContextMenu(event, '${inq.id}')" ontouchstart="handleThreadTouchStart(event, '${inq.id}')" ontouchend="handleTouchEnd(event)" ontouchmove="handleTouchMove(event)"`;
 
                 if (isThreadSelectionMode) {
-                    checkboxHTML = `<input type="checkbox" ${isSelected ? 'checked' : ''} style="margin-right:12px; pointer-events:none; transform:scale(1.2);">`;
+                    checkboxHTML = `<input type="checkbox" ${isSelected ? 'checked' : ''} style="width:auto; margin:0; margin-right:12px; pointer-events:none; transform:scale(1.5);">`;
                     clickAction = `toggleThreadSelection('${inq.id}')`;
                     contextActions = ''; // disable long-press in selection mode
                 }
