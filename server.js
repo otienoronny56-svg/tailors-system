@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`\n✅ Stitch & Style Kenya server running at: http://localhost:${PORT}`);
+    console.log(`\n✅ Stitch 'N Style Kenya server running at: http://localhost:${PORT}`);
     console.log(`   Home:      http://localhost:${PORT}/index.html`);
     console.log(`   Login:     http://localhost:${PORT}/login.html`);
     console.log(`   Marketplace: http://localhost:${PORT}/views/client/marketplace.html\n`);
