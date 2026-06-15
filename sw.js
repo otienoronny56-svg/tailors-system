@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tailors-cache-v1040';
+const CACHE_NAME = 'tailors-cache-v1041';
 const urlsToCache = [
   '/',
   '/index.html',

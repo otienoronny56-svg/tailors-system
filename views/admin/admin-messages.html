@@ -695,6 +695,24 @@
                         ${!isThreadSelectionMode && inq.unreadCount > 0 ? `<div style="position:absolute; right:15px; top:12px; background:#10b981; color:white; font-size:0.7em; font-weight:bold; border-radius:10px; min-width:20px; height:20px; display:flex; align-items:center; justify-content:center; padding:0 6px;">${inq.unreadCount}</div>` : ''}
                     </div>`;
             }).join('');
+            
+            // Update global total unread dot
+            const totalUnread = threads.reduce((acc, t) => acc + (t.unreadCount || 0), 0);
+            const msgNavLink = window.parent.document.querySelector('.sidebar a[href="admin-messages.html"]');
+            if (msgNavLink) {
+                let dot = msgNavLink.querySelector('.unread-dot');
+                if (totalUnread > 0) {
+                    if (!dot) {
+                        dot = window.parent.document.createElement('span');
+                        dot.className = 'unread-dot';
+                        dot.style.cssText = 'position:absolute; right:10px; top:50%; transform:translateY(-50%); width:8px; height:8px; background-color:#ef4444; border-radius:50%; box-shadow: 0 0 8px #ef4444;';
+                        msgNavLink.style.position = 'relative';
+                        msgNavLink.appendChild(dot);
+                    }
+                } else if (dot) {
+                    dot.remove();
+                }
+            }
         }
 
         function closeChatThread() {
@@ -1693,7 +1711,22 @@
                         }
                     }
                     
-                    if (activeThread && (activeThread.all_inquiry_ids ? activeThread.all_inquiry_ids.includes(newMsg.inquiry_id) : newMsg.inquiry_id === activeThread.id)) {
+                    const isActiveThread = activeThread && (activeThread.all_inquiry_ids ? activeThread.all_inquiry_ids.includes(newMsg.inquiry_id) : newMsg.inquiry_id === activeThread.id);
+                    
+                    const threadData = threads.find(t => t.all_inquiry_ids ? t.all_inquiry_ids.includes(newMsg.inquiry_id) : t.id === newMsg.inquiry_id);
+                    if (threadData) {
+                        threadData.previewText = newMsg.message_text;
+                        threadData.lastActivity = new Date(newMsg.created_at);
+                        
+                        if (!isActiveThread && newMsg.sender_id !== USER_PROFILE.id) {
+                            threadData.unreadCount = (threadData.unreadCount || 0) + 1;
+                        }
+                        
+                        threads.sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
+                        renderThreadsList();
+                    }
+                    
+                    if (isActiveThread) {
                         if (!messages.find(m => m.id === newMsg.id)) {
                             messages.push(newMsg);
                             renderChatHistory();
