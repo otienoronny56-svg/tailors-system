@@ -627,136 +627,6 @@ async function loadWorkersDropdown() {
     }
 }
 
-async function loadAdminManagementScreen() {
-    logDebug("Loading admin management screen", null, 'info');
-
-    try {
-        // Setup shop creation form
-        const shopForm = document.getElementById('add-shop-form');
-        if (shopForm) {
-            shopForm.onsubmit = createShopAndManager;
-        }
-
-        // Setup worker creation form
-        const workerForm = document.getElementById('admin-add-worker-form');
-        if (workerForm) {
-            workerForm.onsubmit = async (e) => {
-                e.preventDefault();
-
-                const shopId = document.getElementById('admin-shop-select').value;
-                const name = document.getElementById('admin-new-worker-name').value;
-                const phone = document.getElementById('admin-new-worker-phone').value;
-
-                if (!shopId) {
-                    alert("Please select a shop first!");
-                    return;
-                }
-
-                if (!name.trim()) {
-                    alert("Please enter worker name!");
-                    return;
-                }
-
-                try {
-                    const { error } = await supabaseClient
-                        .from('workers')
-                        .insert([{
-                            organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
-                            shop_id: shopId,
-                            name: name.trim(),
-                            phone_number: phone.trim() || null,
-                            created_at: new Date().toISOString()
-                        }]);
-
-                    if (error) throw error;
-
-                    alert("Worker added successfully!");
-                    workerForm.reset();
-                    loadShopCommandCenter();
-
-                } catch (error) {
-                    alert("Error: " + error.message);
-                }
-            };
-        }
-
-        // Load data
-        await Promise.all([
-            loadShopsForDropdown('admin-shop-select'),
-            loadShopCommandCenter()
-        ]);
-
-        addRefreshButton();
-
-    } catch (error) {
-        logDebug("Error loading admin management:", error, 'error');
-    }
-}
-
-async function loadAdminManagementScreen() {
-    logDebug("Loading admin management screen", null, 'info');
-
-    try {
-        // Setup shop creation form
-        const shopForm = document.getElementById('add-shop-form');
-        if (shopForm) {
-            shopForm.onsubmit = createShopAndManager;
-        }
-
-        // Setup worker creation form
-        const workerForm = document.getElementById('admin-add-worker-form');
-        if (workerForm) {
-            workerForm.onsubmit = async (e) => {
-                e.preventDefault();
-
-                const shopId = document.getElementById('admin-shop-select').value;
-                const name = document.getElementById('admin-new-worker-name').value;
-                const phone = document.getElementById('admin-new-worker-phone').value;
-
-                if (!shopId) {
-                    alert("Please select a shop first!");
-                    return;
-                }
-
-                if (!name.trim()) {
-                    alert("Please enter worker name!");
-                    return;
-                }
-
-                try {
-                    const { error } = await supabaseClient
-                        .from('workers')
-                        .insert([{
-                            shop_id: shopId,
-                            name: name.trim(),
-                            phone_number: phone.trim() || null,
-                            created_at: new Date().toISOString()
-                        }]);
-
-                    if (error) throw error;
-
-                    alert("Worker added successfully!");
-                    workerForm.reset();
-                    loadShopCommandCenter();
-
-                } catch (error) {
-                    alert("Error: " + error.message);
-                }
-            };
-        }
-
-        // Load data
-        await Promise.all([
-            loadShopsForDropdown('admin-shop-select'),
-            loadShopCommandCenter()
-        ]);
-
-        addRefreshButton();
-
-    } catch (error) {
-        logDebug("Error loading admin management:", error, 'error');
-    }
-}
 
 async function loadAdminManagementScreen() {
     logDebug("Loading Admin Management Setup", null, 'info');
@@ -778,42 +648,6 @@ async function loadAdminManagementScreen() {
     }
 }
 
-async function loadShopsForDropdown(elId) {
-    const el = document.getElementById(elId);
-    if (!el) {
-        logDebug(`Element ${elId} not found for shop dropdown`, null, 'warning');
-        return;
-    }
-
-    try {
-        let query = supabaseClient.from('shops').select('id, name');
-        if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
-            query = query.eq('organization_id', USER_PROFILE.organization_id);
-        }
-        const { data: shops, error } = await query.order('name');
-        if (error) {
-            logDebug("Error loading shops for dropdown:", error, 'error');
-            return;
-        }
-
-        if (shops) {
-            const firstOption = el.options[0];
-            el.innerHTML = '';
-            if (firstOption) el.appendChild(firstOption);
-
-            shops.forEach(s => {
-                const option = document.createElement('option');
-                option.value = s.id;
-                option.textContent = s.name;
-                el.appendChild(option);
-            });
-
-            logDebug(`Loaded ${shops.length} shops for dropdown ${elId}`, null, 'success');
-        }
-    } catch (error) {
-        logDebug("Exception loading shops for dropdown:", error, 'error');
-    }
-}
 
 async function loadShopsForDropdown(elId) {
     const el = document.getElementById(elId);
@@ -852,24 +686,6 @@ async function loadShopsForDropdown(elId) {
     }
 }
 
-async function loadAllWorkersForAdmin() {
-    try {
-        const { data: workers, error } = await supabaseClient
-            .from('workers')
-            .select('id, name, shop_id')
-            .order('name');
-
-        if (error) throw error;
-
-        const workerSelect = document.getElementById('worker-select');
-        if (workerSelect && workers) {
-            workerSelect.innerHTML = '<option value="">-- Select Worker --</option>' +
-                workers.map(w => `<option value="${w.id}">${w.name} (Shop ${w.shop_id})</option>`).join('');
-        }
-    } catch (error) {
-        logDebug("Error loading workers for admin:", error, 'error');
-    }
-}
 
 async function loadAllWorkersForAdmin() {
     try {
@@ -890,116 +706,6 @@ async function loadAllWorkersForAdmin() {
     }
 }
 
-async function loadShopCommandCenter() {
-    const container = document.getElementById('shop-command-center');
-    if (!container) return;
-
-    container.innerHTML = '<p>Loading command center...</p>';
-
-    try {
-        const admin = getAdminClient();
-        if (!admin) {
-            container.innerHTML = '<p class="error">Admin privileges required (Service Key missing).</p>';
-            return;
-        }
-
-        let shopsQuery = admin.from('shops').select('*');
-        let profilesQuery = admin.from('user_profiles').select('*').eq('role', 'manager');
-        let workersQuery = admin.from('workers').select('*');
-
-        if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
-            shopsQuery = shopsQuery.eq('organization_id', USER_PROFILE.organization_id);
-            profilesQuery = profilesQuery.eq('organization_id', USER_PROFILE.organization_id);
-            workersQuery = workersQuery.eq('organization_id', USER_PROFILE.organization_id);
-        }
-
-        const [{ data: shops }, { data: profiles }, { data: workers }] = await Promise.all([
-            shopsQuery.order('name'),
-            profilesQuery,
-            workersQuery
-        ]);
-
-        if (!shops || shops.length === 0) {
-            container.innerHTML = '<p>No shops found.</p>';
-            return;
-        }
-
-        // Fetch emails for each manager individually using getUserById.
-        // This avoids the broken listUsers() bulk call which returns a 500 on this project.
-        // We use Promise.all so all lookups run in parallel.
-        const managerEmailMap = {};
-        if (profiles && profiles.length > 0) {
-            await Promise.all(profiles.map(async (profile) => {
-                try {
-                    const { data, error } = await admin.auth.admin.getUserById(profile.id);
-                    if (!error && data?.user?.email) {
-                        managerEmailMap[profile.id] = data.user.email;
-                    }
-                } catch (e) {
-                    // Silently skip â€” email just won't show for this manager
-                }
-            }));
-        }
-
-        container.innerHTML = shops.map(shop => {
-            const manager = profiles?.find(p => p.shop_id === shop.id);
-            const managerEmail = manager ? (managerEmailMap[manager.id] || manager.email || 'No Email') : null;
-            const shopWorkers = workers?.filter(w => w.shop_id === shop.id) || [];
-
-            return `
-                <div class="entity-card">
-                    <div class="entity-header">
-                        <div class="shop-name"><i class="fas fa-store-alt" style="color: var(--brand-gold);"></i> ${shop.name}</div>
-                        <button onclick="deleteShop('${shop.id}', '${shop.name}')" class="action-btn danger" title="Delete Shop"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                    
-                    <div class="entity-body">
-                        ${manager ? `
-                            <div class="manager-info">
-                                <div class="manager-avatar">${manager.full_name.charAt(0).toUpperCase()}</div>
-                                <div style="flex-grow: 1;">
-                                    <div style="font-weight: 600; color: var(--brand-navy); font-size: 0.95em;">${manager.full_name}</div>
-                                    <div style="color: #64748b; font-size: 0.8em;"><i class="fas fa-envelope" style="margin-right: 4px;"></i>${managerEmail}</div>
-                                    <div style="color: #10b981; font-size: 0.75em; font-weight: 600; margin-top: 2px;"><i class="fas fa-star" style="margin-right: 4px;"></i>Shop Manager</div>
-                                </div>
-                            </div>
-                        ` : `
-                            <div class="manager-info" style="opacity: 0.6;">
-                                <div class="manager-avatar" style="background: #f1f5f9; color: #94a3b8;"><i class="fas fa-user-slash"></i></div>
-                                <div>
-                                    <div style="font-weight: 600; color: #64748b; font-size: 0.95em;">No Manager Assigned</div>
-                                </div>
-                            </div>
-                        `}
-                        
-                        <div style="margin-top: 15px;">
-                            <h4 style="margin:0 0 10px 0; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; color:#94a3b8;">Workforce (${shopWorkers.length})</h4>
-                            <ul class="worker-list" style="max-height:120px; overflow-y:auto; padding-right: 5px;">
-                                ${shopWorkers.length > 0 ? shopWorkers.map(w => `
-                                    <li class="worker-item">
-                                        <span><i class="fas fa-user" style="color:#cbd5e1; margin-right:8px; font-size:0.8em;"></i>${w.name}</span>
-                                        <button onclick="deleteWorker('${w.id}')" style="border:none; background:none; cursor:pointer; color:#ef4444;" title="Remove worker"><i class="fas fa-times"></i></button>
-                                    </li>
-                                `).join('') : '<li class="worker-item" style="color:#94a3b8; font-style:italic;">No workers assigned</li>'}
-                            </ul>
-                        </div>
-                    </div>
-
-                    ${manager ? `
-                    <div class="entity-actions">
-                        <button onclick="openResetPasswordModal('${manager.id}', '${manager.full_name}')" class="action-btn" title="Reset Manager Password"><i class="fas fa-key"></i> Reset Pass</button>
-                        <button onclick="fireManager('${manager.id}', '${shop.id}')" class="action-btn danger" title="Remove Manager"><i class="fas fa-user-times"></i> Remove</button>
-                    </div>
-                    ` : ''}
-                </div>
-            `;
-        }).join('');
-
-    } catch (error) {
-        console.error(error);
-        container.innerHTML = `<p class="error">Error: ${error.message}</p>`;
-    }
-}
 
 async function loadShopCommandCenter() {
     const container = document.getElementById('shop-command-center');
@@ -1025,6 +731,18 @@ async function loadShopCommandCenter() {
             .eq('organization_id', USER_PROFILE.organization_id)
             .eq('role', 'manager');
 
+        // Fetch emails via admin client
+        const adminClient = getAdminClient();
+        const managerEmailMap = {};
+        if (managers && managers.length > 0 && adminClient) {
+            await Promise.all(managers.map(async (m) => {
+                try {
+                    const { data, error } = await adminClient.auth.admin.getUserById(m.id);
+                    if (!error && data?.user?.email) managerEmailMap[m.id] = data.user.email;
+                } catch(e){}
+            }));
+        }
+
         // Fetch workers
         const { data: allWorkers } = await supabaseClient.from('workers')
             .select('*')
@@ -1044,15 +762,23 @@ async function loadShopCommandCenter() {
             const manager = managerMap[shop.id];
             const workers = workerMap[shop.id] || [];
 
-            let managerHtml = '<div style="color:#94a3b8; font-style:italic;">No active manager</div>';
+            let managerHtml = `
+                <div class="manager-info" style="opacity: 0.6;">
+                    <div class="manager-avatar" style="background: #f1f5f9; color: #94a3b8;"><i class="fas fa-user-slash"></i></div>
+                    <div>
+                        <div style="font-weight: 600; color: #64748b; font-size: 0.95em;">No Manager Assigned</div>
+                    </div>
+                </div>`;
             if (manager) {
                 const initials = manager.full_name ? manager.full_name.substring(0, 2).toUpperCase() : 'MGR';
+                const managerEmail = managerEmailMap[manager.id] || 'No Email';
                 managerHtml = `
                     <div class="manager-info">
                         <div class="manager-avatar">${initials}</div>
-                        <div>
+                        <div style="flex-grow: 1;">
                             <div style="font-weight:600; color:var(--brand-navy);">${manager.full_name}</div>
-                            <div style="font-size:0.8em; color:#64748b;text-transform:uppercase;">Shop Manager <i class="fas fa-shield-check" style="color:#10b981; margin-left:4px;"></i></div>
+                            <div style="color: #64748b; font-size: 0.8em;"><i class="fas fa-envelope" style="margin-right: 4px;"></i>${managerEmail}</div>
+                            <div style="font-size:0.8em; color:#10b981; font-weight: 600; text-transform:uppercase; margin-top: 2px;">Shop Manager <i class="fas fa-shield-check" style="margin-left:4px;"></i></div>
                         </div>
                     </div>`;
             }
@@ -1093,9 +819,18 @@ async function loadShopCommandCenter() {
                         </div>
                     </div>
                     <div class="entity-actions">
-                        <button class="action-btn" onclick="openResetPasswordModal('${manager?.id || ''}', '${manager?.full_name?.replace(/'/g, "\\'") || ''}')" ${!manager ? 'disabled style="opacity:0.5; pointer-events:none;"' : ''} title="Reset Manager Password">
-                            <i class="fas fa-key"></i> Key Reset
-                        </button>
+                        ${manager ? `
+                            <button class="action-btn" onclick="openResetPasswordModal('${manager.id}', '${manager.full_name.replace(/'/g, "\\'")}')" title="Reset Manager Password">
+                                <i class="fas fa-key"></i> Key Reset
+                            </button>
+                            <button onclick="fireManager('${manager.id}', '${shop.id}', '${manager.full_name.replace(/'/g, "\\'")}')" class="action-btn danger" title="Remove Manager">
+                                <i class="fas fa-user-times"></i> Remove
+                            </button>
+                        ` : `
+                            <button class="action-btn" style="background:#10b981; color:white; border-color:#10b981;" onclick="openAssignManagerModal('${shop.id}', '${shop.name.replace(/'/g, "\\'")}')" title="Assign New Manager">
+                                <i class="fas fa-user-plus"></i> Assign Manager
+                            </button>
+                        `}
                     </div>
                 </div>
             `;
@@ -1147,13 +882,7 @@ async function createShopAndManager(e) {
     }
 }
 
-function openResetPasswordModal(userId, name) {
-    document.getElementById('reset-user-id').value = userId;
-    document.getElementById('reset-user-name').textContent = name;
-    document.getElementById('password-reset-modal').style.display = 'flex';
-}
-
-function openResetPasswordModal(userId, userName) {
+window.openResetPasswordModal = function(userId, userName) {
     if (!userId) return;
     document.getElementById('reset-user-id').value = userId;
     document.getElementById('reset-user-name').textContent = userName;
@@ -1161,22 +890,7 @@ function openResetPasswordModal(userId, userName) {
     document.getElementById('password-reset-modal').style.display = 'flex';
 }
 
-async function handlePasswordReset() {
-    const userId = document.getElementById('reset-user-id').value;
-    const password = document.getElementById('new-reset-password').value;
-    if (password.length < 6) return alert("Password too short");
-
-    try {
-        const { error } = await getAdminClient().auth.admin.updateUserById(userId, { password });
-        if (error) throw error;
-        alert("Password updated");
-        document.getElementById('password-reset-modal').style.display = 'none';
-    } catch (e) {
-        alert(e.message);
-    }
-}
-
-async function handlePasswordReset() {
+window.handlePasswordReset = async function() {
     const userId = document.getElementById('reset-user-id').value;
     const newPass = document.getElementById('new-reset-password').value;
 
@@ -1199,8 +913,8 @@ async function handlePasswordReset() {
     }
 }
 
-async function fireManager(userId, shopId) {
-    if (!confirm("Remove this manager? Account will be deleted.")) return;
+window.fireManager = async function(userId, shopId, managerName) {
+    if (!confirm(`Are you sure you want to remove ${managerName} from their position as manager? Their account will be downgraded to a worker.`)) return;
     try {
         const admin = getAdminClient();
         // Security check: Verify target profile is in this owner's organization
@@ -1208,11 +922,91 @@ async function fireManager(userId, shopId) {
         if (!targetProfile || targetProfile.organization_id !== USER_PROFILE.organization_id) {
             throw new Error("Unauthorized: This user does not belong to your organization.");
         }
-        await admin.auth.admin.deleteUser(userId);
-        await admin.from('user_profiles').delete().eq('id', userId);
+        
+        // Update user_profiles instead of deleting, leave them in the shop
+        const { error } = await admin.from('user_profiles')
+            .update({ role: 'worker' }) // Keep shop_id so they belong to the shop
+            .eq('id', userId);
+            
+        if (error) throw error;
+
+        // Also add them to the workers table so they show up under the shop's workers list
+        await admin.from('workers').insert([{
+            organization_id: targetProfile.organization_id,
+            shop_id: shopId,
+            name: managerName,
+            role: 'tailor'
+        }]);
+        
         loadShopCommandCenter();
     } catch (e) {
         alert(e.message);
+    }
+}
+
+window.openAssignManagerModal = function(shopId, shopName) {
+    document.getElementById('assign-manager-shop-id').value = shopId;
+    document.getElementById('assign-manager-shop-name').textContent = shopName;
+    document.getElementById('assign-manager-modal').style.display = 'flex';
+}
+
+window.handleAssignManagerToShop = async function(e) {
+    e.preventDefault();
+    if (!USER_PROFILE || !USER_PROFILE.organization_id) return;
+
+    const shopId = document.getElementById('assign-manager-shop-id').value;
+    const mgrName = document.getElementById('assign-manager-name').value.trim();
+    const mgrEmail = document.getElementById('assign-manager-email').value.trim();
+    const mgrPass = document.getElementById('assign-manager-password').value;
+    const msg = document.getElementById('assign-manager-message');
+    const submitBtn = document.querySelector('#assign-manager-form button[type="submit"]');
+
+    if (!shopId || !mgrName || !mgrEmail || !mgrPass) {
+        msg.innerHTML = '<span style="color:red;">Please fill all fields</span>';
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Assigning...';
+    msg.innerHTML = '';
+
+    try {
+        const adminClient = getAdminClient();
+        if (!adminClient) throw new Error("Admin privileges missing.");
+
+        // 1. Create Manager Auth User
+        const { data: authUser, error: authErr } = await adminClient.auth.admin.createUser({
+            email: mgrEmail,
+            password: mgrPass,
+            email_confirm: true,
+            user_metadata: { full_name: mgrName }
+        });
+
+        if (authErr) throw authErr;
+
+        // 2. Create Manager User Profile
+        const { error: profileErr } = await supabaseClient.from('user_profiles').insert([{
+            id: authUser.user.id,
+            organization_id: USER_PROFILE.organization_id,
+            shop_id: shopId,
+            full_name: mgrName,
+            role: 'manager'
+        }]);
+
+        if (profileErr) throw profileErr;
+
+        alert(`✅ Manager '${mgrName}' successfully assigned to the shop!`);
+        document.getElementById('assign-manager-form').reset();
+        document.getElementById('assign-manager-modal').style.display = 'none';
+        
+        loadShopCommandCenter();
+
+    } catch (error) {
+        msg.innerHTML = `<span style="color:red;">❌ Error: ${error.message}</span>`;
+        logDebug("Assign Manager Error", error, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Assign Manager';
     }
 }
 
