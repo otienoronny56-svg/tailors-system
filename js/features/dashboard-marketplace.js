@@ -176,67 +176,56 @@ async function loadMarketplaceData() {
     }
 
     try {
-        // Fetch public shops
-        let { data: shops, error: shopsErr } = await supabaseClient
-            .from('shops')
-            .select('*')
-            .eq('is_public', true);
-        if (shopsErr || !shops) {
-            const fallback = await supabaseClient.from('shops').select('*');
-            shops = fallback.data || [];
-        }
-        allMarketplaceShops = shops;
+        // Fetch current user details first as some queries depend on it
+        const authRes = await supabaseClient.auth.getUser();
+        if (authRes.data && authRes.data.user) currentUser = authRes.data.user;
 
-        // Fetch active listings
-        let { data: listings, error: listingsErr } = await supabaseClient
-            .from('marketplace_listings')
-            .select('*, shops(name, profile_image)')
-            .eq('status', 'active');
-        if (listingsErr || !listings || listings.length === 0) {
+        // Fire all independent queries simultaneously
+        const [shopsRes, listingsRes, reviewsRes, likesRes, favsRes, globalLikesRes] = await Promise.all([
+            // 1. Fetch public shops
+            supabaseClient.from('shops').select('*').eq('is_public', true).then(res => {
+                if (res.error || !res.data) return supabaseClient.from('shops').select('*');
+                return res;
+            }),
+            // 2. Fetch active listings
+            supabaseClient.from('marketplace_listings').select('*, shops(name, profile_image)').eq('status', 'active'),
+            // 3. Fetch reviews
+            supabaseClient.from('vw_marketplace_reviews').select('*'),
+            // 4. Fetch user likes
+            currentUser ? supabaseClient.from('marketplace_likes').select('listing_id').eq('user_id', currentUser.id) : Promise.resolve({ data: [] }),
+            // 5. Fetch user favorite shops
+            currentUser ? supabaseClient.from('client_favorite_shops').select('shop_id').eq('client_id', currentUser.id) : Promise.resolve({ data: [] }),
+            // 6. Fetch global likes count
+            supabaseClient.from('marketplace_likes').select('listing_id')
+        ]);
+
+        // Process shops
+        allMarketplaceShops = shopsRes.data || [];
+
+        // Process listings
+        if (listingsRes.error || !listingsRes.data || listingsRes.data.length === 0) {
             allMarketplaceListings = getMockListings();
         } else {
-            allMarketplaceListings = listings;
+            allMarketplaceListings = listingsRes.data;
         }
 
-        // Fetch reviews
-        let { data: reviews } = await supabaseClient
-            .from('vw_marketplace_reviews')
-            .select('*');
-        allMarketplaceReviews = reviews || [];
+        // Process reviews
+        allMarketplaceReviews = reviewsRes.data || [];
 
-        // Fetch user likes if logged in
-        if (currentUser) {
-            let { data: likes, error: likesErr } = await supabaseClient
-                .from('marketplace_likes')
-                .select('listing_id')
-                .eq('user_id', currentUser.id);
-            if (!likesErr && likes) {
-                userLikes = likes.map(l => l.listing_id);
-            }
+        // Process user likes
+        if (likesRes.data && !likesRes.error) {
+            userLikes = likesRes.data.map(l => l.listing_id);
         }
 
-        // Fetch user favorite shops if logged in
-        if (currentUser) {
-            try {
-                let { data: favs, error: favsErr } = await supabaseClient
-                    .from('client_favorite_shops')
-                    .select('shop_id')
-                    .eq('client_id', currentUser.id);
-                if (!favsErr && favs) {
-                    userFavoriteShops = favs.map(f => f.shop_id);
-                }
-            } catch (favErr) {
-                console.warn("Favorite shops table not initialized yet.", favErr);
-            }
+        // Process user favorite shops
+        if (favsRes.data && !favsRes.error) {
+            userFavoriteShops = favsRes.data.map(f => f.shop_id);
         }
 
-        // Fetch global likes for algorithm
-        let { data: globalLikesData } = await supabaseClient
-            .from('marketplace_likes')
-            .select('listing_id');
+        // Process global likes
         globalLikesCount = {};
-        if (globalLikesData) {
-            globalLikesData.forEach(l => { globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1; });
+        if (globalLikesRes.data) {
+            globalLikesRes.data.forEach(l => { globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1; });
         }
 
         // Invalidate caching before sorting to respect favorited status changes
@@ -301,10 +290,10 @@ function renderMarketplaceShops(shops) {
                     ${favBtn}
                     <div class="card-banner" style="${bannerStyle}"></div>
                 </div>
-                <div class="card-avatar" style="${avatarStyle}">
+                <div class="card-avatar" style="${avatarStyle} position: absolute;">
                     ${shop.profile_image ? '' : avatarIcon}
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="padding-top: 25px;">
                     <h3 class="card-title">${shop.name}</h3>
                     <div class="card-location">
                         <i class="fas fa-map-marker-alt"></i> ${formattedLoc}
@@ -402,12 +391,12 @@ function getDealsScrollerHtml() {
     if (dealListings.length === 0) return '';
 
     const displayedDeals = dealListings.slice(0, 8);
-    const cardsHtml = displayedDeals.map(list => getListingCardHtml(list)).join('');
+    const cardsHtml = displayedDeals.map(list => `<div style="flex: 0 0 240px; scroll-snap-align: start;">${getListingCardHtml(list)}</div>`).join('');
 
     return `
         <div class="scroller-section">
             <div class="scroller-section-title">
-                <span><i class="fas fa-fire fire-icon"></i> 🔥 Top Deals &amp; Exclusive Discounts</span>
+                <span><i class="fas fa-fire fire-icon"></i> Top Deals &amp; Exclusive Discounts</span>
             </div>
             <div class="horizontal-scroller">
                 ${cardsHtml}
@@ -437,6 +426,53 @@ function getShopSpotlightBannerHtml() {
                     <p class="promo-desc">${escapeHTML(selectedShop.description || 'Discover premium custom designs, experienced tailors, and professional alterations at this top-rated bespoke house.')}</p>
                     <a href="../../views/manager/shop.html?id=${selectedShop.id}" class="promo-btn">Explore Shop <i class="fas fa-chevron-right"></i></a>
                 </div>
+            </div>
+        </div>
+    `;
+}
+
+// Generate "You may be looking for" Feed Card HTML
+function getCategorySuggestionCardHtml(chunkIndex) {
+    const allCategories = [
+        { name: 'Suits', icon: 'fas fa-user-tie' },
+        { name: 'Senator Wear', icon: 'fas fa-cut' },
+        { name: 'Dresses', icon: 'fas fa-female' },
+        { name: 'Shirts', icon: 'fas fa-shirt' },
+        { name: 'Trousers', icon: 'fas fa-cut' },
+        { name: 'Coats', icon: 'fas fa-user-tie' },
+        { name: 'Alterations', icon: 'fas fa-compress' },
+        { name: 'Jumpsuits & Rompers', icon: 'fas fa-female' },
+        { name: 'Activewear', icon: 'fas fa-running' },
+        { name: 'Watches', icon: 'fas fa-clock' },
+        { name: 'Glasses & Shades', icon: 'fas fa-glasses' },
+        { name: 'Ties & Bowties', icon: 'fas fa-user-tie' },
+        { name: 'Belts', icon: 'fas fa-tag' },
+        { name: 'Bags & Clutches', icon: 'fas fa-briefcase' },
+        { name: 'Shoes', icon: 'fas fa-shoe-prints' }
+    ];
+
+    const itemsPerCard = 4;
+    const startIndex = (chunkIndex * itemsPerCard) % allCategories.length;
+    const chunk = allCategories.slice(startIndex, startIndex + itemsPerCard);
+    
+    if (chunk.length < itemsPerCard) {
+        chunk.push(...allCategories.slice(0, itemsPerCard - chunk.length));
+    }
+
+    const gradient = 'linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, var(--card-bg) 100%)';
+
+    return `
+        <div class="card suggestion-card" style="background: ${gradient}; padding: 16px; display: flex; flex-direction: column; gap: 14px; border: 1px solid rgba(212, 175, 55, 0.3);">
+            <h3 style="font-size: 1.15em; color: var(--brand-white); margin-bottom: 2px; font-family: 'Playfair Display', serif;">You may be looking for</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                ${chunk.map(cat => `
+                    <button onclick="selectSidebarCategory('${escapeHTML(cat.name)}')" style="display: flex; align-items: center; gap: 12px; background: var(--bg-dark); border: 1px solid rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 30px; cursor: pointer; transition: all 0.2s; width: 100%; text-align: left; color: var(--brand-white); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(212, 175, 55, 0.2);">
+                            <i class="${escapeHTML(cat.icon)}" style="color: var(--brand-gold); font-size: 0.9em;"></i>
+                        </div>
+                        <span style="font-size: 0.88em; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(cat.name)}</span>
+                    </button>
+                `).join('')}
             </div>
         </div>
     `;
@@ -481,15 +517,15 @@ function getFeaturedShopsScrollerHtml() {
             </button>`;
 
         return `
-            <div class="card shop-card" style="flex: 0 0 280px; scroll-snap-align: start; margin-bottom: 2px;">
+            <div class="card shop-card" style="flex: 0 0 240px; scroll-snap-align: start; margin-bottom: 2px;">
                 <div class="card-banner-wrap" style="height: 120px;">
                     ${favBtn}
                     <div class="card-banner" style="${bannerStyle}"></div>
                 </div>
-                <div class="card-avatar" style="width: 50px; height: 50px; top: 95px; left: 15px; position:relative; overflow:hidden; border-color: ${avatarUrl ? 'var(--brand-gold)' : 'var(--glass-border)'}; display:flex; align-items:center; justify-content:center; font-size: 1.2em;">
+                <div class="card-avatar" style="width: 50px; height: 50px; top: 95px; left: 15px; position:absolute; overflow:hidden; border-color: ${avatarUrl ? 'var(--brand-gold)' : 'var(--glass-border)'}; display:flex; align-items:center; justify-content:center; font-size: 1.2em;">
                     ${avatarHTML}
                 </div>
-                <div class="card-body" style="padding-top: 15px;">
+                <div class="card-body" style="padding-top: 30px;">
                     <h3 class="card-title" style="font-size: 1.1em; margin-bottom: 4px;">${escapeHTML(shop.name)}</h3>
                     <div class="card-location" style="font-size: 0.78em; margin-bottom: 8px;">
                         <i class="fas fa-map-marker-alt"></i> ${escapeHTML(formattedLoc)}
@@ -525,10 +561,17 @@ function renderMarketplaceListings(listings) {
     }
 
     let html = [];
+    let suggestionIndex = 0;
     listings.forEach((list, index) => {
         html.push(getListingCardHtml(list));
 
         if (activeMarketplaceMode === 'listings') {
+            // Inject "You may be looking for" card periodically (every 8 items starting at index 3)
+            if ((index - 3) % 8 === 0) {
+                html.push(getCategorySuggestionCardHtml(suggestionIndex));
+                suggestionIndex++;
+            }
+
             // Inject Top Deals after 6 items (index 5)
             if (index === 5) {
                 const dealsHtml = getDealsScrollerHtml();

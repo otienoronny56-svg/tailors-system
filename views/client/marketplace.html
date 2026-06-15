@@ -676,34 +676,48 @@
             align-items: start;
         }
 
+        .marketplace-sidebar {
+            display: none;
+            order: 2;
+            position: relative;
+            z-index: 10;
+        }
+
+        .marketplace-main-stream {
+            order: 1;
+        }
+
         @media (min-width: 992px) {
             .marketplace-body-layout {
                 grid-template-columns: 260px 1fr;
             }
-        }
-
-        .marketplace-sidebar {
-            position: sticky;
-            top: 100px;
-            z-index: 10;
+            .marketplace-sidebar {
+                display: block;
+                order: 1;
+                position: sticky;
+                top: 100px;
+            }
+            .marketplace-main-stream {
+                order: 2;
+            }
         }
 
         .sidebar-card {
             background: var(--card-bg);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
-            padding: 20px;
+            padding: 12px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .sidebar-card h3 {
             font-family: 'Playfair Display', serif;
-            font-size: 1.15em;
+            font-size: 0.9em;
             color: var(--brand-white);
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 10px;
+            padding-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -715,24 +729,56 @@
 
         .sidebar-cat-list {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .sidebar-cat-list::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
         }
 
         .sidebar-cat-item {
+            flex: 0 0 auto;
+            width: auto;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 10px 15px;
+            padding: 6px 12px;
             border-radius: 8px;
             color: var(--brand-light-slate);
-            font-size: 0.88em;
+            font-size: 0.75em;
             font-weight: 500;
             cursor: pointer;
             transition: var(--transition-smooth);
             text-align: left;
+        }
+
+        @media (min-width: 992px) {
+            .sidebar-card {
+                padding: 20px;
+            }
+            .sidebar-card h3 {
+                font-size: 1.15em;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+            .sidebar-cat-list {
+                flex-direction: column;
+                overflow-x: visible;
+                padding-bottom: 0;
+            }
+            .sidebar-cat-item {
+                flex: none;
+                width: 100%;
+                font-size: 0.88em;
+                padding: 10px 15px;
+                gap: 10px;
+            }
         }
 
         .sidebar-cat-item:hover, .sidebar-cat-item.active {
@@ -1372,60 +1418,41 @@
         // Fetch Data from Supabase Database
         async function loadMarketplace() {
             try {
-                // 1. Fetch public shops
-                let { data: shops, error: shopsErr } = await supabaseClient
-                    .from('shops')
-                    .select('*')
-                    .eq('is_public', true);
-                allShops = shops || [];
+                // Fetch current user details first
+                const authRes = await supabaseClient.auth.getUser();
+                currentUser = authRes.data?.user || null;
 
-                // 2. Fetch active creations
-                let { data: listings, error: listingsErr } = await supabaseClient
-                    .from('marketplace_listings')
-                    .select('*, shops(name, profile_image)')
-                    .eq('status', 'active');
-                allListings = listings || [];
+                // Fire all independent queries simultaneously
+                const [shopsRes, listingsRes, reviewsRes, likesRes, favsRes, globalLikesRes] = await Promise.all([
+                    // 1. Fetch public shops
+                    supabaseClient.from('shops').select('*').eq('is_public', true),
+                    // 2. Fetch active creations
+                    supabaseClient.from('marketplace_listings').select('*, shops(name, profile_image)').eq('status', 'active'),
+                    // 3. Fetch reviews
+                    supabaseClient.from('vw_marketplace_reviews').select('*'),
+                    // 4. Fetch user likes
+                    currentUser ? supabaseClient.from('marketplace_likes').select('listing_id').eq('user_id', currentUser.id) : Promise.resolve({ data: [] }),
+                    // 4.5 Fetch user favorite shops
+                    currentUser ? supabaseClient.from('client_favorite_shops').select('shop_id').eq('client_id', currentUser.id) : Promise.resolve({ data: [] }),
+                    // 5. Fetch global likes count
+                    supabaseClient.from('marketplace_likes').select('listing_id')
+                ]);
 
-                // 3. Fetch reviews
-                let { data: reviews } = await supabaseClient
-                    .from('vw_marketplace_reviews')
-                    .select('*');
-                allReviews = reviews || [];
+                allShops = shopsRes.data || [];
+                allListings = listingsRes.data || [];
+                allReviews = reviewsRes.data || [];
 
-                // 4. Fetch user likes if logged in
-                currentUser = (await supabaseClient.auth.getUser())?.data?.user;
-                if (currentUser) {
-                    let { data: likes, error: likesErr } = await supabaseClient
-                        .from('marketplace_likes')
-                        .select('listing_id')
-                        .eq('user_id', currentUser.id);
-                    if (!likesErr && likes) {
-                        userLikes = likes.map(l => l.listing_id);
-                    }
+                if (likesRes.data && !likesRes.error) {
+                    userLikes = likesRes.data.map(l => l.listing_id);
                 }
 
-                // 4.5 Fetch user favorite shops if logged in
-                if (currentUser) {
-                    try {
-                        let { data: favs, error: favsErr } = await supabaseClient
-                            .from('client_favorite_shops')
-                            .select('shop_id')
-                            .eq('client_id', currentUser.id);
-                        if (!favsErr && favs) {
-                            userFavoriteShops = favs.map(f => f.shop_id);
-                        }
-                    } catch (favErr) {
-                        console.warn("Favorite shops table not initialized yet.", favErr);
-                    }
+                if (favsRes.data && !favsRes.error) {
+                    userFavoriteShops = favsRes.data.map(f => f.shop_id);
                 }
 
-                // 5. Fetch global likes count (Aggregate)
-                let { data: allLikesData } = await supabaseClient
-                    .from('marketplace_likes')
-                    .select('listing_id');
-                if (allLikesData) {
+                if (globalLikesRes.data) {
                     globalLikesCount = {};
-                    allLikesData.forEach(l => {
+                    globalLikesRes.data.forEach(l => {
                         globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1;
                     });
                 }
@@ -1772,12 +1799,12 @@
             if (dealListings.length === 0) return '';
 
             const displayedDeals = dealListings.slice(0, 8);
-            const cardsHtml = displayedDeals.map(list => getListingCardHtml(list)).join('');
+            const cardsHtml = displayedDeals.map(list => `<div style="flex: 0 0 240px; scroll-snap-align: start;">${getListingCardHtml(list)}</div>`).join('');
 
             return `
                 <div class="scroller-section">
                     <div class="scroller-section-title">
-                        <span><i class="fas fa-fire fire-icon"></i> 🔥 Top Deals &amp; Exclusive Discounts</span>
+                        <span><i class="fas fa-fire fire-icon"></i> Top Deals &amp; Exclusive Discounts</span>
                     </div>
                     <div class="horizontal-scroller">
                         ${cardsHtml}
@@ -1885,6 +1912,53 @@
             `;
         }
 
+        // Generate "You may be looking for" Feed Card HTML
+        function getCategorySuggestionCardHtml(chunkIndex) {
+            const allCategories = [
+                { name: 'Suits', icon: 'fas fa-user-tie' },
+                { name: 'Senator Wear', icon: 'fas fa-cut' },
+                { name: 'Dresses', icon: 'fas fa-female' },
+                { name: 'Shirts', icon: 'fas fa-shirt' },
+                { name: 'Trousers', icon: 'fas fa-cut' },
+                { name: 'Coats', icon: 'fas fa-user-tie' },
+                { name: 'Alterations', icon: 'fas fa-compress' },
+                { name: 'Jumpsuits & Rompers', icon: 'fas fa-female' },
+                { name: 'Activewear', icon: 'fas fa-running' },
+                { name: 'Watches', icon: 'fas fa-clock' },
+                { name: 'Glasses & Shades', icon: 'fas fa-glasses' },
+                { name: 'Ties & Bowties', icon: 'fas fa-user-tie' },
+                { name: 'Belts', icon: 'fas fa-tag' },
+                { name: 'Bags & Clutches', icon: 'fas fa-briefcase' },
+                { name: 'Shoes', icon: 'fas fa-shoe-prints' }
+            ];
+
+            const itemsPerCard = 4;
+            const startIndex = (chunkIndex * itemsPerCard) % allCategories.length;
+            const chunk = allCategories.slice(startIndex, startIndex + itemsPerCard);
+            
+            if (chunk.length < itemsPerCard) {
+                chunk.push(...allCategories.slice(0, itemsPerCard - chunk.length));
+            }
+
+            const gradient = 'linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, var(--card-bg) 100%)';
+
+            return `
+                <div class="card suggestion-card" style="background: ${gradient}; padding: 16px; display: flex; flex-direction: column; gap: 14px; border: 1px solid rgba(212, 175, 55, 0.3);">
+                    <h3 style="font-size: 1.15em; color: var(--brand-white); margin-bottom: 2px; font-family: 'Playfair Display', serif;">You may be looking for</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        ${chunk.map(cat => `
+                            <button onclick="selectSidebarCategory('${escapeHTML(cat.name)}')" style="display: flex; align-items: center; gap: 12px; background: var(--bg-dark); border: 1px solid rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 30px; cursor: pointer; transition: all 0.2s; width: 100%; text-align: left; color: var(--brand-white); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(212, 175, 55, 0.2);">
+                                    <i class="${escapeHTML(cat.icon)}" style="color: var(--brand-gold); font-size: 0.9em;"></i>
+                                </div>
+                                <span style="font-size: 0.88em; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(cat.name)}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
         // Render Listings Grid
         function renderListings(listings) {
             const container = document.getElementById('listings-grid');
@@ -1895,10 +1969,17 @@
             }
 
             let html = [];
+            let suggestionIndex = 0;
             listings.forEach((list, index) => {
                 html.push(getListingCardHtml(list));
 
                 if (activeMode === 'listings') {
+                    // Inject "You may be looking for" card periodically (every 8 items starting at index 3)
+                    if ((index - 3) % 8 === 0) {
+                        html.push(getCategorySuggestionCardHtml(suggestionIndex));
+                        suggestionIndex++;
+                    }
+
                     // Inject Top Deals after 6 items (index 5)
                     if (index === 5) {
                         const dealsHtml = getDealsScrollerHtml();
