@@ -689,13 +689,10 @@
 
         @media (min-width: 992px) {
             .marketplace-body-layout {
-                grid-template-columns: 260px 1fr;
+                grid-template-columns: 1fr;
             }
             .marketplace-sidebar {
-                display: block;
-                order: 1;
-                position: sticky;
-                top: 100px;
+                display: none;
             }
             .marketplace-main-stream {
                 order: 2;
@@ -1092,16 +1089,6 @@
 
         <!-- Creations (Listings) Grid & Sidebar Wrapper -->
         <div class="marketplace-body-layout">
-            <!-- Left Sidebar Category Selector -->
-            <aside class="marketplace-sidebar" id="mkt-sidebar-aside">
-                <div class="sidebar-card">
-                    <h3><i class="fas fa-compass"></i> You may be looking for</h3>
-                    <div class="sidebar-cat-list" id="sidebar-categories-container">
-                        <!-- Rendered dynamically -->
-                    </div>
-                </div>
-            </aside>
-
             <!-- Right Main Stream Content -->
             <div class="marketplace-main-stream">
                 <!-- Creations Grid -->
@@ -2110,6 +2097,94 @@
             // Navigate to the action page after tracking
             setTimeout(() => window.location.href = fallbackUrl, 120);
         }
+    </script>
+    <script>
+        // Custom Pull to Refresh Logic for Mobile
+        (function() {
+            let startY = 0;
+            let currentY = 0;
+            const threshold = 100;
+            let isRefreshing = false;
+            let refreshIndicator = null;
+            let activeScrollContainer = null;
+
+            document.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) return;
+                
+                // Find the closest scrollable container
+                activeScrollContainer = e.target.closest('.marketplace-pane, .workspace-section, .settings-pane');
+                if (!activeScrollContainer) return;
+                
+                // Only initialize pull-to-refresh if the container is scrolled to the very top
+                if (activeScrollContainer.scrollTop <= 0) {
+                    startY = e.touches[0].clientY;
+                } else {
+                    startY = 0; // Disable PTR if not at top
+                }
+            }, {passive: true});
+
+            document.addEventListener('touchmove', function(e) {
+                if (isRefreshing || startY === 0 || !activeScrollContainer) return;
+                
+                currentY = e.touches[0].clientY;
+                const distance = currentY - startY;
+
+                // Only react to downward pulls
+                if (distance > 0 && activeScrollContainer.scrollTop <= 0) {
+                    if (!refreshIndicator) {
+                        refreshIndicator = document.createElement('div');
+                        refreshIndicator.innerHTML = '<i class="fas fa-sync-alt"></i>';
+                        refreshIndicator.style.cssText = 'position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; background: var(--card-bg); border: 1px solid var(--brand-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--brand-gold); box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000; transition: top 0.2s, transform 0.2s;';
+                        activeScrollContainer.style.position = 'relative';
+                        activeScrollContainer.prepend(refreshIndicator);
+                    }
+                    
+                    // Move indicator down, up to a max
+                    const pullDistance = Math.min(distance * 0.5, threshold);
+                    refreshIndicator.style.top = (pullDistance - 50) + 'px';
+                    refreshIndicator.querySelector('i').style.transform = `rotate(${distance}deg)`;
+                }
+            }, {passive: true});
+
+            document.addEventListener('touchend', function(e) {
+                if (isRefreshing || startY === 0 || !refreshIndicator) return;
+                
+                const distance = currentY - startY;
+                
+                if (distance > threshold * 0.8) {
+                    // Trigger Refresh
+                    isRefreshing = true;
+                    refreshIndicator.style.top = '20px';
+                    refreshIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    
+                    // Call the appropriate refresh function or reload
+                    setTimeout(function() {
+                        if (typeof loadMarketplace === 'function') {
+                            loadMarketplace().then(finishRefresh).catch(finishRefresh);
+                        } else {
+                            window.location.reload();
+                        }
+                    }, 300);
+                } else {
+                    // Cancel Refresh
+                    finishRefresh();
+                }
+            });
+
+            function finishRefresh() {
+                if (refreshIndicator) {
+                    refreshIndicator.style.top = '-50px';
+                    setTimeout(() => {
+                        if (refreshIndicator && refreshIndicator.parentNode) {
+                            refreshIndicator.parentNode.removeChild(refreshIndicator);
+                        }
+                        refreshIndicator = null;
+                        isRefreshing = false;
+                        startY = 0;
+                    }, 300);
+                }
+            }
+        })();
     </script>
 </body>
 
