@@ -667,6 +667,285 @@
                 margin-top: 4px;
             }
         }
+
+        /* ===== REDESIGNED SIDEBAR LAYOUT STYLES ===== */
+        .marketplace-body-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (min-width: 992px) {
+            .marketplace-body-layout {
+                grid-template-columns: 260px 1fr;
+            }
+        }
+
+        .marketplace-sidebar {
+            position: sticky;
+            top: 100px;
+            z-index: 10;
+        }
+
+        .sidebar-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15em;
+            color: var(--brand-white);
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-card h3 i {
+            color: var(--brand-gold);
+        }
+
+        .sidebar-cat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-cat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: var(--brand-light-slate);
+            font-size: 0.88em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-align: left;
+        }
+
+        .sidebar-cat-item:hover, .sidebar-cat-item.active {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--brand-gold);
+            color: var(--brand-white);
+            transform: translateX(3px);
+        }
+
+        .sidebar-cat-item i {
+            color: var(--brand-gold);
+            font-size: 1.05em;
+            width: 16px;
+            text-align: center;
+        }
+
+        /* Override creations grid to show 3 columns on desktop to fit layout */
+        @media (min-width: 1200px) {
+            .marketplace-main-stream .content-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Scroller section (dynamic horizontal list injected inside main grid) */
+        .scroller-section {
+            grid-column: 1 / -1;
+            margin: 25px 0;
+            background: rgba(17, 34, 64, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .scroller-section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4em;
+            color: var(--brand-white);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .scroller-section-title span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scroller-section-title .fire-icon {
+            color: #ef4444;
+            animation: pulse-fire 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse-fire {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.8; }
+        }
+
+        .horizontal-scroller {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding-bottom: 12px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+            scrollbar-color: var(--brand-gold) rgba(255, 255, 255, 0.05);
+        }
+
+        .horizontal-scroller::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .horizontal-scroller::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+
+        .horizontal-scroller::-webkit-scrollbar-thumb {
+            background: var(--brand-gold);
+            border-radius: 10px;
+        }
+
+        .horizontal-scroller > .card, .horizontal-scroller > .listing-card {
+            flex: 0 0 280px;
+            scroll-snap-align: start;
+            margin-bottom: 2px;
+        }
+
+        /* Premium in-app banner spotlight */
+        .promo-banner-section {
+            grid-column: 1 / -1;
+            margin: 25px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .promo-banner {
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .promo-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(6, 12, 24, 0.95) 0%, rgba(6, 12, 24, 0.75) 50%, rgba(6, 12, 24, 0.2) 100%);
+            z-index: 1;
+        }
+
+        .promo-content {
+            position: relative;
+            z-index: 2;
+            max-width: 550px;
+        }
+
+        .promo-tag {
+            font-size: 0.72em;
+            font-weight: 700;
+            color: var(--brand-gold);
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .promo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75em;
+            color: var(--brand-white);
+            margin-bottom: 8px;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .promo-desc {
+            font-size: 0.88em;
+            color: var(--brand-light-slate);
+            margin-bottom: 18px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .promo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--brand-gold);
+            color: var(--brand-navy);
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.82em;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .promo-btn:hover {
+            background: var(--brand-gold-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        @media (max-width: 991px) {
+            .marketplace-sidebar {
+                position: relative;
+                top: 0;
+                margin-bottom: 10px;
+            }
+            .sidebar-card {
+                padding: 15px;
+            }
+            .sidebar-cat-list {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .sidebar-cat-item {
+                flex: 1 1 auto;
+                padding: 8px 14px;
+                font-size: 0.8em;
+                justify-content: center;
+            }
+            .promo-banner {
+                height: 180px;
+                padding: 0 20px;
+            }
+            .promo-title {
+                font-size: 1.35em;
+            }
+            .promo-desc {
+                font-size: 0.8em;
+                margin-bottom: 12px;
+            }
+        }
     </style>
     <link rel="manifest" href="../../manifest.json">
 </head>
@@ -765,19 +1044,35 @@
             </button>
         </div>
 
-        <!-- Creations (Listings) Grid -->
-        <div class="content-grid" id="listings-grid">
-            <div class="loader-container">
-                <i class="fas fa-spinner loader-spinner"></i>
-                <p>Loading marketplace creations...</p>
-            </div>
-        </div>
+        <!-- Creations (Listings) Grid & Sidebar Wrapper -->
+        <div class="marketplace-body-layout">
+            <!-- Left Sidebar Category Selector -->
+            <aside class="marketplace-sidebar" id="mkt-sidebar-aside">
+                <div class="sidebar-card">
+                    <h3><i class="fas fa-compass"></i> You may be looking for</h3>
+                    <div class="sidebar-cat-list" id="sidebar-categories-container">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+            </aside>
 
-        <!-- Shops Grid -->
-        <div class="content-grid" id="shops-grid" style="display: none;">
-            <div class="loader-container">
-                <i class="fas fa-spinner loader-spinner"></i>
-                <p>Loading tailoring shops...</p>
+            <!-- Right Main Stream Content -->
+            <div class="marketplace-main-stream">
+                <!-- Creations Grid -->
+                <div class="content-grid" id="listings-grid">
+                    <div class="loader-container">
+                        <i class="fas fa-spinner loader-spinner"></i>
+                        <p>Loading marketplace creations...</p>
+                    </div>
+                </div>
+
+                <!-- Shops Grid -->
+                <div class="content-grid" id="shops-grid" style="display: none;">
+                    <div class="loader-container">
+                        <i class="fas fa-spinner loader-spinner"></i>
+                        <p>Loading tailoring shops...</p>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -1172,6 +1467,154 @@
             }
         }
 
+        // Curation Categories Helpers
+        function getCuratedCategories(query = '') {
+            const defaultCategories = [
+                { name: 'Suits', icon: 'fas fa-user-tie' },
+                { name: 'Senator Wear', icon: 'fas fa-cut' },
+                { name: 'Dresses', icon: 'fas fa-female' },
+                { name: 'Shirts', icon: 'fas fa-shirt' },
+                { name: 'Shoes', icon: 'fas fa-shoe-prints' },
+                { name: 'Bags & Clutches', icon: 'fas fa-briefcase' }
+            ];
+
+            if (!query) {
+                return defaultCategories;
+            }
+
+            const queryLower = query.toLowerCase();
+
+            if (queryLower.includes('shoe') || queryLower.includes('foot') || queryLower.includes('boot') || queryLower.includes('sandal')) {
+                return [
+                    { name: 'Shoes', icon: 'fas fa-shoe-prints' },
+                    { name: 'Sandals & Slippers', icon: 'fas fa-shoe-prints' },
+                    { name: 'Boots', icon: 'fas fa-shoe-prints' },
+                    { name: 'Belts', icon: 'fas fa-tag' },
+                    { name: 'Suits', icon: 'fas fa-user-tie' }
+                ];
+            }
+            if (queryLower.includes('dress') || queryLower.includes('gown') || queryLower.includes('female') || queryLower.includes('woman') || queryLower.includes('women')) {
+                return [
+                    { name: 'Dresses', icon: 'fas fa-female' },
+                    { name: 'Ready-to-Wear Dresses', icon: 'fas fa-female' },
+                    { name: 'Jumpsuits & Rompers', icon: 'fas fa-female' },
+                    { name: 'Bags & Clutches', icon: 'fas fa-briefcase' },
+                    { name: 'Jewellery', icon: 'fas fa-gem' }
+                ];
+            }
+            if (queryLower.includes('suit') || queryLower.includes('formal') || queryLower.includes('coat') || queryLower.includes('senator') || queryLower.includes('man') || queryLower.includes('men')) {
+                return [
+                    { name: 'Suits', icon: 'fas fa-user-tie' },
+                    { name: 'Senator Wear', icon: 'fas fa-cut' },
+                    { name: 'Shirts', icon: 'fas fa-shirt' },
+                    { name: 'Trousers', icon: 'fas fa-cut' },
+                    { name: 'Ties & Bowties', icon: 'fas fa-user-tie' },
+                    { name: 'Belts', icon: 'fas fa-tag' }
+                ];
+            }
+            if (queryLower.includes('accessory') || queryLower.includes('bag') || queryLower.includes('watch') || queryLower.includes('glass') || queryLower.includes('shade') || queryLower.includes('hat') || queryLower.includes('cap')) {
+                return [
+                    { name: 'Watches', icon: 'fas fa-clock' },
+                    { name: 'Glasses & Shades', icon: 'fas fa-glasses' },
+                    { name: 'Bags & Clutches', icon: 'fas fa-briefcase' },
+                    { name: 'Hats & Caps', icon: 'fas fa-hat-cowboy' },
+                    { name: 'Belts', icon: 'fas fa-tag' }
+                ];
+            }
+
+            const matching = [];
+            const allOptions = [
+                { name: 'Suits', icon: 'fas fa-user-tie' },
+                { name: 'Senator Wear', icon: 'fas fa-cut' },
+                { name: 'Dresses', icon: 'fas fa-female' },
+                { name: 'Shirts', icon: 'fas fa-shirt' },
+                { name: 'Trousers', icon: 'fas fa-cut' },
+                { name: 'Coats', icon: 'fas fa-user-tie' },
+                { name: 'Alterations', icon: 'fas fa-compress' },
+                { name: 'Jumpsuits & Rompers', icon: 'fas fa-female' },
+                { name: 'Hoodies & Sweatshirts', icon: 'fas fa-shirt' },
+                { name: 'T-Shirts & Polos', icon: 'fas fa-shirt' },
+                { name: 'Jeans & Denim', icon: 'fas fa-cut' },
+                { name: 'Jackets & Cardigans', icon: 'fas fa-user-tie' },
+                { name: 'Ready-to-Wear Dresses', icon: 'fas fa-female' },
+                { name: 'Activewear', icon: 'fas fa-running' },
+                { name: 'Watches', icon: 'fas fa-clock' },
+                { name: 'Glasses & Shades', icon: 'fas fa-glasses' },
+                { name: 'Ties & Bowties', icon: 'fas fa-user-tie' },
+                { name: 'Scarves & Capes', icon: 'fas fa-user-tie' },
+                { name: 'Belts', icon: 'fas fa-tag' },
+                { name: 'Hats & Caps', icon: 'fas fa-hat-cowboy' },
+                { name: 'Bags & Clutches', icon: 'fas fa-briefcase' },
+                { name: 'Jewellery', icon: 'fas fa-gem' },
+                { name: 'Shoes', icon: 'fas fa-shoe-prints' },
+                { name: 'Sandals & Slippers', icon: 'fas fa-shoe-prints' },
+                { name: 'Boots', icon: 'fas fa-shoe-prints' }
+            ];
+
+            for (const opt of allOptions) {
+                if (opt.name.toLowerCase().includes(queryLower)) {
+                    matching.push(opt);
+                    if (matching.length >= 6) break;
+                }
+            }
+
+            if (matching.length < 5) {
+                for (const opt of defaultCategories) {
+                    if (!matching.some(m => m.name === opt.name)) {
+                        matching.push(opt);
+                    }
+                    if (matching.length >= 6) break;
+                }
+            }
+
+            return matching;
+        }
+
+        function renderSidebarCategories() {
+            const container = document.getElementById('sidebar-categories-container');
+            if (!container) return;
+
+            const query = document.getElementById('mkt-search-query')?.value || '';
+            const currentCat = document.getElementById('mkt-category-filter')?.value || '';
+            const curated = getCuratedCategories(query);
+
+            let html = '';
+            
+            const allActive = currentCat === '' ? 'active' : '';
+            html += `
+                <button class="sidebar-cat-item ${allActive}" onclick="selectSidebarCategory('')">
+                    <i class="fas fa-th-large"></i> All Categories
+                </button>
+            `;
+
+            curated.forEach(cat => {
+                const isActive = currentCat === cat.name ? 'active' : '';
+                html += `
+                    <button class="sidebar-cat-item ${isActive}" onclick="selectSidebarCategory('${escapeHTML(cat.name)}')">
+                        <i class="${escapeHTML(cat.icon)}"></i> ${escapeHTML(cat.name)}
+                    </button>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function selectSidebarCategory(catName) {
+            const select = document.getElementById('mkt-category-filter');
+            if (select) {
+                select.value = catName;
+            }
+            if (activeMode === 'shops' || activeMode === 'favourites') {
+                setMarketplaceMode('listings');
+            } else {
+                filterMarketplace();
+            }
+            const target = document.getElementById('listings-grid');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
         // Render Tailors Grid
         function renderShops(shops) {
             const container = document.getElementById('shops-grid');
@@ -1238,6 +1681,210 @@
             }).join('');
         }
 
+        // Get single listing card HTML helper
+        function getListingCardHtml(list) {
+            const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=400`;
+            const shopFromCache = allShops.find(s => s.id === list.shop_id);
+            const shopName = list.shops?.name || shopFromCache?.name || 'Style Shop';
+            const shopProfileImg = list.shops?.profile_image || shopFromCache?.profile_image;
+
+            const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
+            const avatarImgUrl = shopProfileImg ? (shopProfileImg.startsWith('http') ? shopProfileImg : STORAGE_URL + shopProfileImg) : null;
+            const avatarIconHtml = avatarImgUrl 
+                ? `<img src="${avatarImgUrl}" style="width:16px; height:16px; border-radius:50%; object-fit:cover; margin-right:6px; border: 1px solid var(--brand-gold); vertical-align: middle;">`
+                : `<i class="fas fa-store" style="color:var(--brand-gold); margin-right:4px; vertical-align: middle;"></i>`;
+
+            const listingReviews = allReviews.filter(r => r.listing_id === list.id);
+            const avgRating = listingReviews.length > 0
+                ? (listingReviews.reduce((sum, r) => sum + r.rating, 0) / listingReviews.length).toFixed(1)
+                : null;
+
+            const isLiked = userLikes.includes(list.id);
+            const heartIcon = isLiked ? 'fas fa-heart' : 'far fa-heart';
+            const heartColor = isLiked ? '#ef4444' : 'var(--brand-slate)';
+            const likeBtn = `
+                <button class="like-btn" onclick="event.stopPropagation(); toggleLike('${list.id}')" style="background:transparent; border:none; color:${heartColor}; cursor:pointer; font-size:1.15em; padding:4px; display:inline-flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'" id="like-btn-${list.id}">
+                    <i class="${heartIcon}"></i>
+                </button>`;
+
+            const viewsHtml = `<span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate); display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><i class="fas fa-eye"></i> ${list.views || 0}</span>`;
+            const ratingTag = `
+                <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                    ${avgRating ? `<span style="color: var(--brand-gold); font-size: 0.82em; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><i class="fas fa-star"></i> ${avgRating}</span>` : ''}
+                    ${viewsHtml}
+                    ${likeBtn}
+                </div>
+            `;
+
+            let badgeHtml = '';
+            if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
+                const pct = Math.round(((parseFloat(list.original_price) - parseFloat(list.price)) / parseFloat(list.original_price)) * 100);
+                badgeHtml = `<span class="badge-discount">${pct}% OFF</span>`;
+            } else if (list.created_at) {
+                const createdAt = new Date(list.created_at);
+                const now = new Date();
+                const diffTime = now - createdAt;
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                if (diffDays <= 5) {
+                    badgeHtml = `<span class="badge-new">NEW</span>`;
+                }
+            }
+
+            return `
+                <div class="card listing-card">
+                    <div class="card-banner-wrap">
+                        ${badgeHtml}
+                        <div class="card-banner-blur" style="background-image: url('${imageUrl}')"></div>
+                        <div class="card-banner" style="background-image: url('${imageUrl}')"></div>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;">
+                            <h3 class="card-title" style="font-size:1.15em; margin-bottom: 0; line-height: 1.2;">${escapeHTML(list.title)}</h3>
+                            ${ratingTag}
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap: 8px; margin-top: 5px;">
+                            <span class="card-badge">${escapeHTML(list.category || 'Senator Wear')}</span>
+                            <span style="font-size:0.8em; color:var(--brand-slate); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 140px; display: inline-flex; align-items: center;" title="${escapeHTML(shopName)}">
+                                ${avatarIconHtml}${escapeHTML(shopName)}
+                            </span>
+                        </div>
+                        <p class="card-desc" style="font-size: 0.85em; margin-bottom: 6px;">${escapeHTML(list.description || 'Custom crafted.')}</p>
+                        <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
+                                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                        <span style="text-decoration: line-through; color: var(--brand-slate); font-size: 0.82em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
+                                        <span class="price-tag" style="color: #ef4444; font-weight: 700; font-size: 1.05em; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
+                                    </div>
+                                ` : `
+                                    <span class="price-tag">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+                                `}
+                            </div>
+                            <a href="../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}" class="card-btn" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}'); return false;">Inquire Now <i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // Generate Deals Horizontal Scroller HTML helper
+        function getDealsScrollerHtml() {
+            const dealListings = allListings.filter(list => list.original_price && parseFloat(list.original_price) > parseFloat(list.price));
+            if (dealListings.length === 0) return '';
+
+            const displayedDeals = dealListings.slice(0, 8);
+            const cardsHtml = displayedDeals.map(list => getListingCardHtml(list)).join('');
+
+            return `
+                <div class="scroller-section">
+                    <div class="scroller-section-title">
+                        <span><i class="fas fa-fire fire-icon"></i> 🔥 Top Deals &amp; Exclusive Discounts</span>
+                    </div>
+                    <div class="horizontal-scroller">
+                        ${cardsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate Shop Spotlight Banner HTML helper
+        function getShopSpotlightBannerHtml() {
+            if (allShops.length === 0) return '';
+            const shopsWithBanner = allShops.filter(s => s.banner_image && s.banner_image.trim() !== '' && !s.banner_image.endsWith('/'));
+            const selectedShop = shopsWithBanner.length > 0 ? shopsWithBanner[Math.floor(Math.random() * shopsWithBanner.length)] : allShops[0];
+            if (!selectedShop) return '';
+
+            const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
+            const bannerUrl = selectedShop.banner_image && selectedShop.banner_image.trim() !== '' && !selectedShop.banner_image.endsWith('/')
+                ? (selectedShop.banner_image.startsWith('http') ? selectedShop.banner_image : STORAGE_URL + selectedShop.banner_image)
+                : 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=1000';
+
+            return `
+                <div class="promo-banner-section">
+                    <div class="promo-banner" style="background-image: url('${bannerUrl}')">
+                        <div class="promo-content">
+                            <span class="promo-tag"><i class="fas fa-award"></i> In-App Premium Spotlight</span>
+                            <h3 class="promo-title">${escapeHTML(selectedShop.name)}</h3>
+                            <p class="promo-desc">${escapeHTML(selectedShop.description || 'Discover premium custom designs, experienced tailors, and professional alterations at this top-rated bespoke house.')}</p>
+                            <a href="../../views/manager/shop.html?id=${selectedShop.id}" class="promo-btn">Explore Shop <i class="fas fa-chevron-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate Featured Shops Scroller HTML helper
+        function getFeaturedShopsScrollerHtml() {
+            if (allShops.length === 0) return '';
+            const displayedShops = allShops.slice(0, 6);
+
+            const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
+            const cardsHtml = displayedShops.map(shop => {
+                const hasBanner = shop.banner_image && shop.banner_image.trim() !== '' && !shop.banner_image.endsWith('/');
+                const bannerUrl = hasBanner ? (shop.banner_image.startsWith('http') ? shop.banner_image : STORAGE_URL + shop.banner_image) : null;
+                const bannerStyle = bannerUrl ? `background-image: url('${bannerUrl}')` : `background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-navy-light) 100%); border-bottom: 1px solid rgba(212,175,55,0.15);`;
+                
+                let sImg = shop.profile_image;
+                if (sImg === 'undefined' || sImg === 'null') sImg = '';
+                const avatarUrl = sImg ? (sImg.startsWith('http') ? sImg : STORAGE_URL + sImg) : '';
+                
+                let avatarHTML = avatarUrl 
+                    ? `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; position:absolute; top:0; left:0; z-index:2;" onerror="this.style.display='none';">
+                       <i class="fas fa-store" style="position:relative; z-index:1;"></i>`
+                    : `<i class="fas fa-store"></i>`;
+
+                const rawLoc = shop.location_name || shop.location || 'Nairobi, Kenya';
+                const formattedLoc = rawLoc.split(',').map(s => s.trim().replace(/\b\w/g, c => c.toUpperCase())).join(', ');
+
+                const shopReviews = allReviews.filter(r => r.shop_id === shop.id);
+                const avgRating = shopReviews.length > 0
+                    ? (shopReviews.reduce((sum, r) => sum + r.rating, 0) / shopReviews.length).toFixed(1)
+                    : null;
+                const ratingBadge = avgRating
+                    ? `<span class="card-badge"><i class="fas fa-star" style="color: var(--brand-gold);"></i> ${avgRating}</span>`
+                    : `<span class="card-badge" style="background: rgba(255,255,255,0.05); color: var(--brand-slate);"><i class="far fa-star"></i> New</span>`;
+
+                const isFavorited = userFavoriteShops.includes(shop.id);
+                const favColor = isFavorited ? '#e60023' : 'rgba(255,255,255,0.75)';
+                const favBtn = `
+                    <button class="fav-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation(); toggleFavoriteShop('${shop.id}')" style="position:absolute; top:12px; right:12px; z-index:10; background:rgba(6,12,24,0.65); border:none; color:${favColor}; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.9em; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.3);" title="${isFavorited ? 'Unpin Shop' : 'Pin Shop'}">
+                        <i class="fas fa-thumbtack" style="transition: transform 0.2s; transform: ${isFavorited ? 'rotate(45deg)' : 'rotate(0deg)'};"></i>
+                    </button>`;
+
+                return `
+                    <div class="card shop-card" style="flex: 0 0 280px; scroll-snap-align: start; margin-bottom: 2px;">
+                        <div class="card-banner-wrap" style="height: 120px;">
+                            ${favBtn}
+                            <div class="card-banner" style="${bannerStyle}"></div>
+                        </div>
+                        <div class="card-avatar" style="width: 50px; height: 50px; top: 95px; left: 15px; position:relative; overflow:hidden; border-color: ${avatarUrl ? 'var(--brand-gold)' : 'var(--glass-border)'}; display:flex; align-items:center; justify-content:center; font-size: 1.2em;">
+                            ${avatarHTML}
+                        </div>
+                        <div class="card-body" style="padding-top: 15px;">
+                            <h3 class="card-title" style="font-size: 1.1em; margin-bottom: 4px;">${escapeHTML(shop.name)}</h3>
+                            <div class="card-location" style="font-size: 0.78em; margin-bottom: 8px;">
+                                <i class="fas fa-map-marker-alt"></i> ${escapeHTML(formattedLoc)}
+                            </div>
+                            <div class="card-footer" style="padding-top: 6px; margin-top: auto;">
+                                ${ratingBadge}
+                                <a href="../../views/manager/shop.html?id=${shop.id}" class="card-btn" style="padding: 5px 10px; font-size: 0.78em;">Visit <i class="fas fa-chevron-right"></i></a>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            return `
+                <div class="scroller-section">
+                    <div class="scroller-section-title">
+                        <span><i class="fas fa-store" style="color:var(--brand-gold);"></i> 📍 Featured Tailoring Shops</span>
+                        <button onclick="setMarketplaceMode('shops')" style="background:transparent; border:none; color:var(--brand-gold); font-size:0.8em; font-family:'Montserrat',sans-serif; cursor:pointer; font-weight:600;">View All <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                    <div class="horizontal-scroller">
+                        ${cardsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
         // Render Listings Grid
         function renderListings(listings) {
             const container = document.getElementById('listings-grid');
@@ -1247,93 +1894,35 @@
                 return;
             }
 
-            container.innerHTML = listings.map(list => {
-                const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=400`;
-                const shopFromCache = allShops.find(s => s.id === list.shop_id);
-                const shopName = list.shops?.name || shopFromCache?.name || 'Style Shop';
-                const shopProfileImg = list.shops?.profile_image || shopFromCache?.profile_image;
+            let html = [];
+            listings.forEach((list, index) => {
+                html.push(getListingCardHtml(list));
 
-                const STORAGE_URL = `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/`;
-                const avatarImgUrl = shopProfileImg ? (shopProfileImg.startsWith('http') ? shopProfileImg : STORAGE_URL + shopProfileImg) : null;
-                const avatarIconHtml = avatarImgUrl 
-                    ? `<img src="${avatarImgUrl}" style="width:16px; height:16px; border-radius:50%; object-fit:cover; margin-right:6px; border: 1px solid var(--brand-gold); vertical-align: middle;">`
-                    : `<i class="fas fa-store" style="color:var(--brand-gold); margin-right:4px; vertical-align: middle;"></i>`;
-
-                const listingReviews = allReviews.filter(r => r.listing_id === list.id);
-                const avgRating = listingReviews.length > 0
-                    ? (listingReviews.reduce((sum, r) => sum + r.rating, 0) / listingReviews.length).toFixed(1)
-                    : null;
-
-                const isLiked = userLikes.includes(list.id);
-                const heartIcon = isLiked ? 'fas fa-heart' : 'far fa-heart';
-                const heartColor = isLiked ? '#ef4444' : 'var(--brand-slate)';
-                const likeBtn = `
-                    <button class="like-btn" onclick="event.stopPropagation(); toggleLike('${list.id}')" style="background:transparent; border:none; color:${heartColor}; cursor:pointer; font-size:1.15em; padding:4px; display:inline-flex; align-items:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'" id="like-btn-${list.id}">
-                        <i class="${heartIcon}"></i>
-                    </button>`;
-
-                const viewsHtml = `<span id="view-count-${list.id}" style="font-size:0.75em;color:var(--brand-slate); display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><i class="fas fa-eye"></i> ${list.views || 0}</span>`;
-                const ratingTag = `
-                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                        ${avgRating ? `<span style="color: var(--brand-gold); font-size: 0.82em; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><i class="fas fa-star"></i> ${avgRating}</span>` : ''}
-                        ${viewsHtml}
-                        ${likeBtn}
-                    </div>
-                `;
-
-                let badgeHtml = '';
-                if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
-                    const pct = Math.round(((parseFloat(list.original_price) - parseFloat(list.price)) / parseFloat(list.original_price)) * 100);
-                    badgeHtml = `<span class="badge-discount">${pct}% OFF</span>`;
-                } else if (list.created_at) {
-                    const createdAt = new Date(list.created_at);
-                    const now = new Date();
-                    const diffTime = now - createdAt;
-                    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-                    if (diffDays <= 5) {
-                        badgeHtml = `<span class="badge-new">NEW</span>`;
+                if (activeMode === 'listings') {
+                    // Inject Top Deals after 6 items (index 5)
+                    if (index === 5) {
+                        const dealsHtml = getDealsScrollerHtml();
+                        if (dealsHtml) html.push(dealsHtml);
+                    }
+                    // Inject Shop Spotlight Banner after 12 items (index 11)
+                    if (index === 11) {
+                        const spotlightHtml = getShopSpotlightBannerHtml();
+                        if (spotlightHtml) html.push(spotlightHtml);
+                    }
+                    // Inject Featured Shops Scroller after 18 items (index 17)
+                    if (index === 17) {
+                        const shopsScrollerHtml = getFeaturedShopsScrollerHtml();
+                        if (shopsScrollerHtml) html.push(shopsScrollerHtml);
                     }
                 }
+            });
 
-                return `
-                    <div class="card listing-card">
-                        <div class="card-banner-wrap">
-                            ${badgeHtml}
-                            <div class="card-banner-blur" style="background-image: url('${imageUrl}')"></div>
-                            <div class="card-banner" style="background-image: url('${imageUrl}')"></div>
-                        </div>
-                        <div class="card-body">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;">
-                                <h3 class="card-title" style="font-size:1.15em; margin-bottom: 0; line-height: 1.2;">${escapeHTML(list.title)}</h3>
-                                ${ratingTag}
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap: 8px; margin-top: 5px;">
-                                <span class="card-badge">${escapeHTML(list.category || 'Senator Wear')}</span>
-                                <span style="font-size:0.8em; color:var(--brand-slate); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 140px; display: inline-flex; align-items: center;" title="${escapeHTML(shopName)}">
-                                    ${avatarIconHtml}${escapeHTML(shopName)}
-                                </span>
-                            </div>
-                            <p class="card-desc" style="font-size: 0.85em; margin-bottom: 6px;">${escapeHTML(list.description || 'Custom crafted.')}</p>
-                            <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    ${list.original_price && parseFloat(list.original_price) > parseFloat(list.price) ? `
-                                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                                            <span style="text-decoration: line-through; color: var(--brand-slate); font-size: 0.82em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
-                                            <span class="price-tag" style="color: #ef4444; font-weight: 700; font-size: 1.05em; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
-                                        </div>
-                                    ` : `
-                                        <span class="price-tag">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
-                                    `}
-                                </div>
-                                <a href="../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}" class="card-btn" onclick="event.stopPropagation(); trackListingView('${list.id || ''}', '../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}'); return false;">Inquire Now <i class="fas fa-envelope"></i></a>
-                            </div>
-                        </div>
-                    </div>`;
-            }).join('');
+            container.innerHTML = html.join('');
         }
 
         // Search & Filter Controller
         function filterMarketplace() {
+            renderSidebarCategories();
             const query = document.getElementById('mkt-search-query').value.toLowerCase().trim();
             const location = document.getElementById('mkt-search-location').value.toLowerCase().trim();
             const category = document.getElementById('mkt-category-filter').value;
@@ -1379,7 +1968,7 @@
 
                 // Algorithm: Sort by Bespoke Score (Popularity > Quality > Recency > Profile)
                 filteredListings.sort((a, b) => {
-                    return calculateBespokeScore(b, allShops, allReviews, globalLikesCount) - calculateBespokeScore(a, allShops, allReviews, globalLikesCount);
+                    return calculateBespokeScore(b, allShops, allReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allShops, allReviews, globalLikesCount, userFavoriteShops);
                 });
 
                 renderListings(filteredListings);
