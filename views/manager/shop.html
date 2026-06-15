@@ -1123,7 +1123,8 @@
     <div class="shop-container">
         <!-- 👤 LEFT SIDEBAR: PROFILE CARD -->
         <aside class="shop-info-sidebar">
-            <div class="shop-profile-card">
+            <div class="shop-profile-card" style="position: relative;">
+                <div id="shop-bookmark-container" style="position: absolute; top: 15px; right: 15px; z-index: 10;"></div>
                 <div class="shop-logo-large" id="shop-logo-large" onclick="openImageModal(this.style.backgroundImage)" style="cursor: pointer;" title="View Image">
                     <i class="fas fa-store"></i>
                 </div>
@@ -1418,6 +1419,7 @@
         let currentUserProfile = null;
         let selectedFormRating = 0; // Store star value in review modal
         let userLikes = []; // Track which listings this user has liked
+        let userFavoriteShops = []; // Track client's saved shops
 
         // Parse query params
         const urlParams = new URLSearchParams(window.location.search);
@@ -1444,6 +1446,7 @@
             renderShopListings();
             populateInquiryDropdown();
             renderReviews();
+            renderBookmarkButton();
         }
 
         async function checkSession() {
@@ -1465,13 +1468,23 @@
 
                 currentUser = user;
 
-                // Fetch this user's likes for listings in this shop
+                // Fetch this user's likes and saved shops
                 if (supabaseClient) {
                     const { data: likes } = await supabaseClient
                         .from('marketplace_likes')
                         .select('listing_id')
                         .eq('user_id', user.id);
                     if (likes) userLikes = likes.map(l => l.listing_id);
+
+                    try {
+                        const { data: favs } = await supabaseClient
+                            .from('client_favorite_shops')
+                            .select('shop_id')
+                            .eq('client_id', user.id);
+                        if (favs) userFavoriteShops = favs.map(f => f.shop_id);
+                    } catch (favErr) {
+                        console.warn("Could not load favorite shops:", favErr);
+                    }
                 }
 
                 // Fetch profile role
@@ -1560,6 +1573,69 @@
         async function signOutUser() {
             if (supabaseClient) await supabaseClient.auth.signOut();
             location.reload();
+        }
+
+        function renderBookmarkButton() {
+            const btnContainer = document.getElementById('shop-bookmark-container');
+            if (!btnContainer) return;
+
+            if (!currentUser) {
+                btnContainer.style.display = 'none';
+                return;
+            }
+
+            btnContainer.style.display = 'block';
+            const isFavorited = userFavoriteShops.includes(shopId);
+            const color = isFavorited ? '#e60023' : 'rgba(255,255,255,0.75)';
+            const title = isFavorited ? 'Unpin Shop' : 'Pin Shop';
+
+            btnContainer.innerHTML = `
+                <button onclick="toggleFavoriteShop()" style="background:rgba(6,12,24,0.65); border:none; color:${color}; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.1em; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.3);" title="${title}">
+                    <i class="fas fa-thumbtack" style="transition: transform 0.2s; transform: ${isFavorited ? 'rotate(45deg)' : 'rotate(0deg)'};"></i>
+                </button>
+            `;
+        }
+
+        async function toggleFavoriteShop() {
+            if (!currentUser) {
+                alert("Please log in to save tailor shops.");
+                return;
+            }
+
+            const isCurrentlyFavorited = userFavoriteShops.includes(shopId);
+
+            // Optimistic UI Update
+            if (isCurrentlyFavorited) {
+                userFavoriteShops = userFavoriteShops.filter(id => id !== shopId);
+            } else {
+                userFavoriteShops.push(shopId);
+            }
+            renderBookmarkButton();
+
+            try {
+                if (isCurrentlyFavorited) {
+                    const { error } = await supabaseClient
+                        .from('client_favorite_shops')
+                        .delete()
+                        .eq('client_id', currentUser.id)
+                        .eq('shop_id', shopId);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient
+                        .from('client_favorite_shops')
+                        .insert([{ client_id: currentUser.id, shop_id: shopId }]);
+                    if (error) throw error;
+                }
+            } catch (err) {
+                console.error("Failed to toggle favorite shop:", err);
+                // Revert optimistic update
+                if (isCurrentlyFavorited) {
+                    userFavoriteShops.push(shopId);
+                } else {
+                    userFavoriteShops = userFavoriteShops.filter(id => id !== shopId);
+                }
+                renderBookmarkButton();
+            }
         }
 
         async function fetchShopDetails() {

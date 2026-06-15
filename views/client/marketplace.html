@@ -799,6 +799,7 @@
         let currentUser;
         let userLikes = [];
         let globalLikesCount = {};
+        let userFavoriteShops = [];
 
         // Apply config branding dynamically
         if (typeof APP_CONFIG !== 'undefined') {
@@ -974,6 +975,68 @@
             }
         }
 
+        function updateFavoriteShopIcons(shopId, isFav) {
+            const buttons = document.querySelectorAll(`button.fav-shop-btn[data-shop-id="${shopId}"]`);
+            buttons.forEach(btn => {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-thumbtack';
+                    icon.style.transform = isFav ? 'rotate(45deg)' : 'rotate(0deg)';
+                }
+                btn.style.color = isFav ? '#e60023' : 'rgba(255,255,255,0.75)';
+                btn.title = isFav ? 'Unpin Shop' : 'Pin Shop';
+            });
+        }
+
+        async function toggleFavoriteShop(shopId) {
+            if (!currentUser) {
+                alert("Please log in to save tailor shops.");
+                return;
+            }
+
+            const isCurrentlyFavorited = userFavoriteShops.includes(shopId);
+
+            // Optimistic UI Update: toggle local list
+            if (isCurrentlyFavorited) {
+                userFavoriteShops = userFavoriteShops.filter(id => id !== shopId);
+            } else {
+                userFavoriteShops.push(shopId);
+            }
+
+            // Invalidate algorithm cache
+            if (typeof clearAlgorithmCache === 'function') {
+                clearAlgorithmCache();
+            }
+
+            // Update DOM icons directly in-place without triggering sorting to prevent disorienting jumps
+            updateFavoriteShopIcons(shopId, !isCurrentlyFavorited);
+
+            try {
+                if (isCurrentlyFavorited) {
+                    const { error } = await supabaseClient
+                        .from('client_favorite_shops')
+                        .delete()
+                        .eq('client_id', currentUser.id)
+                        .eq('shop_id', shopId);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient
+                        .from('client_favorite_shops')
+                        .insert([{ client_id: currentUser.id, shop_id: shopId }]);
+                    if (error) throw error;
+                }
+            } catch (err) {
+                console.error("Failed to toggle favorite shop:", err);
+                // Revert optimistic update
+                if (isCurrentlyFavorited) {
+                    userFavoriteShops.push(shopId);
+                } else {
+                    userFavoriteShops = userFavoriteShops.filter(id => id !== shopId);
+                }
+                updateFavoriteShopIcons(shopId, isCurrentlyFavorited);
+            }
+        }
+
         // Toggle Active Tab Mode
         function setMarketplaceMode(mode) {
             activeMode = mode;
@@ -1046,6 +1109,21 @@
                     }
                 }
 
+                // 4.5 Fetch user favorite shops if logged in
+                if (currentUser) {
+                    try {
+                        let { data: favs, error: favsErr } = await supabaseClient
+                            .from('client_favorite_shops')
+                            .select('shop_id')
+                            .eq('client_id', currentUser.id);
+                        if (!favsErr && favs) {
+                            userFavoriteShops = favs.map(f => f.shop_id);
+                        }
+                    } catch (favErr) {
+                        console.warn("Favorite shops table not initialized yet.", favErr);
+                    }
+                }
+
                 // 5. Fetch global likes count (Aggregate)
                 let { data: allLikesData } = await supabaseClient
                     .from('marketplace_likes')
@@ -1055,6 +1133,19 @@
                     allLikesData.forEach(l => {
                         globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1;
                     });
+                }
+
+                // Invalidate cache and sort listings/shops using recomendation scoring
+                if (typeof clearAlgorithmCache === 'function') {
+                    clearAlgorithmCache();
+                }
+
+                if (typeof calculateShopScore === 'function') {
+                    allShops.sort((a, b) => calculateShopScore(b, allReviews) - calculateShopScore(a, allReviews));
+                }
+
+                if (typeof calculateBespokeScore === 'function') {
+                    allListings.sort((a, b) => calculateBespokeScore(b, allShops, allReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allShops, allReviews, globalLikesCount, userFavoriteShops));
                 }
 
                 // Check URL params for category filter trigger
@@ -1116,9 +1207,17 @@
                     ? `<span class="card-badge"><i class="fas fa-star" style="color: var(--brand-gold);"></i> ${avgRating} (${shopReviews.length})</span>`
                     : `<span class="card-badge" style="background: rgba(255,255,255,0.05); color: var(--brand-slate);"><i class="far fa-star"></i> New Shop</span>`;
 
+                const isFavorited = userFavoriteShops.includes(shop.id);
+                const favColor = isFavorited ? '#e60023' : 'rgba(255,255,255,0.75)';
+                const favBtn = `
+                    <button class="fav-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation(); toggleFavoriteShop('${shop.id}')" style="position:absolute; top:12px; right:12px; z-index:10; background:rgba(6,12,24,0.65); border:none; color:${favColor}; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.9em; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.3);" title="${isFavorited ? 'Unpin Shop' : 'Pin Shop'}">
+                        <i class="fas fa-thumbtack" style="transition: transform 0.2s; transform: ${isFavorited ? 'rotate(45deg)' : 'rotate(0deg)'};"></i>
+                    </button>`;
+
                 return `
                     <div class="card shop-card">
                         <div class="card-banner-wrap">
+                            ${favBtn}
                             <div class="card-banner" style="${bannerStyle}"></div>
                         </div>
                         <div class="card-avatar" style="position:relative; overflow:hidden; border-color: ${avatarUrl ? 'var(--brand-gold)' : 'var(--glass-border)'}; display:flex; align-items:center; justify-content:center;">

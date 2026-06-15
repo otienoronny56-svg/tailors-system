@@ -2,10 +2,15 @@
 // 📈 THE BESPOKE SCORE ALGORITHM
 // ==========================================
 
-const bespokeScoreCache = new WeakMap();
-const shopScoreCache = new WeakMap();
+let bespokeScoreCache = new WeakMap();
+let shopScoreCache = new WeakMap();
 
-function calculateBespokeScore(list, allShops = [], allReviews = [], globalLikesCount = {}) {
+function clearAlgorithmCache() {
+    bespokeScoreCache = new WeakMap();
+    shopScoreCache = new WeakMap();
+}
+
+function calculateBespokeScore(list, allShops = [], allReviews = [], globalLikesCount = {}, userFavoriteShops = []) {
     if (bespokeScoreCache.has(list)) {
         return bespokeScoreCache.get(list);
     }
@@ -60,6 +65,11 @@ function calculateBespokeScore(list, allShops = [], allReviews = [], globalLikes
     // 6. Heavy Random Variance (up to 30 pts) 
     // This ensures a massive shuffle on every single page refresh while keeping top items generally high.
     score += Math.random() * 30;
+
+    // 7. Favorite Shop Multiplier (5.0x Boost)
+    if (userFavoriteShops && userFavoriteShops.includes(list.shop_id)) {
+        score *= 5.0;
+    }
 
     bespokeScoreCache.set(list, score);
     return score;

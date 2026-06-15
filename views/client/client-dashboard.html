@@ -1301,7 +1301,7 @@
                                 style="font-size: 0.85em; padding: 6px 0; background: transparent; border: none; color: white; outline: none; width: 100%;">
                         </div>
                         <div class="search-input-group extra-filter-group"
-                            style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 140px;">
+                            style="border-right: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 8px; padding-right: 10px; flex: 1; min-width: 140px;">
                             <i class="fas fa-tags" style="font-size: 0.85em; color: var(--brand-gold);"></i>
                             <select id="marketplace-category-filter" onchange="filterMarketplace()"
                                 style="font-size: 0.82em; padding: 6px 0; background: transparent; border: none; color: white; outline: none; width: 100%; cursor: pointer;">
@@ -1350,6 +1350,14 @@
                                     <option value="Boots" style="background:#1e293b;">Boots</option>
                                 </optgroup>
                             </select>
+                        </div>
+                        <div class="search-input-group extra-filter-group"
+                            style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 140px; justify-content: flex-start; padding-left: 5px;">
+                            <i class="fas fa-heart" style="font-size: 0.85em; color: #ef4444;"></i>
+                            <label for="marketplace-favorites-filter" style="font-size: 0.82em; color: white; cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; width: 100%;">
+                                <input type="checkbox" id="marketplace-favorites-filter" onchange="filterMarketplace()" style="cursor: pointer; width: auto; margin: 0; transform: scale(1.1);">
+                                Fav Shops Only
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -2641,6 +2649,8 @@
         let allMarketplaceListings = [];
         let allMarketplaceReviews = []; // Store reviews globally
         let userLikes = []; // Track liked listings
+        let userFavoriteShops = []; // Track favorited shop IDs
+        let globalLikesCount = {}; // Track global likes count
 
         async function loadMarketplaceData() {
             const shopsContainer = document.getElementById('marketplace-shops-container');
@@ -2692,13 +2702,35 @@
                     }
                 }
 
+                // Fetch user favorite shops if logged in
+                if (currentUser) {
+                    try {
+                        let { data: favs, error: favsErr } = await supabaseClient
+                            .from('client_favorite_shops')
+                            .select('shop_id')
+                            .eq('client_id', currentUser.id);
+                        if (!favsErr && favs) {
+                            userFavoriteShops = favs.map(f => f.shop_id);
+                        } else if (favsErr) {
+                            console.warn("Could not load client_favorite_shops. SQL schema might not be updated.", favsErr);
+                        }
+                    } catch (favErr) {
+                        console.warn("Favorite shops table not initialized yet.", favErr);
+                    }
+                }
+
                 // Fetch global likes for algorithm
                 let { data: globalLikesData } = await supabaseClient
                     .from('marketplace_likes')
                     .select('listing_id');
-                let globalLikesCount = {};
+                globalLikesCount = {};
                 if (globalLikesData) {
                     globalLikesData.forEach(l => { globalLikesCount[l.listing_id] = (globalLikesCount[l.listing_id] || 0) + 1; });
+                }
+
+                // Invalidate caching before sorting to respect favorited status changes and new random variance
+                if (typeof clearAlgorithmCache === 'function') {
+                    clearAlgorithmCache();
                 }
 
                 if (typeof calculateShopScore === 'function') {
@@ -2706,7 +2738,7 @@
                 }
                 
                 if (typeof calculateBespokeScore === 'function') {
-                    allMarketplaceListings.sort((a, b) => calculateBespokeScore(b, allMarketplaceShops, allMarketplaceReviews, globalLikesCount) - calculateBespokeScore(a, allMarketplaceShops, allMarketplaceReviews, globalLikesCount));
+                    allMarketplaceListings.sort((a, b) => calculateBespokeScore(b, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops));
                 }
 
                 renderMarketplaceShops(allMarketplaceShops);
@@ -2746,9 +2778,17 @@
                     ? `<span class="card-badge"><i class="fas fa-star" style="color: var(--brand-gold);"></i> ${avgRating} (${shopReviews.length})</span>`
                     : `<span class="card-badge" style="background: rgba(255,255,255,0.05); color: var(--brand-slate);"><i class="far fa-star"></i> New Shop</span>`;
 
+                const isFavorited = userFavoriteShops.includes(shop.id);
+                const favShopColor = isFavorited ? '#e60023' : 'rgba(255,255,255,0.75)';
+                const favBtn = `
+                    <button class="fav-shop-btn" data-shop-id="${shop.id}" onclick="event.stopPropagation(); toggleFavoriteShop('${shop.id}')" style="position:absolute; top:12px; right:12px; z-index:10; background:rgba(6,12,24,0.65); border:none; color:${favShopColor}; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.9em; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.3);" title="${isFavorited ? 'Unpin Shop' : 'Pin Shop'}">
+                        <i class="fas fa-thumbtack" style="transition: transform 0.2s; transform: ${isFavorited ? 'rotate(45deg)' : 'rotate(0deg)'};"></i>
+                    </button>`;
+
                 return `
                     <div class="card shop-card">
                         <div class="card-banner-wrap">
+                            ${favBtn}
                             <div class="card-banner" style="${bannerStyle}"></div>
                         </div>
                         <div class="card-avatar" style="${avatarStyle}">
@@ -2825,6 +2865,72 @@
                     btn.style.color = 'var(--brand-slate)';
                 }
                 if (activeMarketplaceMode === 'favourites') {
+                    filterMarketplace();
+                }
+            }
+        }
+
+        function updateFavoriteShopIcons(shopId, isFav) {
+            const buttons = document.querySelectorAll(`button.fav-shop-btn[data-shop-id="${shopId}"]`);
+            buttons.forEach(btn => {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-thumbtack';
+                    icon.style.transform = isFav ? 'rotate(45deg)' : 'rotate(0deg)';
+                }
+                btn.style.color = isFav ? '#e60023' : 'rgba(255,255,255,0.75)';
+                btn.title = isFav ? 'Unpin Shop' : 'Pin Shop';
+            });
+        }
+
+        async function toggleFavoriteShop(shopId) {
+            if (!currentUser) {
+                alert("Please log in to save tailor shops.");
+                return;
+            }
+
+            const isCurrentlyFavorited = userFavoriteShops.includes(shopId);
+
+            // Optimistic UI Update: toggle local list
+            if (isCurrentlyFavorited) {
+                userFavoriteShops = userFavoriteShops.filter(id => id !== shopId);
+            } else {
+                userFavoriteShops.push(shopId);
+            }
+
+            // Update DOM icons directly in-place without triggering sorting to prevent disorienting jumps
+            updateFavoriteShopIcons(shopId, !isCurrentlyFavorited);
+
+            // Trigger filters query only if we are currently looking at "Fav Shops Only"
+            const favoritesFilterEl = document.getElementById('marketplace-favorites-filter');
+            if (favoritesFilterEl && favoritesFilterEl.checked) {
+                filterMarketplace();
+            }
+
+            try {
+                if (isCurrentlyFavorited) {
+                    const { error } = await supabaseClient
+                        .from('client_favorite_shops')
+                        .delete()
+                        .eq('client_id', currentUser.id)
+                        .eq('shop_id', shopId);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient
+                        .from('client_favorite_shops')
+                        .insert([{ client_id: currentUser.id, shop_id: shopId }]);
+                    if (error) throw error;
+                }
+            } catch (err) {
+                console.error("Failed to toggle favorite shop:", err);
+                // Revert optimistic update on failure
+                if (isCurrentlyFavorited) {
+                    userFavoriteShops.push(shopId);
+                } else {
+                    userFavoriteShops = userFavoriteShops.filter(id => id !== shopId);
+                }
+                updateFavoriteShopIcons(shopId, isCurrentlyFavorited);
+                if (favoritesFilterEl && favoritesFilterEl.checked) {
                     filterMarketplace();
                 }
             }
@@ -2921,8 +3027,12 @@
             const location = document.getElementById('marketplace-search-location').value.toLowerCase().trim();
             const categoryFilterEl = document.getElementById('marketplace-category-filter');
             const category = categoryFilterEl ? categoryFilterEl.value : '';
+            const favoritesFilterEl = document.getElementById('marketplace-favorites-filter');
+            const showFavoritesOnly = favoritesFilterEl ? favoritesFilterEl.checked : false;
 
             const filteredShops = allMarketplaceShops.filter(shop => {
+                if (showFavoritesOnly && !userFavoriteShops.includes(shop.id)) return false;
+
                 const nameMatch = !query ||
                     (shop.name && shop.name.toLowerCase().includes(query)) ||
                     (shop.description && shop.description.toLowerCase().includes(query));
@@ -2938,6 +3048,8 @@
                 if (activeMarketplaceMode === 'favourites') {
                     if (!userLikes.includes(list.id)) return false;
                 }
+
+                if (showFavoritesOnly && !userFavoriteShops.includes(list.shop_id)) return false;
 
                 const titleMatch = !query ||
                     (list.title && list.title.toLowerCase().includes(query)) ||
