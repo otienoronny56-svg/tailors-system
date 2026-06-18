@@ -21,6 +21,7 @@ function getCuratedCategories(query = '') {
     const defaultCategories = [
         { name: 'Suits', icon: 'fas fa-user-tie' },
         { name: 'Senator Wear', icon: 'fas fa-cut' },
+            { name: 'African Attire', icon: 'fas fa-globe-africa' },
         { name: 'Dresses', icon: 'fas fa-female' },
         { name: 'Shirts', icon: 'fas fa-shirt' },
         { name: 'Shoes', icon: 'fas fa-shoe-prints' },
@@ -55,6 +56,7 @@ function getCuratedCategories(query = '') {
         return [
             { name: 'Suits', icon: 'fas fa-user-tie' },
             { name: 'Senator Wear', icon: 'fas fa-cut' },
+            { name: 'African Attire', icon: 'fas fa-globe-africa' },
             { name: 'Shirts', icon: 'fas fa-shirt' },
             { name: 'Trousers', icon: 'fas fa-cut' },
             { name: 'Ties & Bowties', icon: 'fas fa-user-tie' },
@@ -75,6 +77,7 @@ function getCuratedCategories(query = '') {
     const allOptions = [
         { name: 'Suits', icon: 'fas fa-user-tie' },
         { name: 'Senator Wear', icon: 'fas fa-cut' },
+            { name: 'African Attire', icon: 'fas fa-globe-africa' },
         { name: 'Dresses', icon: 'fas fa-female' },
         { name: 'Shirts', icon: 'fas fa-shirt' },
         { name: 'Trousers', icon: 'fas fa-cut' },
@@ -436,6 +439,7 @@ function getCategorySuggestionCardHtml(chunkIndex) {
     const allCategories = [
         { name: 'Suits', icon: 'fas fa-user-tie' },
         { name: 'Senator Wear', icon: 'fas fa-cut' },
+            { name: 'African Attire', icon: 'fas fa-globe-africa' },
         { name: 'Dresses', icon: 'fas fa-female' },
         { name: 'Shirts', icon: 'fas fa-shirt' },
         { name: 'Trousers', icon: 'fas fa-cut' },
