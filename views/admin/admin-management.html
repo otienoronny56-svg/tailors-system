@@ -1259,6 +1259,34 @@
             }
         }
     </script>
+    <!-- View Shops Modal -->
+    <div class="modal" id="view-shops-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div class="modal-content" style="background:var(--brand-navy); border:2px solid var(--brand-gold); padding:20px; border-radius:8px; max-width:800px; width:90%; position:relative; max-height:80vh; overflow-y:auto; color:white;">
+            <button onclick="document.getElementById('view-shops-modal').style.display='none'" style="position:absolute; top:10px; right:10px; background:transparent; border:none; color:var(--brand-gold); font-size:1.5em; cursor:pointer;">&times;</button>
+            <h2 id="view-shops-org-name" style="color:var(--brand-gold); border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:10px; margin-bottom:20px;">Organization Shops</h2>
+            
+            <div style="overflow-x:auto;">
+                <table class="data-table" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:rgba(212,175,55,0.1);">
+                            <th style="padding:10px; text-align:left;">Shop ID</th>
+                            <th style="padding:10px; text-align:left;">Name</th>
+                            <th style="padding:10px; text-align:left;">Location</th>
+                            <th style="padding:10px; text-align:left;">Status</th>
+                            <th style="padding:10px; text-align:left;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="org-shops-tbody">
+                        <tr><td colspan="5" style="text-align:center; padding:20px;">Loading shops...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+                <button type="button" class="btn" onclick="document.getElementById('view-shops-modal').style.display='none'" style="background:transparent; border:1px solid #64748b; color:white; margin-right:10px;">Close</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

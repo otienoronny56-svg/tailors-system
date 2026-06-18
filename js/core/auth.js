@@ -150,7 +150,41 @@ async function checkSession() {
                             <div style="font-size: 50px; color: #ef4444; margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i></div>
                             <h1 style="color: var(--brand-gold); margin-bottom: 15px; font-family: 'Playfair Display', serif;">Workspace Suspended</h1>
                             <p style="color: var(--brand-slate); line-height: 1.6; margin-bottom: 25px;">
-                                Your shop/organization has been suspended. Please contact platform administration to reactivate your workspace.
+                                Your organization has been suspended. Please contact platform administration to reactivate your workspace.
+                            </p>
+                            <button onclick="supabaseClient.auth.signOut().then(() => { sessionStorage.clear(); location.href='/index.html'; })" class="small-btn" style="width: 100%; background: #ef4444; color: white; border: none; font-weight: bold; cursor: pointer;">Logout</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+        }
+
+        // 🛑 NEW: Check for shop suspension (Enforcement)
+        if (USER_PROFILE.shop_id && USER_PROFILE.role !== 'superadmin') {
+            const cachedShopStatus = sessionStorage.getItem('SHOP_STATUS_' + USER_PROFILE.shop_id);
+            let isShopSuspended = cachedShopStatus === 'Suspended';
+            
+            if (!cachedShopStatus) {
+                const { data: shop, error: shopError } = await supabaseClient
+                    .from('shops')
+                    .select('status')
+                    .eq('id', USER_PROFILE.shop_id)
+                    .single();
+                if (!shopError && shop) {
+                    sessionStorage.setItem('SHOP_STATUS_' + USER_PROFILE.shop_id, shop.status || 'Active');
+                    isShopSuspended = shop.status === 'Suspended';
+                }
+            }
+
+            if (isShopSuspended) {
+                document.body.innerHTML = `
+                    <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #060c18; font-family: 'Montserrat', sans-serif; color: white;">
+                        <div style="text-align: center; background: rgba(17, 34, 64, 0.75); border: 1px solid rgba(212, 175, 55, 0.15); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 450px;">
+                            <div style="font-size: 50px; color: #ef4444; margin-bottom: 20px;"><i class="fas fa-store-alt-slash"></i></div>
+                            <h1 style="color: var(--brand-gold); margin-bottom: 15px; font-family: 'Playfair Display', serif;">Shop Suspended</h1>
+                            <p style="color: var(--brand-slate); line-height: 1.6; margin-bottom: 25px;">
+                                Your specific shop has been suspended by administration. Please contact support.
                             </p>
                             <button onclick="supabaseClient.auth.signOut().then(() => { sessionStorage.clear(); location.href='/index.html'; })" class="small-btn" style="width: 100%; background: #ef4444; color: white; border: none; font-weight: bold; cursor: pointer;">Logout</button>
                         </div>

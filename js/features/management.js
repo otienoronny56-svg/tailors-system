@@ -159,6 +159,7 @@ async function loadOrganizations() {
                         <td>${formatDate(org.created_at)}</td>
                         <td><span style="background:${badgeColor}; color:white; padding:3px 10px; border-radius:12px; font-weight:bold; font-size:0.85em;">${statusText}</span></td>
                         <td>
+                            <button class="small-btn" onclick="viewOrgShops('${org.id}', '${org.name.replace(/'/g, "\\'")}')" style="background:var(--brand-navy); color:white; border:1px solid var(--brand-gold); margin-right:5px;">View Shops</button>
                             <button class="small-btn" onclick="toggleOrganizationSuspension('${org.id}', '${statusText}')" style="background:${btnBg}; color:white; border:none; margin-right:5px;">${btnText}</button>
                             <button class="small-btn" onclick="deleteOrganization('${org.id}')" style="background:#ef4444; color:white; border:none;">Delete</button>
                         </td>
@@ -1757,4 +1758,78 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+
+
+window.viewOrgShops = async function(orgId, orgName) {
+    document.getElementById('view-shops-org-name').innerText = orgName + ' - Shops';
+    document.getElementById('view-shops-modal').style.display = 'flex';
+    const tbody = document.getElementById('org-shops-tbody');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading shops...</td></tr>';
+
+    try {
+        const { data: shops, error } = await supabaseClient
+            .from('shops')
+            .select('*')
+            .eq('organization_id', orgId)
+            .order('name');
+            
+        if (error) throw error;
+
+        if (!shops || shops.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No shops found for this organization</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = shops.map(shop => {
+            const statusText = shop.status || 'Active';
+            const isSuspended = statusText === 'Suspended';
+            const badgeColor = isSuspended ? '#ef4444' : '#10b981';
+            const btnText = isSuspended ? 'Reactivate' : 'Suspend';
+            const btnBg = isSuspended ? '#10b981' : '#f59e0b';
+            
+            return \
+            <tr>
+                <td><small>\</small></td>
+                <td><strong>\</strong></td>
+                <td>\</td>
+                <td><span style="background:\; color:white; padding:3px 10px; border-radius:12px; font-weight:bold; font-size:0.85em;">\</span></td>
+                <td>
+                    <button class="small-btn" onclick="toggleShopSuspension('\', '\', '\', '\')" style="background:\; color:white; border:none; margin-right:5px;">\</button>
+                    <button class="small-btn" onclick="deleteShop('\', '\', '\')" style="background:#ef4444; color:white; border:none;">Delete</button>
+                </td>
+            </tr>\;
+        }).join('');
+    } catch (err) {
+        tbody.innerHTML = \<tr><td colspan="5" style="text-align:center; color:#ef4444;">Error loading shops: \</td></tr>\;
+    }
+}
+
+window.toggleShopSuspension = async function(shopId, currentStatus, orgId, orgName) {
+    const newStatus = currentStatus === 'Suspended' ? 'Active' : 'Suspended';
+    const actionText = currentStatus === 'Suspended' ? 'reactivate' : 'suspend';
+    if (!confirm(\Are you sure you want to \ this shop?\)) return;
+    try {
+        const { error } = await supabaseClient
+            .from('shops')
+            .update({ status: newStatus })
+            .eq('id', shopId);
+        if (error) throw error;
+        alert(\Shop successfully \!\);
+        viewOrgShops(orgId, orgName);
+    } catch (err) {
+        alert("Error updating shop: " + err.message);
+    }
+}
+
+window.deleteShop = async function(shopId, orgId, orgName) {
+    if (!confirm("Are you sure? This will delete all data related to this shop!")) return;
+    try {
+        const { error } = await supabaseClient.from('shops').delete().eq('id', shopId);
+        if (error) throw error;
+        viewOrgShops(orgId, orgName);
+        loadOrganizations(); // update shop count
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
+}
 
