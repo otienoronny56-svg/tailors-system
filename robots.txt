@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /views/admin/
+Disallow: /views/superadmin/
+Disallow: /views/client/
+Disallow: /js/core/config.js
+Disallow: /scratch/
+Disallow: /developer_tools/
+
+Sitemap: https://tailors.co.ke/sitemap.xml
