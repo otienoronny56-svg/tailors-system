@@ -49,7 +49,8 @@ function getCuratedCategories(query = '') {
             { name: 'Ready-to-Wear Dresses', icon: 'fas fa-female' },
             { name: 'Jumpsuits & Rompers', icon: 'fas fa-female' },
             { name: 'Bags & Clutches', icon: 'fas fa-briefcase' },
-            { name: 'Jewellery', icon: 'fas fa-gem' }
+            { name: 'Jewellery', icon: 'fas fa-gem' },
+            { name: 'Walking Sticks & Canes', icon: 'fas fa-magic' }
         ];
     }
     if (queryLower.includes('suit') || queryLower.includes('formal') || queryLower.includes('coat') || queryLower.includes('senator') || queryLower.includes('man') || queryLower.includes('men')) {
@@ -98,6 +99,7 @@ function getCuratedCategories(query = '') {
         { name: 'Hats & Caps', icon: 'fas fa-hat-cowboy' },
         { name: 'Bags & Clutches', icon: 'fas fa-briefcase' },
         { name: 'Jewellery', icon: 'fas fa-gem' },
+            { name: 'Walking Sticks & Canes', icon: 'fas fa-magic' },
         { name: 'Shoes', icon: 'fas fa-shoe-prints' },
         { name: 'Sandals & Slippers', icon: 'fas fa-shoe-prints' },
         { name: 'Boots', icon: 'fas fa-shoe-prints' }
