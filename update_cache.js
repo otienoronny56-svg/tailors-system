@@ -10,7 +10,7 @@ function walkDir(dir) {
         const stat = fs.statSync(fullPath);
         if (stat.isDirectory()) {
             files = files.concat(walkDir(fullPath));
-        } else if (fullPath.endsWith('.html')) {
+        } else if (fullPath.endsWith('.html') || fullPath.endsWith('sw.js')) {
             files.push(fullPath);
         }
     }
@@ -19,12 +19,13 @@ function walkDir(dir) {
 
 const htmlFiles = walkDir(__dirname);
 let count = 0;
+const newVersion = '1781434537376';
 for (const file of htmlFiles) {
     let content = fs.readFileSync(file, 'utf8');
-    if (content.includes('v=1781434537371')) {
-        content = content.replace(/v=1781434537371/g, 'v=1781434537375');
+    if (content.includes('v=1781434537375')) {
+        content = content.replace(/v=1781434537375/g, `v=${newVersion}`);
         fs.writeFileSync(file, content);
         count++;
     }
 }
-console.log(`Updated cache buster in ${count} files.`);
+console.log(`Updated cache buster to ${newVersion} in ${count} files.`);
