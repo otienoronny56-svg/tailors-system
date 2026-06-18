@@ -1,26 +1,27 @@
 const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
 
-const supabase = createClient(
-    "https://ouuhirckiavcvgqlpriw.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91dWhpcmNraWF2Y3ZncWxwcml3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzkxNjI0NSwiZXhwIjoyMDg5NDkyMjQ1fQ.yC10d9Lu9cNB0JALqr5WCLuWBblw_6at8vuy0MXSyWA"
-);
+const configText = fs.readFileSync('c:/Users/ronny/Desktop/tailors project/js/core/config.js', 'utf8');
+const url = configText.match(/supabaseUrl:\s*['"]([^'"]+)['"]/)[1];
+const key = configText.match(/serviceRoleKey:\s*['"]([^'"]+)['"]/)[1];
 
-async function main() {
-    console.log("\n=== Shops ===");
-    const { data: shops } = await supabase.from('shops').select('id, name, organization_id');
-    console.table(shops);
+const supabase = createClient(url, key);
 
-    console.log("\n=== marketplace_listings with shop join ===");
-    const { data: listings, error } = await supabase
-        .from('marketplace_listings')
-        .select('id, title, shop_id, status, shops(name)')
-        .limit(20);
-    if (error) console.error('Error:', error.message);
-    else {
-        listings.forEach(l => {
-            console.log(`Title: "${l.title}" | shop_id: ${l.shop_id} | shops.name: ${l.shops?.name || 'NULL'} | status: ${l.status}`);
-        });
+async function checkListingsShops() {
+    const { data: listings } = await supabase.from('marketplace_listings').select('id, shop_id, status');
+    
+    // Group listings by shop_id
+    const shopCounts = {};
+    for (const listing of listings) {
+        if (!shopCounts[listing.shop_id]) shopCounts[listing.shop_id] = 0;
+        shopCounts[listing.shop_id]++;
     }
+    console.log("Listings count by shop_id:", shopCounts);
+    
+    // Compare with existing shops
+    const { data: shops } = await supabase.from('shops').select('id, name');
+    const validShopIds = shops.map(s => s.id);
+    
+    console.log("Valid shop IDs:", validShopIds);
 }
-
-main().catch(console.error);
+checkListingsShops();
