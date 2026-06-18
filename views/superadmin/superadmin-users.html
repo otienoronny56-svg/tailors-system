@@ -281,16 +281,18 @@
                             <input type="email" id="admin-email" placeholder="admin@shop.com" required>
                         </div>
                     </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Initial Password</label>
-                        <input type="password" id="admin-password" placeholder="Min 6 characters" required>
-                    </div>
-                    <div style="margin-bottom: 25px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Assign to Organization</label>
-                        <select id="admin-org-select" required>
-                            <option value="">Select Organization...</option>
-                            <!-- Orgs will be loaded by JS -->
-                        </select>
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Initial Password</label>
+                            <input type="password" id="admin-password" placeholder="Min 6 characters" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Assign to Organization</label>
+                            <select id="admin-org-select" required>
+                                <option value="">Select Organization...</option>
+                                <!-- Orgs will be loaded by JS -->
+                            </select>
+                        </div>
                     </div>
                     <button type="submit" class="submit-btn" id="create-admin-btn">
                         <i class="fas fa-user-plus"></i> Create Admin Account
