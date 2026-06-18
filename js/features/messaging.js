@@ -9,7 +9,11 @@ async function checkUnreadMessages() {
     try {
         let shopIds = [];
         if (USER_PROFILE.role === 'owner' || USER_PROFILE.role === 'superadmin') {
-            const { data: shops } = await supabaseClient.from('shops').select('id').eq('organization_id', USER_PROFILE.organization_id);
+            let query = supabaseClient.from('shops').select('id');
+            if (USER_PROFILE.organization_id) {
+                query = query.eq('organization_id', USER_PROFILE.organization_id);
+            }
+            const { data: shops } = await query;
             shopIds = shops ? shops.map(s => s.id) : [];
         } else if (USER_PROFILE.role === 'manager') {
             shopIds = [USER_PROFILE.shop_id];

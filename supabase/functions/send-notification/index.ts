@@ -79,6 +79,23 @@ serve(async (req) => {
         });
       }
     } 
+    // 3. Organization Suspension
+    else if (table === 'organizations' && type === 'UPDATE') {
+      if (record.subscription_status === 'Suspended' && (!old_record || old_record.subscription_status !== 'Suspended')) {
+          clientPhone = record.phone || "";
+          clientEmail = record.email || "otienoronny56@gmail.com"; 
+          clientName = record.name || "Organization Owner";
+
+          textMessage = `Alert: Your workspace "${clientName}" has been suspended. Please contact platform administration to reactivate your workspace.`;
+          emailSubject = `Action Required: Workspace Suspended - ${clientName}`;
+          emailHtml = `<h3>Hello,</h3><p>Your workspace/organization <strong>${clientName}</strong> has been suspended.</p><p>Please contact the system administrator to resolve this issue and reactivate your account.</p>`;
+      } else {
+        return new Response(JSON.stringify({ message: "Ignored: Not a suspension update." }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
+    }
     // Other unsupported triggers
     else {
       return new Response(JSON.stringify({ message: "Ignored: Unsupported event." }), {

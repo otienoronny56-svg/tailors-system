@@ -8,12 +8,12 @@ ON CONFLICT (id) DO NOTHING;
 
 -- 3. Set up Storage Policies for chat_images
 -- Allow public viewing of chat images
-CREATE POLICY "Public Access"
+CREATE POLICY "chat_images_public_access"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'chat_images');
 
 -- Allow authenticated users to upload images
-CREATE POLICY "Authenticated users can upload"
+CREATE POLICY "chat_images_authenticated_upload"
 ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (
@@ -21,7 +21,7 @@ WITH CHECK (
 );
 
 -- Allow authenticated users to delete their own uploads
-CREATE POLICY "Users can delete own uploads"
+CREATE POLICY "chat_images_delete_own"
 ON storage.objects FOR DELETE
 TO authenticated
 USING (
