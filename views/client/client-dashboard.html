@@ -2321,10 +2321,16 @@
                 </div>
                 <div class="chat-history" id="chat-history">
                 </div>
-                <div class="chat-input-area">
-                    <form class="input-form" onsubmit="sendChatMessage(event)">
-                        <input type="text" id="chat-message-input" required placeholder="Type your message here...">
-                        <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+                <div class="chat-input-area" style="flex-direction: column;">
+                    <div id="chat-image-preview-container" style="display:none; padding: 10px; position:relative; background:rgba(0,0,0,0.2); border-radius:8px 8px 0 0; border-bottom:1px solid rgba(255,255,255,0.1);">
+                        <img id="chat-image-preview" src="" style="max-height:100px; border-radius:4px; border:1px solid var(--brand-gold);">
+                        <button type="button" onclick="clearChatImagePreview()" style="position:absolute; top:5px; left:5px; background:rgba(239,68,68,0.9); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-times"></i></button>
+                    </div>
+                    <form class="input-form" onsubmit="sendChatMessage(event)" style="display:flex; width:100%; align-items:center; border-radius: 0 0 8px 8px; overflow:hidden;">
+                        <input type="file" id="chat-image-input" accept="image/*" style="display:none;" onchange="previewChatImage(this)">
+                        <button type="button" class="btn-attach" onclick="document.getElementById('chat-image-input').click()" style="background:transparent; color:var(--brand-gold); border:none; padding:10px 15px; cursor:pointer; font-size:1.2em; transition:0.2s;"><i class="fas fa-paperclip"></i></button>
+                        <input type="text" id="chat-message-input" placeholder="Type your message here..." style="flex:1; border:none; outline:none; padding:12px; background:transparent; color:white;">
+                        <button type="submit" class="btn-send" id="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
                     </form>
                 </div>`;
 
@@ -2498,6 +2504,10 @@
                         </div>
                     `;
                 }
+                let imageHtml = '';
+                if (msg.image_url) {
+                    imageHtml = `<div style="margin-bottom:8px;"><img src="${msg.image_url}" style="max-width:100%; border-radius:4px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="window.open('${msg.image_url}', '_blank')"></div>`;
+                }
 
                 return `
                     <div class="message-bubble ${bubbleClass}" style="${bubbleStyle} ${extraStyle}; position:relative; min-width: 150px; cursor: context-menu;"
@@ -2509,6 +2519,7 @@
                          ` : ''}>
                         ${inquiryLabel}
                         ${listingInfo}
+                        ${imageHtml}
                         ${msgContent}
                         <span class="message-time" style="${msg.is_inquiry ? 'color:rgba(255,255,255,0.7);' : 'position:relative; display:block; text-align:right; margin-top:5px;'}">${timeStr}</span>
                         ${!msg.is_inquiry ? actionsHtml : ''}
@@ -2590,6 +2601,189 @@
             } catch (err) {
                 console.error(err);
                 alert("Failed to unsend messages");
+            }
+        }
+
+        function previewChatImage(input) {
+            const previewContainer = document.getElementById('chat-image-preview-container');
+            const previewImg = document.getElementById('chat-image-preview');
+            const textInput = document.getElementById('chat-message-input');
+            
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image must be less than 5MB');
+                    input.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    textInput.removeAttribute('required');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearChatImagePreview() {
+            const input = document.getElementById('chat-image-input');
+            const previewContainer = document.getElementById('chat-image-preview-container');
+            const textInput = document.getElementById('chat-message-input');
+            
+            if (input) input.value = '';
+            if (previewContainer) previewContainer.style.display = 'none';
+            if (textInput) textInput.setAttribute('required', 'true');
+        }
+
+        async function sendChatMessage(e) {
+            e.preventDefault();
+            const textInput = document.getElementById('chat-message-input');
+            const imageInput = document.getElementById('chat-image-input');
+            const sendBtn = document.getElementById('chat-send-btn');
+            
+            const text = textInput ? textInput.value.trim() : '';
+            const hasImage = imageInput && imageInput.files && imageInput.files.length > 0;
+            
+            if (!text && !hasImage) return;
+            if (!activeThread) return;
+
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
+
+            try {
+                // Link message to the latest inquiry of this shop
+                const latestInquiry = activeThread.inquiries[activeThread.inquiries.length - 1];
+                const inquiryId = latestInquiry.id;
+
+                // Find recipient (shop owner/manager)
+                // Strategy: resolve the shop's organization_id, then find the owner of that org
+                let recipientId = null;
+                try {
+                    // Primary: look up shop → org → owner (most reliable, since shop_id is usually null on user_profiles)
+                    const { data: shop } = await supabaseClient
+                        .from('shops')
+                        .select('organization_id')
+                        .eq('id', activeThread.shopId)
+                        .single();
+
+                    if (shop && shop.organization_id) {
+                        // First try to find a manager assigned to this exact shop
+                        const { data: shopManager } = await supabaseClient
+                            .from('user_profiles')
+                            .select('id')
+                            .eq('shop_id', activeThread.shopId)
+                            .in('role', ['manager', 'owner'])
+                            .limit(1);
+
+                        if (shopManager && shopManager[0]) {
+                            recipientId = shopManager[0].id;
+                        } else {
+                            // Fall back to org owner
+                            const { data: owner } = await supabaseClient
+                                .from('user_profiles')
+                                .select('id')
+                                .eq('organization_id', shop.organization_id)
+                                .eq('role', 'owner')
+                                .limit(1);
+
+                            recipientId = owner && owner[0] ? owner[0].id : null;
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Recipient query failed:", err);
+                }
+
+                if (!recipientId) {
+                    // Fallback: Check if any previous messages in this thread came from the tailor (a sender that is NOT me)
+                    if (activeThread.messages && activeThread.messages.length > 0) {
+                        const tailorMsg = activeThread.messages.find(m => m.sender_id && m.sender_id !== currentUser.id);
+                        if (tailorMsg) {
+                            recipientId = tailorMsg.sender_id;
+                            console.log("Resolved recipientId from message history fallback:", recipientId);
+                        }
+                    }
+                }
+
+                if (!recipientId) {
+                    alert("Cannot send message: Could not find the shop owner. Please try again or contact support.");
+                    return;
+                }
+
+                // Cache recipientId on the thread for future messages in this chat
+                activeThread.recipientId = recipientId;
+                
+                let finalImageUrl = null;
+                
+                // Upload image if present
+                if (hasImage) {
+                    const file = imageInput.files[0];
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
+                    
+                    const { error: uploadError } = await supabaseClient.storage
+                        .from('chat_images')
+                        .upload(fileName, file, { upsert: false });
+                        
+                    if (uploadError) throw uploadError;
+                    
+                    const { data: urlData } = supabaseClient.storage
+                        .from('chat_images')
+                        .getPublicUrl(fileName);
+                        
+                    finalImageUrl = urlData.publicUrl;
+                }
+
+                // Insert message
+                const { data, error } = await supabaseClient
+                    .from('messages')
+                    .insert([{
+                        inquiry_id: inquiryId,
+                        sender_id: currentUser.id,
+                        recipient_id: recipientId,
+                        message_text: text,
+                        image_url: finalImageUrl
+                    }])
+                    .select();
+
+                if (error) throw error;
+                
+                // Clear inputs
+                if (textInput) textInput.value = '';
+                clearChatImagePreview();
+
+                // Add to local state and re-render instantly
+                if (data && data[0]) {
+                    activeThread.messages.push(data[0]);
+
+                    // Rebuild allMessages timeline
+                    const virtualInqs = activeThread.inquiries.map(inq => ({
+                        id: 'inq-' + inq.id,
+                        inquiry_id: inq.id,
+                        sender_id: null,
+                        is_inquiry: true,
+                        message_text: inq.message,
+                        created_at: inq.created_at
+                    }));
+                    activeThread.allMessages = [...virtualInqs, ...activeThread.messages];
+                    activeThread.allMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+                    activeThread.lastMessage = data[0].message_text;
+                    activeThread.lastMessageTime = data[0].created_at;
+
+                    renderChatHistory();
+                    scrollToBottom();
+                    renderThreadsList();
+                }
+            } catch (err) {
+                alert("Could not send message: " + err.message);
+            } finally {
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                }
             }
         }
 
@@ -2859,117 +3053,6 @@
             } catch (err) {
                 console.error(err);
                 alert("Failed to delete message");
-            }
-        }
-
-        async function sendChatMessage(e) {
-            e.preventDefault();
-            const input = document.getElementById('chat-message-input');
-            const text = input.value.trim();
-            if (!text || !activeThread) return;
-
-            input.value = '';
-
-            try {
-                // Link message to the latest inquiry of this shop
-                const latestInquiry = activeThread.inquiries[activeThread.inquiries.length - 1];
-                const inquiryId = latestInquiry.id;
-
-                // Find recipient (shop owner/manager)
-                // Strategy: resolve the shop's organization_id, then find the owner of that org
-                let recipientId = null;
-                try {
-                    // Primary: look up shop → org → owner (most reliable, since shop_id is usually null on user_profiles)
-                    const { data: shop } = await supabaseClient
-                        .from('shops')
-                        .select('organization_id')
-                        .eq('id', activeThread.shopId)
-                        .single();
-
-                    if (shop && shop.organization_id) {
-                        // First try to find a manager assigned to this exact shop
-                        const { data: shopManager } = await supabaseClient
-                            .from('user_profiles')
-                            .select('id')
-                            .eq('shop_id', activeThread.shopId)
-                            .in('role', ['manager', 'owner'])
-                            .limit(1);
-
-                        if (shopManager && shopManager[0]) {
-                            recipientId = shopManager[0].id;
-                        } else {
-                            // Fall back to org owner
-                            const { data: owner } = await supabaseClient
-                                .from('user_profiles')
-                                .select('id')
-                                .eq('organization_id', shop.organization_id)
-                                .eq('role', 'owner')
-                                .limit(1);
-
-                            recipientId = owner && owner[0] ? owner[0].id : null;
-                        }
-                    }
-                } catch (err) {
-                    console.warn("Recipient query failed:", err);
-                }
-
-                if (!recipientId) {
-                    // Fallback: Check if any previous messages in this thread came from the tailor (a sender that is NOT me)
-                    if (activeThread.messages && activeThread.messages.length > 0) {
-                        const tailorMsg = activeThread.messages.find(m => m.sender_id && m.sender_id !== currentUser.id);
-                        if (tailorMsg) {
-                            recipientId = tailorMsg.sender_id;
-                            console.log("Resolved recipientId from message history fallback:", recipientId);
-                        }
-                    }
-                }
-
-                if (!recipientId) {
-                    alert("Cannot send message: Could not find the shop owner. Please try again or contact support.");
-                    return;
-                }
-
-                // Cache recipientId on the thread for future messages in this chat
-                activeThread.recipientId = recipientId;
-
-                // Insert message
-                const { data, error } = await supabaseClient
-                    .from('messages')
-                    .insert([{
-                        inquiry_id: inquiryId,
-                        sender_id: currentUser.id,
-                        recipient_id: recipientId,
-                        message_text: text
-                    }])
-                    .select();
-
-                if (error) throw error;
-
-                // Add to local state and re-render instantly
-                if (data && data[0]) {
-                    activeThread.messages.push(data[0]);
-
-                    // Rebuild allMessages timeline
-                    const virtualInqs = activeThread.inquiries.map(inq => ({
-                        id: 'inq-' + inq.id,
-                        inquiry_id: inq.id,
-                        sender_id: null,
-                        is_inquiry: true,
-                        message_text: inq.message,
-                        created_at: inq.created_at
-                    }));
-                    activeThread.allMessages = [...virtualInqs, ...activeThread.messages];
-                    activeThread.allMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-                    activeThread.lastMessage = data[0].message_text;
-                    activeThread.lastMessageTime = data[0].created_at;
-
-                    renderChatHistory();
-                    scrollToBottom();
-                    renderThreadsList();
-                }
-            } catch (err) {
-                alert("Could not send message: " + err.message);
             }
         }
 
