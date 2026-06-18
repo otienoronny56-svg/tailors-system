@@ -1760,6 +1760,7 @@ if ('serviceWorker' in navigator) {
 
 
 
+
 window.viewOrgShops = async function(orgId, orgName) {
     document.getElementById('view-shops-org-name').innerText = orgName + ' - Shops';
     document.getElementById('view-shops-modal').style.display = 'flex';
@@ -1787,34 +1788,34 @@ window.viewOrgShops = async function(orgId, orgName) {
             const btnText = isSuspended ? 'Reactivate' : 'Suspend';
             const btnBg = isSuspended ? '#10b981' : '#f59e0b';
             
-            return \
+            return `
             <tr>
-                <td><small>\</small></td>
-                <td><strong>\</strong></td>
-                <td>\</td>
-                <td><span style="background:\; color:white; padding:3px 10px; border-radius:12px; font-weight:bold; font-size:0.85em;">\</span></td>
+                <td><small>${shop.id.slice(-8)}</small></td>
+                <td><strong>${shop.name}</strong></td>
+                <td>${shop.location || 'N/A'}</td>
+                <td><span style="background:${badgeColor}; color:white; padding:3px 10px; border-radius:12px; font-weight:bold; font-size:0.85em;">${statusText}</span></td>
                 <td>
-                    <button class="small-btn" onclick="toggleShopSuspension('\', '\', '\', '\')" style="background:\; color:white; border:none; margin-right:5px;">\</button>
-                    <button class="small-btn" onclick="deleteShop('\', '\', '\')" style="background:#ef4444; color:white; border:none;">Delete</button>
+                    <button class="small-btn" onclick="toggleShopSuspension('${shop.id}', '${statusText}', '${orgId}', '${orgName.replace(/'/g, "\\'")}')" style="background:${btnBg}; color:white; border:none; margin-right:5px;">${btnText}</button>
+                    <button class="small-btn" onclick="deleteShop('${shop.id}', '${orgId}', '${orgName.replace(/'/g, "\\'")}')" style="background:#ef4444; color:white; border:none;">Delete</button>
                 </td>
-            </tr>\;
+            </tr>`;
         }).join('');
     } catch (err) {
-        tbody.innerHTML = \<tr><td colspan="5" style="text-align:center; color:#ef4444;">Error loading shops: \</td></tr>\;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444;">Error loading shops: ${err.message}</td></tr>`;
     }
 }
 
 window.toggleShopSuspension = async function(shopId, currentStatus, orgId, orgName) {
     const newStatus = currentStatus === 'Suspended' ? 'Active' : 'Suspended';
     const actionText = currentStatus === 'Suspended' ? 'reactivate' : 'suspend';
-    if (!confirm(\Are you sure you want to \ this shop?\)) return;
+    if (!confirm(`Are you sure you want to ${actionText} this shop?`)) return;
     try {
         const { error } = await supabaseClient
             .from('shops')
             .update({ status: newStatus })
             .eq('id', shopId);
         if (error) throw error;
-        alert(\Shop successfully \!\);
+        alert(`Shop successfully ${newStatus === 'Suspended' ? 'suspended' : 'activated'}!`);
         viewOrgShops(orgId, orgName);
     } catch (err) {
         alert("Error updating shop: " + err.message);
@@ -1832,4 +1833,3 @@ window.deleteShop = async function(shopId, orgId, orgName) {
         alert("Error: " + err.message);
     }
 }
-
