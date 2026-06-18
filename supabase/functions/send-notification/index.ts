@@ -19,44 +19,73 @@ serve(async (req) => {
     // Webhook payload typically includes: { type, table, record, old_record }
     const { type, table, record, old_record } = body;
 
-    // Only proceed if this is an order status update
-    if (table !== 'orders' || type !== 'UPDATE') {
-      return new Response(JSON.stringify({ message: "Ignored: Not an order update." }), {
+    let clientPhone = "";
+    let clientEmail = "";
+    let clientName = "";
+    let textMessage = "";
+    let emailSubject = "";
+    let emailHtml = "";
+
+    // 1. Order Status Update
+    if (table === 'orders' && type === 'UPDATE') {
+      // Only send notification if the status actually changed
+      if (record.status === old_record.status) {
+         return new Response(JSON.stringify({ message: "Ignored: Status did not change." }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
+
+      const orderId = record.order_id || record.id;
+      const newStatus = record.status;
+      clientPhone = record.customer_phone || record.phone_number;
+      // Fallback to your testing email because Resend free tier requires a verified domain to send to arbitrary emails
+      clientEmail = record.customer_email || record.email || "otienoronny56@gmail.com"; 
+      clientName = record.customer_name || "Valued Customer";
+
+      const STATUS_MAP: Record<number, string> = {
+          1: 'In Progress',
+          2: 'Fitting',
+          3: 'Ready',
+          4: 'Completed',
+          5: 'Cancelled'
+      };
+      
+      // Fallback to the raw value if not found in the map
+      const statusText = STATUS_MAP[Number(newStatus)] || String(newStatus);
+
+      // Prepare Notification Message
+      textMessage = `Hello ${clientName}, this is an update regarding your order #${String(orderId).slice(0, 6)}. Your order status is now: ${statusText.toUpperCase()}. Thank you for choosing us!`;
+      emailSubject = `Order Update: #${String(orderId).slice(0, 6)}`;
+      emailHtml = `<h3>Hello ${clientName},</h3><p>Your order <strong>#${String(orderId).slice(0, 6)}</strong> status has been updated to: <strong style="color: #10b981;">${statusText.toUpperCase()}</strong>.</p><p>Thank you for choosing us!</p>`;
+    } 
+    // 2. New Tailor Registration (Pending)
+    else if (table === 'user_profiles' && (type === 'INSERT' || type === 'UPDATE')) {
+      if (record.status === 'Pending' && (!old_record || old_record.status !== 'Pending') && (record.role === 'owner' || record.role === 'tailor')) {
+          clientPhone = Deno.env.get("ADMIN_PHONE") || "+254712345678"; // Admin's phone number
+          clientEmail = Deno.env.get("ADMIN_EMAIL") || "otienoronny56@gmail.com"; // Admin's email
+          clientName = "System Administrator";
+
+          const tailorName = record.full_name || "A new tailor";
+          const tailorEmail = record.email || "No email provided";
+
+          textMessage = `Admin Alert: A new tailor (${tailorName}) has registered and is awaiting approval. Please log in to review.`;
+          emailSubject = `New Tailor Registration: ${tailorName}`;
+          emailHtml = `<h3>Hello Admin,</h3><p>A new tailor has registered and is awaiting approval.</p><ul><li><strong>Name:</strong> ${tailorName}</li><li><strong>Email:</strong> ${tailorEmail}</li></ul><p>Please log in to the admin dashboard to review.</p>`;
+      } else {
+        return new Response(JSON.stringify({ message: "Ignored: Not a new pending tailor." }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
+    } 
+    // Other unsupported triggers
+    else {
+      return new Response(JSON.stringify({ message: "Ignored: Unsupported event." }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
     }
-
-    // Only send notification if the status actually changed
-    if (record.status === old_record.status) {
-       return new Response(JSON.stringify({ message: "Ignored: Status did not change." }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
-    }
-
-    const orderId = record.order_id || record.id;
-    const newStatus = record.status;
-    const clientPhone = record.customer_phone || record.phone_number;
-    // Fallback to your testing email because Resend free tier requires a verified domain to send to arbitrary emails
-    const clientEmail = record.customer_email || record.email || "otienoronny56@gmail.com"; 
-    const clientName = record.customer_name || "Valued Customer";
-
-    const STATUS_MAP: Record<number, string> = {
-        1: 'In Progress',
-        2: 'Fitting',
-        3: 'Ready',
-        4: 'Completed',
-        5: 'Cancelled'
-    };
-    
-    // Fallback to the raw value if not found in the map
-    const statusText = STATUS_MAP[Number(newStatus)] || String(newStatus);
-
-    // Prepare Notification Message
-    const textMessage = `Hello ${clientName}, this is an update regarding your order #${String(orderId).slice(0, 6)}. Your order status is now: ${statusText.toUpperCase()}. Thank you for choosing us!`;
-    const emailSubject = `Order Update: #${String(orderId).slice(0, 6)}`;
-    const emailHtml = `<h3>Hello ${clientName},</h3><p>Your order <strong>#${String(orderId).slice(0, 6)}</strong> status has been updated to: <strong style="color: #10b981;">${statusText.toUpperCase()}</strong>.</p><p>Thank you for choosing us!</p>`;
 
     const results = [];
 
