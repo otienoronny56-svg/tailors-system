@@ -151,7 +151,7 @@
 
             const { data, error } = await client
                 .from('blogs')
-                .select('*, workers!blogs_author_id_fkey(name)')
+                .select('*, user_profiles(full_name)')
                 .eq('slug', slug)
                 .single();
 

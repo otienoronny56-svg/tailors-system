@@ -138,7 +138,7 @@
         async function fetchBlogs() {
             const { data, error } = await client
                 .from('blogs')
-                .select('*, workers!blogs_author_id_fkey(name)')
+                .select('*, user_profiles(full_name)')
                 .eq('status', 'published')
                 .order('created_at', { ascending: false });
 
@@ -168,7 +168,7 @@
                 });
                 
                 // Get author name
-                const authorName = post.workers?.name || 'Stitch & Styles';
+                const authorName = post.user_profiles?.full_name || 'Stitch & Styles';
                 // Mock views for visual layout
                 const views = Math.floor(Math.random() * 1000) + 150;
                 
