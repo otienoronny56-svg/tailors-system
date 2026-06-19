@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname), {
     etag: true,
     lastModified: true,
+    extensions: ['html']
 }));
 
 // Fallback: serve index.html for root
