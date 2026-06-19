@@ -163,7 +163,9 @@
             }
 
             // Increment views (fails silently if RPC doesn't exist yet)
-            client.rpc('increment_blog_views', { blog_slug: slug }).catch(e => console.log("Views not tracked yet"));
+            client.rpc('increment_blog_views', { blog_slug: slug }).then(({error}) => {
+                if (error) console.log("Views not tracked yet:", error.message);
+            });
 
             const { data, error } = await client
                 .from('blogs')
