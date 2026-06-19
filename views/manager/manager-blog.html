@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Blog Posts</title>
+    <link rel="icon" type="image/png" href="../../logo.jpeg">
+    <link rel="stylesheet" href="../../styles.css">
+    <script src="/js/lib/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .blog-list { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .blog-list table { width: 100%; border-collapse: collapse; }
+        .blog-list th, .blog-list td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .blog-list th { color: var(--brand-navy); }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
+        .status-published { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+        .status-draft { background: #f1f5f9; color: #475569; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;}
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">&nbsp;</h1>
+                </div>
+            </div>
+            <nav>
+                <a href="manager-dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="manager-blog.html" style="color: var(--brand-gold);"><i class="fas fa-pen-nib"></i> Manage Blog</a>
+                <a href="../../index.html"><i class="fas fa-store"></i> Back to Site</a>
+            </nav>
+        </aside>
+
+        <main class="main-content" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center;">
+                <h1 style="color: var(--brand-navy);">Shop Blog Posts</h1>
+                <button onclick="openModal()" style="background: var(--brand-navy); color: var(--brand-gold); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;"><i class="fas fa-plus"></i> Write New Post</button>
+            </div>
+
+            <div class="blog-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="blog-tbody">
+                        <tr><td colspan="3">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="blog-modal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <h2 style="margin:0;">Write a Blog Post</h2>
+                <button onclick="closeModal()" style="background:none; border:none; font-size: 1.5em; cursor: pointer;">&times;</button>
+            </div>
+            <form id="blog-form" onsubmit="event.preventDefault(); savePost();">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="blog-title" required placeholder="e.g. 5 Ways to Style African Prints">
+                </div>
+                <div class="form-group">
+                    <label>Content (HTML supported)</label>
+                    <textarea id="blog-content" rows="6" required placeholder="<p>Write your article here...</p>"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Action</label>
+                    <select id="blog-action">
+                        <option value="draft">Save as Draft</option>
+                        <option value="pending">Submit for Approval</option>
+                    </select>
+                </div>
+                <button type="submit" style="background: var(--brand-navy); color: var(--brand-gold); width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Save Post</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../../js/core/config.js"></script>
+    <script>
+        const supabase = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+
+        async function fetchMyPosts() {
+            // Need to get user's org id
+            const { data: { session } } = await supabase.auth.getSession();
+            if(!session) { window.location.href = '../../login.html'; return; }
+
+            const { data: orgData } = await supabase.from('organization_members').select('organization_id').eq('user_id', session.user.id).single();
+            if(!orgData) return;
+
+            const { data, error } = await supabase.from('blogs').select('*').eq('shop_id', orgData.organization_id).order('created_at', { ascending: false });
+            
+            const tbody = document.getElementById('blog-tbody');
+            if(error || !data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3">No posts found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(p => {
+                const date = new Date(p.created_at).toLocaleDateString();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${p.title}</strong></td>
+                    <td><span class="status-badge status-${p.status}">${p.status.toUpperCase()}</span></td>
+                    <td>${date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function savePost() {
+            const { data: { session } } = await supabase.auth.getSession();
+            const { data: orgData } = await supabase.from('organization_members').select('organization_id').eq('user_id', session.user.id).single();
+            
+            const title = document.getElementById('blog-title').value;
+            const content = document.getElementById('blog-content').value;
+            const status = document.getElementById('blog-action').value;
+            const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + '-' + Date.now();
+
+            const { error } = await supabase.from('blogs').insert([{
+                title, slug, content, status, author_id: session.user.id, shop_id: orgData.organization_id
+            }]);
+
+            if(error) alert('Error saving post: ' + error.message);
+            else {
+                closeModal();
+                fetchMyPosts();
+            }
+        }
+
+        function openModal() { document.getElementById('blog-modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('blog-modal').style.display = 'none'; document.getElementById('blog-form').reset(); }
+
+        document.addEventListener('DOMContentLoaded', fetchMyPosts);
+    </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin - Blog Approvals</title>
+    <link rel="icon" type="image/png" href="../../logo.jpeg">
+    <link rel="stylesheet" href="../../styles.css">
+    <script src="/js/lib/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #060c18; color: white; }
+        .dashboard-container { background: transparent; }
+        .main-content { padding: 20px 40px; }
+        .blog-list { background: rgba(17, 34, 64, 0.75); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 12px; padding: 20px; }
+        .blog-list table { width: 100%; border-collapse: collapse; }
+        .blog-list th, .blog-list td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .blog-list th { color: #D4AF37; text-transform: uppercase; }
+        .btn-approve { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-reject { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; }
+        .status-pending { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+        .status-published { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">SAAS CONTROL</h1>
+                </div>
+            </div>
+            <nav>
+                <a href="superadmin-dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="superadmin-blog.html" style="color: #D4AF37;"><i class="fas fa-check-circle"></i> Blog Approvals</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1 style="color: #D4AF37; font-family: 'Playfair Display', serif;">Blog Approvals</h1>
+            <p style="color: #8892b0; margin-bottom: 20px;">Review and approve articles submitted by tailors.</p>
+
+            <div class="blog-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="blog-tbody">
+                        <tr><td colspan="4">Loading pending blogs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../js/core/config.js"></script>
+    <script>
+        const supabase = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+
+        async function fetchPendingBlogs() {
+            // Admin fetches all pending and published just to see
+            const { data, error } = await supabase.from('blogs').select('*').in('status', ['pending', 'published']).order('created_at', { ascending: false });
+            
+            const tbody = document.getElementById('blog-tbody');
+            if(error || !data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">No blogs to review.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(p => {
+                const date = new Date(p.created_at).toLocaleDateString();
+                const tr = document.createElement('tr');
+                
+                let actions = '';
+                if(p.status === 'pending') {
+                    actions = `
+                        <button class="btn-approve" onclick="updateStatus('${p.id}', 'published')">Approve</button>
+                        <button class="btn-reject" onclick="updateStatus('${p.id}', 'rejected')">Reject</button>
+                    `;
+                } else if (p.status === 'published') {
+                     actions = `<button class="btn-reject" onclick="updateStatus('${p.id}', 'draft')">Unpublish</button>`;
+                }
+
+                tr.innerHTML = `
+                    <td><strong>${p.title}</strong></td>
+                    <td><span class="status-badge status-${p.status}">${p.status.toUpperCase()}</span></td>
+                    <td>${date}</td>
+                    <td style="display:flex; gap:10px;">${actions}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function updateStatus(id, newStatus) {
+            const { error } = await supabase.from('blogs').update({ status: newStatus }).eq('id', id);
+            if(error) alert('Error: ' + error.message);
+            else fetchPendingBlogs();
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchPendingBlogs);
+    </script>
+</body>
+</html>
