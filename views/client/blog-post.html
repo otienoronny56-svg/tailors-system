@@ -186,6 +186,25 @@
             document.getElementById('post-title').innerText = data.title;
             document.title = `${data.title} | Stitch & Styles Kenya`;
             
+            // Inject SEO Meta Tags for Google
+            const excerpt = data.excerpt || data.content.replace(/<[^>]+>/g, '').substring(0, 150) + '...';
+            const imgUrl = data.image_url ? (data.image_url.startsWith('http') ? data.image_url : `../../${data.image_url}`) : '../../hero_bg.png';
+            
+            const metaDescription = document.createElement('meta');
+            metaDescription.name = "description";
+            metaDescription.content = excerpt;
+            document.head.appendChild(metaDescription);
+
+            const ogTitle = document.createElement('meta');
+            ogTitle.property = "og:title";
+            ogTitle.content = data.title;
+            document.head.appendChild(ogTitle);
+
+            const ogImage = document.createElement('meta');
+            ogImage.property = "og:image";
+            ogImage.content = imgUrl;
+            document.head.appendChild(ogImage);
+            
             const date = new Date(data.created_at).toLocaleDateString('en-KE', { 
                 year: 'numeric', month: 'long', day: 'numeric' 
             });
