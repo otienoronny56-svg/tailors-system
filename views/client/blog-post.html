@@ -231,8 +231,6 @@
             }
             
             document.getElementById('post-body').innerHTML = data.content;
-
-            const imgUrl = data.image_url ? (data.image_url.startsWith('http') ? data.image_url : `../../${data.image_url}`) : '../../hero_bg.png';
             document.getElementById('hero-img').src = imgUrl;
 
             // Setup Share Links
