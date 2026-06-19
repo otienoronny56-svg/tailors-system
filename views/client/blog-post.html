@@ -69,6 +69,10 @@
         .article-body p { margin-bottom: 25px; }
         .article-body h2, .article-body h3 { font-family: var(--font-display); color: var(--gold); margin: 40px 0 20px; font-weight: 600; }
         
+        .meta-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 25px; }
+        .meta-pill { background: rgba(255, 255, 255, 0.05); color: var(--text-slate); font-size: 0.7em; padding: 6px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid var(--border-glass); }
+        .views-pill { color: var(--gold); background: var(--gold-glow); border-color: var(--gold-border); }
+        
         /* Share & Back */
         .article-footer { margin-top: 50px; padding-top: 30px; border-top: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center; }
         .back-link { color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 8px; transition: color 0.3s; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; }
@@ -122,7 +126,7 @@
 
         <main class="article-container">
             <header class="article-header">
-                <span class="article-date" id="post-date"></span>
+                <div class="meta-tags" id="post-meta"></div>
                 <h1 class="article-title" id="post-title"></h1>
             </header>
             
@@ -132,6 +136,11 @@
             
             <footer class="article-footer">
                 <a href="blog.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Blog</a>
+                
+                <button id="like-btn" onclick="toggleLike()" style="background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
+                    <i class="far fa-heart" id="like-icon"></i> <span id="like-count">0</span> Likes
+                </button>
+
                 <div class="share-links">
                     <a href="#" id="share-wa" target="_blank"><i class="fab fa-whatsapp"></i></a>
                     <a href="#" id="share-fb" target="_blank"><i class="fab fa-facebook-f"></i></a>
@@ -153,9 +162,12 @@
                 return;
             }
 
+            // Increment views (fails silently if RPC doesn't exist yet)
+            client.rpc('increment_blog_views', { blog_slug: slug }).catch(e => console.log("Views not tracked yet"));
+
             const { data, error } = await client
                 .from('blogs')
-                .select('*, user_profiles(full_name)')
+                .select('*, user_profiles(full_name), blog_likes(id, user_id)')
                 .eq('slug', slug)
                 .single();
 
@@ -175,7 +187,27 @@
             const date = new Date(data.created_at).toLocaleDateString('en-KE', { 
                 year: 'numeric', month: 'long', day: 'numeric' 
             });
-            document.getElementById('post-date').innerText = date;
+            
+            const authorName = data.user_profiles?.full_name || 'Stitch & Styles';
+            const viewsCount = data.views || 0;
+            
+            document.getElementById('post-meta').innerHTML = `
+                <span class="meta-pill"><i class="far fa-calendar-alt"></i> ${date}</span>
+                <span class="meta-pill"><i class="far fa-user"></i> ${authorName}</span>
+                <span class="meta-pill views-pill"><i class="far fa-eye"></i> ${viewsCount} Views</span>
+            `;
+            
+            window.currentPostId = data.id;
+            const likes = data.blog_likes || [];
+            document.getElementById('like-count').innerText = likes.length;
+            
+            const { data: { session } } = await client.auth.getSession();
+            if (session) {
+                const userLiked = likes.some(l => l.user_id === session.user.id);
+                if (userLiked) {
+                    document.getElementById('like-icon').classList.replace('far', 'fas');
+                }
+            }
             
             document.getElementById('post-body').innerHTML = data.content;
 
@@ -188,6 +220,30 @@
             document.getElementById('share-wa').href = `https://api.whatsapp.com/send?text=${titleEncoded}%20${currentUrl}`;
             document.getElementById('share-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`;
             document.getElementById('share-tw').href = `https://twitter.com/intent/tweet?url=${currentUrl}&text=${titleEncoded}`;
+        }
+
+        async function toggleLike() {
+            const { data: { session } } = await client.auth.getSession();
+            if (!session) {
+                alert("Please log in to like articles.");
+                return;
+            }
+            
+            const icon = document.getElementById('like-icon');
+            const countEl = document.getElementById('like-count');
+            let currentCount = parseInt(countEl.innerText);
+            
+            if (icon.classList.contains('fas')) {
+                // Unlike
+                icon.classList.replace('fas', 'far');
+                countEl.innerText = currentCount - 1;
+                await client.from('blog_likes').delete().eq('blog_id', window.currentPostId).eq('user_id', session.user.id);
+            } else {
+                // Like
+                icon.classList.replace('far', 'fas');
+                countEl.innerText = currentCount + 1;
+                await client.from('blog_likes').insert([{ blog_id: window.currentPostId, user_id: session.user.id }]);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', fetchPost);

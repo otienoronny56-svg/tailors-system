@@ -149,7 +149,7 @@
         async function fetchBlogs() {
             const { data, error } = await client
                 .from('blogs')
-                .select('*, user_profiles(full_name)')
+                .select('*, user_profiles(full_name), blog_likes(id)')
                 .eq('status', 'published')
                 .order('created_at', { ascending: false });
 
@@ -180,8 +180,9 @@
                 
                 // Get author name
                 const authorName = post.user_profiles?.full_name || 'Stitch & Styles';
-                // Mock views for visual layout
-                const views = Math.floor(Math.random() * 1000) + 150;
+                
+                const views = post.views || 0;
+                const likes = post.blog_likes?.length || 0;
                 
                 // Create excerpt (strip HTML and cut length)
                 const tmp = document.createElement("DIV");
@@ -204,6 +205,7 @@
                             <span class="meta-pill"><i class="far fa-calendar-alt"></i> ${date}</span>
                             <span class="meta-pill"><i class="far fa-user"></i> ${authorName}</span>
                             <span class="meta-pill views-pill"><i class="far fa-eye"></i> ${views} Views</span>
+                            <span class="meta-pill" style="color: #ef4444; border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.05);"><i class="fas fa-heart"></i> ${likes} Likes</span>
                         </div>
                         <h2 class="blog-title">${post.title}</h2>
                         <div class="blog-excerpt">${excerptText}</div>
