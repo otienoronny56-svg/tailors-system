@@ -145,7 +145,7 @@
             const slug = params.get('slug');
             
             if (!slug) {
-                document.getElementById('post-content-area').innerHTML = '<p style="text-align:center; color:red;">Article not found.</p>';
+                document.getElementById('loading-state').innerHTML = '<p style="text-align:center; color:red;">Article not found.</p>';
                 return;
             }
 
@@ -186,7 +186,7 @@
             document.getElementById('share-tw').href = `https://twitter.com/intent/tweet?url=${currentUrl}&text=${titleEncoded}`;
         }
 
-        document.addEventListener('DOMContentLoaded', fetchArticle);
+        document.addEventListener('DOMContentLoaded', fetchPost);
     </script>
 </body>
 </html>
