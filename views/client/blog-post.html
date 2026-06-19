@@ -138,20 +138,20 @@
     </div>
 
     <script>
-        const supabase = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+        const client = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
 
-        async function fetchArticle() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const slug = urlParams.get('slug');
-
+        async function fetchPost() {
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get('slug');
+            
             if (!slug) {
-                window.location.href = 'blog.html';
+                document.getElementById('post-content-area').innerHTML = '<p style="text-align:center; color:red;">Article not found.</p>';
                 return;
             }
 
-            const { data, error } = await supabase
+            const { data, error } = await client
                 .from('blogs')
-                .select('*')
+                .select('*, workers!blogs_author_id_fkey(name)')
                 .eq('slug', slug)
                 .single();
 

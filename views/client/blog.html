@@ -129,10 +129,10 @@
     </section>
 
     <script>
-        const supabase = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+        const client = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
 
         async function fetchBlogs() {
-            const { data, error } = await supabase
+            const { data, error } = await client
                 .from('blogs')
                 .select('*')
                 .eq('status', 'published')

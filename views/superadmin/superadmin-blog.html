@@ -61,11 +61,11 @@
 
     <script src="../../js/core/config.js"></script>
     <script>
-        const supabase = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+        const client = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
 
         async function fetchPendingBlogs() {
             // Admin fetches all pending and published just to see
-            const { data, error } = await supabase.from('blogs').select('*').in('status', ['pending', 'published']).order('created_at', { ascending: false });
+            const { data, error } = await client.from('blogs').select('*').in('status', ['pending', 'published']).order('created_at', { ascending: false });
             
             const tbody = document.getElementById('blog-tbody');
             if(error || !data || data.length === 0) {
@@ -99,7 +99,7 @@
         }
 
         async function updateStatus(id, newStatus) {
-            const { error } = await supabase.from('blogs').update({ status: newStatus }).eq('id', id);
+            const { error } = await client.from('blogs').update({ status: newStatus }).eq('id', id);
             if(error) alert('Error: ' + error.message);
             else fetchPendingBlogs();
         }
