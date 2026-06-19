@@ -2,7 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /views/admin/
 Disallow: /views/superadmin/
-Disallow: /views/client/
+Disallow: /views/manager/
+Disallow: /views/worker/
 Disallow: /js/core/config.js
 Disallow: /scratch/
 Disallow: /developer_tools/
