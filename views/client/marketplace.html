@@ -757,10 +757,9 @@
         .sidebar-cat-list {
             display: flex;
             flex-direction: row;
+            flex-wrap: wrap;
             gap: 8px;
-            overflow-x: auto;
             padding-bottom: 5px;
-            scrollbar-width: none; /* Firefox */
         }
         
         .sidebar-cat-list::-webkit-scrollbar {
@@ -2701,8 +2700,8 @@
                 right: 10px;
                 left: 10px;
                 width: auto;
-                height: calc(100dvh - 100px);
-                max-height: 600px;
+                height: calc(100dvh - 90px);
+                max-height: calc(100dvh - 90px);
             }
         }
     </style>
