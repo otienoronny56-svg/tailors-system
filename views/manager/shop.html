@@ -1606,9 +1606,10 @@
                 if (!user) {
                     // Guest: show Log In + Sign Up
                     if (authArea) {
+                        const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
                         authArea.innerHTML = `
-                            <a href="../../login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
-                            <a href="../../login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
+                            <a href="../../login.html?redirect=${currentUrl}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                            <a href="../../login.html?mode=signup&redirect=${currentUrl}" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
                         `;
                     }
                     return;
@@ -2193,7 +2194,13 @@
 
             const message = document.getElementById('message');
             if (message) {
-                message.value = `Hi! I am interested in ordering/customizing your "${title}". Please contact me to discuss my measurements and pricing.`;
+                const draft = localStorage.getItem('draft_inquiry_message');
+                if (draft) {
+                    message.value = draft;
+                    localStorage.removeItem('draft_inquiry_message');
+                } else {
+                    message.value = `Hi! I am interested in ordering/customizing your "${title}". Please contact me to discuss my measurements and pricing.`;
+                }
             }
 
             // Switch to inquiry/booking tab
@@ -2348,6 +2355,11 @@
                 alert("Please log in or sign up to send an inquiry.");
                 
                 const listingId = document.getElementById('select-item').value;
+                const messageText = document.getElementById('message').value;
+                if (messageText) {
+                    localStorage.setItem('draft_inquiry_message', messageText);
+                }
+                
                 const urlParams = new URLSearchParams(window.location.search);
                 if (listingId) {
                     urlParams.set('inquire', listingId);

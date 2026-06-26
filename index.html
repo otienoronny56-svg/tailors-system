@@ -2772,9 +2772,17 @@
             document.getElementById('modal-shop-name').textContent = shopName;
 
             const inquireBtn = document.getElementById('modal-inquire-btn');
-            inquireBtn.href = `views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}`;
-            inquireBtn.onclick = function() {
+            const targetShopUrl = `views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}`;
+            inquireBtn.href = targetShopUrl;
+            inquireBtn.onclick = function(e) {
                 if (typeof trackListingView === 'function') trackListingView(list.id, inquireBtn.href);
+                // Intercept if not logged in to prevent losing them on the shop page
+                if (!window.userProfile && !window.currentUser) {
+                    e.preventDefault();
+                    alert("Please log in or sign up to inquire about this design.");
+                    const returnUrl = encodeURIComponent(targetShopUrl);
+                    window.location.href = `login.html?redirect=${returnUrl}`;
+                }
             };
 
             const overlay = document.getElementById('listing-modal-overlay');
