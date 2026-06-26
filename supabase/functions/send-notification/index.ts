@@ -67,26 +67,102 @@ serve(async (req) => {
       emailSubject = `Order Update: #${String(orderId).slice(0, 6)}`;
       emailHtml = `<h3>Hello ${clientName},</h3><p>Your order <strong>#${String(orderId).slice(0, 6)}</strong> status has been updated to: <strong style="color: #10b981;">${statusText.toUpperCase()}</strong>.</p><p>Thank you for choosing us!</p>`;
     } 
-    // 2. New Tailor Registration (Pending)
-    else if (table === 'user_profiles' && (type === 'INSERT' || type === 'UPDATE')) {
-      if (record.status === 'Pending' && (!old_record || old_record.status !== 'Pending') && (record.role === 'owner' || record.role === 'tailor')) {
-          clientPhone = Deno.env.get("ADMIN_PHONE") || "+254712345678"; 
-          clientEmail = Deno.env.get("ADMIN_EMAIL") || "otienoronny56@gmail.com"; 
-          clientName = "System Administrator";
+    // 2. New User Registration — Welcome Emails
+    else if (table === 'user_profiles' && type === 'INSERT') {
+      const newUserEmail = record.email;
+      const newUserName = record.full_name || "there";
+      const newUserRole = record.role;
+      const domain = "https://tailors.co.ke";
 
-          const tailorName = record.full_name || "A new tailor";
-          const tailorEmail = record.email || "No email provided";
-
-          textMessage = `Admin Alert: A new tailor (${tailorName}) has registered and is awaiting approval. Please log in to review.`;
-          emailSubject = `New Tailor Registration: ${tailorName}`;
-          emailHtml = `<h3>Hello Admin,</h3><p>A new tailor has registered and is awaiting approval.</p><ul><li><strong>Name:</strong> ${tailorName}</li><li><strong>Email:</strong> ${tailorEmail}</li></ul><p>Please log in to the admin dashboard to review.</p>`;
-      } else {
-        return new Response(JSON.stringify({ message: "Ignored: Not a new pending tailor." }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        });
+      if (!newUserEmail) {
+        return new Response(JSON.stringify({ message: "Ignored: No email on new user profile." }), { status: 200 });
       }
-    } 
+
+      // --- A: New Client Signup ---
+      if (newUserRole === 'client') {
+        clientEmail = newUserEmail;
+        clientName = newUserName;
+        emailSubject = `Welcome to Tailors.co.ke, ${newUserName}! 🎉`;
+        emailHtml = `
+          <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
+            <div style="background: #1e293b; padding: 24px; border-radius: 10px 10px 0 0; text-align:center;">
+              <h1 style="color: #D4AF37; margin: 0;">Welcome to Tailors.co.ke!</h1>
+            </div>
+            <div style="background: #f8fafc; padding: 24px; border-radius: 0 0 10px 10px;">
+              <p>Hi <strong>${newUserName}</strong>,</p>
+              <p>Welcome aboard! Your account is all set up and ready to go. You can now browse our marketplace, inquire about listings, and track your orders — all in one place.</p>
+              <a href="${domain}" style="display:inline-block; margin: 16px 0; padding:12px 24px; background-color:#1e293b; color:#D4AF37; text-decoration:none; border-radius:6px; font-weight:bold;">Explore the Marketplace →</a>
+              <p style="color:#888; font-size:0.85em;">If you have any questions, just reply to this email or message a shop directly on the platform.</p>
+              <p style="color:#888; font-size:0.85em;">— The Tailors.co.ke Team</p>
+            </div>
+          </div>`;
+
+      // --- B: New Tailor / Shop Owner Registration ---
+      } else if (newUserRole === 'owner' || newUserRole === 'tailor') {
+        const resendApiKey = Deno.env.get("RESEND_API_KEY");
+
+        // 1. Send welcome email to the new tailor
+        if (resendApiKey) {
+          const tailorWelcomeHtml = `
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
+              <div style="background: #1e293b; padding: 24px; border-radius: 10px 10px 0 0; text-align:center;">
+                <h1 style="color: #D4AF37; margin: 0;">Registration Received!</h1>
+              </div>
+              <div style="background: #f8fafc; padding: 24px; border-radius: 0 0 10px 10px;">
+                <p>Hi <strong>${newUserName}</strong>,</p>
+                <p>Thank you for registering your tailor shop on <strong>Tailors.co.ke</strong>! We've received your application and our team is currently reviewing it.</p>
+                <p>You'll receive another email once your account has been <strong>approved</strong>. This usually takes less than 24 hours.</p>
+                <p>In the meantime, if you have any questions, feel free to reach out to us.</p>
+                <p style="color:#888; font-size:0.85em;">— The Tailors.co.ke Team</p>
+              </div>
+            </div>`;
+          
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              from: "Tailors.co.ke <notifications@tailors.co.ke>",
+              to: newUserEmail,
+              subject: "Your Shop Registration is Under Review 🧵",
+              html: tailorWelcomeHtml,
+            }),
+          });
+          console.log(`Welcome email sent to new tailor: ${newUserEmail}`);
+        }
+
+        // 2. Also notify admin about the new pending tailor
+        clientEmail = Deno.env.get("ADMIN_EMAIL") || "otienoronny56@gmail.com";
+        clientName = "Admin";
+        emailSubject = `New Tailor Registration: ${newUserName}`;
+        emailHtml = `<h3>Hello Admin,</h3><p>A new tailor has registered and is awaiting approval.</p><ul><li><strong>Name:</strong> ${newUserName}</li><li><strong>Email:</strong> ${newUserEmail}</li></ul><p>Please log in to the admin dashboard to review.</p><a href="${domain}/views/admin/admin-dashboard.html" style="display:inline-block; padding:12px 20px; background-color:#1e293b; color:white; text-decoration:none; border-radius:6px;">Review in Dashboard →</a>`;
+
+      } else {
+        return new Response(JSON.stringify({ message: "Ignored: Role not handled for welcome email." }), { status: 200 });
+      }
+    }
+    // 2b. Tailor Approved (status changes from Pending to Active)
+    else if (table === 'user_profiles' && type === 'UPDATE') {
+      if (record.status === 'Active' && old_record && old_record.status === 'Pending' && (record.role === 'owner' || record.role === 'tailor')) {
+        const domain = "https://tailors.co.ke";
+        clientEmail = record.email;
+        clientName = record.full_name || "there";
+        emailSubject = `Your shop has been approved! 🎉`;
+        emailHtml = `
+          <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
+            <div style="background: #1e293b; padding: 24px; border-radius: 10px 10px 0 0; text-align:center;">
+              <h1 style="color: #D4AF37; margin: 0;">You're Approved! 🎉</h1>
+            </div>
+            <div style="background: #f8fafc; padding: 24px; border-radius: 0 0 10px 10px;">
+              <p>Hi <strong>${clientName}</strong>,</p>
+              <p>Great news! Your tailor shop registration on <strong>Tailors.co.ke</strong> has been <strong style="color:#10b981;">approved</strong>. Your dashboard is now active and you can start receiving orders!</p>
+              <a href="${domain}/views/admin/admin-dashboard.html" style="display:inline-block; margin: 16px 0; padding:12px 24px; background-color:#1e293b; color:#D4AF37; text-decoration:none; border-radius:6px; font-weight:bold;">Go to My Dashboard →</a>
+              <p style="color:#888; font-size:0.85em;">— The Tailors.co.ke Team</p>
+            </div>
+          </div>`;
+      } else {
+        return new Response(JSON.stringify({ message: "Ignored: Not a relevant profile update." }), { status: 200 });
+      }
+    }
     // 3. Organization Suspension
     else if (table === 'organizations' && type === 'UPDATE') {
       if (record.subscription_status === 'Suspended' && (!old_record || old_record.subscription_status !== 'Suspended')) {

@@ -240,10 +240,21 @@
             console.error("Initialization error:", e);
         }
 
-        function getAdminClient() {
-            return window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
-                auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+
+        async function callAdminProxy(action, payload) {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            const token = session?.access_token;
+            const res = await fetch(`${APP_CONFIG.supabaseUrl}/functions/v1/admin-proxy`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ action, payload })
             });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || 'Admin proxy error');
+            return result;
         }
 
         // On Page Load
@@ -295,30 +306,24 @@
             try {
                 if (!currentUser) throw new Error("No active user session.");
 
-                const adminClient = getAdminClient();
+                // 1. Create Organization via admin-proxy
+                const orgResult = await callAdminProxy('insert', {
+                    table: 'organizations',
+                    record: { name: shopName }
+                });
+                const orgData = orgResult.data;
 
-                // 1. Create Organization
-                const { data: orgData, error: orgErr } = await adminClient
-                    .from('organizations')
-                    .insert([{ name: shopName }])
-                    .select()
-                    .single();
+                // 2. Create Shop via admin-proxy
+                const shopResult = await callAdminProxy('insert', {
+                    table: 'shops',
+                    record: { organization_id: orgData.id, name: shopName }
+                });
+                const shopData = shopResult.data;
 
-                if (orgErr) throw orgErr;
-
-                // 2. Create Shop
-                const { data: shopData, error: shopErr } = await adminClient
-                    .from('shops')
-                    .insert([{ organization_id: orgData.id, name: shopName }])
-                    .select()
-                    .single();
-
-                if (shopErr) throw shopErr;
-
-                // 3. Create or Update User Profile (Pending Approval)
-                const { error: profileErr } = await adminClient
-                    .from('user_profiles')
-                    .upsert({
+                // 3. Create or Update User Profile (Pending Approval) via admin-proxy
+                await callAdminProxy('upsert', {
+                    table: 'user_profiles',
+                    record: {
                         id: currentUser.id,
                         organization_id: orgData.id,
                         shop_id: shopData.id,
@@ -326,9 +331,8 @@
                         role: 'owner',
                         status: 'Pending',
                         email: currentUser.email
-                    });
-
-                if (profileErr) throw profileErr;
+                    }
+                });
 
                 alert("Shop setup completed successfully! Redirecting you to verify approval status.");
                 window.location.href = '/views/admin/admin-dashboard.html';
