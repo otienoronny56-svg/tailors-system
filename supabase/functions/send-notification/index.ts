@@ -232,7 +232,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "onboarding@resend.dev", // Uses Resend's default test email
+          from: "Tailors.co.ke <notifications@tailors.co.ke>",
           to: clientEmail,
           subject: emailSubject,
           html: emailHtml,
