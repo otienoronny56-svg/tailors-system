@@ -221,6 +221,16 @@ async function checkSession() {
             else if (USER_PROFILE.role === 'owner') redirectTo = '/views/admin/admin-dashboard.html';
             else if (USER_PROFILE.role === 'client') redirectTo = '/views/client/client-dashboard.html';
             
+            // Allow redirect via URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectParam = urlParams.get('redirect');
+            if (redirectParam) {
+                // Ensure redirect is to our domain, not external malicious site
+                if (redirectParam.startsWith('/views/') || redirectParam.startsWith('/index.html')) {
+                    redirectTo = redirectParam;
+                }
+            }
+            
             window.location.href = redirectTo;
             return;
         }

@@ -2330,7 +2330,8 @@
 
             if (!currentUser) {
                 alert("Please log in or sign up to send an inquiry.");
-                location.href = '../../login.html';
+                const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                location.href = `../../login.html?redirect=${currentUrl}`;
                 return;
             }
 
