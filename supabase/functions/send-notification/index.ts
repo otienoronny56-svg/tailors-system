@@ -248,25 +248,56 @@ serve(async (req) => {
       const senderName = sender ? sender.full_name : "Someone";
       const domain = "https://tailors.co.ke";
 
-      // SIMPLEST APPROACH: Look up the recipient directly by recipient_id on the message
-      // This is 100% reliable — no need to guess owner/org relationships
-      const { data: recipient } = await supabase
-        .from('user_profiles')
-        .select('email, full_name, role')
-        .eq('id', record.recipient_id)
-        .single();
+      // SMART RECIPIENT RESOLUTION:
+      // Since 'recipient_id' might be bypassed (nuclear hack) or missing emails, we look up based on the sender
+      const isClientSender = (record.sender_id === inquiry.client_id) || (record.sender_id === record.recipient_id);
+      
+      let recipientEmails: string[] = [];
+      let recipientRole: string = 'client';
+      let resolvedClientName = "There";
 
-      if (!recipient || !recipient.email) {
-        console.log("Ignored: Could not find recipient profile for ID", record.recipient_id);
-        return new Response(JSON.stringify({ message: "Ignored: Recipient not found." }), { status: 200 });
+      if (isClientSender) {
+        // Client sent a message. Notify the SHOP owners/managers
+        recipientRole = 'owner';
+        const { data: shop } = await supabase.from('shops').select('organization_id').eq('id', inquiry.shop_id).single();
+        if (shop && shop.organization_id) {
+           const { data: managers } = await supabase
+              .from('user_profiles')
+              .select('email, full_name')
+              .eq('organization_id', shop.organization_id)
+              .in('role', ['owner', 'manager']);
+           
+           if (managers && managers.length > 0) {
+              recipientEmails = managers.map(m => m.email).filter(e => !!e);
+              resolvedClientName = "Tailor";
+           }
+        }
+      } else {
+        // Shop sent a message. Notify the CLIENT
+        recipientRole = 'client';
+        if (inquiry.client_email) {
+           recipientEmails = [inquiry.client_email];
+           resolvedClientName = inquiry.client_name || "Valued Client";
+        } else if (inquiry.client_id) {
+           const { data: clientProf } = await supabase.from('user_profiles').select('email, full_name').eq('id', inquiry.client_id).single();
+           if (clientProf && clientProf.email) {
+              recipientEmails = [clientProf.email];
+              resolvedClientName = clientProf.full_name || "Valued Client";
+           }
+        }
       }
 
-      console.log(`Notifying recipient: ${recipient.email} (role: ${recipient.role})`);
-      clientEmail = recipient.email;
-      clientName = recipient.full_name || "There";
+      if (recipientEmails.length === 0) {
+        console.log("Ignored: Could not resolve any recipient emails for message from", record.sender_id);
+        return new Response(JSON.stringify({ message: "Ignored: No valid recipients found." }), { status: 200 });
+      }
+
+      clientEmail = recipientEmails[0]; // Send to the primary resolved email
+      clientName = resolvedClientName;
+      console.log(`Notifying recipient: ${clientEmail} (resolved role: ${recipientRole})`);
 
       // Determine the correct dashboard link based on who is being notified
-      const isClientBeingNotified = recipient.role === 'client';
+      const isClientBeingNotified = recipientRole === 'client';
       const dashboardLink = isClientBeingNotified
         ? `${domain}/views/client/client-dashboard.html`
         : `${domain}/views/admin/admin-messages.html`;
