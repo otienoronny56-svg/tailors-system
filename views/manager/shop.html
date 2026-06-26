@@ -2418,6 +2418,33 @@
                     throw error;
                 }
 
+                const insertedInquiry = data && data[0];
+
+                if (currentUser && insertedInquiry) {
+                    try {
+                        const { data: shopManagers } = await supabaseClient
+                            .from('user_profiles')
+                            .select('id')
+                            .eq('shop_id', shopId)
+                            .in('role', ['manager', 'owner'])
+                            .limit(1);
+
+                        if (shopManagers && shopManagers.length > 0) {
+                            await supabaseClient
+                                .from('messages')
+                                .insert([{
+                                    inquiry_id: insertedInquiry.id,
+                                    sender_id: currentUser.id,
+                                    recipient_id: shopManagers[0].id,
+                                    message_text: messageText,
+                                    is_read: false
+                                }]);
+                        }
+                    } catch (e) {
+                        console.warn("Failed to auto-start message thread", e);
+                    }
+                }
+
                 showSuccess(currentUser);
                 // Keep button disabled after success so user cannot re-submit the same inquiry
             } catch (err) {
