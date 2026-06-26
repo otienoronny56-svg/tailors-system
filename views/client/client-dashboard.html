@@ -1318,8 +1318,14 @@
                 border-radius: 0;
                 height: 100%;
             }
-            .marketplace-pane, .threads-sidebar, .chat-pane, .orders-pane, .settings-pane {
+            .marketplace-pane, .threads-sidebar, .orders-pane, .settings-pane {
                 padding: 15px 10px 70px !important;
+                height: calc(100dvh - 65px);
+                display: flex;
+                flex-direction: column;
+            }
+            .chat-pane {
+                padding: 0 !important;
                 height: calc(100dvh - 65px);
                 display: flex;
                 flex-direction: column;
@@ -1380,7 +1386,7 @@
                 gap: 12px;
             }
             .chat-input-area {
-                padding-bottom: 60px !important;
+                padding: 15px 15px 80px 15px !important;
             }
             .grid-shops {
                 grid-template-columns: 1fr 1fr;
