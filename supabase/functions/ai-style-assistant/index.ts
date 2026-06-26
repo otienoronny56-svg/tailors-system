@@ -27,52 +27,67 @@ serve(async (req) => {
     // Initialize Supabase to fetch inventory
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || "https://ouuhirckiavcvgqlpriw.supabase.co";
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseKey) {
+        throw new Error('Supabase client key is not set');
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // 1. Generate Embedding for the user's message
+    const embeddingResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            content: { parts: [{ text: message }] }
+        })
+    });
+
+    if (!embeddingResponse.ok) {
+        const errText = await embeddingResponse.text();
+        throw new Error(`Gemini Embedding API responded with status ${embeddingResponse.status}: ${errText}`);
+    }
+
+    const embeddingData = await embeddingResponse.json();
+    const queryEmbedding = embeddingData.embedding?.values;
+
+    if (!queryEmbedding || !Array.isArray(queryEmbedding) || queryEmbedding.length !== 3072) {
+        throw new Error(`Failed to retrieve valid 3072-dimension embedding values from Gemini.`);
+    }
+
+    // 2. Query Postgres pgvector RPC function match_listings
+    const { data: matchedListings, error: searchErr } = await supabase.rpc('match_listings', {
+        query_embedding: queryEmbedding,
+        match_threshold: 0.1, // lower threshold to ensure we get *some* context if they are just chatting, though the model will ignore it if irrelevant
+        match_count: 5 // Get top 5 most relevant items
+    });
+
+    if (searchErr) {
+        throw new Error(`Postgres similarity query failed: ${searchErr.message}`);
+    }
+
     let inventoryContext = "";
-
-    let listings: any[] | null = null;
-    let listingsError: any = null;
-    if (supabaseUrl && supabaseKey) {
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        const { data, error } = await supabase
-            .from('marketplace_listings')
-            .select('id, title, category, target_audience, price, image_urls')
-            .eq('status', 'active')
-            .limit(100);
-        listings = data;
-        listingsError = error;
-
-        if (listings && listings.length > 0) {
-            inventoryContext = `\n\nCURRENT AVAILABLE INVENTORY IN THE DB:\n` +
-                listings.map(l => {
-                    let imgUrl = "https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=400";
-                    if (l.image_urls) {
-                        try {
-                            const arr = typeof l.image_urls === 'string' ? JSON.parse(l.image_urls) : l.image_urls;
-                            if (arr && arr.length > 0) imgUrl = arr[0];
-                        } catch(e){}
-                    } else if (l.image_url) {
-                        imgUrl = l.image_url;
-                    }
-                    if (imgUrl && !imgUrl.startsWith('http')) {
-                        imgUrl = "https://ouuhirckiavcvgqlpriw.supabase.co/storage/v1/object/public/marketplace-assets/" + imgUrl;
-                    }
-                    return `- ID: ${l.id} | Title: ${l.title} | Category: ${l.category} | Price: Ksh ${l.price} | Img: ${imgUrl}`;
-                }).join('\n');
-        }
+    if (matchedListings && matchedListings.length > 0) {
+        inventoryContext = `\n\nCURRENT AVAILABLE INVENTORY IN THE DB:\n` +
+            matchedListings.map((l: any) => {
+                return `- ID: ${l.id} | Title: ${l.title} | Category: ${l.category} | Price: Ksh ${l.price} | Target: ${l.target_audience}`;
+            }).join('\n');
+    } else {
+        inventoryContext = `\n\nCURRENT AVAILABLE INVENTORY IN THE DB:\n(No relevant items found for this query.)`;
     }
 
     const systemInstruction = `
       You are an expert fashion stylist for a high-end tailored clothing marketplace in Kenya.
       CRITICAL INSTRUCTIONS:
-      1. Keep your responses conversational but short.
+      1. Keep your responses conversational, friendly, and short.
       2. If you recommend items, you MUST ONLY USE the items listed in the "CURRENT AVAILABLE INVENTORY" below.
-      3. Do fuzzy/semantic matching: suggest items from the list that closely fit the user's intent. For example, if they ask for "dinner wear" or "dinner outfit", recommend items like "Dinner dress", "Dinner Tuxedo", or "Velvet Tuxedo" from the inventory below. If they ask for "suits", recommend any suit from the list.
-      4. NEVER invent, guess, or make up items.
-      5. To recommend an item, you MUST output a recommendation token on its own line exactly like this:
-         • [RECOMMEND: ID_HERE]
-         Replace ID_HERE with the exact ID of the item from the list below.
-      6. You can provide brief descriptions or style advice, but any recommended product MUST be listed as a bullet point with the [RECOMMEND: ID_HERE] token. Do not write raw HTML links.
-      7. Max 3 recommendations per response.
+      3. NEVER invent, guess, or make up items. If the inventory below does not match what the user is asking for, politely inform them that we don't have exactly that, but you can suggest something else or they can request a custom tailored order.
+      4. To recommend an item, you MUST output a markdown link pointing to its ID. Format the link exactly like this:
+         [Exact Item Title](#listing-ID_HERE)
+         For example, if the ID is 123 and Title is Red Dress, output: [Red Dress](#listing-123).
+      5. Max 3 recommendations per response.
       ${inventoryContext}
     `;
 
@@ -102,7 +117,7 @@ serve(async (req) => {
       }
     };
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -119,52 +134,7 @@ serve(async (req) => {
     const data = await response.json();
     let textResult = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
     
-    console.log("Supabase URL present:", !!supabaseUrl);
-    console.log("Supabase Key present:", !!supabaseKey);
-    console.log("Listings count:", listings ? listings.length : 0);
     console.log("Raw AI response:", textResult);
-
-    // Process recommendation tokens with backend validation
-    if (listings && listings.length > 0) {
-      textResult = textResult.replace(/\[RECOMMEND:\s*([^\]]+)\]/gi, (match, itemIdentifier) => {
-        const cleanId = itemIdentifier.trim().toLowerCase();
-        
-        // Find match using multiple matching strategies:
-        const found = listings.find(l => {
-          const idStr = String(l.id).trim().toLowerCase();
-          const titleStr = String(l.title).trim().toLowerCase();
-          
-          // Strategy 1: Exact ID match
-          if (idStr === cleanId) return true;
-          
-          // Strategy 2: Exact Title match
-          if (titleStr === cleanId) return true;
-          
-          // Strategy 3: Slugified Title match (e.g., "dinner-tuxedo" vs "dinner tuxedo")
-          const titleSlug = titleStr.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-          const cleanSlug = cleanId.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-          if (titleSlug === cleanSlug) return true;
-          
-          // Strategy 4: Substring match (e.g. "dinner dress" includes "dinner")
-          if (titleStr.includes(cleanId) || cleanId.includes(titleStr)) return true;
-          
-          return false;
-        });
-
-        if (found) {
-          console.log(`Matched token "${itemIdentifier}" to listing:`, found.title);
-          return `<a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal('${found.id}'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:underline;">${found.title}</a>`;
-        }
-        console.log(`No match found for token "${itemIdentifier}", marking for removal.`);
-        return "REMOVE_LINE_TOKEN";
-      });
-
-      // Filter out any lines containing REMOVE_LINE_TOKEN (e.g. invalid bullet points)
-      textResult = textResult
-        .split('\n')
-        .filter(line => !line.includes("REMOVE_LINE_TOKEN"))
-        .join('\n');
-    }
 
     return new Response(
       JSON.stringify({ reply: textResult }),

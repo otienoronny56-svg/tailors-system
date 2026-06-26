@@ -2770,8 +2770,11 @@
             const msgDiv = document.createElement('div');
             msgDiv.className = `ai-msg ${sender}`;
             
-            // Parse simple newlines and bold text
-            let formattedText = text.replace(/\\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            // Parse simple newlines, bold text, and markdown links
+            let formattedText = text
+                .replace(/\\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\[([^\]]+)\]\(#listing-([^\)]+)\)/g, '<a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal(\'$2\'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:underline;">$1</a>');
             msgDiv.innerHTML = formattedText;
             
             container.appendChild(msgDiv);
