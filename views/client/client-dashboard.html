@@ -2215,9 +2215,11 @@
                 await loadClientThreads();
                 subscribeToGlobalMessages();
 
-                // Initialize default tab from URL or fallback to marketplace
+                // Initialize default tab from URL hash, URL param, or fallback to marketplace
+                const hashTab = window.location.hash.replace('#', '');
                 const urlParams = new URLSearchParams(window.location.search);
-                const targetTab = urlParams.get('tab');
+                const targetTab = hashTab || urlParams.get('tab');
+                
                 if (targetTab && ['marketplace', 'inbox', 'orders', 'settings'].includes(targetTab)) {
                     switchTab(targetTab);
                 } else {
@@ -3299,6 +3301,13 @@
         // Marketplace-specific state variables and DOM functions extracted to js/features/dashboard-marketplace.js
 
         function switchTab(tabName) {
+            // Update URL hash to persist the tab on refresh
+            if (history.replaceState) {
+                history.replaceState(null, null, `#${tabName}`);
+            } else {
+                location.hash = `#${tabName}`;
+            }
+
             document.querySelectorAll('.dock-item').forEach(item => item.classList.remove('active'));
             document.getElementById(`tab-btn-${tabName}`).classList.add('active');
 
