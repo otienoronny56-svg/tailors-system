@@ -2372,7 +2372,7 @@
 
             // Expose modal function
             window.openListingModal = function(listingId) {
-                const list = allListings.find(l => l.id === listingId) || dealListings.find(l => l.id === listingId);
+                const list = allListings.find(l => l.id === listingId);
                 if (!list) return;
 
                 const shopFromCache = allShops.find(s => s.id === list.shop_id);
