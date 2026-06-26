@@ -227,14 +227,14 @@
                     </button>
                     <script>
                         window.shareMyStorefront = async function() {
-                            let targetShopId = window.USER_PROFILE?.shop_id;
+                            let targetShopId = typeof USER_PROFILE !== 'undefined' && USER_PROFILE ? USER_PROFILE.shop_id : null;
                             
-                            if (!targetShopId && window.USER_PROFILE?.organization_id) {
+                            if (!targetShopId && typeof USER_PROFILE !== 'undefined' && USER_PROFILE && USER_PROFILE.organization_id) {
                                 // Admin/Owner might have multiple shops, fetch them
                                 const { data: shops, error } = await window.supabaseClient
                                     .from('shops')
                                     .select('id, name')
-                                    .eq('organization_id', window.USER_PROFILE.organization_id);
+                                    .eq('organization_id', USER_PROFILE.organization_id);
                                     
                                 if (!error && shops && shops.length > 0) {
                                     if (shops.length === 1) {
