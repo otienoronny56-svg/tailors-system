@@ -132,7 +132,7 @@ serve(async (req) => {
         }
 
         // 2. Also notify superadmins about the new pending tailor
-        const { data: adminUsers } = await supabaseClient
+        const { data: adminUsers } = await supabase
           .from('user_profiles')
           .select('email')
           .eq('role', 'superadmin');
