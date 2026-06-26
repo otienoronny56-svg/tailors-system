@@ -350,7 +350,7 @@ function getListingCardHtml(list) {
     }
 
     return `
-        <div class="card listing-card">
+        <div class="card listing-card" style="cursor: pointer;" onclick="openListingModal('${list.id}')">
             <div class="card-banner-wrap">
                 ${badgeHtml}
                 <div class="card-banner-blur" style="background-image: url('${imageUrl}')"></div>
@@ -895,3 +895,61 @@ function getMockListings() {
         }
     ];
 }
+
+window.openListingModal = function(listingId) {
+    const list = window.allMarketplaceListings.find(l => l.id === listingId) || [];
+    if (!list) return;
+
+    const shopFromCache = window.allMarketplaceShops.find(s => s.id === list.shop_id);
+    const shopName = list.shops?.name || shopFromCache?.name || 'Style Shop';
+    const shopProfileImg = list.shops?.profile_image || shopFromCache?.profile_image;
+
+    const STORAGE_URL = window.APP_CONFIG ? `${window.APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/` : '';
+    const avatarImgUrl = shopProfileImg ? (shopProfileImg.startsWith('http') ? shopProfileImg : STORAGE_URL + shopProfileImg) : null;
+    const avatarIconHtml = avatarImgUrl 
+        ? `<img src="${avatarImgUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; border: 1px solid var(--brand-gold);">`
+        : `<i class="fas fa-store" style="color:var(--brand-gold); font-size: 1.2em;"></i>`;
+
+    const imageUrl = (list.image_urls && JSON.parse(list.image_urls)[0]) || list.image_url || `https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=800`;
+
+    let priceHtml = '';
+    if (list.original_price && parseFloat(list.original_price) > parseFloat(list.price)) {
+        priceHtml = `
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+                <span style="text-decoration: line-through; color: var(--brand-slate); font-size: 1em;">Ksh ${parseFloat(list.original_price).toLocaleString()}</span>
+                <span style="color: #ef4444; font-weight: 800; font-size: 1.5em; line-height: 1;">Ksh ${parseFloat(list.price).toLocaleString()}</span>
+            </div>
+        `;
+    } else {
+        priceHtml = `
+            <span style="color: var(--brand-gold); font-weight: 800; font-size: 1.5em; line-height: 1;">${list.price ? 'Ksh ' + parseFloat(list.price).toLocaleString() : 'Negotiable'}</span>
+        `;
+    }
+
+    document.getElementById('modal-listing-image').src = imageUrl;
+    document.getElementById('modal-listing-image-blur').src = imageUrl;
+    document.getElementById('modal-listing-title').textContent = list.title || 'Listing Details';
+    document.getElementById('modal-listing-desc').textContent = list.description || 'No description provided.';
+    document.getElementById('modal-listing-category').textContent = list.category || 'Fashion';
+    document.getElementById('modal-listing-audience').textContent = list.target_audience || 'Unisex';
+    document.getElementById('modal-listing-price').innerHTML = priceHtml;
+    document.getElementById('modal-shop-avatar').innerHTML = avatarIconHtml;
+    document.getElementById('modal-shop-name').textContent = shopName;
+
+    const inquireBtn = document.getElementById('modal-inquire-btn');
+    inquireBtn.href = `../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}`;
+
+    const overlay = document.getElementById('listing-modal-overlay');
+    overlay.classList.add('active');
+};
+
+window.closeListingModal = function() {
+    const overlay = document.getElementById('listing-modal-overlay');
+    overlay.classList.remove('active');
+};
+
+document.getElementById('listing-modal-overlay')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeListingModal();
+    }
+});
