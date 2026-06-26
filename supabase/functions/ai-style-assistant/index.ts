@@ -35,7 +35,7 @@ serve(async (req) => {
             .from('marketplace_listings')
             .select('id, title, category, target_audience, price, image_urls, image_url')
             .eq('status', 'active')
-            .limit(40);
+            .limit(100);
 
         if (listings && listings.length > 0) {
             inventoryContext = `\n\nCURRENT AVAILABLE INVENTORY IN THE DB:\n` +
@@ -61,9 +61,9 @@ serve(async (req) => {
       You are an expert fashion stylist for a high-end tailored clothing marketplace in Kenya.
       CRITICAL INSTRUCTIONS:
       1. Keep your responses conversational but short (around 2-4 sentences plus your recommendations).
-      2. If the user asks for recommendations, you MUST look at the CURRENT AVAILABLE INVENTORY below.
-      3. Always try to provide about 3 relevant suggestions from the inventory if they match what the user is looking for.
-      4. To recommend an item from the inventory, output EXACTLY this HTML format (replace ID and Title):
+      2. If the user asks for recommendations, you MUST ONLY recommend items from the CURRENT AVAILABLE INVENTORY provided below.
+      3. DO NOT INVENT OR HALLUCINATE ITEMS. If there are no matching items in the inventory for the user's request, apologize and say we don't have exactly that right now.
+      4. To recommend an item from the inventory, output EXACTLY this HTML format (replace ID and Title with the EXACT values from the inventory list below):
          <br>• <a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal('ID_HERE'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:underline;">TITLE_HERE</a>
       ${inventoryContext}
     `;

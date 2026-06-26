@@ -2372,8 +2372,13 @@
 
             // Expose modal function
             window.openListingModal = function(listingId) {
-                const list = allListings.find(l => l.id === listingId);
-                if (!list) return;
+                console.log("Trying to open modal for ID:", listingId);
+                const list = allListings.find(l => String(l.id).trim() === String(listingId).trim());
+                if (!list) {
+                    console.error("Listing not found in allListings! ID:", listingId);
+                    alert("Sorry, we couldn't load this item right now. It might no longer be available.");
+                    return;
+                }
 
                 const shopFromCache = allShops.find(s => s.id === list.shop_id);
                 const shopName = list.shops?.name || shopFromCache?.name || 'Style Shop';
