@@ -724,6 +724,7 @@
 
                 const payload = {
                     imageBase64,
+                    mimeType: file.type || 'image/jpeg',
                     currentTitle: titleInput.value.trim(),
                     currentDesc: descInput.value.trim()
                 };
@@ -740,6 +741,8 @@
                 if (response.error) throw new Error(response.error.message || 'Error generating AI content');
 
                 const data = response.data;
+                if (data && data.error) throw new Error(data.error);
+
                 
                 if (data.title) titleInput.value = data.title;
                 if (data.description) descInput.value = data.description;
