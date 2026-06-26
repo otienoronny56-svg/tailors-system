@@ -154,16 +154,19 @@ serve(async (req) => {
              clientName = owner.full_name || "Admin";
              clientPhone = owner.phone || "";
              console.log(`Notifying shop owner: ${clientEmail}`);
-             
-             textMessage = `New message from ${senderName} regarding an inquiry. Log in to your dashboard to reply.`;
-             emailSubject = `New Message from ${senderName}`;
-             emailHtml = `<h3>Hello ${clientName},</h3>
-                          <p>You have received a new message from <strong>${senderName}</strong>.</p>
-                          <p><em>"${(record.message_text || '').length > 50 ? (record.message_text || '').substring(0, 50) + '...' : (record.message_text || '')}"</em></p>
-                          <a href="${domain}/views/admin/admin-messages.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
            } else {
-             console.log("Could not find shop owner for org:", shop.organization_id);
+             // Fallback: owner profile may not have organization_id set yet — use env var
+             clientEmail = Deno.env.get("ADMIN_EMAIL") || "otienoronny56@gmail.com";
+             clientName = "Admin";
+             console.log(`Owner not found by org lookup, falling back to ADMIN_EMAIL: ${clientEmail}`);
            }
+           
+           textMessage = `New message from ${senderName} regarding an inquiry. Log in to your dashboard to reply.`;
+           emailSubject = `New Message from ${senderName}`;
+           emailHtml = `<h3>Hello ${clientName},</h3>
+                        <p>You have received a new message from <strong>${senderName}</strong>.</p>
+                        <p><em>"${(record.message_text || '').length > 50 ? (record.message_text || '').substring(0, 50) + '...' : (record.message_text || '')}"</em></p>
+                        <a href="${domain}/views/admin/admin-messages.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
         } else {
           console.log("Could not find shop:", inquiry.shop_id);
         }
