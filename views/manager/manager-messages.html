@@ -25,6 +25,7 @@
             display: grid;
             grid-template-columns: 320px 1fr;
             height: calc(100vh - 120px);
+            height: calc(100dvh - 120px);
             background: white;
             border-radius: 12px;
             overflow: hidden;
@@ -225,16 +226,19 @@
         html,
         body {
             height: 100vh !important;
+            height: 100dvh !important;
             overflow: hidden !important;
         }
 
         .dashboard-container {
             height: 100vh !important;
+            height: 100dvh !important;
             overflow: hidden !important;
         }
 
         .main-content {
             height: 100vh !important;
+            height: 100dvh !important;
             display: flex !important;
             flex-direction: column !important;
             padding: 20px !important;
@@ -250,7 +254,9 @@
         .inbox-layout {
             flex-grow: 1 !important;
             height: calc(100vh - 180px) !important;
+            height: calc(100dvh - 180px) !important;
             min-height: calc(100vh - 180px) !important;
+            min-height: calc(100dvh - 180px) !important;
         }
 
         .mobile-back-btn {
@@ -289,7 +295,7 @@
                 padding: 10px 15px;
             }
             .msg-input-pane {
-                padding: 10px 15px 40px 15px; /* Added extra bottom padding to lift the input up */
+                padding: 10px 15px 60px 15px; /* Extra bottom padding to lift the input above OS nav bars */
             }
             .chat-messages-stream {
                 padding: 15px;
