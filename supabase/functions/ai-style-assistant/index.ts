@@ -29,13 +29,17 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY');
     let inventoryContext = "";
 
+    let listings: any[] | null = null;
+    let listingsError: any = null;
     if (supabaseUrl && supabaseKey) {
         const supabase = createClient(supabaseUrl, supabaseKey);
-        const { data: listings } = await supabase
+        const { data, error } = await supabase
             .from('marketplace_listings')
-            .select('id, title, category, target_audience, price, image_urls, image_url')
+            .select('id, title, category, target_audience, price, image_urls')
             .eq('status', 'active')
             .limit(100);
+        listings = data;
+        listingsError = error;
 
         if (listings && listings.length > 0) {
             inventoryContext = `\n\nCURRENT AVAILABLE INVENTORY IN THE DB:\n` +
@@ -62,11 +66,13 @@ serve(async (req) => {
       CRITICAL INSTRUCTIONS:
       1. Keep your responses conversational but short.
       2. If you recommend items, you MUST ONLY USE the items listed in the "CURRENT AVAILABLE INVENTORY" below.
-      3. NEVER invent, guess, or make up items. If no items match, say "I don't have exactly that right now."
-      4. When recommending an item, you MUST use the EXACT ID and EXACT TITLE from the list below. Do not change the title.
-      5. DO NOT recommend an item if it is not in the list below.
-      6. Output recommendations exactly like this:
-         <br>• <a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal('ID_HERE'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:underline;">TITLE_HERE</a>
+      3. Do fuzzy/semantic matching: suggest items from the list that closely fit the user's intent. For example, if they ask for "dinner wear" or "dinner outfit", recommend items like "Dinner dress", "Dinner Tuxedo", or "Velvet Tuxedo" from the inventory below. If they ask for "suits", recommend any suit from the list.
+      4. NEVER invent, guess, or make up items.
+      5. To recommend an item, you MUST output a recommendation token on its own line exactly like this:
+         • [RECOMMEND: ID_HERE]
+         Replace ID_HERE with the exact ID of the item from the list below.
+      6. You can provide brief descriptions or style advice, but any recommended product MUST be listed as a bullet point with the [RECOMMEND: ID_HERE] token. Do not write raw HTML links.
+      7. Max 3 recommendations per response.
       ${inventoryContext}
     `;
 
@@ -96,7 +102,7 @@ serve(async (req) => {
       }
     };
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -113,6 +119,53 @@ serve(async (req) => {
     const data = await response.json();
     let textResult = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
     
+    console.log("Supabase URL present:", !!supabaseUrl);
+    console.log("Supabase Key present:", !!supabaseKey);
+    console.log("Listings count:", listings ? listings.length : 0);
+    console.log("Raw AI response:", textResult);
+
+    // Process recommendation tokens with backend validation
+    if (listings && listings.length > 0) {
+      textResult = textResult.replace(/\[RECOMMEND:\s*([^\]]+)\]/gi, (match, itemIdentifier) => {
+        const cleanId = itemIdentifier.trim().toLowerCase();
+        
+        // Find match using multiple matching strategies:
+        const found = listings.find(l => {
+          const idStr = String(l.id).trim().toLowerCase();
+          const titleStr = String(l.title).trim().toLowerCase();
+          
+          // Strategy 1: Exact ID match
+          if (idStr === cleanId) return true;
+          
+          // Strategy 2: Exact Title match
+          if (titleStr === cleanId) return true;
+          
+          // Strategy 3: Slugified Title match (e.g., "dinner-tuxedo" vs "dinner tuxedo")
+          const titleSlug = titleStr.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const cleanSlug = cleanId.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          if (titleSlug === cleanSlug) return true;
+          
+          // Strategy 4: Substring match (e.g. "dinner dress" includes "dinner")
+          if (titleStr.includes(cleanId) || cleanId.includes(titleStr)) return true;
+          
+          return false;
+        });
+
+        if (found) {
+          console.log(`Matched token "${itemIdentifier}" to listing:`, found.title);
+          return `<a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal('${found.id}'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:underline;">${found.title}</a>`;
+        }
+        console.log(`No match found for token "${itemIdentifier}", marking for removal.`);
+        return "REMOVE_LINE_TOKEN";
+      });
+
+      // Filter out any lines containing REMOVE_LINE_TOKEN (e.g. invalid bullet points)
+      textResult = textResult
+        .split('\n')
+        .filter(line => !line.includes("REMOVE_LINE_TOKEN"))
+        .join('\n');
+    }
+
     return new Response(
       JSON.stringify({ reply: textResult }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -1735,9 +1735,9 @@
                     
                     <div style="display: flex; align-items: center; width: 100%; gap: 10px;">
                         <div class="search-input-group" style="flex-grow: 1; display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-search" style="font-size: 0.85em; color: var(--brand-gold);"></i>
+                            <i class="fas fa-search" id="marketplace-search-icon" style="font-size: 0.85em; color: var(--brand-gold);"></i>
                             <input type="text" id="marketplace-search-query" placeholder="Search creations..."
-                                autocomplete="off" onkeyup="filterMarketplace()"
+                                autocomplete="off" onkeyup="handleSearchInput()"
                                 style="font-size: 0.85em; padding: 6px 0; background: transparent; border: none; color: white; outline: none; width: 100%;">
                         </div>
                         <button type="button" id="btn-toggle-mkt-filters" onclick="toggleMarketplaceFilters()" style="background: transparent; border: none; color: var(--brand-gold); padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.15em;"><i class="fas fa-sliders-h"></i></button>

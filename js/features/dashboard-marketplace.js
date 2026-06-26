@@ -8,6 +8,8 @@ let userLikes = [];
 let userFavoriteShops = []; 
 let globalLikesCount = {}; 
 let activeMarketplaceMode = 'listings';
+let searchTimeout = null;
+let semanticSearchResults = null;
 
 function escapeHTML(str) {
     if (!str) return '';
@@ -632,6 +634,52 @@ function renderMarketplaceListings(listings) {
 
 
 // Search & Filter Controller
+async function handleSearchInput() {
+    const queryVal = document.getElementById('marketplace-search-query').value.trim();
+
+    if (activeMarketplaceMode === 'shops') {
+        filterMarketplace();
+        return;
+    }
+
+    if (!queryVal) {
+        semanticSearchResults = null;
+        filterMarketplace();
+        return;
+    }
+
+    // Show searching loader in input container
+    const searchIcon = document.getElementById('marketplace-search-icon');
+    if (searchIcon) {
+        searchIcon.className = 'fas fa-spinner fa-spin';
+    }
+
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(async () => {
+        try {
+            // Invoke semantic-search edge function
+            const response = await supabaseClient.functions.invoke('semantic-search', {
+                body: { query: queryVal, matchThreshold: 0.1, matchCount: 80 }
+            });
+
+            if (response.error) throw new Error(response.error);
+            
+            const listingsData = response.data?.listings || [];
+            semanticSearchResults = listingsData;
+        } catch (err) {
+            console.error("Semantic search failed, falling back to keyword search:", err);
+            semanticSearchResults = null;
+        } finally {
+            // Restore search icon
+            const searchIcon = document.getElementById('marketplace-search-icon');
+            if (searchIcon) {
+                searchIcon.className = 'fas fa-search';
+            }
+            filterMarketplace();
+        }
+    }, 600); // 600ms debounce
+}
+
 function filterMarketplace() {
     marketplaceDisplayLimit = 20; // Reset pagination on new search
     renderSidebarCategories();
@@ -669,10 +717,18 @@ function filterMarketplace() {
 
             if (showFavoritesOnly && !userFavoriteShops.includes(list.shop_id)) return false;
 
-            const titleMatch = !query ||
-                (list.title && list.title.toLowerCase().includes(query)) ||
-                (list.description && list.description.toLowerCase().includes(query)) ||
-                (list.category && list.category.toLowerCase().includes(query));
+            let queryMatch = false;
+            if (!query) {
+                queryMatch = true;
+            } else if (semanticSearchResults) {
+                // Semantic Match: Check if the listing is in our semantic search results
+                queryMatch = semanticSearchResults.some(sr => sr.id === list.id);
+            } else {
+                // Fallback: standard keyword matching
+                queryMatch = (list.title && list.title.toLowerCase().includes(query)) ||
+                    (list.description && list.description.toLowerCase().includes(query)) ||
+                    (list.category && list.category.toLowerCase().includes(query));
+            }
 
             const categoryMatch = !category || list.category === category;
 
@@ -694,13 +750,24 @@ function filterMarketplace() {
                 (shop.location && shop.location.toLowerCase().includes(location))
             ));
 
-            return titleMatch && categoryMatch && isAudienceMatch && locMatch;
+            return queryMatch && categoryMatch && isAudienceMatch && locMatch;
         });
 
-        // Algorithm: Sort by Bespoke Score (Popularity > Quality > Recency > Profile)
-        filteredListings.sort((a, b) => {
-            return calculateBespokeScore(b, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops);
-        });
+        // Sort by semantic similarity if semantic search results exist, otherwise sort by bespoke score
+        if (query && semanticSearchResults) {
+            filteredListings.sort((a, b) => {
+                const simA = semanticSearchResults.find(sr => sr.id === a.id)?.similarity || 0;
+                const simB = semanticSearchResults.find(sr => sr.id === b.id)?.similarity || 0;
+                if (simB !== simA) return simB - simA; // Higher similarity first
+                // Tie breaker: calculateBespokeScore
+                return calculateBespokeScore(b, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops);
+            });
+        } else {
+            // Algorithm: Sort by Bespoke Score (Popularity > Quality > Recency > Profile)
+            filteredListings.sort((a, b) => {
+                return calculateBespokeScore(b, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops) - calculateBespokeScore(a, allMarketplaceShops, allMarketplaceReviews, globalLikesCount, userFavoriteShops);
+            });
+        }
 
         renderMarketplaceListings(filteredListings);
     }

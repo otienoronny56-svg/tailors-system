@@ -588,7 +588,7 @@
                     .getPublicUrl(fileName);
 
                 // Insert listing
-                const { error: insertErr } = await supabaseClient
+                const { data: insertedData, error: insertErr } = await supabaseClient
                     .from('marketplace_listings')
                     .insert([{
                         organization_id: USER_PROFILE.organization_id,
@@ -599,8 +599,16 @@
                         description: desc,
                         image_urls: JSON.stringify([urlData.publicUrl]),
                         status: 'active'
-                    }]);
+                    }])
+                    .select();
                 if (insertErr) throw insertErr;
+
+                // Call edge function to generate listing embedding on the fly
+                if (insertedData && insertedData[0]) {
+                    supabaseClient.functions.invoke('generate-listing-embedding', {
+                        body: { listingId: insertedData[0].id }
+                    }).catch(err => console.error("Error generating listing embedding:", err));
+                }
 
                 alert('✅ Listing published successfully!');
                 document.getElementById('listing-add-form').reset();
@@ -684,6 +692,11 @@
                     .update({ title, description, price, original_price: originalPrice, category, target_audience: targetAudience })
                     .eq('id', id);
                 if (error) throw error;
+
+                // Call edge function to generate listing embedding on the fly
+                supabaseClient.functions.invoke('generate-listing-embedding', {
+                    body: { listingId: id }
+                }).catch(err => console.error("Error generating listing embedding:", err));
 
                 closeManagerEditModal();
                 await loadManagerListingsScreen();
