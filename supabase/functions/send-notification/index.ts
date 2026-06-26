@@ -139,7 +139,7 @@ serve(async (req) => {
 
         if (adminUsers && adminUsers.length > 0 && resendApiKey) {
           const adminEmails = adminUsers.map(a => a.email).filter(Boolean);
-          const adminHtml = `<h3>Hello Admin,</h3><p>A new tailor has registered and is awaiting approval.</p><ul><li><strong>Name:</strong> ${newUserName}</li><li><strong>Email:</strong> ${newUserEmail}</li></ul><p>Please log in to the admin dashboard to review.</p><a href="${domain}/views/admin/admin-dashboard.html" style="display:inline-block; padding:12px 20px; background-color:#1e293b; color:white; text-decoration:none; border-radius:6px;">Review in Dashboard →</a>`;
+          const adminHtml = `<h3>Hello Admin,</h3><p>A new tailor has registered and is awaiting approval.</p><ul><li><strong>Name:</strong> ${newUserName}</li><li><strong>Email:</strong> ${newUserEmail}</li></ul><p>Please log in to the admin dashboard to review.</p><a href="${domain}/views/superadmin/superadmin-dashboard.html" style="display:inline-block; padding:12px 20px; background-color:#1e293b; color:white; text-decoration:none; border-radius:6px;">Review in Dashboard →</a>`;
 
           if (adminEmails.length > 0) {
             await fetch("https://api.resend.com/emails", {
