@@ -2466,6 +2466,240 @@
             </div>
         </div>
     </div>
+
+    <!-- AI Style Assistant Chatbot -->
+    <style>
+        .ai-chat-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .ai-chat-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+        .ai-chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            height: 500px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        .ai-chat-window.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .ai-chat-header {
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        .ai-chat-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            font-size: 18px;
+            transition: color 0.2s;
+        }
+        .ai-chat-close:hover { color: white; }
+        .ai-chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .ai-msg {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            line-height: 1.4;
+            color: white;
+            word-wrap: break-word;
+        }
+        .ai-msg.user {
+            align-self: flex-end;
+            background: var(--brand-gold);
+            color: var(--brand-navy);
+            border-bottom-right-radius: 4px;
+        }
+        .ai-msg.bot {
+            align-self: flex-start;
+            background: rgba(255,255,255,0.1);
+            border-bottom-left-radius: 4px;
+        }
+        .ai-chat-input-area {
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            gap: 10px;
+        }
+        .ai-chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 10px 15px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9em;
+            outline: none;
+        }
+        .ai-chat-input:focus { border-color: var(--brand-gold); }
+        .ai-chat-send {
+            background: var(--brand-gold);
+            color: var(--brand-navy);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .ai-chat-send:hover { transform: scale(1.1); }
+        .ai-typing {
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.5);
+            align-self: flex-start;
+            padding: 5px 10px;
+            display: none;
+        }
+    </style>
+
+    <button class="ai-chat-btn" onclick="toggleAIChat()">
+        <i class="fas fa-magic"></i>
+    </button>
+
+    <div class="ai-chat-window" id="ai-chat-window">
+        <div class="ai-chat-header">
+            <span><i class="fas fa-magic" style="color: var(--brand-gold); margin-right: 8px;"></i> Style Assistant</span>
+            <button class="ai-chat-close" onclick="toggleAIChat()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="ai-chat-messages" id="ai-chat-messages">
+            <div class="ai-msg bot">Hi there! I'm your personal style assistant. Need outfit ideas or help finding something specific?</div>
+        </div>
+        <div class="ai-typing" id="ai-typing">Assistant is typing...</div>
+        <div class="ai-chat-input-area">
+            <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="E.g. What to wear to a wedding?" onkeypress="if(event.key === 'Enter') sendAIMessage()">
+            <button class="ai-chat-send" onclick="sendAIMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let aiChatHistory = [];
+        
+        function toggleAIChat() {
+            const window = document.getElementById('ai-chat-window');
+            if(window.classList.contains('active')) {
+                window.classList.remove('active');
+                setTimeout(() => window.style.display = 'none', 300);
+            } else {
+                window.style.display = 'flex';
+                setTimeout(() => window.classList.add('active'), 10);
+                document.getElementById('ai-chat-input').focus();
+            }
+        }
+
+        async function sendAIMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const message = input.value.trim();
+            if(!message) return;
+
+            input.value = '';
+            appendAIMessage(message, 'user');
+            
+            const typingInd = document.getElementById('ai-typing');
+            typingInd.style.display = 'block';
+            
+            // Scroll to bottom
+            const messagesContainer = document.getElementById('ai-chat-messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            try {
+                if(!window.supabaseClient) throw new Error("Supabase client not initialized");
+                
+                const response = await window.supabaseClient.functions.invoke('ai-style-assistant', {
+                    body: { message, history: aiChatHistory }
+                });
+
+                typingInd.style.display = 'none';
+
+                if (response.error) throw new Error(response.error.message);
+                if (response.data && response.data.error) throw new Error(response.data.error);
+
+                const reply = response.data.reply;
+                
+                // Add to history
+                aiChatHistory.push({ role: 'user', text: message });
+                aiChatHistory.push({ role: 'model', text: reply });
+
+                // Keep history manageable
+                if(aiChatHistory.length > 10) aiChatHistory = aiChatHistory.slice(-10);
+
+                appendAIMessage(reply, 'bot');
+            } catch(e) {
+                console.error("Chat Error:", e);
+                typingInd.style.display = 'none';
+                appendAIMessage("Sorry, I'm having trouble connecting right now. Please try again later.", 'bot');
+            }
+        }
+
+        function appendAIMessage(text, sender) {
+            const container = document.getElementById('ai-chat-messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `ai-msg ${sender}`;
+            
+            // Parse simple newlines and bold text
+            let formattedText = text.replace(/\\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            msgDiv.innerHTML = formattedText;
+            
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
 </body>
 
 </html>
