@@ -63,8 +63,9 @@ serve(async (req) => {
       1. Keep your responses conversational but short.
       2. If you recommend items, you MUST ONLY USE the items listed in the "CURRENT AVAILABLE INVENTORY" below.
       3. NEVER invent, guess, or make up items. If no items match, say "I don't have exactly that right now."
-      4. When recommending an item, you MUST use the EXACT ID and TITLE from the list below.
-      5. Output recommendations exactly like this:
+      4. When recommending an item, you MUST use the EXACT ID and EXACT TITLE from the list below. Do not change the title.
+      5. DO NOT recommend an item if it is not in the list below.
+      6. Output recommendations exactly like this:
          <br>• <a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal('ID_HERE'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:underline;">TITLE_HERE</a>
       ${inventoryContext}
     `;
