@@ -681,10 +681,11 @@ function filterMarketplace() {
             const audience = audienceFilterEl ? audienceFilterEl.value : '';
             let isAudienceMatch = true;
             if (audience) {
+                const itemAudience = list.target_audience || 'Unisex';
                 if (audience !== 'Unisex') {
-                    isAudienceMatch = (list.target_audience === audience || list.target_audience === 'Unisex');
+                    isAudienceMatch = (itemAudience === audience || itemAudience === 'Unisex');
                 } else {
-                    isAudienceMatch = (list.target_audience === 'Unisex');
+                    isAudienceMatch = (itemAudience === 'Unisex');
                 }
             }
 
