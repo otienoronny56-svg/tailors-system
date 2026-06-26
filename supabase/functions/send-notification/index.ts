@@ -131,11 +131,32 @@ serve(async (req) => {
           console.log(`Welcome email sent to new tailor: ${newUserEmail}`);
         }
 
-        // 2. Also notify admin about the new pending tailor
-        clientEmail = Deno.env.get("ADMIN_EMAIL") || "otienoronny56@gmail.com";
-        clientName = "Admin";
-        emailSubject = `New Tailor Registration: ${newUserName}`;
-        emailHtml = `<h3>Hello Admin,</h3><p>A new tailor has registered and is awaiting approval.</p><ul><li><strong>Name:</strong> ${newUserName}</li><li><strong>Email:</strong> ${newUserEmail}</li></ul><p>Please log in to the admin dashboard to review.</p><a href="${domain}/views/admin/admin-dashboard.html" style="display:inline-block; padding:12px 20px; background-color:#1e293b; color:white; text-decoration:none; border-radius:6px;">Review in Dashboard →</a>`;
+        // 2. Also notify superadmins about the new pending tailor
+        const { data: adminUsers } = await supabaseClient
+          .from('user_profiles')
+          .select('email')
+          .eq('role', 'superadmin');
+
+        if (adminUsers && adminUsers.length > 0 && resendApiKey) {
+          const adminEmails = adminUsers.map(a => a.email).filter(Boolean);
+          const adminHtml = `<h3>Hello Admin,</h3><p>A new tailor has registered and is awaiting approval.</p><ul><li><strong>Name:</strong> ${newUserName}</li><li><strong>Email:</strong> ${newUserEmail}</li></ul><p>Please log in to the admin dashboard to review.</p><a href="${domain}/views/admin/admin-dashboard.html" style="display:inline-block; padding:12px 20px; background-color:#1e293b; color:white; text-decoration:none; border-radius:6px;">Review in Dashboard →</a>`;
+
+          if (adminEmails.length > 0) {
+            await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                from: "Tailors.co.ke <notifications@tailors.co.ke>",
+                to: adminEmails,
+                subject: `New Tailor Registration: ${newUserName}`,
+                html: adminHtml,
+              }),
+            });
+            console.log(`Admin alert sent to superadmins: ${adminEmails.join(', ')}`);
+          }
+        }
+        
+        return new Response(JSON.stringify({ message: "Tailor welcome and admin alert emails sent." }), { status: 200 });
 
       // --- C: Tailor Approved (status changes from Pending to Active) ---
       } else if (type === 'UPDATE' && record.status === 'Active' && old_record && old_record.status === 'Pending' && (record.role === 'owner' || record.role === 'tailor')) {
