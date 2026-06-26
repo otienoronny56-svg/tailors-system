@@ -2880,7 +2880,7 @@
                 }
 
                 // Insert message
-                const { data, error } = await supabaseClient
+                let { data, error } = await supabaseClient
                     .from('messages')
                     .insert([{
                         inquiry_id: inquiryId,
@@ -2890,6 +2890,22 @@
                         image_url: finalImageUrl
                     }])
                     .select();
+
+                if (error && error.code === '23503') { // FK violation
+                    console.warn("Recipient ID invalid (FK violation). Retrying with null recipient...");
+                    const retry = await supabaseClient
+                        .from('messages')
+                        .insert([{
+                            inquiry_id: inquiryId,
+                            sender_id: currentUser.id,
+                            recipient_id: null,
+                            message_text: text,
+                            image_url: finalImageUrl
+                        }])
+                        .select();
+                    data = retry.data;
+                    error = retry.error;
+                }
 
                 if (error) throw error;
                 
@@ -3776,10 +3792,8 @@
                     throw new Error("Could not resolve a valid Inquiry ID for submission.");
                 }
 
-                // Removed direct RPC sync since the RPC doesn't exist and we just save to auth metadata
-
                 // Send submission as a chat message
-                const { data: msgData, error: msgErr } = await supabaseClient
+                let { data: msgData, error: msgErr } = await supabaseClient
                     .from('messages')
                     .insert([{
                         inquiry_id: targetInqId,
@@ -3788,6 +3802,21 @@
                         message_text: subText
                     }])
                     .select();
+
+                if (msgErr && msgErr.code === '23503') { // FK violation
+                    console.warn("Recipient ID invalid (FK violation). Retrying with null recipient...");
+                    const retry = await supabaseClient
+                        .from('messages')
+                        .insert([{
+                            inquiry_id: targetInqId,
+                            sender_id: currentUser.id,
+                            recipient_id: null,
+                            message_text: subText
+                        }])
+                        .select();
+                    msgData = retry.data;
+                    msgErr = retry.error;
+                }
 
                 if (msgErr) throw msgErr;
 
