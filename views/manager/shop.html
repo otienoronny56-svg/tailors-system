@@ -1527,8 +1527,9 @@
         // Parse query params
         const urlParams = new URLSearchParams(window.location.search);
         shopId = urlParams.get('id');
+        const shopNameParam = urlParams.get('shop');
 
-        if (!shopId) {
+        if (!shopId && !shopNameParam) {
             alert("No shop specified! Returning to homepage.");
             location.href = '/';
         }
@@ -1539,8 +1540,16 @@
         }
 
         async function loadShopData() {
+            // Fetch details first because we need the shopId if we only have the shopNameParam
+            await fetchShopDetails();
+            
+            if (!shopId) {
+                alert("Shop not found! Returning to homepage.");
+                location.href = '/';
+                return;
+            }
+
             await Promise.all([
-                fetchShopDetails(),
                 fetchShopListings(),
                 fetchShopReviews(),
                 checkSession()
@@ -1743,19 +1752,24 @@
 
         async function fetchShopDetails() {
             try {
-                const { data, error } = await supabaseClient
-                    .from('shops')
-                    .select('*')
-                    .eq('id', shopId)
-                    .single();
+                let query = supabaseClient.from('shops').select('*');
+                
+                if (shopId) {
+                    query = query.eq('id', shopId);
+                } else if (shopNameParam) {
+                    query = query.ilike('name', shopNameParam);
+                }
+
+                const { data, error } = await query.single();
 
                 if (!error && data) {
                     shopDetails = data;
+                    shopId = data.id; // Set shopId for subsequent queries
                 } else {
                     console.error("Error fetching shop details:", error);
                     // Mock fallback if query fails
                     shopDetails = {
-                        id: shopId,
+                        id: shopId || 'unknown',
                         name: "Premium Bespoke Shop",
                         description: "Professional bespoke customization for both men and women. We focus on premium suites, traditional wear, senator wear, alterations and custom-fitting items.",
                         location_name: "Nairobi CBD",

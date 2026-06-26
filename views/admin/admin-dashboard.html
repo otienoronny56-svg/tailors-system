@@ -228,6 +228,7 @@
                     <script>
                         window.shareMyStorefront = async function() {
                             let targetShopId = typeof USER_PROFILE !== 'undefined' && USER_PROFILE ? USER_PROFILE.shop_id : null;
+                            let targetShopName = "";
                             
                             if (!targetShopId && typeof USER_PROFILE !== 'undefined' && USER_PROFILE && USER_PROFILE.organization_id) {
                                 // Admin/Owner might have multiple shops, fetch them
@@ -238,12 +239,15 @@
                                     
                                 if (!error && shops && shops.length > 0) {
                                     if (shops.length === 1) {
-                                        targetShopId = shops[0].id; // Only one shop
+                                        targetShopId = shops[0].id;
+                                        targetShopName = shops[0].name;
                                     } else {
                                         // Multiple shops, check if the UI dropdown is set to a specific one
                                         const filterVal = document.getElementById('shop-filter')?.value;
                                         if (filterVal && filterVal !== 'all') {
                                             targetShopId = filterVal;
+                                            const selectedOption = document.querySelector(`#shop-filter option[value="${filterVal}"]`);
+                                            if (selectedOption) targetShopName = selectedOption.text;
                                         } else {
                                             alert("You manage multiple shops! Please select a specific shop from the 'Filter by Shop' dropdown below first, then click Share.");
                                             return;
@@ -257,7 +261,20 @@
                                 return;
                             }
                             
-                            const shopUrl = `${window.location.origin}/views/manager/shop.html?id=${targetShopId}`;
+                            if (!targetShopName && typeof window.supabaseClient !== 'undefined') {
+                                // Fetch the name if we only had the ID
+                                const { data } = await window.supabaseClient.from('shops').select('name').eq('id', targetShopId).single();
+                                if (data && data.name) targetShopName = data.name;
+                            }
+                            
+                            // Use shop name in URL if available, fallback to ID
+                            let shopUrl = "";
+                            if (targetShopName) {
+                                shopUrl = `${window.location.origin}/views/manager/shop.html?shop=${encodeURIComponent(targetShopName.trim())}`;
+                            } else {
+                                shopUrl = `${window.location.origin}/views/manager/shop.html?id=${targetShopId}`;
+                            }
+                            
                             navigator.clipboard.writeText(shopUrl).then(() => {
                                 alert("✅ Storefront link copied to clipboard!\n\nShare this link with your clients:\n" + shopUrl);
                             }).catch(err => {
