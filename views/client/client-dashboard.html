@@ -3664,7 +3664,7 @@
             for (const [component, fields] of Object.entries(measurements)) {
                 html += `<div style="border-bottom:1px solid rgba(212,175,55,0.1); padding-bottom:15px;">
                     <h4 style="font-size:0.9em; text-transform:uppercase; letter-spacing:1px; color:var(--brand-white); margin-bottom:10px;">${component}</h4>
-                    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(${isTextBased ? '200px' : '130px'}, 1fr)); gap:15px;">`;
+                    <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:10px;">`;
 
                 fields.forEach(field => {
                     // For size-based types, use text input; for traditional tailoring, use number
