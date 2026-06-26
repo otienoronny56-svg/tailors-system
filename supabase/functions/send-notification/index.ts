@@ -180,6 +180,28 @@ serve(async (req) => {
         return new Response(JSON.stringify({ message: "Ignored: Role or status not handled for welcome email." }), { status: 200 });
       }
     }
+    // 2b. Tailor Rejected (user profile is DELETED while Pending)
+    else if (table === 'user_profiles' && type === 'DELETE') {
+      if (old_record && old_record.status === 'Pending' && (old_record.role === 'owner' || old_record.role === 'tailor')) {
+        clientEmail = old_record.email;
+        clientName = old_record.full_name || "there";
+        emailSubject = `Update on your Tailors.co.ke registration`;
+        emailHtml = `
+          <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
+            <div style="background: #1e293b; padding: 24px; border-radius: 10px 10px 0 0; text-align:center;">
+              <h1 style="color: #ef4444; margin: 0;">Registration Update</h1>
+            </div>
+            <div style="background: #f8fafc; padding: 24px; border-radius: 0 0 10px 10px;">
+              <p>Hi <strong>${clientName}</strong>,</p>
+              <p>Thank you for your interest in joining <strong>Tailors.co.ke</strong>. Unfortunately, after reviewing your shop registration, we are unable to approve it at this time.</p>
+              <p>If you believe this was a mistake or you have updated your business details, you are welcome to register again with a different shop name.</p>
+              <p style="color:#888; font-size:0.85em;">— The Tailors.co.ke Team</p>
+            </div>
+          </div>`;
+      } else {
+        return new Response(JSON.stringify({ message: "Ignored: Not a relevant profile deletion." }), { status: 200 });
+      }
+    }
 
     // 3. Organization Suspension
     else if (table === 'organizations' && type === 'UPDATE') {
