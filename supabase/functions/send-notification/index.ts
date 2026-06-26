@@ -159,7 +159,7 @@ serve(async (req) => {
              emailSubject = `New Message from ${senderName}`;
              emailHtml = `<h3>Hello ${clientName},</h3>
                           <p>You have received a new message from <strong>${senderName}</strong>.</p>
-                          <p><em>"${record.content.length > 50 ? record.content.substring(0, 50) + '...' : record.content}"</em></p>
+                          <p><em>"${(record.message_text || '').length > 50 ? (record.message_text || '').substring(0, 50) + '...' : (record.message_text || '')}"</em></p>
                           <a href="${domain}/views/admin/admin-messages.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
            } else {
              console.log("Could not find shop owner for org:", shop.organization_id);
@@ -192,7 +192,7 @@ serve(async (req) => {
            emailSubject = `New Message from ${shopDisplayName}`;
            emailHtml = `<h3>Hello ${clientName},</h3>
                         <p>You have received a new message from <strong>${shopDisplayName}</strong> regarding your inquiry.</p>
-                        <p><em>"${record.content.length > 50 ? record.content.substring(0, 50) + '...' : record.content}"</em></p>
+                        <p><em>"${(record.message_text || '').length > 50 ? (record.message_text || '').substring(0, 50) + '...' : (record.message_text || '')}"</em></p>
                         <a href="${domain}/views/client/client-dashboard.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
          } else {
            console.log("No client email found on inquiry:", inquiry.id);
