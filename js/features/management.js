@@ -10,7 +10,7 @@ async function loadPendingApprovals() {
     if (!tbody) return;
 
     try {
-        const adminClient = getAdminClient();
+        const adminClient = window.supabaseClient;
 
         // Step 1: Fetch all Pending profiles (no nested join to avoid schema cache error)
         const { data: pending, error } = await adminClient
@@ -83,7 +83,7 @@ async function loadPendingApprovals() {
 async function approveShop(profileId, shopId, orgId) {
     if (!confirm('Approve this shop? They will gain full access to their dashboard.')) return;
     try {
-        const adminClient = getAdminClient();
+        const adminClient = window.supabaseClient;
 
         // 1. Set profile status to Active
         const { error: profErr } = await adminClient
@@ -111,7 +111,7 @@ async function approveShop(profileId, shopId, orgId) {
 async function rejectShop(profileId, shopId, orgId, shopName) {
     if (!confirm(`Reject and delete "${shopName}"? This will remove their profile, shop, and organization so they can re-register.`)) return;
     try {
-        const adminClient = getAdminClient();
+        const adminClient = window.supabaseClient;
 
         // Delete in order: profile â†’ shop â†’ org
         await adminClient.from('user_profiles').delete().eq('id', profileId);
@@ -197,12 +197,12 @@ async function loadPlatformUsers() {
     if (!tbody) return;
 
     try {
-        const adminClient = getAdminClient();
-        if (!adminClient) throw new Error("Superadmin access restricted");
+        const adminClient = window.supabaseClient;
+        
 
         // 1. Fetch data in parallel
         const [{ data: { users: authUsers }, error: authError }, { data: profiles }, { data: orgs }] = await Promise.all([
-            adminClient.auth.admin.listUsers(),
+            window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'listUsers' } }).then(res => ({ data: res.data ? res.data.data : null, error: res.error })),
             supabaseClient.from('user_profiles').select('*'),
             supabaseClient.from('organizations').select('id, name')
         ]);
@@ -317,16 +317,17 @@ async function handleCreateAdminAccount(e) {
     btn.textContent = 'Provisioning...';
 
     try {
-        const adminClient = getAdminClient();
-        if (!adminClient) return;
+        const adminClient = window.supabaseClient;
+        
 
         // 1. Create User in Auth
-        const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
+        const { data: edgeData, error: authError } = await window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'createUser', payload: {
             email,
             password,
             email_confirm: true,
             user_metadata: { full_name: fullNameStatus }
-        });
+        } } });
+        const authUser = edgeData ? edgeData.data.user : null;
 
         if (authError) throw authError;
 
@@ -751,12 +752,13 @@ async function loadShopCommandCenter() {
             .eq('role', 'manager');
 
         // Fetch emails via admin client
-        const adminClient = getAdminClient();
+        const adminClient = window.supabaseClient;
         const managerEmailMap = {};
         if (managers && managers.length > 0 && adminClient) {
             await Promise.all(managers.map(async (m) => {
                 try {
-                    const { data, error } = await adminClient.auth.admin.getUserById(m.id);
+                    const { data: edgeData, error } = await window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'getUserById', payload: { id: m.id } } });
+                        const data = edgeData ? edgeData.data : null;
                     if (!error && data?.user?.email) managerEmailMap[m.id] = data.user.email;
                 } catch(e){}
             }));
@@ -872,12 +874,13 @@ async function createShopAndManager(e) {
     const password = document.getElementById('new-manager-password').value;
 
     try {
-        const admin = getAdminClient();
+        const admin = window.supabaseClient;
 
         // 1. Create Auth User
-        const { data: user, error: authError } = await admin.auth.admin.createUser({
+        const { data: edgeData, error: authError } = await window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'createUser', payload: {
             email, password, email_confirm: true, user_metadata: { full_name: mgrName }
-        });
+        } } });
+        const user = edgeData ? edgeData.data.user : null;
         if (authError) throw authError;
 
         // 2. Create Shop
@@ -937,10 +940,11 @@ window.handlePasswordReset = async function() {
     }
 
     try {
-        const adminClient = getAdminClient();
-        if (!adminClient) throw new Error("Missing Admin Privileges.");
+        const adminClient = window.supabaseClient;
+        
 
-        const { data, error } = await adminClient.auth.admin.updateUserById(userId, { password: newPass });
+        const { data: edgeData, error } = await window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'updateUserById', payload: { id: userId,  password: newPass  } } });
+        const data = edgeData ? edgeData.data : null;
         if (error) throw error;
 
         alert("✅ Password updated successfully! The manager can now log in with the new password.");
@@ -953,7 +957,7 @@ window.handlePasswordReset = async function() {
 window.fireManager = async function(userId, shopId, managerName) {
     if (!confirm(`Are you sure you want to remove ${managerName} from their position as manager? Their account will be downgraded to a worker.`)) return;
     try {
-        const admin = getAdminClient();
+        const admin = window.supabaseClient;
         // Security check: Verify target profile is in this owner's organization
         const { data: targetProfile } = await admin.from('user_profiles').select('organization_id').eq('id', userId).single();
         if (!targetProfile || targetProfile.organization_id !== USER_PROFILE.organization_id) {
@@ -1008,16 +1012,17 @@ window.handleAssignManagerToShop = async function(e) {
     msg.innerHTML = '';
 
     try {
-        const adminClient = getAdminClient();
-        if (!adminClient) throw new Error("Admin privileges missing.");
+        const adminClient = window.supabaseClient;
+        
 
         // 1. Create Manager Auth User
-        const { data: authUser, error: authErr } = await adminClient.auth.admin.createUser({
+        const { data: edgeData, error: authErr } = await window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'createUser', payload: {
             email: mgrEmail,
             password: mgrPass,
             email_confirm: true,
             user_metadata: { full_name: mgrName }
-        });
+        } } });
+        const authUser = edgeData ? edgeData.data.user : null;
 
         if (authErr) throw authErr;
 
@@ -1050,7 +1055,7 @@ window.handleAssignManagerToShop = async function(e) {
 async function deleteShop(shopId, name) {
     if (!confirm(`Delete shop "${name}" and ALL associated data (orders, workers, manager)?`)) return;
     try {
-        const admin = getAdminClient();
+        const admin = window.supabaseClient;
         // Security check: Verify shop belongs to this owner's organization
         const { data: targetShop } = await admin.from('shops').select('organization_id').eq('id', shopId).single();
         if (!targetShop || targetShop.organization_id !== USER_PROFILE.organization_id) {
@@ -1058,7 +1063,7 @@ async function deleteShop(shopId, name) {
         }
         const { data: mgr } = await admin.from('user_profiles').select('id').eq('shop_id', shopId).eq('role', 'manager').single();
         await admin.from('shops').delete().eq('id', shopId);
-        if (mgr) await admin.auth.admin.deleteUser(mgr.id);
+        if (mgr) await window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'deleteUser', payload: { id: mgr.id } } });
         loadShopCommandCenter();
     } catch (e) {
         alert(e.message);
@@ -1098,15 +1103,16 @@ async function handleAddShopAndManager(e) {
         if (shopErr) throw shopErr;
 
         // 2. Provision Manager Auth User using Admin Client
-        const adminClient = getAdminClient();
-        if (!adminClient) throw new Error("Admin privileges missing. Cannot create login for manager.");
+        const adminClient = window.supabaseClient;
+        
 
-        const { data: authUser, error: authErr } = await adminClient.auth.admin.createUser({
+        const { data: edgeData, error: authErr } = await window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'createUser', payload: {
             email: mgrEmail,
             password: mgrPass,
             email_confirm: true,
             user_metadata: { full_name: mgrName }
-        });
+        } } });
+        const authUser = edgeData ? edgeData.data.user : null;
 
         if (authErr) throw authErr;
 

@@ -49,21 +49,7 @@ try {
 const SHOP_CONTACT = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.shopPhone : "";
 const CURRENCY = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.currencySymbol : "Ksh";
 
-function getAdminClient() {
-    if (!APP_CONFIG.serviceRoleKey) {
-        console.error("❌ CRITICAL: Service Role Key missing in config.js");
-        alert("Admin Error: You need the 'serviceRoleKey' in config.js to create users.");
-        return null;
-    }
-    return window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
-        auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-            detectSessionInUrl: false
-        }
-    });
-}
-
+// getAdminClient has been replaced by the admin-proxy Edge Function.
 // Inject global footer for portals
 document.addEventListener('DOMContentLoaded', () => {
     const existingFooter = document.querySelector('footer');
