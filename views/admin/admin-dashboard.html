@@ -219,6 +219,26 @@
                         onmouseout="this.style.background='white'; this.style.transform='translateY(0)'">
                         <i class="fas fa-file-invoice-dollar" style="color: var(--brand-gold);"></i> Manage Expenses
                     </button>
+                    <button onclick="shareMyStorefront()"
+                        style="background: white; color: #8b5cf6; border: 1px solid #8b5cf6; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"
+                        onmouseover="this.style.background='#f3e8ff'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='white'; this.style.transform='translateY(0)'">
+                        <i class="fas fa-share-nodes"></i> Share My Storefront
+                    </button>
+                    <script>
+                        window.shareMyStorefront = function() {
+                            if (!window.USER_PROFILE || !window.USER_PROFILE.shop_id) {
+                                alert("We couldn't find your shop ID. Please ensure your setup is complete.");
+                                return;
+                            }
+                            const shopUrl = `${window.location.origin}/views/manager/shop.html?id=${window.USER_PROFILE.shop_id}`;
+                            navigator.clipboard.writeText(shopUrl).then(() => {
+                                alert("✅ Storefront link copied to clipboard!\n\nShare this link with your clients:\n" + shopUrl);
+                            }).catch(err => {
+                                alert("Your Storefront link is:\n\n" + shopUrl);
+                            });
+                        };
+                    </script>
                     <button onclick="window.location.href='/views/admin/admin-order-form.html'"
                         style="background: var(--brand-navy); color: var(--brand-gold); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);"
                         onmouseover="this.style.transform='translateY(-1px)'"
