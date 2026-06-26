@@ -1104,6 +1104,16 @@
                         </optgroup>
                     </select>
                 </div>
+                <div class="search-group">
+                    <i class="fas fa-users"></i>
+                    <select id="mkt-audience-filter" onchange="filterMarketplace()">
+                        <option value="">All Demographics</option>
+                        <option value="Men">Men</option>
+                        <option value="Ladies">Ladies</option>
+                        <option value="Children">Children</option>
+                        <option value="Unisex">Unisex</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -1795,7 +1805,10 @@
                             ${ratingTag}
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap: 6px; margin-top: 5px; flex-wrap: wrap;">
-                            <span class="card-badge" style="white-space: normal; line-height: 1.2; text-align: center;">${escapeHTML(list.category || 'Senator Wear')}</span>
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                <span class="card-badge" style="white-space: normal; line-height: 1.2; text-align: center;">${escapeHTML(list.category || 'Senator Wear')}</span>
+                                <span class="card-badge" style="background: rgba(212, 175, 55, 0.1); color: var(--brand-gold); border: 1px solid rgba(212, 175, 55, 0.2); white-space: normal; line-height: 1.2; text-align: center;">${escapeHTML(list.target_audience || 'Unisex')}</span>
+                            </div>
                             <span style="font-size:0.8em; color:var(--brand-slate); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 100%; display: inline-flex; align-items: center;" title="${escapeHTML(shopName)}">
                                 ${avatarIconHtml}${escapeHTML(shopName)}
                             </span>
@@ -2063,6 +2076,7 @@
             const query = document.getElementById('mkt-search-query').value.toLowerCase().trim();
             const location = document.getElementById('mkt-search-location').value.toLowerCase().trim();
             const category = document.getElementById('mkt-category-filter').value;
+            const audience = document.getElementById('mkt-audience-filter').value;
 
             if (activeMode === 'shops') {
                 const filteredShops = allShops.filter(shop => {
@@ -2093,6 +2107,19 @@
                         (list.category && list.category.toLowerCase().includes(query));
 
                     const categoryMatch = !category || list.category === category;
+                    const audienceMatch = !audience || list.target_audience === audience || list.target_audience === 'Unisex'; // Assuming Unisex matches any specific audience filter optionally, but let's be strict: if user selects Men, they want Men or Unisex.
+                    
+                    // Let's refine audience logic:
+                    // If user selects "Men", show "Men" and "Unisex".
+                    // If user selects "Unisex", show only "Unisex".
+                    let isAudienceMatch = true;
+                    if (audience) {
+                        if (audience !== 'Unisex') {
+                            isAudienceMatch = (list.target_audience === audience || list.target_audience === 'Unisex');
+                        } else {
+                            isAudienceMatch = (list.target_audience === 'Unisex');
+                        }
+                    }
 
                     const shop = allShops.find(s => s.id === list.shop_id);
                     const locMatch = !location || (shop && (
@@ -2100,7 +2127,7 @@
                         (shop.location && shop.location.toLowerCase().includes(location))
                     ));
 
-                    return titleMatch && categoryMatch && locMatch;
+                    return titleMatch && categoryMatch && isAudienceMatch && locMatch;
                 });
 
                 // Algorithm: Sort by Bespoke Score (Popularity > Quality > Recency > Profile)

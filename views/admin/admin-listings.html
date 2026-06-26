@@ -296,6 +296,23 @@
                             </select>
                         </div>
                         <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Target Audience</label>
+                            <div class="audience-pills" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <label style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; border: 1px solid #cbd5e1;">
+                                    <input type="radio" name="list-audience" value="Unisex" checked style="margin:0;"> Unisex
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; border: 1px solid #cbd5e1;">
+                                    <input type="radio" name="list-audience" value="Men" style="margin:0;"> Men
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; border: 1px solid #cbd5e1;">
+                                    <input type="radio" name="list-audience" value="Ladies" style="margin:0;"> Ladies
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; border: 1px solid #cbd5e1;">
+                                    <input type="radio" name="list-audience" value="Children" style="margin:0;"> Children
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
                             <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Price (Ksh)</label>
                             <input type="number" id="list-price" placeholder="e.g. 15000" required style="margin: 0;">
                         </div>
@@ -598,6 +615,7 @@
             try {
                 const title = document.getElementById('list-title').value.trim();
                 const category = document.getElementById('list-category').value;
+                const targetAudience = document.querySelector('input[name="list-audience"]:checked')?.value || 'Unisex';
                 const price = parseFloat(document.getElementById('list-price').value);
                 const originalPriceVal = document.getElementById('list-original-price').value.trim();
                 const originalPrice = originalPriceVal ? parseFloat(originalPriceVal) : null;
@@ -634,6 +652,7 @@
                         shop_id: shopId,
                         title,
                         category,
+                        target_audience: targetAudience,
                         price,
                         original_price: originalPrice,
                         description: desc,
@@ -730,6 +749,13 @@
                 catSelect.value = listing.category || '';
             }
 
+            // Set target audience
+            const audience = listing.target_audience || 'Unisex';
+            const audienceRadios = document.querySelectorAll('input[name="edit-list-audience"]');
+            audienceRadios.forEach(r => {
+                if(r.value === audience) r.checked = true;
+            });
+
             document.getElementById('edit-listing-modal').style.display = 'flex';
         }
 
@@ -751,12 +777,13 @@
                 const originalPriceVal = document.getElementById('edit-listing-original-price').value.trim();
                 const originalPrice = originalPriceVal ? parseFloat(originalPriceVal) : null;
                 const category = document.getElementById('edit-listing-category').value;
+                const targetAudience = document.querySelector('input[name="edit-list-audience"]:checked')?.value || 'Unisex';
 
                 if (!title) throw new Error('Title is required.');
 
                 const { error } = await supabaseClient
                     .from('marketplace_listings')
-                    .update({ title, description, price, original_price: originalPrice, category })
+                    .update({ title, description, price, original_price: originalPrice, category, target_audience: targetAudience })
                     .eq('id', id);
 
                 if (error) throw error;
@@ -831,22 +858,39 @@
                             <optgroup label="— Footwear —">
                                 <option value="Shoes">Shoes</option>
                                 <option value="Sandals &amp; Slippers">Sandals &amp; Slippers</option>
-                                <option value="Boots">Boots</option>
-                            </optgroup>
-                        </select>
+                                    <option value="Boots">Boots</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Price (Ksh)</label>
+                            <input type="number" id="edit-listing-price" min="0" step="1"
+                                style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box; transition:border 0.2s;"
+                                onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
+                        </div>
+                        <div>
+                            <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Original Price (Ksh)</label>
+                            <input type="number" id="edit-listing-original-price" min="0" step="1" placeholder="Optional"
+                                style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box; transition:border 0.2s;"
+                                onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
+                        </div>
                     </div>
                     <div>
-                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Price (Ksh)</label>
-                        <input type="number" id="edit-listing-price" min="0" step="1"
-                            style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box; transition:border 0.2s;"
-                            onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
-                    </div>
-                    <div>
-                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Original Price (Ksh)</label>
-                        <input type="number" id="edit-listing-original-price" min="0" step="1" placeholder="Optional"
-                            style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.95em; box-sizing:border-box; transition:border 0.2s;"
-                            onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='#e2e8f0'">
-                    </div>
+                        <label style="display:block; font-weight:600; font-size:0.85em; color:#475569; margin-bottom:6px;">Target Audience</label>
+                        <div class="audience-pills" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; border: 1px solid #cbd5e1;">
+                                <input type="radio" name="edit-list-audience" value="Unisex" checked style="margin:0;"> Unisex
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; border: 1px solid #cbd5e1;">
+                                <input type="radio" name="edit-list-audience" value="Men" style="margin:0;"> Men
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; border: 1px solid #cbd5e1;">
+                                <input type="radio" name="edit-list-audience" value="Ladies" style="margin:0;"> Ladies
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; border: 1px solid #cbd5e1;">
+                                <input type="radio" name="edit-list-audience" value="Children" style="margin:0;"> Children
+                            </label>
+                        </div>
                 </div>
 
                 <div>

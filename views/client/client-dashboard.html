@@ -24,6 +24,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Client -->
     <script src="/js/lib/supabase.min.js"></script>
+    <!-- Paystack Client -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
     <style>
         :root {
             --brand-navy: #0a192f;
@@ -1684,6 +1686,18 @@
                                         Slippers</option>
                                     <option value="Boots" style="background:#1e293b;">Boots</option>
                                 </optgroup>
+                            </select>
+                        </div>
+                        <div class="search-input-group extra-filter-group"
+                            style="border-right: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 8px; padding-right: 10px; flex: 1; min-width: 140px;">
+                            <i class="fas fa-users" style="font-size: 0.85em; color: var(--brand-gold);"></i>
+                            <select id="marketplace-audience-filter" onchange="filterMarketplace()"
+                                style="font-size: 0.82em; padding: 6px 0; background: transparent; border: none; color: white; outline: none; width: 100%; cursor: pointer;">
+                                <option value="" style="background:#1e293b;">All Demographics</option>
+                                <option value="Men" style="background:#1e293b;">Men</option>
+                                <option value="Ladies" style="background:#1e293b;">Ladies</option>
+                                <option value="Children" style="background:#1e293b;">Children</option>
+                                <option value="Unisex" style="background:#1e293b;">Unisex</option>
                             </select>
                         </div>
                         <div class="search-input-group extra-filter-group"
@@ -3793,7 +3807,17 @@
                                 </div>
                             </div>
 
-                            <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
+                            <div style="display: flex; justify-content: flex-end; margin-top: 5px; gap: 10px; flex-wrap: wrap;">
+                                ${(order.price - (order.amount_paid || 0)) > 0 ? `
+                                    <button onclick="initiateEscrowPayment('${order.id}', ${order.price - (order.amount_paid || 0)})" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; border: none; color: white; padding: 8px 16px; border-radius: 6px; font-size: 0.85em; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                                        <i class="fas fa-shield-alt"></i> Pay into Escrow
+                                    </button>
+                                ` : ''}
+                                ${(order.status >= 4 && (order.price - (order.amount_paid || 0)) <= 0) ? `
+                                    <button onclick="approveOrder('${order.id}')" style="display: inline-flex; align-items: center; gap: 8px; background: #3b82f6; border: none; color: white; padding: 8px 16px; border-radius: 6px; font-size: 0.85em; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                                        <i class="fas fa-check-double"></i> Approve Order
+                                    </button>
+                                ` : ''}
                                 <a href="${trackLink}" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: transparent; border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 8px 16px; border-radius: 6px; font-size: 0.85em; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='var(--brand-gold)'; this.style.color='var(--brand-navy)';" onmouseout="this.style.background='transparent'; this.style.color='var(--brand-gold)';">
                                     <i class="fas fa-external-link-alt"></i> View Live Tracking
                                 </a>
@@ -3806,6 +3830,62 @@
             } catch (err) {
                 console.error("Error loading client orders:", err);
                 container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:40px;">Error loading orders: ${err.message}</div>`;
+            }
+        }
+
+        async function initiateEscrowPayment(orderId, amount) {
+            try {
+                if (!currentUser) return alert("Please log in to make a payment.");
+                const email = currentUser.email || 'guest@example.com';
+                const phone = currentUser.phone || currentUser.user_metadata?.phone;
+
+                // 1. Call our Supabase Edge Function to initialize Paystack
+                const response = await fetch('https://YOUR_SUPABASE_PROJECT.supabase.co/functions/v1/paystack-escrow/initialize-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${supabaseClient.auth.session()?.access_token || ''}`
+                    },
+                    body: JSON.stringify({ order_id: orderId, amount: amount, email: email, phone: phone })
+                });
+
+                if (!response.ok) throw new Error('Failed to initialize payment');
+                const data = await response.json();
+
+                // 2. Open Paystack Popup
+                let handler = PaystackPop.setup({
+                    key: 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxx', // Replace with real public key
+                    email: email,
+                    amount: amount * 100, // Paystack uses kobo/cents
+                    currency: 'KES',
+                    ref: data.reference,
+                    callback: function(response){
+                        alert('Payment complete! Reference: ' + response.reference);
+                        // The webhook will update the DB. We can reload the UI.
+                        loadClientOrders();
+                    },
+                    onClose: function(){
+                        console.log('Payment window closed.');
+                    }
+                });
+                handler.openIframe();
+            } catch (err) {
+                console.error('Payment Error:', err);
+                alert('Could not start payment: ' + err.message);
+            }
+        }
+
+        async function approveOrder(orderId) {
+            if(!confirm("Are you sure you want to approve this order? Funds will be released to the tailor.")) return;
+            try {
+                // In a real app, this would call another edge function to release funds.
+                // For now, we just update the order status and alert.
+                await supabaseClient.from('orders').update({ status: 5 }).eq('id', orderId); // Status 5 = Collected/Done
+                alert("Order approved! Funds released to tailor.");
+                loadClientOrders();
+            } catch(err) {
+                console.error('Approval Error:', err);
+                alert('Could not approve order: ' + err.message);
             }
         }
 

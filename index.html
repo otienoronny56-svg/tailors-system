@@ -884,14 +884,8 @@
         /* ===== SHOWCASE LISTINGS (Teaser Listings) ===== */
         .listings-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 30px;
-        }
-
-        @media (min-width: 1200px) {
-            .listings-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
         }
 
         .listing-card {
@@ -2359,7 +2353,10 @@
                         ${isFeatured ? `<div style="position:absolute;top:16px;right:16px;z-index:4;background:var(--gold);color:var(--bg-deep);border-radius:40px;padding:4px 12px;font-size:0.7em;font-weight:800;letter-spacing:1px;">FEATURED</div>` : ''}
                         <div class="listing-img-blur" style="background-image:url('${imgUrl}')"></div>
                         <div class="listing-img" style="background-image:url('${imgUrl}')"></div>
-                        <span class="listing-badge">${escapeHTML(list.category || 'Fashion')}</span>
+                        <div style="position: absolute; bottom: 16px; left: 16px; display: flex; gap: 6px; z-index: 3;">
+                            <span class="listing-badge" style="position: static;">${escapeHTML(list.category || 'Fashion')}</span>
+                            <span class="listing-badge" style="position: static; background: rgba(212, 175, 55, 0.15); color: var(--gold-light); border: 1px solid rgba(212, 175, 55, 0.3);">${escapeHTML(list.target_audience || 'Unisex')}</span>
+                        </div>
                     </div>
                     <div class="listing-body">
                         <div class="listing-title">${escapeHTML(list.title)}</div>
