@@ -306,33 +306,21 @@
             try {
                 if (!currentUser) throw new Error("No active user session.");
 
-                // 1. Create Organization via admin-proxy
-                const orgResult = await callAdminProxy('insert', {
-                    table: 'organizations',
-                    record: { name: shopName }
-                });
-                const orgData = orgResult.data;
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                const token = session?.access_token;
 
-                // 2. Create Shop via admin-proxy
-                const shopResult = await callAdminProxy('insert', {
-                    table: 'shops',
-                    record: { organization_id: orgData.id, name: shopName }
+                // Call dedicated onboarding edge function (allows any authenticated user)
+                const res = await fetch(`${APP_CONFIG.supabaseUrl}/functions/v1/tailor-onboarding`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ shopName, fullName })
                 });
-                const shopData = shopResult.data;
 
-                // 3. Create or Update User Profile (Pending Approval) via admin-proxy
-                await callAdminProxy('upsert', {
-                    table: 'user_profiles',
-                    record: {
-                        id: currentUser.id,
-                        organization_id: orgData.id,
-                        shop_id: shopData.id,
-                        full_name: fullName,
-                        role: 'owner',
-                        status: 'Pending',
-                        email: currentUser.email
-                    }
-                });
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'Onboarding failed');
 
                 alert("Shop setup completed successfully! Redirecting you to verify approval status.");
                 window.location.href = '/views/admin/admin-dashboard.html';
