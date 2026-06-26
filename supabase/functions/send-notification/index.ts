@@ -125,88 +125,56 @@ serve(async (req) => {
       // Get the sender's details
       const { data: sender } = await supabase
         .from('user_profiles')
-        .select('*')
+        .select('full_name, email')
         .eq('id', record.sender_id)
         .single();
         
       const senderName = sender ? sender.full_name : "Someone";
       const domain = "https://tailors.co.ke";
 
-      // If sender is the client, notify the shop owner
-      if (record.sender_id === inquiry.client_user_id || inquiry.client_email === sender?.email) {
-        // Find the owner of the shop
-        const { data: shop } = await supabase
-          .from('shops')
-          .select('organization_id, name')
-          .eq('id', inquiry.shop_id)
-          .single();
-          
-        if (shop) {
-           const { data: owner } = await supabase
-             .from('user_profiles')
-             .select('email, full_name, phone')
-             .eq('organization_id', shop.organization_id)
-             .eq('role', 'owner')
-             .single();
-             
-           if (owner) {
-             clientEmail = owner.email || "otienoronny56@gmail.com";
-             clientName = owner.full_name || "Admin";
-             clientPhone = owner.phone || "";
-             console.log(`Notifying shop owner: ${clientEmail}`);
-           } else {
-             // Fallback: owner profile may not have organization_id set yet — use env var
-             clientEmail = Deno.env.get("ADMIN_EMAIL") || "otienoronny56@gmail.com";
-             clientName = "Admin";
-             console.log(`Owner not found by org lookup, falling back to ADMIN_EMAIL: ${clientEmail}`);
-           }
-           
-           textMessage = `New message from ${senderName} regarding an inquiry. Log in to your dashboard to reply.`;
-           emailSubject = `New Message from ${senderName}`;
-           emailHtml = `<h3>Hello ${clientName},</h3>
-                        <p>You have received a new message from <strong>${senderName}</strong>.</p>
-                        <p><em>"${(record.message_text || '').length > 50 ? (record.message_text || '').substring(0, 50) + '...' : (record.message_text || '')}"</em></p>
-                        <a href="${domain}/views/admin/admin-messages.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
-        } else {
-          console.log("Could not find shop:", inquiry.shop_id);
-        }
-      } 
-      // If sender is NOT the client (meaning it's the admin/manager), notify the client
-      else {
-         // Use client_email directly from the inquiry record
-         const clientEmailFromInquiry = inquiry.client_email;
-         const clientNameFromInquiry = inquiry.client_name || "Valued Client";
-         
-         if (clientEmailFromInquiry) {
-           clientEmail = clientEmailFromInquiry;
-           clientName = clientNameFromInquiry;
-           console.log(`Notifying client: ${clientEmail}`);
-           
-           // Find shop name
-           const { data: shopInfo } = await supabase
-             .from('shops')
-             .select('name')
-             .eq('id', inquiry.shop_id)
-             .single();
-             
-           const shopDisplayName = shopInfo ? shopInfo.name : "Your Tailor";
-           
-           textMessage = `New message from ${shopDisplayName}. Log in to your dashboard to reply.`;
-           emailSubject = `New Message from ${shopDisplayName}`;
-           emailHtml = `<h3>Hello ${clientName},</h3>
-                        <p>You have received a new message from <strong>${shopDisplayName}</strong> regarding your inquiry.</p>
-                        <p><em>"${(record.message_text || '').length > 50 ? (record.message_text || '').substring(0, 50) + '...' : (record.message_text || '')}"</em></p>
-                        <a href="${domain}/views/client/client-dashboard.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
-         } else {
-           console.log("No client email found on inquiry:", inquiry.id);
-         }
+      // SIMPLEST APPROACH: Look up the recipient directly by recipient_id on the message
+      // This is 100% reliable — no need to guess owner/org relationships
+      const { data: recipient } = await supabase
+        .from('user_profiles')
+        .select('email, full_name, role')
+        .eq('id', record.recipient_id)
+        .single();
+
+      if (!recipient || !recipient.email) {
+        console.log("Ignored: Could not find recipient profile for ID", record.recipient_id);
+        return new Response(JSON.stringify({ message: "Ignored: Recipient not found." }), { status: 200 });
       }
+
+      console.log(`Notifying recipient: ${recipient.email} (role: ${recipient.role})`);
+      clientEmail = recipient.email;
+      clientName = recipient.full_name || "There";
+
+      // Determine the correct dashboard link based on who is being notified
+      const isClientBeingNotified = recipient.role === 'client';
+      const dashboardLink = isClientBeingNotified
+        ? `${domain}/views/client/client-dashboard.html`
+        : `${domain}/views/admin/admin-messages.html`;
+
+      // Get shop name for the email body
+      const { data: shopInfo } = await supabase
+        .from('shops')
+        .select('name')
+        .eq('id', inquiry.shop_id)
+        .single();
+      const shopDisplayName = shopInfo ? shopInfo.name : "the tailor";
+
+      const preview = (record.message_text || '').length > 50
+        ? (record.message_text || '').substring(0, 50) + '...'
+        : (record.message_text || '(media message)');
+
+      textMessage = `New message from ${senderName}. Log in to reply.`;
+      emailSubject = `New Message from ${senderName}`;
+      emailHtml = `<h3>Hello ${clientName},</h3>
+                   <p>You have received a new message from <strong>${senderName}</strong>.</p>
+                   <p><em>"${preview}"</em></p>
+                   <a href="${dashboardLink}" style="display:inline-block; padding:12px 20px; background-color:#1e293b; color:white; text-decoration:none; border-radius:6px; font-weight:bold;">View Message in Dashboard →</a>
+                   <p style="color:#888; font-size:0.85em; margin-top:16px;">This notification was sent from ${shopDisplayName} via tailors.co.ke</p>`;
       
-      // If we didn't find anyone to notify, just exit
-      if (!clientEmail) {
-         console.log("Ignored: Could not determine recipient email.");
-         return new Response(JSON.stringify({ message: "Ignored: Could not determine recipient email." }), { status: 200 });
-      }
       console.log(`Determined recipient email: ${clientEmail} (Name: ${clientName})`);
     }
     // Other unsupported triggers
