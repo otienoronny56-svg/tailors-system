@@ -2697,11 +2697,12 @@
                 font-size: 20px;
             }
             .ai-chat-window {
-                bottom: 150px;
+                bottom: 80px;
                 right: 10px;
                 left: 10px;
                 width: auto;
-                max-height: 450px;
+                height: calc(100dvh - 100px);
+                max-height: 600px;
             }
         }
     </style>
@@ -2732,12 +2733,15 @@
         
         function toggleAIChat() {
             const window = document.getElementById('ai-chat-window');
+            const btn = document.querySelector('.ai-chat-btn');
             if(window.classList.contains('active')) {
                 window.classList.remove('active');
                 setTimeout(() => window.style.display = 'none', 300);
+                if (btn) btn.style.display = 'flex';
             } else {
                 window.style.display = 'flex';
                 setTimeout(() => window.classList.add('active'), 10);
+                if (btn) btn.style.display = 'none';
                 document.getElementById('ai-chat-input').focus();
             }
         }
