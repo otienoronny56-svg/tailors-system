@@ -118,6 +118,7 @@ serve(async (req) => {
         .single();
         
       if (!inquiry) {
+         console.log("Ignored: Inquiry not found for ID", record.inquiry_id);
          return new Response(JSON.stringify({ message: "Ignored: Inquiry not found." }), { status: 200 });
       }
 
@@ -195,8 +196,10 @@ serve(async (req) => {
       
       // If we didn't find anyone to notify, just exit
       if (!clientEmail) {
+         console.log("Ignored: Could not determine recipient email.");
          return new Response(JSON.stringify({ message: "Ignored: Could not determine recipient email." }), { status: 200 });
       }
+      console.log(`Determined recipient email: ${clientEmail} (Name: ${clientName})`);
     }
     // Other unsupported triggers
     else {
@@ -259,7 +262,9 @@ serve(async (req) => {
           html: emailHtml,
         }),
       });
-      results.push({ channel: "Email", status: emailRes.status, ok: emailRes.ok });
+      const resendResponseText = await emailRes.text();
+      console.log(`Email Send Attempt to ${clientEmail}: Status ${emailRes.status}, Response: ${resendResponseText}`);
+      results.push({ channel: "Email", status: emailRes.status, ok: emailRes.ok, response: resendResponseText });
     }
 
     return new Response(JSON.stringify({ success: true, results }), {
@@ -268,6 +273,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
+    console.error("Webhook Execution Error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
