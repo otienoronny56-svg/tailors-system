@@ -68,7 +68,7 @@ serve(async (req) => {
       emailHtml = `<h3>Hello ${clientName},</h3><p>Your order <strong>#${String(orderId).slice(0, 6)}</strong> status has been updated to: <strong style="color: #10b981;">${statusText.toUpperCase()}</strong>.</p><p>Thank you for choosing us!</p>`;
     } 
     // 2. New User Registration — Welcome Emails
-    else if (table === 'user_profiles' && type === 'INSERT') {
+    else if (table === 'user_profiles' && (type === 'INSERT' || type === 'UPDATE')) {
       const newUserEmail = record.email;
       const newUserName = record.full_name || "there";
       const newUserRole = record.role;
@@ -78,8 +78,8 @@ serve(async (req) => {
         return new Response(JSON.stringify({ message: "Ignored: No email on new user profile." }), { status: 200 });
       }
 
-      // --- A: New Client Signup ---
-      if (newUserRole === 'client') {
+      // --- A: New Client Signup (only on INSERT) ---
+      if (newUserRole === 'client' && type === 'INSERT') {
         clientEmail = newUserEmail;
         clientName = newUserName;
         emailSubject = `Welcome to Tailors.co.ke, ${newUserName}! 🎉`;
@@ -98,7 +98,8 @@ serve(async (req) => {
           </div>`;
 
       // --- B: New Tailor / Shop Owner Registration ---
-      } else if (newUserRole === 'owner' || newUserRole === 'tailor') {
+      // Trigger if it's an INSERT with status=Pending, OR an UPDATE where status changed to Pending
+      } else if ((newUserRole === 'owner' || newUserRole === 'tailor') && record.status === 'Pending' && (!old_record || old_record.status !== 'Pending')) {
         const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
         // 1. Send welcome email to the new tailor
@@ -136,13 +137,8 @@ serve(async (req) => {
         emailSubject = `New Tailor Registration: ${newUserName}`;
         emailHtml = `<h3>Hello Admin,</h3><p>A new tailor has registered and is awaiting approval.</p><ul><li><strong>Name:</strong> ${newUserName}</li><li><strong>Email:</strong> ${newUserEmail}</li></ul><p>Please log in to the admin dashboard to review.</p><a href="${domain}/views/admin/admin-dashboard.html" style="display:inline-block; padding:12px 20px; background-color:#1e293b; color:white; text-decoration:none; border-radius:6px;">Review in Dashboard →</a>`;
 
-      } else {
-        return new Response(JSON.stringify({ message: "Ignored: Role not handled for welcome email." }), { status: 200 });
-      }
-    }
-    // 2b. Tailor Approved (status changes from Pending to Active)
-    else if (table === 'user_profiles' && type === 'UPDATE') {
-      if (record.status === 'Active' && old_record && old_record.status === 'Pending' && (record.role === 'owner' || record.role === 'tailor')) {
+      // --- C: Tailor Approved (status changes from Pending to Active) ---
+      } else if (type === 'UPDATE' && record.status === 'Active' && old_record && old_record.status === 'Pending' && (record.role === 'owner' || record.role === 'tailor')) {
         const domain = "https://tailors.co.ke";
         clientEmail = record.email;
         clientName = record.full_name || "there";
@@ -160,9 +156,10 @@ serve(async (req) => {
             </div>
           </div>`;
       } else {
-        return new Response(JSON.stringify({ message: "Ignored: Not a relevant profile update." }), { status: 200 });
+        return new Response(JSON.stringify({ message: "Ignored: Role or status not handled for welcome email." }), { status: 200 });
       }
     }
+
     // 3. Organization Suspension
     else if (table === 'organizations' && type === 'UPDATE') {
       if (record.subscription_status === 'Suspended' && (!old_record || old_record.subscription_status !== 'Suspended')) {
