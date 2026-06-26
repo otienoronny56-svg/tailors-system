@@ -368,7 +368,6 @@ function getListingCardHtml(list) {
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap: 8px; margin-top: 5px;">
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                         <span class="card-badge">${list.category || 'Senator Wear'}</span>
-                        <span class="card-badge" style="background: rgba(212, 175, 55, 0.1); color: var(--brand-gold); border: 1px solid rgba(212, 175, 55, 0.2);">${list.target_audience || 'Unisex'}</span>
                     </div>
                     <span style="font-size:0.8em; color:var(--brand-slate); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display: inline-flex; align-items: center;" title="${shopName}">
                         ${avatarIconHtml}${shopName}
