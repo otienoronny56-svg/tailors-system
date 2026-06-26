@@ -27,5 +27,5 @@ const APP_CONFIG = {
 
     // === 5. BACKEND CONNECTION (Supabase) ===
     supabaseUrl: "https://ouuhirckiavcvgqlpriw.supabase.co",
-    supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91dWhpcmNraWF2Y3ZncWxwcml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTYyNDUsImV4cCI6MjA4OTQ5MjI0NX0.l5diE9bfcRQo8ZSMsAx-alG89GFifGA11hA059zDhXM"
+    supabaseKey: "sb_publishable_cwzaqLI3RB-h_ZxVY2xFMA_bUgp5UcU"
 };
