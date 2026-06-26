@@ -2287,6 +2287,7 @@
                     }
                     return;
                 }
+                window.isUserLoggedIn = true;
                 let profileData = null;
                 try {
                     const { data: profile } = await supabaseClient
@@ -2777,7 +2778,7 @@
             inquireBtn.onclick = function(e) {
                 if (typeof trackListingView === 'function') trackListingView(list.id, inquireBtn.href);
                 // Intercept if not logged in to prevent losing them on the shop page
-                if (!window.userProfile && !window.currentUser) {
+                if (!window.isUserLoggedIn) {
                     e.preventDefault();
                     alert("Please log in or sign up to inquire about this design.");
                     const returnUrl = encodeURIComponent(targetShopUrl);
