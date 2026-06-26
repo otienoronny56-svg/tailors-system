@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,12 +24,34 @@ serve(async (req) => {
       throw new Error('message is required');
     }
 
+    // Initialize Supabase to fetch inventory
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || "https://ouuhirckiavcvgqlpriw.supabase.co";
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY');
+    let inventoryContext = "";
+
+    if (supabaseUrl && supabaseKey) {
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        const { data: listings } = await supabase
+            .from('marketplace_listings')
+            .select('id, title, category, target_audience, price')
+            .eq('status', 'active')
+            .limit(40);
+
+        if (listings && listings.length > 0) {
+            inventoryContext = `\n\nCURRENT AVAILABLE INVENTORY IN THE DB:\n` +
+                listings.map(l => `- ID: ${l.id} | Title: ${l.title} | Category: ${l.category} | Audience: ${l.target_audience} | Price: Ksh ${l.price}`).join('\n');
+        }
+    }
+
     const systemInstruction = `
-      You are an expert, friendly personal fashion stylist for a high-end tailored clothing marketplace in Kenya.
-      Your goal is to help clients find the perfect outfit, recommend styles, suggest fabrics, and guide them towards items available on the platform (like Senator Suits, African Attire, Dresses, etc.).
-      Be polite, encouraging, and highly knowledgeable about Kenyan and modern African fashion trends, as well as global styles.
-      Keep your responses relatively concise and easy to read (max 3-4 short paragraphs). Use bullet points if helpful.
-      Do not use complex markdown that isn't easily readable.
+      You are an expert fashion stylist for a high-end tailored clothing marketplace in Kenya.
+      CRITICAL INSTRUCTIONS:
+      1. Keep your responses EXTREMELY short, punchy, and conversational (1-3 sentences max).
+      2. DO NOT over-explain. Just answer the question directly.
+      3. If the user asks for recommendations, you MUST look at the CURRENT AVAILABLE INVENTORY below.
+      4. To recommend an item from the inventory, output EXACTLY this HTML format (replace ID and Title):
+         <a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal('ID_HERE'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:underline;">TITLE_HERE</a>
+      ${inventoryContext}
     `;
 
     // Format chat history for Gemini
