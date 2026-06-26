@@ -33,13 +33,27 @@ serve(async (req) => {
         const supabase = createClient(supabaseUrl, supabaseKey);
         const { data: listings } = await supabase
             .from('marketplace_listings')
-            .select('id, title, category, target_audience, price')
+            .select('id, title, category, target_audience, price, image_urls, image_url')
             .eq('status', 'active')
             .limit(40);
 
         if (listings && listings.length > 0) {
             inventoryContext = `\n\nCURRENT AVAILABLE INVENTORY IN THE DB:\n` +
-                listings.map(l => `- ID: ${l.id} | Title: ${l.title} | Category: ${l.category} | Audience: ${l.target_audience} | Price: Ksh ${l.price}`).join('\n');
+                listings.map(l => {
+                    let imgUrl = "https://images.unsplash.com/photo-1593032465175-481ac7f401a0?auto=format&fit=crop&q=80&w=400";
+                    if (l.image_urls) {
+                        try {
+                            const arr = typeof l.image_urls === 'string' ? JSON.parse(l.image_urls) : l.image_urls;
+                            if (arr && arr.length > 0) imgUrl = arr[0];
+                        } catch(e){}
+                    } else if (l.image_url) {
+                        imgUrl = l.image_url;
+                    }
+                    if (imgUrl && !imgUrl.startsWith('http')) {
+                        imgUrl = "https://ouuhirckiavcvgqlpriw.supabase.co/storage/v1/object/public/marketplace-assets/" + imgUrl;
+                    }
+                    return `- ID: ${l.id} | Title: ${l.title} | Category: ${l.category} | Price: Ksh ${l.price} | Img: ${imgUrl}`;
+                }).join('\n');
         }
     }
 
@@ -49,8 +63,8 @@ serve(async (req) => {
       1. Keep your responses EXTREMELY short, punchy, and conversational (1-3 sentences max).
       2. DO NOT over-explain. Just answer the question directly.
       3. If the user asks for recommendations, you MUST look at the CURRENT AVAILABLE INVENTORY below.
-      4. To recommend an item from the inventory, output EXACTLY this HTML format (replace ID and Title):
-         <a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal('ID_HERE'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:underline;">TITLE_HERE</a>
+      4. To recommend an item from the inventory, output EXACTLY this HTML snippet (replace ID, IMG_URL, and TITLE):
+         <div style="margin: 10px 0; display: inline-block; background: rgba(17,34,64,0.5); padding: 8px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2);"><a href="#" onclick="window.closeListingModal(); setTimeout(()=>window.openListingModal('ID_HERE'), 100); return false;" style="color:#10b981; font-weight:bold; text-decoration:none;"><img src="IMG_URL_HERE" style="width:140px; height:140px; object-fit:cover; border-radius:6px; display:block; margin-bottom:6px;">TITLE_HERE</a></div>
       ${inventoryContext}
     `;
 
