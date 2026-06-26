@@ -2120,8 +2120,22 @@
                     if (matchedListing) {
                         selectListingForInquiry(inquireListingId, matchedListing.title.replace(/'/g, "\\'"));
                         
+                        // Highlight the targeted card slightly so they know it's selected
+                        const targetCard = document.getElementById(`listing-card-${inquireListingId}`);
+                        if (targetCard) {
+                            targetCard.style.transition = 'all 0.5s ease';
+                            targetCard.style.boxShadow = '0 0 25px 5px rgba(212, 175, 55, 0.6)';
+                            targetCard.style.border = '1px solid var(--brand-gold)';
+                            setTimeout(() => {
+                                targetCard.style.boxShadow = '';
+                                targetCard.style.border = '';
+                            }, 3000);
+                        }
+
                         // Remove the inquire parameter from the URL so it doesn't trigger again
-                        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=' + shopId;
+                        const newParams = new URLSearchParams(window.location.search);
+                        newParams.delete('inquire');
+                        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + newParams.toString();
                         window.history.replaceState({ path: newUrl }, '', newUrl);
                     }
                 }, 300);
@@ -2147,7 +2161,9 @@
                         }, 3000);
 
                         // Remove the listing parameter from the URL so it doesn't trigger again on subsequent renders
-                        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=' + shopId;
+                        const newParams = new URLSearchParams(window.location.search);
+                        newParams.delete('listing');
+                        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + newParams.toString();
                         window.history.replaceState({ path: newUrl }, '', newUrl);
                     }
                 }, 300);
@@ -2330,8 +2346,15 @@
 
             if (!currentUser) {
                 alert("Please log in or sign up to send an inquiry.");
-                const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
-                location.href = `../../login.html?redirect=${currentUrl}`;
+                
+                const listingId = document.getElementById('select-item').value;
+                const urlParams = new URLSearchParams(window.location.search);
+                if (listingId) {
+                    urlParams.set('inquire', listingId);
+                }
+                
+                const returnUrl = encodeURIComponent(window.location.pathname + '?' + urlParams.toString());
+                location.href = `../../login.html?redirect=${returnUrl}`;
                 return;
             }
 
