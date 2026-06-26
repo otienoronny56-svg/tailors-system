@@ -611,7 +611,7 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
                 <p style="margin: 0; font-size: 0.8em; color: #999; font-style: italic; letter-spacing: 0.5px;">Thank you for your business.</p>
                 <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #eee; font-size: 0.75em; color: #aaa;">
                     Powered by <strong>Stitch &amp; Styles Kenya</strong><br>
-                    <a href="https://stitchandstyle.co.ke" style="color: #D4AF37; text-decoration: none;">www.stitchandstyle.co.ke</a>
+                    <a href="https://tailors.co.ke" style="color: #D4AF37; text-decoration: none;">www.tailors.co.ke</a>
                 </div>
             </div>
         </div>
@@ -673,7 +673,7 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     lines.push('');
     lines.push('---');
     lines.push('Powered by Stitch & Styles Kenya');
-    lines.push('www.stitchandstyle.co.ke');
+    lines.push('www.tailors.co.ke');
     return lines.join('\n');
 }
 
