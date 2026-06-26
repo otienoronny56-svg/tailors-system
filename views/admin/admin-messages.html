@@ -931,10 +931,7 @@
             } else {
                 if (currentThread.client_email) {
                     try {
-                        const adminClientForLookup = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.serviceRoleKey, {
-                            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'admin-lookup-key' }
-                        });
-                        const { data: profile } = await adminClientForLookup
+                        const { data: profile } = await supabaseClient
                             .from('user_profiles')
                             .select('id')
                             .eq('email', activeThread.client_email)
