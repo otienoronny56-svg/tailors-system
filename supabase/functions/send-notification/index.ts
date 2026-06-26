@@ -133,11 +133,11 @@ serve(async (req) => {
       const domain = "https://tailors.co.ke";
 
       // If sender is the client, notify the shop owner
-      if (record.sender_id === inquiry.client_id) {
+      if (record.sender_id === inquiry.client_user_id || inquiry.client_email === sender?.email) {
         // Find the owner of the shop
         const { data: shop } = await supabase
           .from('shops')
-          .select('organization_id')
+          .select('organization_id, name')
           .eq('id', inquiry.shop_id)
           .single();
           
@@ -153,6 +153,7 @@ serve(async (req) => {
              clientEmail = owner.email || "otienoronny56@gmail.com";
              clientName = owner.full_name || "Admin";
              clientPhone = owner.phone || "";
+             console.log(`Notifying shop owner: ${clientEmail}`);
              
              textMessage = `New message from ${senderName} regarding an inquiry. Log in to your dashboard to reply.`;
              emailSubject = `New Message from ${senderName}`;
@@ -160,21 +161,23 @@ serve(async (req) => {
                           <p>You have received a new message from <strong>${senderName}</strong>.</p>
                           <p><em>"${record.content.length > 50 ? record.content.substring(0, 50) + '...' : record.content}"</em></p>
                           <a href="${domain}/views/admin/admin-messages.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
+           } else {
+             console.log("Could not find shop owner for org:", shop.organization_id);
            }
+        } else {
+          console.log("Could not find shop:", inquiry.shop_id);
         }
       } 
       // If sender is NOT the client (meaning it's the admin/manager), notify the client
       else {
-         const { data: clientUser } = await supabase
-           .from('user_profiles')
-           .select('email, full_name, phone')
-           .eq('id', inquiry.client_id)
-           .single();
-           
-         if (clientUser) {
-           clientEmail = clientUser.email || "otienoronny56@gmail.com";
-           clientName = clientUser.full_name || "Valued Client";
-           clientPhone = clientUser.phone || "";
+         // Use client_email directly from the inquiry record
+         const clientEmailFromInquiry = inquiry.client_email;
+         const clientNameFromInquiry = inquiry.client_name || "Valued Client";
+         
+         if (clientEmailFromInquiry) {
+           clientEmail = clientEmailFromInquiry;
+           clientName = clientNameFromInquiry;
+           console.log(`Notifying client: ${clientEmail}`);
            
            // Find shop name
            const { data: shopInfo } = await supabase
@@ -191,6 +194,8 @@ serve(async (req) => {
                         <p>You have received a new message from <strong>${shopDisplayName}</strong> regarding your inquiry.</p>
                         <p><em>"${record.content.length > 50 ? record.content.substring(0, 50) + '...' : record.content}"</em></p>
                         <a href="${domain}/views/client/client-dashboard.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
+         } else {
+           console.log("No client email found on inquiry:", inquiry.id);
          }
       }
       
