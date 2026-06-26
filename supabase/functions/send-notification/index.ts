@@ -44,11 +44,12 @@ serve(async (req) => {
       clientName = record.customer_name || "Valued Customer";
 
       const STATUS_MAP: Record<number, string> = {
-          1: 'In Progress',
-          2: 'Fitting',
-          3: 'Ready',
-          4: 'Completed',
-          5: 'Cancelled'
+          1: 'Assigned',
+          2: 'In Progress',
+          3: 'QA Check',
+          4: 'Ready',
+          5: 'Collected',
+          6: 'Closed'
       };
       
       // Fallback to the raw value if not found in the map
