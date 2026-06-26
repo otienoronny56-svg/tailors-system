@@ -2427,9 +2427,14 @@
             };
 
             // Close on outside click
-            document.getElementById('listing-modal-overlay').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeListingModal();
+            document.addEventListener('DOMContentLoaded', () => {
+                const modal = document.getElementById('listing-modal-overlay');
+                if (modal) {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            closeListingModal();
+                        }
+                    });
                 }
             });
 
@@ -2659,9 +2664,9 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
             try {
-                if(!window.supabaseClient) throw new Error("Supabase client not initialized");
+                if(!supabaseClient) throw new Error("Supabase client not initialized");
                 
-                const response = await window.supabaseClient.functions.invoke('ai-style-assistant', {
+                const response = await supabaseClient.functions.invoke('ai-style-assistant', {
                     body: { message, history: aiChatHistory }
                 });
 
