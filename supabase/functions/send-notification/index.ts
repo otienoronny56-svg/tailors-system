@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
 
 // Utility for CORS
 const corsHeaders = {
@@ -26,6 +27,15 @@ serve(async (req) => {
     let emailSubject = "";
     let emailHtml = "";
 
+    // Initialize Supabase Client for DB lookups
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    let supabase = null;
+    if (supabaseUrl && supabaseServiceKey) {
+        supabase = createClient(supabaseUrl, supabaseServiceKey);
+    }
+
     // 1. Order Status Update
     if (table === 'orders' && type === 'UPDATE') {
       // Only send notification if the status actually changed
@@ -39,7 +49,6 @@ serve(async (req) => {
       const orderId = record.order_id || record.id;
       const newStatus = record.status;
       clientPhone = record.customer_phone || record.phone_number;
-      // Fallback to your testing email because Resend free tier requires a verified domain to send to arbitrary emails
       clientEmail = record.customer_email || record.email || "otienoronny56@gmail.com"; 
       clientName = record.customer_name || "Valued Customer";
 
@@ -52,10 +61,8 @@ serve(async (req) => {
           6: 'Closed'
       };
       
-      // Fallback to the raw value if not found in the map
       const statusText = STATUS_MAP[Number(newStatus)] || String(newStatus);
 
-      // Prepare Notification Message
       textMessage = `Hello ${clientName}, this is an update regarding your order #${String(orderId).slice(0, 6)}. Your order status is now: ${statusText.toUpperCase()}. Thank you for choosing us!`;
       emailSubject = `Order Update: #${String(orderId).slice(0, 6)}`;
       emailHtml = `<h3>Hello ${clientName},</h3><p>Your order <strong>#${String(orderId).slice(0, 6)}</strong> status has been updated to: <strong style="color: #10b981;">${statusText.toUpperCase()}</strong>.</p><p>Thank you for choosing us!</p>`;
@@ -63,8 +70,8 @@ serve(async (req) => {
     // 2. New Tailor Registration (Pending)
     else if (table === 'user_profiles' && (type === 'INSERT' || type === 'UPDATE')) {
       if (record.status === 'Pending' && (!old_record || old_record.status !== 'Pending') && (record.role === 'owner' || record.role === 'tailor')) {
-          clientPhone = Deno.env.get("ADMIN_PHONE") || "+254712345678"; // Admin's phone number
-          clientEmail = Deno.env.get("ADMIN_EMAIL") || "otienoronny56@gmail.com"; // Admin's email
+          clientPhone = Deno.env.get("ADMIN_PHONE") || "+254712345678"; 
+          clientEmail = Deno.env.get("ADMIN_EMAIL") || "otienoronny56@gmail.com"; 
           clientName = "System Administrator";
 
           const tailorName = record.full_name || "A new tailor";
@@ -95,6 +102,100 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
         });
+      }
+    }
+    // 4. NEW: Chat Message Notifications
+    else if (table === 'messages' && type === 'INSERT') {
+      if (!supabase) {
+        throw new Error("Supabase client not initialized for messages lookup");
+      }
+
+      // Fetch the inquiry to get client and shop info
+      const { data: inquiry } = await supabase
+        .from('marketplace_inquiries')
+        .select('*')
+        .eq('id', record.inquiry_id)
+        .single();
+        
+      if (!inquiry) {
+         return new Response(JSON.stringify({ message: "Ignored: Inquiry not found." }), { status: 200 });
+      }
+
+      // Get the sender's details
+      const { data: sender } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', record.sender_id)
+        .single();
+        
+      const senderName = sender ? sender.full_name : "Someone";
+      const domain = "https://tailors.co.ke";
+
+      // If sender is the client, notify the shop owner
+      if (record.sender_id === inquiry.client_id) {
+        // Find the owner of the shop
+        const { data: shop } = await supabase
+          .from('shops')
+          .select('organization_id')
+          .eq('id', inquiry.shop_id)
+          .single();
+          
+        if (shop) {
+           const { data: owner } = await supabase
+             .from('user_profiles')
+             .select('email, full_name, phone')
+             .eq('organization_id', shop.organization_id)
+             .eq('role', 'owner')
+             .single();
+             
+           if (owner) {
+             clientEmail = owner.email || "otienoronny56@gmail.com";
+             clientName = owner.full_name || "Admin";
+             clientPhone = owner.phone || "";
+             
+             textMessage = `New message from ${senderName} regarding an inquiry. Log in to your dashboard to reply.`;
+             emailSubject = `New Message from ${senderName}`;
+             emailHtml = `<h3>Hello ${clientName},</h3>
+                          <p>You have received a new message from <strong>${senderName}</strong>.</p>
+                          <p><em>"${record.content.length > 50 ? record.content.substring(0, 50) + '...' : record.content}"</em></p>
+                          <a href="${domain}/views/admin/admin-messages.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
+           }
+        }
+      } 
+      // If sender is NOT the client (meaning it's the admin/manager), notify the client
+      else {
+         const { data: clientUser } = await supabase
+           .from('user_profiles')
+           .select('email, full_name, phone')
+           .eq('id', inquiry.client_id)
+           .single();
+           
+         if (clientUser) {
+           clientEmail = clientUser.email || "otienoronny56@gmail.com";
+           clientName = clientUser.full_name || "Valued Client";
+           clientPhone = clientUser.phone || "";
+           
+           // Find shop name
+           const { data: shopInfo } = await supabase
+             .from('shops')
+             .select('name')
+             .eq('id', inquiry.shop_id)
+             .single();
+             
+           const shopDisplayName = shopInfo ? shopInfo.name : "Your Tailor";
+           
+           textMessage = `New message from ${shopDisplayName}. Log in to your dashboard to reply.`;
+           emailSubject = `New Message from ${shopDisplayName}`;
+           emailHtml = `<h3>Hello ${clientName},</h3>
+                        <p>You have received a new message from <strong>${shopDisplayName}</strong> regarding your inquiry.</p>
+                        <p><em>"${record.content.length > 50 ? record.content.substring(0, 50) + '...' : record.content}"</em></p>
+                        <a href="${domain}/views/client/client-dashboard.html" style="display:inline-block; padding:10px 15px; background-color:#1e293b; color:white; text-decoration:none; border-radius:5px;">View Message in Dashboard</a>`;
+         }
+      }
+      
+      // If we didn't find anyone to notify, just exit
+      if (!clientEmail) {
+         return new Response(JSON.stringify({ message: "Ignored: Could not determine recipient email." }), { status: 200 });
       }
     }
     // Other unsupported triggers
@@ -152,7 +253,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "onboarding@resend.dev", // Uses Resend's default test email (Can only send to the email you used to register Resend)
+          from: "onboarding@resend.dev", // Uses Resend's default test email
           to: clientEmail,
           subject: emailSubject,
           html: emailHtml,
