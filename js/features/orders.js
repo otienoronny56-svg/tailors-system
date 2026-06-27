@@ -677,7 +677,7 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     return lines.join('\n');
 }
 
-function showNuclearSharingModal(receiptHTML, receiptText, customerName, customerPhone) {
+function showNuclearSharingModal(receiptHTML, receiptText, customerName, customerPhone, shopName = 'tailors.co.ke') {
     // Remove existing modal
     const existingModal = document.getElementById('receipt-sharing-modal');
     if (existingModal) existingModal.remove();
@@ -778,7 +778,7 @@ function showNuclearSharingModal(receiptHTML, receiptText, customerName, custome
         }
 
         document.getElementById('share-image-btn').onclick = () => {
-            shareReceiptAsImage();
+            shareReceiptAsImage(shopName);
         };
 
         document.getElementById('copy-btn').onclick = () => {
@@ -801,7 +801,7 @@ function shareViaSMS(receiptText, phoneNumber) {
     showStatusMessage('Opening SMS app...', 'success');
 }
 
-async function shareReceiptAsImage() {
+async function shareReceiptAsImage(shopName = 'tailors.co.ke') {
     const receiptContent = document.querySelector('#receipt-preview-container > div');
     if (!receiptContent) {
         showStatusMessage('âŒ Receipt content not found', 'error');
@@ -839,7 +839,7 @@ async function shareReceiptAsImage() {
                         await navigator.share({
                             files: [file],
                             title: 'Tailoring Receipt',
-                            text: 'Receipt from Sir\'s \'n\' Suits'
+                            text: `Receipt from ${shopName} via tailors.co.ke`
                         });
                         showStatusMessage('âœ… Image shared!', 'success');
                     } catch (shareError) {
@@ -2641,7 +2641,7 @@ window.generateAndShareReceipt = async function (orderId) {
         const receiptHTML = generateSimpleReceiptHTML(order, payments, accessories);
         const receiptText = generateTextReceipt(order, payments, 0, accessories);
 
-        showNuclearSharingModal(receiptHTML, receiptText, order.customer_name, order.customer_phone);
+        showNuclearSharingModal(receiptHTML, receiptText, order.customer_name, order.customer_phone, order.shops?.name);
 
     } catch (error) {
         logDebug("Error generating receipt:", error, 'error');
