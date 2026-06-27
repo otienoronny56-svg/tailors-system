@@ -99,13 +99,12 @@
         /* Mobile Responsive Table for Listings */
         @media (max-width: 768px) {
             .listings-table-wrap { overflow: hidden; }
-            .listings-table, .listings-table tbody, .listings-table tr, .listings-table td {
-                display: block; width: 100%; min-width: 0 !important; box-sizing: border-box;
-            }
-            .listings-table thead {
-                display: none;
-            }
+            .listings-table, .listings-table tbody { display: block; width: 100%; box-sizing: border-box; }
+            .listings-table thead { display: none; }
             .listings-table tr {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
                 margin-bottom: 15px;
                 border: 1px solid #e2e8f0;
                 border-radius: 12px;
@@ -114,32 +113,38 @@
                 box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
             .listings-table td {
-                text-align: right;
-                padding-left: 50%;
-                position: relative;
-                border-bottom: 1px solid #f1f5f9;
-                padding-top: 10px;
-                padding-bottom: 10px;
+                display: flex;
+                flex-direction: column;
+                text-align: left;
+                padding: 0;
+                border: none;
                 box-sizing: border-box;
+                align-items: flex-start;
             }
             .listings-table td::before {
                 content: attr(data-label);
-                position: absolute;
-                left: 0;
-                width: 45%;
-                text-align: left;
+                position: static;
+                width: auto;
                 font-weight: 600;
                 color: #64748b;
-                font-size: 0.9em;
+                font-size: 0.75em;
+                margin-bottom: 4px;
+                text-transform: uppercase;
+            }
+            .listings-table td[data-label="Photo"],
+            .listings-table td[data-label="Shop"],
+            .listings-table td[data-label="Title"],
+            .listings-table td:last-child {
+                grid-column: 1 / -1;
             }
             .listings-table td:last-child {
-                border-bottom: 0;
-                text-align: center;
-                padding-left: 0;
-                display: flex;
+                flex-direction: row;
                 flex-wrap: wrap;
                 gap: 8px;
                 justify-content: center;
+                border-top: 1px dashed #e2e8f0;
+                padding-top: 12px;
+                margin-top: 5px;
             }
             .listings-table td:last-child::before {
                 display: none;
@@ -253,7 +258,7 @@
                     <div class="list-form-grid">
                         
                         <!-- 1. TARGET SHOP -->
-                        <div class="form-group" style="margin-bottom: 15px;">
+                        <div class="form-group">
                             <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Target Shop *</label>
                             <select id="list-shop" required style="margin: 0; width: 100%;">
                                 <option value="">-- Select Shop --</option>
@@ -261,7 +266,7 @@
                         </div>
 
                         <!-- 2. TITLE AND CATEGORY -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div class="form-group">
                                 <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Design Title *</label>
                                 <input type="text" id="list-title" placeholder="e.g. Royal Blue senator Suit" required style="margin: 0; width: 100%;">
@@ -309,7 +314,7 @@
                         </div>
 
                         <!-- 3. PHOTO AND AI ENHANCE -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px dashed #cbd5e1;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px dashed #cbd5e1;">
                             <div class="form-group">
                                 <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Upload Product Photo *</label>
                                 <input type="file" id="list-image-file" accept="image/*" required style="margin: 0; padding-top: 8px;">
@@ -330,7 +335,7 @@
                         </div>
 
                         <!-- 4. TARGET AUDIENCE -->
-                        <div class="form-group" style="margin-bottom: 15px;">
+                        <div class="form-group">
                             <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Target Audience</label>
                             <div class="audience-pills" style="display: flex; gap: 4px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px;">
                                 <label style="display: flex; align-items: center; gap: 3px; background: #f1f5f9; padding: 4px 8px; border-radius: 12px; font-size: 0.75em; cursor: pointer; border: 1px solid #cbd5e1; white-space: nowrap;">
@@ -349,7 +354,7 @@
                         </div>
 
                         <!-- 5. PRICING -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div class="form-group">
                                 <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Price (Ksh) *</label>
                                 <input type="number" id="list-price" placeholder="e.g. 15000" required style="margin: 0; width: 100%;">
