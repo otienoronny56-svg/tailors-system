@@ -104,7 +104,7 @@
             .listings-table tr {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 12px;
+                gap: 6px 12px;
                 margin-bottom: 15px;
                 border: 1px solid #e2e8f0;
                 border-radius: 12px;
@@ -114,37 +114,51 @@
             }
             .listings-table td {
                 display: flex;
-                flex-direction: column;
+                flex-direction: row;
+                align-items: center;
                 text-align: left;
-                padding: 0;
+                padding: 4px 0;
                 border: none;
                 box-sizing: border-box;
-                align-items: flex-start;
+                font-size: 0.95em;
             }
             .listings-table td::before {
-                content: attr(data-label);
-                position: static;
-                width: auto;
+                content: attr(data-label) ": ";
                 font-weight: 600;
                 color: #64748b;
-                font-size: 0.75em;
-                margin-bottom: 4px;
-                text-transform: uppercase;
+                font-size: 0.9em;
+                margin-right: 6px;
             }
-            .listings-table td[data-label="Photo"],
-            .listings-table td[data-label="Shop"],
-            .listings-table td[data-label="Title"],
-            .listings-table td:last-child {
+            .listings-table td[data-label="Photo"] {
+                grid-column: 1 / -1;
+                justify-content: center;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #f1f5f9;
+                margin-bottom: 5px;
+            }
+            .listings-table td[data-label="Photo"]::before { display: none; }
+            
+            .listings-table td[data-label="Title"] {
+                grid-column: 1 / -1;
+                font-size: 1.1em;
+                font-weight: bold;
+                color: var(--brand-navy);
+            }
+            .listings-table td[data-label="Title"]::before { display: none; }
+
+            .listings-table td[data-label="Shop"] {
                 grid-column: 1 / -1;
             }
+
             .listings-table td:last-child {
+                grid-column: 1 / -1;
                 flex-direction: row;
                 flex-wrap: wrap;
                 gap: 8px;
                 justify-content: center;
                 border-top: 1px dashed #e2e8f0;
                 padding-top: 12px;
-                margin-top: 5px;
+                margin-top: 8px;
             }
             .listings-table td:last-child::before {
                 display: none;
