@@ -250,7 +250,39 @@
                 <h3 style="color: var(--brand-navy); font-family: 'Playfair Display', serif; margin-bottom: 15px;"><i class="fas fa-plus-circle" style="color: #10b981; margin-right: 8px;"></i> Add New Public Creation</h3>
                 
                 <form id="listing-add-form" onsubmit="addListingItem(event)">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px dashed #cbd5e1;">
+                        <!-- AI GENERATION FOCUSED FIELDS AT TOP -->
+                        <div class="form-group">
+                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Upload Product Photo *</label>
+                            <input type="file" id="list-image-file" accept="image/*" required style="margin: 0; padding-top: 8px;">
+                            <small style="color: #64748b; margin-top: 5px; display:block;">Upload an image first to use the <strong style="color: #10b981;">AI Enhance</strong> tool below!</small>
+                        </div>
+                        <div class="form-group">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                <label style="font-weight: 600; font-size: 0.85em;">Description / Details</label>
+                                <button type="button" id="btn-enhance-ai" onclick="enhanceListingWithAI()" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-magic"></i> Enhance with AI ✨
+                                </button>
+                            </div>
+                            <textarea id="list-desc" rows="2" placeholder="Tell clients about materials, fit, customized measurements availability..." style="width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px; font-family: inherit; font-size: 0.9em;"></textarea>
+                            <div id="ai-enhance-loading" style="display:none; font-size: 0.8em; color: #10b981; margin-top: 5px; text-align: right;">
+                                <i class="fas fa-spinner fa-spin"></i> AI is analyzing the image...
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="list-form-grid">
+                        
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Price (Ksh) *</label>
+                            <input type="number" id="list-price" placeholder="e.g. 15000" required style="margin: 0;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Original Price (Ksh) <span style="color:#64748b; font-weight:400; font-size:0.85em;">(Optional)</span></label>
+                            <input type="number" id="list-original-price" placeholder="e.g. 18000" style="margin: 0;">
+                        </div>
+
+                        <!-- OTHER METADATA FIELDS -->
                         <div class="form-group" style="margin-bottom: 15px;">
                             <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Design Title *</label>
                             <input type="text" id="list-title" placeholder="e.g. Royal Blue senator Suit" required style="margin: 0;">
@@ -313,38 +345,10 @@
                             </div>
                         </div>
                         <div class="form-group" style="margin-bottom: 15px;">
-                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Price (Ksh)</label>
-                            <input type="number" id="list-price" placeholder="e.g. 15000" required style="margin: 0;">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Original Price (Ksh) <span style="color:#64748b; font-weight:400; font-size:0.85em;">(Optional)</span></label>
-                            <input type="number" id="list-original-price" placeholder="e.g. 18000" style="margin: 0;">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 15px;">
                             <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Target Shop</label>
                             <select id="list-shop" required style="margin: 0;">
                                 <option value="">-- Select Shop --</option>
                             </select>
-                        </div>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
-                        <div class="form-group">
-                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Upload Product Photo *</label>
-                            <input type="file" id="list-image-file" accept="image/*" required style="margin: 0; padding-top: 8px;">
-                            <small style="color: #64748b; margin-top: 5px; display:block;">Images are stored securely in marketplace storage.</small>
-                        </div>
-                        <div class="form-group">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                <label style="font-weight: 600; font-size: 0.85em;">Description / Details</label>
-                                <button type="button" id="btn-enhance-ai" onclick="enhanceListingWithAI()" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                    <i class="fas fa-magic"></i> Enhance with AI ✨
-                                </button>
-                            </div>
-                            <textarea id="list-desc" rows="2" placeholder="Tell clients about materials, fit, customized measurements availability..." style="width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px; font-family: inherit; font-size: 0.9em;"></textarea>
-                            <div id="ai-enhance-loading" style="display:none; font-size: 0.8em; color: #10b981; margin-top: 5px; text-align: right;">
-                                <i class="fas fa-spinner fa-spin"></i> AI is analyzing the image...
-                            </div>
                         </div>
                     </div>
 
