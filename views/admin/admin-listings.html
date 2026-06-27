@@ -273,13 +273,15 @@
 
                     <div class="list-form-grid">
                         
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Price (Ksh) *</label>
-                            <input type="number" id="list-price" placeholder="e.g. 15000" required style="margin: 0;">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Original Price (Ksh) <span style="color:#64748b; font-weight:400; font-size:0.85em;">(Optional)</span></label>
-                            <input type="number" id="list-original-price" placeholder="e.g. 18000" style="margin: 0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="form-group">
+                                <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Price (Ksh) *</label>
+                                <input type="number" id="list-price" placeholder="e.g. 15000" required style="margin: 0; width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-weight: 600; font-size: 0.85em; display:block; margin-bottom:5px;">Original Price <span style="color:#64748b; font-weight:400; font-size:0.85em;">(Optional)</span></label>
+                                <input type="number" id="list-original-price" placeholder="e.g. 18000" style="margin: 0; width: 100%;">
+                            </div>
                         </div>
 
                         <!-- OTHER METADATA FIELDS -->
