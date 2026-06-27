@@ -20,16 +20,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .list-form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 15px;
-            align-items: flex-end;
-        }
-        @media (max-width: 768px) {
-            .list-form-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
         }
         .listing-img-thumbnail {
             width: 60px;
@@ -96,9 +89,38 @@
             font-weight: 700;
         }
 
+        /* Desktop Table Precision Styling */
+        .listings-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .listings-table th {
+            background: #f8fafc;
+            color: var(--brand-navy);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            padding: 15px 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .listings-table td {
+            padding: 15px 12px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+            font-size: 0.95em;
+        }
+        .listings-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
         /* Mobile Responsive Table for Listings */
         @media (max-width: 768px) {
             .listings-table-wrap { overflow: hidden; }
+            .listings-table { box-shadow: none; background: transparent; }
             .listings-table, .listings-table tbody { display: block; width: 100%; box-sizing: border-box; }
             .listings-table thead { display: none; }
             .listings-table tr {
@@ -112,6 +134,7 @@
                 background: white;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
+            .listings-table tr:hover td { background-color: transparent; }
             .listings-table td {
                 display: flex;
                 flex-direction: row;
