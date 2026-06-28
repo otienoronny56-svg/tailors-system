@@ -218,12 +218,7 @@
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
                     <!-- Top right icon buttons -->
                     <div class="top-header-actions" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
-                        <button onclick="toggleTheme()" title="Toggle Dark Mode"
-                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
-                            onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
-                            onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
-                            <i class="fa-solid fa-moon theme-toggle-icon"></i>
-                        </button>
+                        
                         
                         <button onclick="loadClients()" title="Refresh Data"
                             style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
@@ -232,7 +227,14 @@
                             <i class="fa-solid fa-arrows-rotate"></i>
                         </button>
                         
-                        <button onclick="handleLogout()" title="Logout"
+                        
+                          <button onclick="toggleTheme()" class="top-right-theme-toggle" title="Toggle Dark Mode"
+                              style="background: transparent; border: 1px solid var(--glass-border, #e2e8f0); color: var(--brand-slate, #475569); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                              onmouseover="this.style.background='var(--card-bg, #f8fafc)'; this.style.transform='translateY(-1px)'"
+                              onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'">
+                              <i class="fa-solid fa-moon theme-toggle-icon"></i>
+                          </button>
+                          <button onclick="handleLogout()" title="Logout"
                             style="background: #ef4444; border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                             onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
                             onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">

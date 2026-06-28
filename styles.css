@@ -3493,14 +3493,14 @@ body.dark-mode .inv-table td::before {
 
     /* --- Sidebar Redesign --- */
     .sidebar {
-        background-color: #ffffff !important;
+        background-color: var(--bg-light, #f8fafc) !important;
         color: #1f2937 !important;
         border-right: 1px solid #e2e8f0 !important;
         box-shadow: none !important;
     }
     
     body.dark-mode .sidebar {
-        background-color: #1e293b !important;
+        background-color: var(--bg-dark, #0f172a) !important;
         color: #f3f4f6 !important;
         border-right: 1px solid #334155 !important;
     }
