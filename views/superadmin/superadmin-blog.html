@@ -306,9 +306,10 @@
                 return;
             }
 
+            window.CURRENT_BLOGS = data;
             tbody.innerHTML = '';
             data.forEach(p => {
-                let actionHtml = `<button class="action-btn btn-edit" onclick="editPost('${p.id}', '${p.title.replace(/'/g, "\\'")}', '${escapeHtml(p.content)}')"><i class="fas fa-edit"></i> Edit</button>`;
+                let actionHtml = `<button class="action-btn btn-edit" onclick="editPost('${p.id}')"><i class="fas fa-edit"></i> Edit</button>`;
                 
                 if(p.status === 'pending') {
                     actionHtml += `
@@ -328,11 +329,6 @@
             });
         }
 
-        function escapeHtml(unsafe) {
-            return (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-                                 .replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\\n/g, "\\\\n");
-        }
-
         function openModal() { 
             document.getElementById('blog-modal').style.display = 'flex'; 
             document.getElementById('edit-post-id').value = '';
@@ -341,10 +337,20 @@
         }
         function closeModal() { document.getElementById('blog-modal').style.display = 'none'; }
 
-        function editPost(id, title, contentStr) {
-            document.getElementById('edit-post-id').value = id;
-            document.getElementById('blog-title').value = title;
-            document.getElementById('blog-content').value = contentStr.replace(/\\\\n/g, "\\n");
+        function editPost(id) {
+            const p = window.CURRENT_BLOGS.find(b => b.id === id);
+            if (!p) return;
+            document.getElementById('edit-post-id').value = p.id;
+            document.getElementById('blog-title').value = p.title;
+            document.getElementById('blog-content').value = p.content || '';
+            
+            const actionSelect = document.getElementById('blog-action');
+            if (actionSelect) {
+                // If the post is pending/rejected, just keep the default 'draft' or add options. 
+                // We'll set it to published if it was published, otherwise draft.
+                actionSelect.value = p.status === 'published' ? 'published' : 'draft';
+            }
+            
             document.getElementById('modal-title').innerText = 'Edit Blog Post';
             document.getElementById('blog-modal').style.display = 'flex';
         }
