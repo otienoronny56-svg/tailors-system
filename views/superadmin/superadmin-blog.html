@@ -42,8 +42,22 @@
         .status-draft { background: #f1f5f9; color: #475569; }
         .status-rejected { background: #fee2e2; color: #991b1b; }
         
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
+        .modal-content { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 600px; 
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #blog-form {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 5px;
+        }
         .dark-mode .modal-content { background: #1e293b; color: white; border: 1px solid #334155; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
