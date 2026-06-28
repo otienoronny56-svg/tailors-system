@@ -198,6 +198,25 @@
             .main-content > header > div > h1 {
                 padding-left: 45px;
             }
+            .tabs-container {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 8px !important;
+                overflow-x: hidden !important;
+                border-bottom: none !important;
+            }
+            .tabs-container .tab-btn {
+                padding: 8px 4px !important;
+                font-size: 0.8em !important;
+                white-space: normal !important;
+                text-align: center;
+                word-wrap: break-word;
+                line-height: 1.2;
+                border-bottom: 2px solid transparent !important;
+            }
+            .tabs-container .tab-btn.active {
+                border-bottom: 2px solid var(--brand-gold) !important;
+            }
         }
     </style>
     <link rel="manifest" href="../../manifest.json">
