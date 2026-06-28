@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="../../styles.css">
     <script src="/js/lib/supabase.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <style>
         .blog-list { 
             background: white; 
@@ -278,8 +280,9 @@
                     <input type="text" id="blog-title" required placeholder="e.g. 5 Ways to Style African Prints">
                 </div>
                 <div class="form-group">
-                    <label>Content (HTML supported)</label>
-                    <textarea id="blog-content" rows="6" required placeholder="Write your article here... Use HTML tags like <b> or <br> if needed."></textarea>
+                    <label>Content</label>
+                    <div id="editor-container" style="height: 250px; background: white; color: black; border-radius: 0 0 6px 6px;"></div>
+                    <textarea id="blog-content" style="display:none;"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Action</label>
@@ -343,10 +346,28 @@
             });
         }
 
+        let quill;
+        document.addEventListener('DOMContentLoaded', () => {
+            quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Write your article here...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['link', 'image', 'blockquote'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+        });
+
         function openModal() { 
             document.getElementById('blog-modal').style.display = 'flex'; 
             document.getElementById('edit-post-id').value = '';
             document.getElementById('blog-form').reset();
+            if (quill) quill.root.innerHTML = '';
             document.getElementById('modal-title').innerText = 'Write a Blog Post';
         }
         function closeModal() { document.getElementById('blog-modal').style.display = 'none'; }
@@ -356,12 +377,10 @@
             if (!p) return;
             document.getElementById('edit-post-id').value = p.id;
             document.getElementById('blog-title').value = p.title;
-            document.getElementById('blog-content').value = p.content || '';
+            if (quill) quill.root.innerHTML = p.content || '';
             
             const actionSelect = document.getElementById('blog-action');
             if (actionSelect) {
-                // If the post is pending/rejected, just keep the default 'draft' or add options. 
-                // We'll set it to published if it was published, otherwise draft.
                 actionSelect.value = p.status === 'published' ? 'published' : 'draft';
             }
             
@@ -373,9 +392,13 @@
             if(!USER_PROFILE) return alert("Not logged in");
             
             const title = document.getElementById('blog-title').value;
-            const content = document.getElementById('blog-content').value;
+            const content = quill ? quill.root.innerHTML : '';
             const status = document.getElementById('blog-action').value;
             const postId = document.getElementById('edit-post-id').value;
+
+            if (!content || content === '<p><br></p>') {
+                return alert("Content cannot be empty.");
+            }
 
             // Generate a slug
             const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + '-' + Date.now().toString().slice(-4);
@@ -384,8 +407,9 @@
                 author_id: USER_PROFILE.id,
                 title, content, slug, status
             };
+            // Supabase table uses shop_id
             if (USER_PROFILE.organization_id) {
-                payload.organization_id = USER_PROFILE.organization_id;
+                payload.shop_id = USER_PROFILE.organization_id;
             }
 
             let res;
@@ -395,8 +419,14 @@
                 res = await client.from('blogs').insert([payload]);
             }
 
-            if (res.error) alert("Error saving: " + res.error.message);
-            else {
+            if (res.error) {
+                console.error(res.error);
+                if (res.error.message.includes('row-level security')) {
+                    alert("Error saving: You do not have permission. Your Superadmin account might be missing the RLS INSERT policy for blogs.");
+                } else {
+                    alert("Error saving: " + res.error.message);
+                }
+            } else {
                 closeModal();
                 fetchBlogs();
             }
