@@ -92,17 +92,26 @@ async function loadSuperadminDashboard() {
                             ticks: { 
                                 autoSkip: true, 
                                 maxRotation: 0,
-                                font: { size: 10 }
+                                font: { size: 10 },
+                                color: document.body.classList.contains('dark-mode') ? '#94a3b8' : '#64748b'
                             }
                         },
                         y: { 
                             beginAtZero: true, 
-                            grid: { color: '#f1f5f9' },
-                            ticks: { stepSize: 1, precision: 0 }
+                            grid: { color: document.body.classList.contains('dark-mode') ? '#334155' : '#e2e8f0' },
+                            ticks: { 
+                                precision: 0,
+                                color: document.body.classList.contains('dark-mode') ? '#94a3b8' : '#64748b'
+                            } 
                         }
                     },
                     plugins: { 
-                        legend: { display: false },
+                        legend: { 
+                            display: false,
+                            labels: {
+                                color: document.body.classList.contains('dark-mode') ? '#e2e8f0' : '#475569'
+                            }
+                        },
                         tooltip: { 
                             mode: 'index', 
                             intersect: false,

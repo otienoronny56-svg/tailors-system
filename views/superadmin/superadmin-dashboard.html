@@ -20,33 +20,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --brand-navy: #0a192f;
-            --brand-navy-light: #112240;
-            --brand-gold: #D4AF37;
-            --brand-gold-hover: #f39c12;
-            --brand-white: #ffffff;
-            --brand-slate: #8892b0;
-            --bg-dark: #060c18;
-            --card-bg: rgba(17, 34, 64, 0.75);
-            --glass-border: rgba(212, 175, 55, 0.15);
-        }
+        
 
-        body {
-            
-            
-        }
+        
 
-        .dashboard-container {
-            
-            background: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.8) 0%, transparent 100%),
-                        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 50%) !important;
-        }
+        
 
         .main-content {
             
-            background: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.8) 0%, transparent 100%),
-                        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 50%) !important;
+            
             flex-grow: 1;
             min-width: 0;
             width: calc(100% - 260px) !important;
@@ -107,16 +89,7 @@
         }
 
         /* Card Container style for table list */
-        .order-list {
-            background: var(--card-bg) !important;
-            border: 1px solid var(--glass-border) !important;
-            border-radius: 16px !important;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
-            
-            padding: 30px !important;
-            margin-top: 20px;
-        }
+        
 
         .order-list h2 {
             color: var(--brand-gold) !important;
@@ -126,59 +99,22 @@
         }
 
         /* Table styling overrides */
-        .order-list table {
-            width: 100%;
-            border-collapse: separate !important;
-            border-spacing: 0 12px !important;
-            background: transparent !important;
-        }
+        
 
-        .order-list table th {
-            background: rgba(6, 12, 24, 0.6) !important;
-            color: var(--brand-gold) !important;
-            font-weight: 700;
-            border: none !important;
-            text-transform: uppercase;
-            font-size: 0.85em;
-            letter-spacing: 1px;
-            padding: 12px 15px !important;
-            text-align: left;
-            white-space: normal !important;
-        }
+        
 
-        .order-list table tbody tr {
-            background: rgba(17, 34, 64, 0.5) !important;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+        
 
-        .order-list table tbody tr:hover {
-            background: rgba(17, 34, 64, 0.85) !important;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        }
+        
 
         /* Prevent parent styles.css hover-td background light override */
-        .order-list table tbody tr:hover td {
-            background-color: transparent !important;
-        }
+        
 
-        .order-list table td {
-            padding: 12px 15px !important;
-            border: none !important;
-            color: var(--brand-slate) !important;
-            vertical-align: middle;
-            background: transparent !important;
-            white-space: normal !important;
-        }
+        
 
-        .order-list table td:first-child {
-            border-radius: 12px 0 0 12px;
-        }
+        
 
-        .order-list table td:last-child {
-            border-radius: 0 12px 12px 0;
-        }
+        
 
         /* Small Button styling */
         .small-btn {
@@ -341,8 +277,8 @@
                         <p style="color: var(--brand-slate); font-size: 0.95em; font-weight: 500; margin-top: 5px;">Platform Health & Growth Monitoring</p>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <button onclick="toggleGuide('superadmin-guide')" class="small-btn" style="background: rgba(17, 34, 64, 0.75); border: 1px solid var(--glass-border); color: var(--brand-gold); cursor: pointer;"><i class="fas fa-question-circle"></i> Guide</button>
-                        <button onclick="location.reload()" class="small-btn" style="background: rgba(17, 34, 64, 0.75); border: 1px solid var(--glass-border); color: var(--brand-gold);"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        <button onclick="toggleGuide('superadmin-guide')" class="small-btn" style="background: var(--card-bg); border: 1px solid var(--glass-border); color: var(--brand-navy); cursor: pointer;"><i class="fas fa-question-circle"></i> Guide</button>
+                        <button onclick="location.reload()" class="small-btn" style="background: var(--card-bg); border: 1px solid var(--glass-border); color: var(--brand-navy); cursor: pointer;"><i class="fas fa-sync-alt"></i> Refresh</button>
                         
                           <button onclick="toggleTheme()" class="top-right-theme-toggle" title="Toggle Dark Mode"
                               style="background: transparent; border: 1px solid var(--glass-border, #e2e8f0); color: var(--brand-slate, #475569); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em;"
@@ -408,15 +344,14 @@
             <section class="order-list" id="pending-approvals-section" style="margin-top: 30px; border: 1px solid rgba(239,68,68,0.3); border-left: 4px solid #ef4444;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="color: #ef4444 !important; display: flex; align-items: center; gap: 10px;">
-                        <span style="width:10px; height:10px; background:#ef4444; border-radius:50%; display:inline-block; animation: pulse-dot 1.5s infinite;"></span>
+                        <span style="width:10px; height:10px; background:#ef4444; border-radius:50%; display:inline-block;"></span>
                         Pending Shop Approvals
                         <span id="pending-badge" style="background:#ef4444; color:white; border-radius:20px; padding:2px 10px; font-size:0.6em; font-family:'Montserrat',sans-serif; font-weight:700; vertical-align:middle;">0</span>
                     </h2>
                     <span style="font-size:0.8em; color:var(--brand-slate);">New tailor shops awaiting activation</span>
                 </div>
                 <style>
-                    @keyframes pulse-dot {
-                        0%, 100% { opacity: 1; transform: scale(1); }
+                    
                         50% { opacity: 0.5; transform: scale(1.4); }
                     }
                 </style>
@@ -441,7 +376,7 @@
             <section class="order-list" style="margin-top: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2>Registered Organizations</h2>
-                    <button onclick="location.href='/views/superadmin/superadmin-orgs.html'" class="small-btn" style="background: rgba(17, 34, 64, 0.75); border: 1px solid var(--glass-border); color: var(--brand-gold);">Management View</button>
+                    <button onclick="location.href='/views/superadmin/superadmin-orgs.html'" class="small-btn" style="background: var(--card-bg); border: 1px solid var(--glass-border); color: var(--brand-navy); cursor: pointer;">Management View</button>
                 </div>
                 <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
                     <table>
