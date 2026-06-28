@@ -187,9 +187,20 @@
                 padding-left: 45px;
             }
             .main-content > header > div > div:last-child {
-                flex-wrap: wrap;
+                flex-wrap: nowrap !important;
                 padding-left: 45px;
-                gap: 8px !important;
+                gap: 5px !important;
+            }
+            .main-content > header > div > div:last-child button {
+                padding: 6px 10px !important;
+                font-size: 0.8em !important;
+                white-space: nowrap;
+            }
+            .main-content > header > div > div:last-child .top-right-theme-toggle {
+                width: 32px !important;
+                height: 32px !important;
+                padding: 0 !important;
+                font-size: 1em !important;
             }
             .dashboard-charts-grid, .advanced-metrics-grid {
                 grid-template-columns: 1fr !important;
