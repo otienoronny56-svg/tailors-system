@@ -67,36 +67,45 @@ async function loadSuperadminDashboard() {
             if (!canvas || !orgs) return;
             const ctx = canvas.getContext('2d');
             
-            // Generate mock data dates based on filter to show realistic curves
             let labels = [];
             let dataPoints = [];
-            let base = orgs.length > 0 ? orgs.length : 10; // Use actual length if possible
+            
+            // Helper: Count orgs created on or before a given date
+            const countOrgsUpTo = (dateObj) => {
+                const targetTime = dateObj.getTime();
+                return orgs.filter(o => new Date(o.created_at).getTime() <= targetTime).length;
+            };
 
             if (currentGrowthFilter === 'monthly') {
-                // Show last 30 days
+                // Last 30 days, step by 3 days
                 for(let i=30; i>=0; i-=3) {
-                    let d = new Date(); d.setDate(d.getDate() - i);
+                    let d = new Date(); 
+                    d.setDate(d.getDate() - i);
                     labels.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
-                    dataPoints.push(Math.max(1, Math.floor(base * (1 - (i/60))))); 
+                    dataPoints.push(countOrgsUpTo(d)); 
                 }
             } else if (currentGrowthFilter === 'quarterly') {
-                // Show last 12 weeks
+                // Last 12 weeks, step by 1 week
                 for(let i=12; i>=0; i--) {
-                    let d = new Date(); d.setDate(d.getDate() - (i*7));
+                    let d = new Date(); 
+                    d.setDate(d.getDate() - (i*7));
                     labels.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
-                    dataPoints.push(Math.max(1, Math.floor(base * (1 - (i/24)))));
+                    dataPoints.push(countOrgsUpTo(d));
                 }
             } else {
-                // Show last 12 months
+                // Last 12 months, step by 1 month
                 for(let i=11; i>=0; i--) {
-                    let d = new Date(); d.setMonth(d.getMonth() - i);
+                    let d = new Date(); 
+                    d.setMonth(d.getMonth() - i);
+                    // End of month approximation
+                    d.setDate(28); 
                     labels.push(d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' }));
-                    dataPoints.push(Math.max(1, Math.floor(base * (1 - (i/15)))));
+                    dataPoints.push(countOrgsUpTo(d));
                 }
             }
 
-            // Always ensure the final point represents current reality
-            dataPoints[dataPoints.length-1] = base;
+            // Always ensure the final point accurately reflects right now
+            dataPoints[dataPoints.length-1] = orgs.length;
 
             if (window.superadminCharts && window.superadminCharts.growthPulse) {
                 window.superadminCharts.growthPulse.destroy();
