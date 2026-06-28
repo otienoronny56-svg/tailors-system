@@ -162,7 +162,7 @@ async function loadOrganizations() {
                         <td>${formatDate(org.created_at)}</td>
                         <td><span style="background:${badgeColor}; color:white; padding:3px 10px; border-radius:12px; font-weight:bold; font-size:0.85em;">${statusText}</span></td>
                         <td>
-                            <button class="small-btn" onclick="viewOrgShops('${org.id}', '${org.name.replace(/'/g, "\\'")}')" style="background:var(--brand-navy); color:white; border:1px solid var(--brand-gold); margin-right:5px;">View Shops</button>
+                            <button class="small-btn" onclick="viewOrgShops('${org.id}', '${org.name.replace(/'/g, "\\'")}')" style="background:#475569; color:white; border:none; margin-right:5px; font-weight: 500;">View Shops</button>
                             <button class="small-btn" onclick="toggleOrganizationSuspension('${org.id}', '${statusText}')" style="background:${btnBg}; color:white; border:none; margin-right:5px;">${btnText}</button>
                             <button class="small-btn" onclick="deleteOrganization('${org.id}')" style="background:#ef4444; color:white; border:none;">Delete</button>
                         </td>
