@@ -3,9 +3,7 @@
  * Handles Organization Renaming and User Credential updates
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    initSettingsPage();
-});
+// Initialize settings page (called by app.js router)
 
 async function initSettingsPage() {
     if (!window.supabase) {
@@ -23,7 +21,7 @@ async function initSettingsPage() {
 
 async function loadCurrentOrgName() {
     try {
-        const orgId = window.globals?.userProfile?.organization_id;
+        const orgId = typeof USER_PROFILE !== 'undefined' && USER_PROFILE ? USER_PROFILE.organization_id : null;
         if (!orgId) return;
         
         const { data, error } = await window.supabase

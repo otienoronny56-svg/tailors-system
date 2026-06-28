@@ -99,6 +99,8 @@ function refreshCurrentView() {
         loadWorkerScreen();
     } else if (path.includes('admin-expenses')) {
         loadAdminExpensesScreen();
+    } else if (path.includes('admin-settings')) {
+        if (typeof initSettingsPage === 'function') initSettingsPage();
     } else if (path.includes('expenses')) {
         loadExpensesScreen();
     } else if (path.includes('worker-assignments')) {
