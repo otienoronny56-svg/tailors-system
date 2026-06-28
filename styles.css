@@ -800,7 +800,7 @@ p {
 
     /* Adjust main content so it doesn't get hidden behind the bar */
     .main-content {
-        padding: 15px 15px 15px 15px !important;
+        padding: 15px 15px 90px 15px !important; /* Added 90px bottom padding to clear the bottom nav */
         width: 100% !important;
         margin: 0 !important;
     }
@@ -3638,7 +3638,7 @@ body.dark-mode .inv-table td::before {
         color: #075985;
     }
     .dashboard-guide-banner .close-guide-btn {
-        background: transparent;
+        background: transparent !important;
         border: none;
         color: #0284c7;
         font-size: 1.2em;
@@ -3646,7 +3646,11 @@ body.dark-mode .inv-table td::before {
         position: absolute;
         top: 12px;
         right: 15px;
+        padding: 4px;
+        margin: 0;
+        line-height: 1;
         transition: color 0.2s ease;
+        align-self: flex-start;
     }
     .dashboard-guide-banner .close-guide-btn:hover {
         color: #0369a1;

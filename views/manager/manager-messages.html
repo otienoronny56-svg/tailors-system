@@ -295,7 +295,7 @@
                 padding: 10px 15px;
             }
             .msg-input-pane {
-                padding: 10px 15px 60px 15px; /* Extra bottom padding to lift the input above OS nav bars */
+                padding: 10px 15px 90px 15px !important; /* Extra bottom padding to lift the input above OS nav bars */
             }
             .chat-messages-stream {
                 padding: 15px;
@@ -875,7 +875,7 @@
             container.innerHTML = `
                 <div class="chat-pane-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <button class="mobile-back-btn" onclick="closeChatThread()" style="background:#e2e8f0; border:none; color:var(--brand-navy); padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+                        <button class="mobile-back-btn" onclick="closeChatThread()" style="background:var(--border-color, #e2e8f0); border:none; color:inherit; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
                             <i class="fas fa-arrow-left"></i>
                         </button>
                         <div>
