@@ -6,7 +6,7 @@
 // Initialize settings page (called by app.js router)
 
 async function initSettingsPage() {
-    if (!window.supabase) {
+    if (!window.supabaseClient) {
         console.error("Supabase client not found.");
         return;
     }
@@ -24,7 +24,7 @@ async function loadCurrentOrgName() {
         const orgId = typeof USER_PROFILE !== 'undefined' && USER_PROFILE ? USER_PROFILE.organization_id : null;
         if (!orgId) return;
         
-        const { data, error } = await window.supabase
+        const { data, error } = await window.supabaseClient
             .from('organizations')
             .select('name')
             .eq('id', orgId)
@@ -58,40 +58,38 @@ async function handleRenameOrg(e) {
         if (!orgId) throw new Error("Organization ID not found.");
         
         // 1. Update Organization
-        const { error } = await window.supabase
+        const { error: orgError } = await window.supabaseClient
             .from('organizations')
             .update({ name: newName })
             .eq('id', orgId);
             
-        if (error) throw error;
+        if (orgError) throw orgError;
         
         // 2. Log to audit_logs
-        await window.supabase
-            .from('audit_logs')
-            .insert([{
-                organization_id: orgId,
-                action: 'RENAME_ORGANIZATION',
-                details: {
-                    old_name: currentName,
-                    new_name: newName
-                }
-            }]);
-            
-        msgDiv.textContent = "Organization successfully renamed!";
-        msgDiv.style.color = "#10b981";
+        await window.supabaseClient.from('audit_logs').insert([{
+            organization_id: orgId,
+            action: 'RENAME_ORG',
+            details: {
+                old_name: currentName !== 'Loading...' ? currentName : 'Unknown',
+                new_name: newName
+            }
+        }]);
         
-        // Refresh display
-        await loadCurrentOrgName();
-        document.getElementById('new-org-name').value = '';
+        msgDiv.textContent = "Organization renamed successfully!";
+        msgDiv.style.color = "#10b981";
+        document.getElementById('current-org-name').textContent = newName;
+        
+        // Update sidebar if it exists
+        const sidebarTitle = document.querySelector('.sidebar-logo');
+        if (sidebarTitle) sidebarTitle.textContent = newName;
         
     } catch (error) {
-        console.error("Failed to rename:", error);
+        console.error("Failed to rename org:", error);
         msgDiv.textContent = error.message;
         msgDiv.style.color = "#ef4444";
     } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-save"></i> Save New Name';
-        setTimeout(() => msgDiv.textContent = '', 4000);
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
     }
 }
 
@@ -99,7 +97,7 @@ async function handleSecurityUpdate(e) {
     e.preventDefault();
     
     const newEmail = document.getElementById('new-email').value.trim();
-    const newPassword = document.getElementById('new-password').value;
+    const newPassword = document.getElementById('new-password').value.trim();
     
     if (!newEmail && !newPassword) {
         alert("Please enter a new email or password to update.");
@@ -117,14 +115,14 @@ async function handleSecurityUpdate(e) {
         if (newEmail) updates.email = newEmail;
         if (newPassword) updates.password = newPassword;
         
-        const { data, error } = await window.supabase.auth.updateUser(updates);
+        const { data, error } = await window.supabaseClient.auth.updateUser(updates);
         
         if (error) throw error;
         
         // Log to audit_logs
         const orgId = typeof USER_PROFILE !== 'undefined' && USER_PROFILE ? USER_PROFILE.organization_id : null;
         if (orgId) {
-            await window.supabase.from('audit_logs').insert([{
+            await window.supabaseClient.from('audit_logs').insert([{
                 organization_id: orgId,
                 action: 'SECURITY_UPDATE',
                 details: {
