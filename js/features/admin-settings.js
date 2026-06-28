@@ -52,7 +52,7 @@ async function handleRenameOrg(e) {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
     
     try {
-        const orgId = window.globals?.userProfile?.organization_id;
+        const orgId = typeof USER_PROFILE !== 'undefined' && USER_PROFILE ? USER_PROFILE.organization_id : null;
         const currentName = document.getElementById('current-org-name').textContent;
         
         if (!orgId) throw new Error("Organization ID not found.");
@@ -122,7 +122,7 @@ async function handleSecurityUpdate(e) {
         if (error) throw error;
         
         // Log to audit_logs
-        const orgId = window.globals?.userProfile?.organization_id;
+        const orgId = typeof USER_PROFILE !== 'undefined' && USER_PROFILE ? USER_PROFILE.organization_id : null;
         if (orgId) {
             await window.supabase.from('audit_logs').insert([{
                 organization_id: orgId,
