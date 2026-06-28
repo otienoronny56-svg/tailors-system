@@ -1899,6 +1899,6 @@ window.loadAuditLogs = async function() {
         }).join('');
     } catch (err) {
         console.error("Error loading audit logs:", err);
-        tbody.innerHTML = \`<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error loading logs: \${err.message}</td></tr>\`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error loading logs: ${err.message}</td></tr>`;
     }
 }
