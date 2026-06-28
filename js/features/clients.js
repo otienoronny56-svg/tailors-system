@@ -161,6 +161,9 @@ async function loadClients() {
         const { data: clients, error } = await query;
         if (error) throw error;
 
+        // Update top mini stat cards dynamically
+        updateClientMiniStats(clients || []);
+
         if (!clients || clients.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No clients found</td></tr>';
             return;
@@ -184,6 +187,47 @@ async function loadClients() {
         logDebug("Error loading clients:", error, 'error');
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:red;">Error loading clients</td></tr>';
     }
+}
+
+/**
+ * Calculates and updates mini stats cards dynamically on the global client database page
+ */
+function updateClientMiniStats(clients) {
+    const totalClientsEl = document.getElementById('stat-total-clients');
+    const newClientsEl = document.getElementById('stat-new-clients');
+    const growthRateEl = document.getElementById('stat-growth-rate');
+    if (!totalClientsEl || !newClientsEl || !growthRateEl) return;
+
+    const total = clients.length;
+    totalClientsEl.textContent = total;
+
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const newThisMonth = clients.filter(c => c.created_at && new Date(c.created_at) >= startOfThisMonth).length;
+    newClientsEl.textContent = newThisMonth;
+
+    const newLastMonth = clients.filter(c => {
+        if (!c.created_at) return false;
+        const d = new Date(c.created_at);
+        return d >= startOfLastMonth && d < startOfThisMonth;
+    }).length;
+
+    let growthText = "0%";
+    let growthColor = "#3b82f6"; // Blue default
+
+    if (newLastMonth > 0) {
+        const percent = ((newThisMonth - newLastMonth) / newLastMonth) * 100;
+        growthText = (percent >= 0 ? "+" : "") + percent.toFixed(1) + "%";
+        growthColor = percent >= 0 ? "#10b981" : "#ef4444"; // Green or Red
+    } else if (newThisMonth > 0) {
+        growthText = "+" + newThisMonth + " new";
+        growthColor = "#10b981"; // Green
+    }
+
+    growthRateEl.textContent = growthText;
+    growthRateEl.style.color = growthColor;
 }
 
 /**

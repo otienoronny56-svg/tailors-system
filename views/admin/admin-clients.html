@@ -21,6 +21,37 @@
     <link rel="manifest" href="../../manifest.json">
     <style>
         @media (max-width: 768px) {
+            .main-content {
+                padding: 15px;
+                padding-top: 60px;
+            }
+            header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+                margin-bottom: 10px !important;
+            }
+            .dashboard-header-text {
+                width: 100% !important;
+            }
+            header > div:nth-child(2) {
+                width: 100% !important;
+                display: flex !important;
+                flex-direction: row-reverse !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                margin-top: 0px !important;
+            }
+            .top-header-actions {
+                width: auto !important;
+                justify-content: flex-end !important;
+            }
+            .dashboard-subtitle {
+                display: none !important;
+            }
+            .filter-bar {
+                margin-bottom: 10px !important;
+            }
             .table-responsive {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -48,6 +79,15 @@
             .table-responsive th:nth-child(5), .table-responsive td:nth-child(5) { order: 3; }
             .table-responsive th:nth-child(3), .table-responsive td:nth-child(3) { order: 4; }
             .table-responsive th:nth-child(4), .table-responsive td:nth-child(4) { order: 5; }
+
+            .header-stats-container {
+                display: none !important;
+            }
+        }
+
+        body.dark-mode .mini-stat-card {
+            background: #1e293b !important;
+            border: 1px solid #334155 !important;
         }
     </style>
 </head>
@@ -125,31 +165,50 @@
         </aside>
 
         <main class="main-content">
-            <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+            <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                 <div class="dashboard-header-text">
                     <h1 class="dashboard-main-title" style="font-family: 'Playfair Display', serif; margin: 0; color: var(--brand-black);">Client Management (Global)</h1>
-                    <p class="dashboard-subtitle" style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">View and manage clients from all shops.</p>
+                    <p class="dashboard-subtitle" id="orders-subtitle-desc" style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">View and manage clients from all shops.</p>
+                </div>
+
+                <!-- Mini Stats (middle) -->
+                <div class="header-stats-container" style="display: flex; gap: 15px; margin-left: 20px; margin-right: 20px; align-items: center; flex-grow: 1; justify-content: center;">
+                    <!-- Total Clients Card -->
+                    <div class="mini-stat-card" style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; display: flex; flex-direction: column; min-width: 90px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                        <span style="font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Total Clients</span>
+                        <span id="stat-total-clients" style="font-size: 14px; font-weight: 800; color: var(--brand-navy); margin-top: 2px;">0</span>
+                    </div>
+                    <!-- New This Month Card -->
+                    <div class="mini-stat-card" style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; display: flex; flex-direction: column; min-width: 90px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                        <span style="font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">New This Month</span>
+                        <span id="stat-new-clients" style="font-size: 14px; font-weight: 800; color: #10b981; margin-top: 2px;">0</span>
+                    </div>
+                    <!-- Growth Rate Card -->
+                    <div class="mini-stat-card" style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; display: flex; flex-direction: column; min-width: 90px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                        <span style="font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Growth Rate</span>
+                        <span id="stat-growth-rate" style="font-size: 14px; font-weight: 800; color: #3b82f6; margin-top: 2px;">0%</span>
+                    </div>
                 </div>
                 
-                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 15px;">
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
                     <!-- Top right icon buttons -->
-                    <div class="top-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                    <div class="top-header-actions" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
                         <button onclick="toggleTheme()" title="Toggle Dark Mode"
-                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                             onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
                             onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
                             <i class="fa-solid fa-moon theme-toggle-icon"></i>
                         </button>
                         
                         <button onclick="loadClients()" title="Refresh Data"
-                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                             onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
                             onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
                             <i class="fa-solid fa-arrows-rotate"></i>
                         </button>
                         
                         <button onclick="handleLogout()" title="Logout"
-                            style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            style="background: #ef4444; border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                             onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
                             onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -158,18 +217,20 @@
 
                     <!-- Main action button -->
                     <button onclick="openNewClientModal()"
-                        style="background: var(--brand-navy); border: none; color: var(--brand-gold); padding: 0 12px; height: 38px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.9em; font-weight: 500; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        style="background: var(--brand-navy); border: none; color: var(--brand-gold); padding: 0 12px; height: 32px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 600; transition: all 0.2s; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);"
+                        onmouseover="this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
                         <i class="fas fa-user-plus"></i> New Client
                     </button>
                 </div>
             </header>
 
-            <div class="filter-bar">
+            <div class="filter-bar" style="margin-bottom: 12px;">
                 <div class="search-box" style="flex: 1; position: relative;">
                     <i class="fas fa-search"
-                        style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                        style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.95em;"></i>
                     <input type="text" id="client-search" placeholder="Search across all shops..."
-                        style="padding-left: 45px; width: 100%;" oninput="loadClients()">
+                        style="padding: 8px 10px 8px 36px; width: 100%; height: 36px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 13px; margin: 0;" oninput="loadClients()">
                 </div>
             </div>
 
