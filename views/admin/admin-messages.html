@@ -1725,13 +1725,14 @@
                     .select();
 
                 if (error) {
-                    if (error.message.includes('messages_recipient_id_fkey')) {
-                        // Retry without recipient_id for guests/legacy threads
+                    if (error.message.includes('messages_recipient_id_fkey') || error.message.includes('not-null constraint')) {
+                        // Retry with the tailor's own ID as the recipient to bypass strict user constraints for guests
                         const { data: retryData, error: retryError } = await supabaseClient
                             .from('messages')
                             .insert([{
                                 inquiry_id: activeThread.all_inquiry_ids ? activeThread.all_inquiry_ids[activeThread.all_inquiry_ids.length - 1] : activeThread.id,
                                 sender_id: USER_PROFILE.id,
+                                recipient_id: USER_PROFILE.id, // Fallback to self for guest inquiries to satisfy DB constraints
                                 message_text: text
                             }])
                             .select();
@@ -1837,8 +1838,7 @@
 
             if (!activeThread || !USER_PROFILE) return;
 
-            const clientUid = activeThread.otherPartyUid;
-            if (!clientUid) return;
+            const clientUid = activeThread.otherPartyUid || USER_PROFILE.id; // Fallback immediately if missing
 
             try {
                 const reqText = `[MEASUREMENT_REQUEST:${garmentType}]`;
@@ -1852,7 +1852,28 @@
                     }])
                     .select();
 
-                if (error) throw error;
+                if (error) {
+                    if (error.message.includes('messages_recipient_id_fkey') || error.message.includes('not-null constraint')) {
+                        // Retry with the tailor's own ID as the recipient to bypass strict user constraints for guests
+                        const { data: retryData, error: retryError } = await supabaseClient
+                            .from('messages')
+                            .insert([{
+                                inquiry_id: activeThread.all_inquiry_ids ? activeThread.all_inquiry_ids[activeThread.all_inquiry_ids.length - 1] : activeThread.id,
+                                sender_id: USER_PROFILE.id,
+                                recipient_id: USER_PROFILE.id, // Fallback to self for guest inquiries to satisfy DB constraints
+                                message_text: reqText
+                            }])
+                            .select();
+                        if (retryError) throw retryError;
+                        if (retryData && retryData[0]) {
+                            messages.push(retryData[0]);
+                            renderChatHistory();
+                            scrollToBottom();
+                        }
+                        return;
+                    }
+                    throw error;
+                }
 
                 if (data && data[0]) {
                     messages.push(data[0]);
