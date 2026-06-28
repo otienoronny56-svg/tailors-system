@@ -3638,6 +3638,8 @@ body.dark-mode .inv-table td::before {
         color: #075985;
     }
     .dashboard-guide-banner .close-guide-btn {
+        appearance: none;
+        -webkit-appearance: none;
         background: transparent !important;
         border: none;
         color: #0284c7;
