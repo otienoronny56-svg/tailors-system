@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TKKW51QFZ5"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TKKW51QFZ5');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailors Directory - Global Admin</title>
+    <!-- Prevent caching during development -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="icon" type="image/png" href="../../logo.jpeg">
+    <link rel="stylesheet" href="../../styles.css?v=20260614_7">
+    <script src="/js/lib/supabase.min.js"></script>
+    <!-- Mobile -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: var(--brand-black);
+            color: var(--brand-gold);
+            border: 1px solid var(--brand-gold);
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: block; }
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                position: fixed;
+                z-index: 999;
+                height: 100%;
+                width: 260px;
+            }
+            .sidebar.active { transform: translateX(0); }
+            .main-content {
+                padding: 15px;
+                padding-top: 60px;
+                width: 100% !important;
+                margin-left: 0;
+            }
+            .header-actions {
+                top: 15px !important;
+                right: 15px !important;
+            }
+            
+            /* Tailor Modal Mobile Overrides */
+            .tdm-body-split {
+                flex-direction: column !important;
+                overflow-y: auto !important;
+            }
+            .tdm-sidebar {
+                width: 100% !important;
+                border-right: none !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                overflow-y: visible !important;
+            }
+            .tdm-content {
+                overflow-y: visible !important;
+            }
+            .tdm-table-container {
+                overflow-x: auto !important;
+            }
+        }
+    </style>
+    <link rel="manifest" href="../../manifest.json">
+</head>
+
+<body>
+    <!-- Dark Mode Initializer -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+    <div class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">&nbsp;</h1>
+                    <span class="sidebar-subtitle">&nbsp;</span>
+                </div>
+            </div>
+
+            <p id="user-info">Logged in as: Owner</p>
+            <nav>
+                <a href="admin-dashboard.html" id="nav-dashboard"><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin Dashboard</a>
+                <a href="admin-orders.html" id="nav-orders"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global Orders</a>
+                <a href="admin-tailors-directory.html" id="nav-tailors-dir" class="active"><i class="fas fa-users-between-lines" style="margin-right: 8px;"></i> Tailors Directory</a>
+
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-address-book" style="margin-right: 8px;"></i> Clients & Inbox</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="admin-clients.html" id="nav-clients"><i class="fas fa-users" style="margin-right: 8px;"></i> Client Database</a>
+                        <a href="admin-messages.html" id="nav-messages"><i class="fas fa-comments" style="margin-right: 8px;"></i> Messages Inbox</a>
+                    </div>
+                </div>
+
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Products & Stock</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="admin-inventory.html" id="nav-inventory"><i class="fas fa-box-open" style="margin-right: 8px;"></i> Inventory</a>
+                        <a href="admin-listings.html" id="nav-listings"><i class="fas fa-tags" style="margin-right: 8px;"></i> Marketplace Catalog</a>
+                    </div>
+                </div>
+
+                <div class="sidebar-dropdown">
+                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
+                        <span><i class="fas fa-wallet" style="margin-right: 8px;"></i> Finance & Analytics</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="financial-overview.html" id="nav-finance"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial Overview</a>
+                        <a href="admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics & AI</a>
+                        <a href="admin-transactions.html" id="nav-transactions"><i class="fas fa-list-ul" style="margin-right: 8px;"></i> Transactions</a>
+                        <a href="admin-expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
+                    </div>
+                </div>
+
+                <a href="admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
+                <a href="admin-settings.html" id="nav-settings"><i class="fas fa-cog" style="margin-right: 8px;"></i> Settings</a>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+            </nav>
+            <script>
+                if (typeof window.toggleSidebarDropdown !== 'function') {
+                    window.toggleSidebarDropdown = function (button) {
+                        const event = window.event || (arguments.length > 1 ? arguments[1] : null);
+                        if (event) event.alreadyHandledDropdown = true;
+                        const dropdown = button.closest('.sidebar-dropdown');
+                        if (dropdown) dropdown.classList.toggle('open');
+                    };
+                }
+            </script>
+        </aside>
+
+        <main class="main-content" style="position: relative;">
+            <header class="management-header" style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid #f1f5f9; padding-bottom:15px; margin-bottom:20px;">
+                <div>
+                    <h1 style="font-family:'Playfair Display',serif; margin:0; color:var(--brand-navy); font-size:2em;">Tailors Directory</h1>
+                    <p style="margin:5px 0 0 0; color:#64748b; font-size:0.95em;">Manage all tailors, view their assigned work, and update profiles.</p>
+                </div>
+                <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="loadTailorsDirectoryPage()" title="Refresh Data" class="btn-modern"
+                        style="width: 42px; height: 42px; padding: 0; background: white; color: #475569; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer;">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button onclick="toggleTheme()" class="top-right-theme-toggle" title="Toggle Dark Mode"
+                        style="background: transparent; border: 1px solid var(--glass-border, #e2e8f0); color: var(--brand-slate, #475569); width: 38px; height: 38px; border-radius: 8px; cursor: pointer;">
+                        <i class="fa-solid fa-moon theme-toggle-icon"></i>
+                    </button>
+                    <button onclick="handleLogout()" title="Logout"
+                        style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1em;">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <select id="tailor-shop-filter" onchange="filterTailors()" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: 'Inter', sans-serif;">
+                    <option value="all">All Shops</option>
+                </select>
+                <div style="position: relative; flex-grow: 1; max-width: 400px;">
+                    <i class="fas fa-search" style="position: absolute; left: 15px; top: 12px; color: #94a3b8;"></i>
+                    <input type="text" id="tailor-search" onkeyup="filterTailors()" placeholder="Search tailors by name..." style="width: 100%; padding: 10px 15px 10px 40px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; box-sizing: border-box; font-family: 'Inter', sans-serif;">
+                </div>
+            </div>
+
+            <!-- TAILORS GRID -->
+            <div id="tailors-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+                <div style="text-align:center; padding:50px; color:#94a3b8; grid-column:1/-1;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:2em; margin-bottom:15px;"></i>
+                    <p>Loading tailors directory...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- TAILOR DETAILS & WORKS MODAL -->
+    <div id="tailor-details-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:3000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:white; border-radius:14px; width:95%; max-width:1000px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,0.25); overflow:hidden;">
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 24px; border-bottom:2px solid var(--brand-gold); background:var(--brand-navy);">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div id="tdm-avatar" style="width:45px; height:45px; border-radius:50%; background:linear-gradient(135deg,var(--brand-gold),#f59e0b); display:flex; align-items:center; justify-content:center; font-size:1.2em; font-weight:800; color:var(--brand-navy);">--</div>
+                    <div>
+                        <h2 id="tdm-name" style="margin:0; color:white; font-size:1.3em; font-weight:800; font-family:'Playfair Display',serif;">Tailor Name</h2>
+                        <span id="tdm-role-shop" style="font-size:0.8em; color:#cbd5e1; font-weight:600;">Role &bull; Shop</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="editTailor()" title="Edit Tailor Details" style="background:rgba(255,255,255,0.15); border:none; color:white; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:6px;"><i class="fas fa-edit"></i> Edit</button>
+                    <button onclick="document.getElementById('tailor-details-modal').style.display='none'" style="background:#ef4444; border:none; color:white; width:36px; height:36px; border-radius:8px; cursor:pointer; font-size:1.1em;"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            
+            <!-- Body Split View -->
+            <div class="tdm-body-split" style="display:flex; flex-grow:1; overflow:hidden;">
+                <!-- Left: Stats & Info -->
+                <div class="tdm-sidebar" style="width:280px; background:#f8fafc; border-right:1px solid #e2e8f0; padding:20px; overflow-y:auto; flex-shrink:0;">
+                    <h3 style="font-size:0.9em; color:#64748b; text-transform:uppercase; margin-top:0; margin-bottom:15px;">Contact Info</h3>
+                    <p style="margin:0 0 10px 0; font-size:0.95em; color:var(--brand-navy);"><i class="fas fa-phone" style="width:20px; color:#94a3b8;"></i> <span id="tdm-phone">N/A</span></p>
+                    
+                    <h3 style="font-size:0.9em; color:#64748b; text-transform:uppercase; margin-top:25px; margin-bottom:15px;">Workload Summary</h3>
+                    
+                    <div style="background:white; padding:15px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:10px; text-align:center;">
+                        <div style="font-size:2em; font-weight:800; color:#3b82f6;" id="tdm-active-count">0</div>
+                        <div style="font-size:0.75em; color:#64748b; font-weight:600; text-transform:uppercase;">Active Orders</div>
+                    </div>
+                    
+                    <div style="background:white; padding:15px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:10px; text-align:center;">
+                        <div style="font-size:2em; font-weight:800; color:#10b981;" id="tdm-ready-count">0</div>
+                        <div style="font-size:0.75em; color:#64748b; font-weight:600; text-transform:uppercase;">Ready/Completed</div>
+                    </div>
+
+                    <button onclick="fireTailor()" style="width:100%; margin-top:30px; background:white; color:#ef4444; border:1px solid #ef4444; padding:10px; border-radius:6px; cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="fas fa-user-times"></i> Terminate / Fire</button>
+                </div>
+                
+                <!-- Right: Assigned Works Table -->
+                <div class="tdm-content" style="flex-grow:1; padding:20px; overflow-y:auto; min-width:0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="margin:0; color:var(--brand-navy); font-size:1.1em;">Assigned Works (Orders)</h3>
+                    </div>
+                    
+                    <div class="tdm-table-container" style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                        <table style="width:100%; border-collapse:collapse; min-width: 500px;">
+                            <thead style="background:#f1f5f9;">
+                                <tr>
+                                    <th style="padding:10px; text-align:left; font-size:0.85em; color:#475569; font-weight:600; border-bottom:1px solid #e2e8f0;">Order ID</th>
+                                    <th style="padding:10px; text-align:left; font-size:0.85em; color:#475569; font-weight:600; border-bottom:1px solid #e2e8f0;">Customer</th>
+                                    <th style="padding:10px; text-align:left; font-size:0.85em; color:#475569; font-weight:600; border-bottom:1px solid #e2e8f0;">Garment</th>
+                                    <th style="padding:10px; text-align:left; font-size:0.85em; color:#475569; font-weight:600; border-bottom:1px solid #e2e8f0;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tdm-works-tbody">
+                                <!-- Loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- EDIT TAILOR MODAL -->
+    <div id="edit-tailor-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:4000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:white; border-radius:12px; width:90%; max-width:450px; padding:25px; box-shadow:0 15px 35px rgba(0,0,0,0.2);">
+            <h3 style="margin:0 0 20px 0; font-family:'Playfair Display',serif; color:var(--brand-navy); font-size:1.4em;">Edit Tailor Profile</h3>
+            
+            <div style="margin-bottom:15px;">
+                <label style="display:block; font-size:0.85em; font-weight:600; color:#475569; margin-bottom:5px;">Full Name</label>
+                <input type="text" id="edit-tailor-name" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            </div>
+            
+            <div style="margin-bottom:15px;">
+                <label style="display:block; font-size:0.85em; font-weight:600; color:#475569; margin-bottom:5px;">Phone Number</label>
+                <input type="text" id="edit-tailor-phone" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            </div>
+            
+            <div style="margin-bottom:15px;">
+                <label style="display:block; font-size:0.85em; font-weight:600; color:#475569; margin-bottom:5px;">Role / Title</label>
+                <input type="text" id="edit-tailor-role" placeholder="e.g. Master Tailor, Seamstress" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            </div>
+            
+            <div style="margin-bottom:20px;">
+                <label style="display:block; font-size:0.85em; font-weight:600; color:#475569; margin-bottom:5px;">Assigned Shop</label>
+                <select id="edit-tailor-shop" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+                    <!-- Filled dynamically -->
+                </select>
+            </div>
+            
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button onclick="document.getElementById('edit-tailor-modal').style.display='none'" style="padding:10px 15px; background:white; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; font-weight:600; color:#475569;">Cancel</button>
+                <button onclick="saveTailorEdits()" style="padding:10px 20px; background:var(--brand-navy); border:none; border-radius:6px; cursor:pointer; font-weight:600; color:var(--brand-gold);">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ADMIN REVIEW MODAL (Required for clicking works) -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" onclick="closeAdminModal()">&times;</span>
+            <h2 id="admin-modal-title" class="admin-modal-title">Order Review</h2>
+            <div id="admin-modal-body" style="padding: 20px;">
+                <p><strong>Shop:</strong> <span id="admin-detail-shop"></span></p>
+                <p><strong>Customer:</strong> <span id="admin-detail-customer-name"></span></p>
+                <p><strong>Garment:</strong> <span id="admin-detail-garment-type"></span></p>
+                <div class="admin-review-summary-box">
+                    <p style="margin:5px 0;"><strong>Total Price:</strong> Ksh <span id="admin-detail-price"></span></p>
+                    <p style="margin:5px 0;"><strong>Total Paid:</strong> <span style="color: var(--profit-green); font-weight:bold;">Ksh <span id="admin-detail-total-paid"></span></span></p>
+                    <p style="margin:5px 0;"><strong>Balance Due:</strong> <span style="color: var(--balance-red); font-weight:bold;">Ksh <span id="admin-detail-balance-due"></span></span></p>
+                </div>
+                <div id="closure-section" style="text-align: center;">
+                    <h3 style="margin-top: 0;">Final Action</h3>
+                    <p id="closure-warning" style="font-weight: bold; margin-bottom: 15px;"></p>
+                    <button id="close-order-btn" class="btn" style="background: var(--brand-navy); color: var(--brand-gold); width: 100%; border: none;">Approve & Close Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION (Admin) -->
+    <nav class="bottom-nav">
+        <a href="admin-dashboard.html" class="nav-item">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dash</span>
+        </a>
+        <a href="admin-orders.html" class="nav-item">
+            <i class="fas fa-bolt"></i>
+            <span>Orders</span>
+        </a>
+        <a href="admin-order-form.html" class="nav-item center-fab">
+            <div class="fab-circle">
+                <i class="fas fa-plus"></i>
+            </div>
+        </a>
+        <a href="admin-tailors-directory.html" class="nav-item active">
+            <i class="fas fa-users-between-lines"></i>
+            <span>Tailors</span>
+        </a>
+        <a href="admin-management.html" class="nav-item">
+            <i class="fas fa-cogs"></i>
+            <span>Setup</span>
+        </a>
+    </nav>
+
+    <script src="../../js/core/config.js?v=1781824528054"></script>
+    <script src="../../js/utils/helpers.js?v=1781824528054"></script>
+    <script src="../../js/ui/theme.js?v=1781824528054"></script>
+    <script src="../../js/core/globals.js?v=1781824528054"></script>
+    <script src="../../js/core/init.js?v=1781824528054"></script>
+    <script src="../../js/core/auth.js?v=1781824528054"></script>
+    <script src="../../js/ui/sidebar.js?v=1781824528054"></script>
+    <script src="../../js/ui/modals.js?v=1781824528054"></script>
+    
+    <!-- This page's specific logic -->
+    <script src="../../js/features/orders.js?v=1781824528054"></script> <!-- Included so admin order modal works -->
+    <script src="../../js/features/tailors-directory.js?v=1781824528054"></script>
+    <script src="../../app.js?v=1781824528054"></script>
+    <script src="../../mobile-nav.js?v=1781824528054"></script>
+</body>
+</html>

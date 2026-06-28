@@ -2128,7 +2128,7 @@ async function loadAnalyticsDashboard() {
 
         // PRE-FETCH: Grab all orders needed for the new advanced charts in ONE query 
         // to prevent spamming the database with 3 simultaneous queries which slows down the browser
-        let advOrdersQuery = supabaseClient.from('orders').select('status, created_at, completed_at, updated_at, customer_phone').eq('organization_id', USER_PROFILE.organization_id);
+        let advOrdersQuery = supabaseClient.from('orders').select('status, created_at, updated_at, customer_phone').eq('organization_id', USER_PROFILE.organization_id);
         if (shopId !== 'all') advOrdersQuery = advOrdersQuery.eq('shop_id', shopId);
         const { data: advancedOrders } = await advOrdersQuery;
         window.advancedAnalyticsOrders = advancedOrders || [];

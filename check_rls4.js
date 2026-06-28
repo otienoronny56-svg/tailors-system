@@ -4,4 +4,10 @@ const config = fs.readFileSync('C:/Users/ronny/Desktop/tailors project/js/core/c
 const supabaseUrl = config.match(/supabaseUrl:\s*"([^"]+)"/)[1];
 const supabaseKey = config.match(/supabaseKey:\s*"([^"]+)"/)[1];
 const supabase = createClient(supabaseUrl, supabaseKey);
-supabase.rpc('execute_sql', { sql_query: "SELECT policyname, cmd, qual, with_check FROM pg_policies WHERE tablename = 'messages';" }).then(console.log);
+supabase.rpc('execute_sql', { sql_query: `
+DROP POLICY IF EXISTS "Super Admins Manage All Blogs" ON public.blogs;
+CREATE POLICY "Super Admins Manage All Blogs" 
+ON public.blogs FOR ALL 
+USING (get_user_role() = 'superadmin')
+WITH CHECK (get_user_role() = 'superadmin');
+` }).then(console.log).catch(console.error);
