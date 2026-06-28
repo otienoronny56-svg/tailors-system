@@ -26,6 +26,12 @@
 </head>
 
 <body>
+    <!-- Dark Mode Initializer -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
     <div class="mobile-menu-btn" id="mobile-menu-btn">
         <i class="fas fa-bars"></i>
     </div>
@@ -101,18 +107,45 @@
         </aside>
 
         <main class="main-content">
-            <div class="form-header-container">
+            <div class="form-header-container" style="display: flex; justify-content: space-between; align-items: center;">
                 <h1 class="form-header-title">Create Global Order</h1>
+                <!-- Dark Mode Toggle -->
+                <button class="control-btn" onclick="toggleDarkMode()" title="Toggle Dark Mode"
+                    style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; height: 38px; width: 38px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+                <script>
+                    // Dark Mode Toggle Logic
+                    function toggleDarkMode() {
+                        document.body.classList.toggle('dark-mode');
+                        const icon = document.getElementById('theme-icon');
+                        if (document.body.classList.contains('dark-mode')) {
+                            localStorage.setItem('theme', 'dark');
+                            icon.classList.remove('fa-moon');
+                            icon.classList.add('fa-sun');
+                        } else {
+                            localStorage.setItem('theme', 'light');
+                            icon.classList.remove('fa-sun');
+                            icon.classList.add('fa-moon');
+                        }
+                    }
+                    
+                    document.addEventListener('DOMContentLoaded', () => {
+                        if (document.body.classList.contains('dark-mode')) {
+                            document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun');
+                        }
+                    });
+                </script>
             </div>
 
             <div class="edit-card">
                 <h2 class="edit-card-title"><i class="fas fa-plus-circle"></i> New Global Order</h2>
 
-                <div style="display: flex; gap: 10px; margin-bottom: 25px; background: #f1f5f9; padding: 6px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <button type="button" id="type-custom" class="toggle-btn active" style="flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: var(--brand-navy); color: var(--brand-gold);">
+                <div class="order-type-wrapper">
+                    <button type="button" id="type-custom" class="order-type-btn active">
                         <i class="fas fa-cut"></i> Custom Tailoring
                     </button>
-                    <button type="button" id="type-retail" class="toggle-btn" style="flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: transparent; color: #64748b;">
+                    <button type="button" id="type-retail" class="order-type-btn">
                         <i class="fas fa-shopping-bag"></i> Retail / Accessory Sale
                     </button>
                 </div>
@@ -213,14 +246,14 @@
                     <fieldset id="extras-fieldset">
                         <legend><i class="fas fa-shopping-bag"></i> Accessories & Extras (Optional)</legend>
                         <p style="font-size: 0.85em; color: #64748b; margin-top: 0;">Add ready-made items or accessories from your inventory.</p>
-                        <div id="extras-list-container" style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc;">
+                        <div id="extras-list-container" class="extras-list-wrapper">
                             <p style="text-align:center; color:#94a3b8; font-style:italic; margin:0;">Select a shop above to see available extras.</p>
                         </div>
-                        <div style="display: flex; justify-content: flex-end; margin-top: 10px; padding: 8px 12px; background: #f1f5f9; border-radius: 8px;">
+                        <div class="extras-subtotal-panel">
                             <span style="font-weight: 600; color: #475569;">Extras Subtotal: </span>
                             <span id="extras-subtotal" style="font-weight: 700; color: var(--brand-navy); margin-left: 8px;">Ksh 0.00</span>
                         </div>
-                        <div style="display: flex; justify-content: flex-end; margin-top: 5px; padding: 8px 12px; background: #e0f2fe; border-radius: 8px; border: 1px solid #bae6fd;">
+                        <div class="extras-grand-total-panel">
                             <span style="font-weight: 600; color: #0369a1;">Grand Total: </span>
                             <span id="grand-total-display" style="font-weight: 700; color: #0c4a6e; margin-left: 8px;">Ksh 0.00</span>
                         </div>

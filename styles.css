@@ -2138,21 +2138,22 @@ body.dark-mode .control-bar select {
 /* Scorecards Grid */
 .scorecard-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
-    gap: 20px !important;
-    margin-bottom: 30px !important;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 25px !important;
 }
 
 .scorecard {
     background: white;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    border-left: 5px solid var(--brand-navy);
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    border-left: 4px solid transparent;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    gap: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #eee;
 }
 
 .scorecard:hover {
@@ -2177,9 +2178,9 @@ body.dark-mode .control-bar select {
 }
 
 .score-title {
-    font-size: 0.85em;
-    font-weight: 700;
-    color: #64748b;
+    font-size: 0.75em;
+    font-weight: 600;
+    color: #666;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: flex;
@@ -2188,10 +2189,10 @@ body.dark-mode .control-bar select {
 }
 
 .score-val {
-    font-size: 2em;
+    font-size: 1.4em;
     font-weight: 800;
-    color: var(--brand-navy);
-    margin: 5px 0;
+    color: var(--brand-black);
+    margin: 3px 0;
 }
 
 .score-trend {
@@ -2505,14 +2506,14 @@ body.dark-mode .rank-5 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
 }
 
 .inv-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
 @media (max-width: 768px) {
@@ -2543,8 +2544,8 @@ body.dark-mode .rank-5 {
 
 .inv-stat-card {
     background: white;
-    padding: 20px;
-    border-radius: 12px;
+    padding: 10px 15px;
+    border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     text-align: center;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -2557,10 +2558,10 @@ body.dark-mode .rank-5 {
 }
 
 .inv-stat-card .stat-value {
-    font-size: 2em;
+    font-size: 1.5em;
     font-weight: 800;
     color: var(--brand-navy);
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .inv-stat-card .stat-value.good {
@@ -2573,7 +2574,7 @@ body.dark-mode .rank-5 {
 
 .inv-stat-card .stat-label {
     color: #64748b;
-    font-size: 0.85em;
+    font-size: 0.7em;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2581,34 +2582,56 @@ body.dark-mode .rank-5 {
 
 .inv-add-panel {
     background: white;
-    padding: 24px;
-    border-radius: 16px;
+    padding: 15px;
+    border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    margin-bottom: 30px;
+    margin-bottom: 15px;
     border-top: 4px solid var(--brand-gold);
     border: 1px solid #f1f5f9;
 }
 
 .inv-add-panel h3 {
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     color: var(--brand-navy);
     display: flex;
     align-items: center;
-    font-size: 1.1em;
+    font-size: 1em;
 }
 
 .inv-form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
+    gap: 20px;
     align-items: end;
+}
+
+@media (min-width: 769px) {
+    .inv-form-grid {
+        /* Desktop: 1 row, 6 columns layout */
+        grid-template-columns: 2fr 1.2fr 0.8fr 0.8fr 1.2fr auto;
+    }
 }
 
 @media (max-width: 768px) {
     .inv-form-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        gap: 8px;
+    }
+    
+    .inv-form-grid > div:nth-child(6) { /* Button spans full width on mobile */
+        grid-column: 1 / -1;
+    }
+    
+    .inv-form-grid input,
+    .inv-form-grid select {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+    
+    .btn-add-item {
+        height: 40px;
+        font-size: 0.9em;
     }
 }
 
@@ -2618,43 +2641,54 @@ body.dark-mode .rank-5 {
     font-weight: 600;
     color: #64748b;
     margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .inv-form-grid input,
 .inv-form-grid select {
     width: 100%;
-    padding: 10px 15px;
+    padding: 12px 15px;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
     font-size: 0.95em;
     box-sizing: border-box;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
+    background-color: #f8fafc;
 }
 
 .inv-form-grid input:focus,
 .inv-form-grid select:focus {
     outline: none;
     border-color: var(--brand-gold);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .btn-add-item {
-    background: var(--brand-navy);
-    color: var(--brand-gold);
+    background: var(--brand-gold);
+    color: var(--brand-navy);
     border: none;
-    padding: 10px 20px;
+    padding: 12px 20px;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 0.95em;
     cursor: pointer;
     width: 100%;
     transition: all 0.2s;
-    height: 42px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.btn-add-item:hover {
+    background: #eab308;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 
-.btn-add-item:hover {
-    background: #0f172a;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
 
 .inv-toolbar {
     display: flex;
@@ -2925,6 +2959,211 @@ body.dark-mode .rank-5 {
     background: #0f172a;
 }
 
+/* Order Form Toggle */
+.order-type-wrapper {
+    display: flex; 
+    gap: 10px; 
+    margin-bottom: 25px; 
+    background: #f1f5f9; 
+    padding: 6px; 
+    border-radius: 8px; 
+    border: 1px solid #e2e8f0;
+}
+
+.order-type-btn {
+    flex: 1; 
+    padding: 10px; 
+    border: none; 
+    border-radius: 6px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: all 0.2s;
+    background: transparent;
+    color: #64748b;
+}
+
+.order-type-btn.active {
+    background: var(--brand-navy); 
+    color: var(--brand-gold);
+}
+
+body.dark-mode .order-type-wrapper {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-mode .order-type-btn {
+    color: #94a3b8;
+}
+
+body.dark-mode .order-type-btn.active {
+    background: var(--brand-gold);
+    color: var(--brand-navy);
+}
+
+
+/* Dark Mode Support for Order Form Bottom Section */
+.extras-list-wrapper {
+    max-height: 250px; 
+    overflow-y: auto; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 8px; 
+    padding: 10px; 
+    background: #f8fafc;
+}
+
+.extra-item-row {
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 8px 10px; 
+    border-bottom: 1px solid #e2e8f0; 
+    gap: 10px;
+}
+
+.extra-item-name {
+    color: #334155; 
+    font-size: 0.9em; 
+    font-weight: 600;
+}
+
+.extra-item-cat {
+    font-size: 0.75em; 
+    background: #e0e7ff; 
+    color: #4338ca; 
+    padding: 2px 8px; 
+    border-radius: 4px; 
+    margin-left: 6px;
+}
+
+.extra-item-desc {
+    font-size: 0.8em; 
+    color: #64748b; 
+    margin-top: 2px;
+}
+
+.extra-qty-input {
+    width: 60px; 
+    padding: 6px 8px; 
+    border: 1px solid #cbd5e1; 
+    border-radius: 6px; 
+    text-align: center; 
+    font-size: 0.9em;
+}
+
+body.dark-mode .extras-list-wrapper {
+    background: var(--dark-surface);
+    border-color: var(--dark-border);
+}
+
+body.dark-mode .extra-item-row {
+    border-color: var(--dark-border);
+}
+
+body.dark-mode .extra-item-name {
+    color: #e2e8f0;
+}
+
+body.dark-mode .extra-item-cat {
+    background: rgba(67, 56, 202, 0.3);
+    color: #818cf8;
+}
+
+body.dark-mode .extra-item-desc {
+    color: #94a3b8;
+}
+
+body.dark-mode .extra-qty-input {
+    background: #0f172a;
+    color: #f8fafc;
+    border-color: #334155;
+}
+
+/* Admin Modal Review */
+.admin-modal-title {
+    text-align: center; 
+    border-bottom: 1px solid #eee; 
+    padding-bottom: 10px;
+}
+
+body.dark-mode .admin-modal-title {
+    border-color: var(--dark-border);
+}
+
+.admin-review-summary-box {
+    background: #f9f9f9; 
+    padding: 15px; 
+    margin: 15px 0; 
+    border-left: 4px solid var(--brand-gold);
+}
+
+body.dark-mode .admin-review-summary-box {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-finalize {
+    width: 100%;
+    background-color: var(--brand-navy);
+    color: var(--brand-gold);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-finalize:hover {
+    background-color: #1a365d;
+}
+
+body.dark-mode .btn-finalize {
+    background-color: var(--brand-gold);
+    color: var(--brand-navy);
+}
+
+.extras-subtotal-panel {
+    display: flex; 
+    justify-content: flex-end; 
+    margin-top: 10px; 
+    padding: 8px 12px; 
+    background: #f1f5f9; 
+    border-radius: 8px;
+}
+
+body.dark-mode .extras-subtotal-panel {
+    background: #1e293b;
+}
+
+body.dark-mode .extras-subtotal-panel span {
+    color: #cbd5e1 !important;
+}
+
+.extras-grand-total-panel {
+    display: flex; 
+    justify-content: flex-end; 
+    margin-top: 5px; 
+    padding: 8px 12px; 
+    background: #e0f2fe; 
+    border-radius: 8px; 
+    border: 1px solid #bae6fd;
+}
+
+body.dark-mode .extras-grand-total-panel {
+    background: #0f172a;
+    border-color: #0369a1;
+}
+
+body.dark-mode .extras-grand-total-panel span {
+    color: #7dd3fc !important;
+}
+
+body.dark-mode #submit-order-btn {
+    background: var(--brand-gold) !important;
+    color: var(--brand-navy) !important;
+    border: none;
+}
+
 /* Dark Mode Support for Inventory */
 body.dark-mode .inv-stat-card,
 body.dark-mode .inv-add-panel,
@@ -2998,14 +3237,14 @@ body.dark-mode .inv-actions button {
 .expense-summary-card {
     background: white;
     border-radius: 12px;
-    padding: 20px;
+    padding: 12px 16px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     border: 1px solid #f1f5f9;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    min-width: 250px;
+    min-width: 200px;
     flex-shrink: 0;
 }
 
@@ -3015,29 +3254,29 @@ body.dark-mode .inv-actions button {
 }
 
 .ex-icon-circle {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: rgba(212, 175, 55, 0.1);
     color: var(--brand-gold);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2em;
+    font-size: 1.1em;
     flex-shrink: 0;
 }
 
 .ex-info h4 {
-    margin: 0 0 5px 0;
-    font-size: 0.9em;
+    margin: 0 0 4px 0;
+    font-size: 0.8em;
     color: #64748b;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .ex-amount {
-    margin: 0 0 3px 0;
-    font-size: 1.4em;
+    margin: 0 0 2px 0;
+    font-size: 1.2em;
     font-weight: 800;
     color: var(--brand-navy);
 }
@@ -3188,6 +3427,28 @@ body.dark-mode .measurement-field label {
         padding: 10px 5px !important; 
         font-size: 0.85em !important; 
     }
+    
+    /* Remove the huge white background box around mobile table cards */
+    .inv-table-wrap {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+}
+
+/* Dark mode for mobile inventory cards */
+body.dark-mode .inv-table tr {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+body.dark-mode .inv-table td {
+    border-bottom-color: #334155 !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .inv-table td::before {
+    color: #94a3b8 !important;
 }
 
 /* ==========================================================================

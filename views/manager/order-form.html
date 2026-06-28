@@ -51,13 +51,11 @@
                 <h2 class="edit-card-title"><i class="fas fa-plus-circle"></i> New Order</h2>
 
                 <!-- Order Type Toggle -->
-                <div style="display: flex; gap: 10px; margin-bottom: 25px; background: #f1f5f9; padding: 6px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <button type="button" id="type-custom" class="toggle-btn active"
-                        style="flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: var(--brand-navy); color: var(--brand-gold);">
+                <div class="order-type-wrapper">
+                    <button type="button" id="type-custom" class="order-type-btn active">
                         <i class="fas fa-cut"></i> Custom Tailoring
                     </button>
-                    <button type="button" id="type-retail" class="toggle-btn"
-                        style="flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: transparent; color: #64748b;">
+                    <button type="button" id="type-retail" class="order-type-btn">
                         <i class="fas fa-shopping-bag"></i> Retail / Accessory Sale
                     </button>
                 </div>

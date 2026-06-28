@@ -1645,15 +1645,14 @@ async function loadExtrasForShop(shopId) {
         }
 
         container.innerHTML = items.map(item => `
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-bottom:1px solid #e2e8f0; gap:10px;" data-extra-id="${item.id}">
+            <div class="extra-item-row" data-extra-id="${item.id}">
                 <div style="flex:1;">
-                    <strong style="color:#334155; font-size:0.9em;">${item.name}</strong>
-                    <span style="font-size:0.75em; background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:4px; margin-left:6px;">${item.category}</span>
-                    <div style="font-size:0.8em; color:#64748b; margin-top:2px;">${formatCurrency(item.price)} each · ${item.stock_quantity} in stock</div>
+                    <strong class="extra-item-name">${item.name}</strong>
+                    <span class="extra-item-cat">${item.category}</span>
+                    <div class="extra-item-desc">${formatCurrency(item.price)} each &middot; ${item.stock_quantity} in stock</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <input type="number" min="0" max="${item.stock_quantity}" value="0" class="extra-qty-input" data-item-id="${item.id}" data-item-name="${item.name}" data-item-price="${item.price}" data-max-stock="${item.stock_quantity}"
-                        style="width:60px; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; text-align:center; font-size:0.9em;"
                         onchange="updateExtrasSubtotal()" oninput="updateExtrasSubtotal()">
                 </div>
             </div>

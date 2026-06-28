@@ -490,7 +490,7 @@
     <div id="admin-modal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <span class="close-btn" onclick="closeAdminModal()">&times;</span>
-            <h2 id="admin-modal-title" style="text-align: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            <h2 id="admin-modal-title" class="admin-modal-title">
                 Order Review</h2>
 
             <div id="admin-modal-body" style="padding: 20px;">
@@ -498,8 +498,7 @@
                 <p><strong>Customer:</strong> <span id="admin-detail-customer-name"></span></p>
                 <p><strong>Garment:</strong> <span id="admin-detail-garment-type"></span></p>
 
-                <div
-                    style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-left: 4px solid var(--brand-gold);">
+                <div class="admin-review-summary-box">
                     <p style="margin:5px 0;"><strong>Total Price:</strong> Ksh <span id="admin-detail-price"></span></p>
                     <p style="margin:5px 0;"><strong>Total Paid:</strong> <span
                             style="color: var(--profit-green); font-weight:bold;">Ksh <span
@@ -512,8 +511,7 @@
                 <div id="closure-section" style="text-align: center;">
                     <h3 style="margin-top: 0;">Final Action</h3>
                     <p id="closure-warning" style="font-weight: bold; margin-bottom: 15px;"></p>
-                    <button id="finalize-order-btn"
-                        style="width: 100%; background-color: var(--brand-navy); color: var(--brand-gold);">
+                    <button id="finalize-order-btn" class="btn-finalize">
                         ✅ Complete & Close
                     </button>
                 </div>

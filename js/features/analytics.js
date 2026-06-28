@@ -1378,12 +1378,222 @@ async function generateAIInsights(shopId) {
     }
 }
 
-function exportDashboardData() {
-    alert("Export feature would generate Excel report with current dashboard data.");
+// --- Advanced Analytics Charts ---
+
+async function loadRetentionChart(shopId = 'all') {
+    const canvas = document.getElementById('retentionChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const orders = window.advancedAnalyticsOrders || [];
+    if (!orders || orders.length === 0) return;
+
+    let newCount = 0;
+    let returningCount = 0;
+    const seenPhones = new Set();
+
+    // Sort by oldest first to properly track first-time customers
+    const sortedOrders = [...orders].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    sortedOrders.forEach(order => {
+        if (!order.customer_phone) return; // Skip if no phone
+        if (seenPhones.has(order.customer_phone)) {
+            returningCount++;
+        } else {
+            newCount++;
+            seenPhones.add(order.customer_phone);
+        }
+    });
+
+    if (newCount === 0 && returningCount === 0) return;
+
+    analyticsCharts.retentionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['New Customers', 'Returning Customers'],
+            datasets: [{
+                data: [newCount, returningCount],
+                backgroundColor: ['#6366f1', '#10b981'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = newCount + returningCount;
+                            const percentage = Math.round((context.raw / total) * 100);
+                            return ` ${context.label}: ${context.raw} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
-function exportDashboardData() {
-    alert("Export feature would generate Excel report with current dashboard data.");
+async function loadEfficiencyChart(shopId = 'all') {
+    const canvas = document.getElementById('efficiencyChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const orders = window.advancedAnalyticsOrders || [];
+    let labels = [];
+    let data = [];
+
+    if (orders && orders.length > 0) {
+        const completedOrders = orders.filter(o => o.status === 4 || o.status === '4' || o.status === 5 || o.status === '5');
+        
+        if (completedOrders.length > 0) {
+            // Group by month to show trend
+            const monthMap = {};
+            
+            completedOrders.forEach(o => {
+                const endStr = o.completed_at || o.updated_at;
+                if (!endStr) return;
+                
+                const start = new Date(o.created_at);
+                const end = new Date(endStr);
+                const days = (end - start) / (1000 * 60 * 60 * 24);
+                
+                if (days < 0 || days > 365) return; 
+
+                const month = start.toLocaleString('default', { month: 'short', year: '2-digit' });
+                if (!monthMap[month]) monthMap[month] = { totalDays: 0, count: 0 };
+                monthMap[month].totalDays += days;
+                monthMap[month].count++;
+            });
+
+            const sortedMonths = Object.keys(monthMap).sort((a, b) => {
+                const [mA, yA] = a.split(' ');
+                const [mB, yB] = b.split(' ');
+                return new Date(`${mA} 1, 20${yA}`) - new Date(`${mB} 1, 20${yB}`);
+            });
+
+            labels = sortedMonths.slice(-6);
+            data = labels.map(m => (monthMap[m].totalDays / monthMap[m].count).toFixed(1));
+        }
+    }
+
+    analyticsCharts.efficiencyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels.length > 0 ? labels : ['No Data'],
+            datasets: [{
+                label: 'Avg Days to Complete',
+                data: data.length > 0 ? data : [0],
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+async function loadSeasonalityChart(shopId = 'all') {
+    const canvas = document.getElementById('seasonalityChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let ordersQuery = supabaseClient.from('orders').select('created_at').eq('organization_id', USER_PROFILE.organization_id);
+    if (shopId !== 'all') ordersQuery = ordersQuery.eq('shop_id', shopId);
+
+    const { data: orders } = await ordersQuery;
+    
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const counts = [0, 0, 0, 0, 0, 0, 0];
+
+    if (orders && orders.length > 0) {
+        orders.forEach(o => {
+            if (o.created_at) {
+                const d = new Date(o.created_at).getDay();
+                if (d >= 0 && d <= 6) counts[d]++;
+            }
+        });
+    }
+
+    analyticsCharts.seasonalityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            datasets: [{
+                label: 'Orders',
+                data: counts,
+                backgroundColor: '#10b981',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+function exportDashboardPDF() {
+    // Trigger native browser print which we have styled for perfect PDF layout
+    window.print();
+}
+
+function exportDashboardCSV() {
+    try {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Type,Date,Amount,Description\n";
+
+        // Export Payments (Revenue)
+        if (window.globalPayments && window.globalPayments.length > 0) {
+            window.globalPayments.forEach(p => {
+                const date = new Date(p.recorded_at).toLocaleDateString();
+                const desc = `Payment for order ${p.order_id || 'N/A'}`;
+                csvContent += `Revenue,${date},${p.amount},"${desc}"\n`;
+            });
+        }
+
+        // Export Expenses
+        if (window.globalExpenses && window.globalExpenses.length > 0) {
+            window.globalExpenses.forEach(e => {
+                const date = new Date(e.incurred_at).toLocaleDateString();
+                const desc = e.description || e.category || 'Expense';
+                csvContent += `Expense,${date},${e.amount},"${desc}"\n`;
+            });
+        }
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Financial_Report_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (err) {
+        console.error("CSV Export failed:", err);
+        alert("Failed to export data. Please try again.");
+    }
 }
 
 async function loadBIAnalytics() {
@@ -1679,6 +1889,13 @@ async function loadAnalyticsDashboard() {
         const revenueDaysStr = document.getElementById('revenue-filter') ? document.getElementById('revenue-filter').value : '30';
         const productMixDaysStr = document.getElementById('product-mix-filter') ? document.getElementById('product-mix-filter').value : '30';
 
+        // PRE-FETCH: Grab all orders needed for the new advanced charts in ONE query 
+        // to prevent spamming the database with 3 simultaneous queries which slows down the browser
+        let advOrdersQuery = supabaseClient.from('orders').select('status, created_at, completed_at, updated_at, customer_phone').eq('organization_id', USER_PROFILE.organization_id);
+        if (shopId !== 'all') advOrdersQuery = advOrdersQuery.eq('shop_id', shopId);
+        const { data: advancedOrders } = await advOrdersQuery;
+        window.advancedAnalyticsOrders = advancedOrders || [];
+
         await Promise.all([
             loadKPIMetrics(shopId),
             loadRevenueTrend(revenueDaysStr),
@@ -1690,7 +1907,10 @@ async function loadAnalyticsDashboard() {
             generateAIInsights(shopId),
             loadExpenseAuditTable(shopId),
             loadOrderVolumeChart(shopId),
-            loadRecentActivities(shopId)
+            loadRecentActivities(shopId),
+            loadRetentionChart(shopId),
+            loadEfficiencyChart(shopId),
+            loadSeasonalityChart(shopId)
         ]);
 
         logDebug("Analytics dashboard loaded", null, 'success');

@@ -2045,11 +2045,6 @@ function initAdminOrderForm() {
         if (btnCustom && btnRetail) {
             btnCustom.classList.toggle('active', type === 'custom');
             btnRetail.classList.toggle('active', type === 'retail');
-
-            btnCustom.style.background = type === 'custom' ? 'var(--brand-navy)' : 'transparent';
-            btnCustom.style.color = type === 'custom' ? 'var(--brand-gold)' : '#64748b';
-            btnRetail.style.background = type === 'retail' ? 'var(--brand-navy)' : 'transparent';
-            btnRetail.style.color = type === 'retail' ? 'var(--brand-gold)' : '#64748b';
         }
 
         const garmentRow = document.getElementById('garment-type-row');

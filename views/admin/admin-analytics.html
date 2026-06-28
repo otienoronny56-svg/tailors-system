@@ -31,6 +31,12 @@
 </head>
 
 <body>
+    <!-- Dark Mode Initializer -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
     <div class="mobile-menu-btn" id="mobile-menu-btn">
         <i class="fas fa-bars"></i>
     </div>
@@ -106,37 +112,52 @@
         </aside>
 
         <main class="main-content">
-            <header class="analytics-header">
+            <header class="analytics-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                 <div>
                     <h1>Business Intelligence</h1>
                     <p>AI-Driven Insights & Visual Performance Analytics</p>
                 </div>
-                <div class="control-bar">
-                    <select id="bi-shop-filter" class="control-btn"
-                        style="border: 1px solid #e2e8f0; outline: none; background: white;"
-                        onchange="loadBIAnalytics()">
-                        <option value="all">Global (All Shops)</option>
-                    </select>
-                    <select id="bi-date-filter" class="control-btn"
-                        style="border: 1px solid #e2e8f0; outline: none; background: white;"
-                        onchange="loadBIAnalytics()">
-                        <option value="30">Last 30 Days</option>
-                        <option value="90">Last 90 Days</option>
-                        <option value="365">This Year</option>
-                        <option value="all" selected>All Time</option>
-                    </select>
-                    <button class="control-btn" onclick="exportBIReport()"
-                        style="background: var(--brand-navy); color: white; border: none;">
-                        <i class="fas fa-file-export"></i> Export PDF
+                
+                <div class="header-actions" style="display: flex; gap: 8px; align-items: center;">
+                    <!-- Dark Mode Toggle -->
+                    <button class="control-btn" onclick="toggleDarkMode()" title="Toggle Dark Mode"
+                        style="padding: 8px; width: 38px; justify-content: center; background: white; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer;">
+                        <i class="fas fa-moon" id="theme-icon"></i>
                     </button>
+                    <script>
+                        // Dark Mode Toggle Logic
+                        function toggleDarkMode() {
+                            document.body.classList.toggle('dark-mode');
+                            const icon = document.getElementById('theme-icon');
+                            if (document.body.classList.contains('dark-mode')) {
+                                localStorage.setItem('theme', 'dark');
+                                icon.classList.remove('fa-moon');
+                                icon.classList.add('fa-sun');
+                            } else {
+                                localStorage.setItem('theme', 'light');
+                                icon.classList.remove('fa-sun');
+                                icon.classList.add('fa-moon');
+                            }
+                            if (typeof loadBIAnalytics === 'function') loadBIAnalytics();
+                        }
+                        
+                        document.addEventListener('DOMContentLoaded', () => {
+                            if (document.body.classList.contains('dark-mode')) {
+                                document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun');
+                            }
+                        });
+                    </script>
+
                     <button class="control-btn" onclick="loadBIAnalytics()" title="Refresh"
-                        style="padding: 8px; width: 38px; justify-content: center;">
+                        style="padding: 8px; width: 38px; justify-content: center; background: white; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer;">
                         <i class="fas fa-sync-alt"></i>
                     </button>
+                    
                     <button class="control-btn" onclick="toggleGuide('analytics-guide')" title="Help & Guide"
                         style="padding: 8px; width: 38px; justify-content: center; background: white; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer;">
                         <i class="fas fa-question-circle"></i>
                     </button>
+                    
                     <button onclick="handleLogout()" title="Logout"
                         style="background: #ef4444; border: none; color: white; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
                         onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
@@ -145,6 +166,30 @@
                     </button>
                 </div>
             </header>
+
+            <div class="control-panel" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; background: white; padding: 8px 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border-top: 3px solid var(--brand-gold);">
+                <div class="control-group" style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                    <select id="bi-shop-filter" class="control-btn"
+                        style="border: 1px solid #e2e8f0; outline: none; background: #fafafa; padding: 0 10px; height: 34px; border-radius: 4px; font-size: 0.85em; font-weight: 500;"
+                        onchange="loadBIAnalytics()">
+                        <option value="all">Global (All Shops)</option>
+                    </select>
+                    
+                    <select id="bi-date-filter" class="control-btn"
+                        style="border: 1px solid #e2e8f0; outline: none; background: #fafafa; padding: 0 10px; height: 34px; border-radius: 4px; font-size: 0.85em; font-weight: 500;"
+                        onchange="loadBIAnalytics()">
+                        <option value="30">Last 30 Days</option>
+                        <option value="90">Last 90 Days</option>
+                        <option value="365">This Year</option>
+                        <option value="all" selected>All Time</option>
+                    </select>
+                </div>
+                
+                <button class="control-btn" onclick="exportBIReport()" title="Export PDF"
+                    style="background: var(--brand-navy); color: var(--brand-gold); border: 1px solid var(--brand-gold); border-radius: 4px; font-weight: 600; cursor: pointer; white-space: nowrap; padding: 0 12px; transition: all 0.2s; display: flex; align-items: center; gap: 8px; height: 34px; font-size: 0.85em;">
+                    <i class="fas fa-file-pdf" style="color: #ef4444;"></i> EXPORT PDF
+                </button>
+            </div>
 
             <!-- Interactive Analytics Guide -->
             <div class="dashboard-guide-banner" id="analytics-guide" style="display: flex; margin-bottom: 25px;">
@@ -213,7 +258,7 @@
             <!-- 2. Primary Charts -->
             <section class="bi-section">
                 <!-- Smooth Area Chart -->
-                <div class="bi-card" style="flex: 2; min-width: 450px;">
+                <div class="bi-card" style="flex: 2; min-width: 250px;">
                     <h3 class="bi-card-title"><i class="fas fa-wave-square" style="color: #8b5cf6;"></i> Financial
                         Health Trajectory</h3>
                     <div class="chart-wrapper">
@@ -222,7 +267,7 @@
                 </div>
 
                 <!-- Polar Area Chart -->
-                <div class="bi-card" style="flex: 1; min-width: 300px;">
+                <div class="bi-card" style="flex: 1; min-width: 250px;">
                     <h3 class="bi-card-title"><i class="fas fa-layer-group" style="color: #3b82f6;"></i> Product
                         Category Dominance</h3>
                     <div class="chart-wrapper">
@@ -234,7 +279,7 @@
             <!-- 3. Secondary Metrics / AI -->
             <section class="bi-section">
                 <!-- AI Insights -->
-                <div style="flex: 1.5; min-width: 350px;">
+                <div style="flex: 1.5; min-width: 250px;">
                     <div class="ai-feed">
                         <h3 class="bi-card-title"
                             style="color: white; border-color: rgba(255,255,255,0.1); margin-bottom: 25px;"><i
@@ -251,7 +296,7 @@
                 </div>
 
                 <!-- Leaderboard & Radar -->
-                <div style="flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 25px;">
+                <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 25px;">
                     <!-- Shop Radar -->
                     <div class="bi-card" style="padding: 15px;">
                         <h3 class="bi-card-title" style="margin-bottom: 10px; font-size: 1em;"><i class="fas fa-spider"
