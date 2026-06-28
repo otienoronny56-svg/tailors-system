@@ -484,8 +484,8 @@ async function viewClientDetails(clientId) {
         let ordersHtml = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px; background: white; border: 1px solid #e2e8f0; border-radius: 12px;">No order history found.</p>';
         if (orders && orders.length > 0) {
             ordersHtml = `
-                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9em;">
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow-x: auto; overflow-y: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9em; min-width: 400px;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
                                 <th style="padding: 10px 15px; color: #64748b; font-weight: 600;">Date</th>

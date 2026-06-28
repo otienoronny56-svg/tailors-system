@@ -1907,6 +1907,13 @@ body.dark-mode .history-item [id^="audit-diff-"] {
 }
 
 /* Section headers (Measurement History / Order & Billing History) */
+@media (max-width: 768px) {
+    .client-details-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+}
+
 body.dark-mode .client-details-grid h3 {
     color: #f8fafc !important;
 }

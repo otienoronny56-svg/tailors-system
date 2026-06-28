@@ -20,7 +20,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="icon" type="image/png" href="../../logo.jpeg">
-    <link rel="stylesheet" href="../../styles.css?v=20260629_1">
+    <link rel="stylesheet" href="../../styles.css?v=20260629_2">
     <script src="/js/lib/supabase.min.js"></script>
     <!-- Mobile -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -85,6 +85,9 @@
                 width: 32px !important;
                 height: 32px !important;
                 font-size: 0.9em !important;
+            }
+            .hide-mobile-text {
+                display: none !important;
             }
 
             .command-grid {
@@ -655,7 +658,7 @@
                 <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
                     <button onclick="window.location.href='admin-tailors-directory.html'" title="Tailors Directory" class="btn-modern"
                         style="height: 42px; padding: 0 14px; background: var(--brand-navy); color: var(--brand-gold); border: none; display: flex; align-items: center; gap: 8px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.82em; white-space: nowrap;">
-                        <i class="fas fa-users-between-lines"></i> Tailors Directory
+                        <i class="fas fa-users-between-lines"></i> <span class="hide-mobile-text">Tailors Directory</span>
                     </button>
                     <button onclick="toggleGuide('management-guide')" title="Help & Setup Guide" class="btn-modern"
                         style="width: 42px; height: 42px; padding: 0; background: white; color: #475569; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer;">
