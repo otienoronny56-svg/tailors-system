@@ -386,6 +386,7 @@
                 <button class="tab-btn" onclick="switchTenantTab(event, 'pending')" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;">Pending Approvals <span id="pending-badge" style="background:#ef4444; color:white; border-radius:20px; padding:2px 8px; font-size:0.7em; margin-left: 5px; display: none;">0</span></button>
                 <button class="tab-btn" onclick="switchTenantTab(event, 'create')" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;"><i class="fas fa-plus"></i> New Tenant</button>
                 <button class="tab-btn" onclick="switchTenantTab(event, 'admins')" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;"><i class="fas fa-user-shield"></i> Admin Accounts</button>
+                <button class="tab-btn" onclick="switchTenantTab(event, 'audit')" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;"><i class="fas fa-history"></i> Audit Logs</button>
             </div>
 
             <!-- Tab 1: Active Orgs -->
@@ -477,6 +478,25 @@
                 </form>
             </section>
 
+            <!-- Tab 5: Audit Logs -->
+            <section class="order-list" id="tab-audit" style="display: none; border-left: 4px solid #8b5cf6;">
+                <div style="width: 100%; overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Organization</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="audit-logs-tbody">
+                            <tr><td colspan="4" style="text-align:center; padding:20px;">Loading audit logs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <script>
                 function switchTenantTab(event, tabId) {
                     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -489,6 +509,7 @@
                     document.getElementById('tab-pending-orgs').style.display = 'none';
                     document.getElementById('tab-create-org').style.display = 'none';
                     document.getElementById('tab-admins').style.display = 'none';
+                    document.getElementById('tab-audit').style.display = 'none';
 
                     const activeBtn = event.currentTarget;
                     activeBtn.style.color = 'var(--brand-gold)';
@@ -500,6 +521,10 @@
                     if(tabId === 'pending') document.getElementById('tab-pending-orgs').style.display = 'block';
                     if(tabId === 'create') document.getElementById('tab-create-org').style.display = 'block';
                     if(tabId === 'admins') document.getElementById('tab-admins').style.display = 'block';
+                    if(tabId === 'audit') {
+                        document.getElementById('tab-audit').style.display = 'block';
+                        if (typeof window.loadAuditLogs === 'function') window.loadAuditLogs();
+                    }
                 }
             </script>
 

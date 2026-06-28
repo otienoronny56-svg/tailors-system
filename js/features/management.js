@@ -1849,3 +1849,56 @@ window.deleteShop = async function(shopId, orgId, orgName) {
         alert("Error: " + err.message);
     }
 }
+
+window.loadAuditLogs = async function() {
+    const tbody = document.getElementById('audit-logs-tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Loading...</td></tr>';
+    try {
+        const { data: logs, error } = await supabaseClient
+            .from('audit_logs')
+            .select(`
+                id, created_at, action, details,
+                organizations ( name )
+            `)
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+        if (error) throw error;
+
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--brand-slate);">No audit logs found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = logs.map(log => {
+            const dateStr = new Date(log.created_at).toLocaleString();
+            const orgName = log.organizations ? log.organizations.name : 'Unknown';
+            let detailsHtml = '';
+            
+            if (log.action === 'RENAME_ORGANIZATION') {
+                detailsHtml = `Changed from <strong>${log.details.old_name}</strong> to <strong>${log.details.new_name}</strong>`;
+            } else if (log.action === 'SECURITY_UPDATE') {
+                const updates = [];
+                if (log.details.email_updated) updates.push('Email');
+                if (log.details.password_updated) updates.push('Password');
+                detailsHtml = `Updated: ${updates.join(', ')}`;
+            } else {
+                detailsHtml = JSON.stringify(log.details);
+            }
+
+            return `
+                <tr>
+                    <td><small style="color:var(--brand-slate);">${dateStr}</small></td>
+                    <td style="font-weight:600;">${orgName}</td>
+                    <td><span style="background:rgba(139, 92, 246, 0.1); color:#8b5cf6; padding:3px 8px; border-radius:4px; font-size:0.85em; font-weight:600;">${log.action.replace('_', ' ')}</span></td>
+                    <td>${detailsHtml}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error("Error loading audit logs:", err);
+        tbody.innerHTML = \`<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error loading logs: \${err.message}</td></tr>\`;
+    }
+}
