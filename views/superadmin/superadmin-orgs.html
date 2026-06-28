@@ -286,11 +286,64 @@
         </aside>
 
         <main class="main-content">
-            <header style="margin-bottom: 30px;">
-                <h1>Organization Management</h1>
+            <header style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+                <h1>Tenant Management</h1>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="toggleTheme()" class="top-right-theme-toggle" title="Toggle Dark Mode" style="background: transparent; border: 1px solid var(--glass-border); color: var(--brand-slate); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em;" onmouseover="this.style.background='var(--card-bg)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-moon theme-toggle-icon"></i>
+                    </button>
+                    <button onclick="handleLogout()" class="small-btn" style="background: #e11d48; color: white; border: none;">Logout</button>
+                </div>
             </header>
 
-            <section class="order-form-container">
+            <div class="tabs-container" style="margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); display: flex; gap: 20px; overflow-x: auto;">
+                <button class="tab-btn active" onclick="switchTenantTab(event, 'active')" style="background: none; border: none; color: var(--brand-gold); font-weight: 700; padding: 10px 15px; border-bottom: 3px solid var(--brand-gold); cursor: pointer; font-size: 1.1em; white-space: nowrap;">Active Organizations</button>
+                <button class="tab-btn" onclick="switchTenantTab(event, 'pending')" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;">Pending Approvals <span id="pending-badge" style="background:#ef4444; color:white; border-radius:20px; padding:2px 8px; font-size:0.7em; margin-left: 5px; display: none;">0</span></button>
+                <button class="tab-btn" onclick="switchTenantTab(event, 'create')" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;"><i class="fas fa-plus"></i> New Tenant</button>
+            </div>
+
+            <!-- Tab 1: Active Orgs -->
+            <section class="order-list" id="tab-active-orgs">
+                <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Setup Date</th>
+                                <th>Tier</th>
+                                <th>Expires In</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orgs-tbody">
+                            <tr><td colspan="6" style="text-align:center; padding:20px;">Loading tenants...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Tab 2: Pending Approvals -->
+            <section class="order-list" id="tab-pending-orgs" style="display: none; border-left: 4px solid #ef4444;">
+                <div style="width: 100%; overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Shop Name</th>
+                                <th>Owner Name</th>
+                                <th>Email</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-approvals-tbody">
+                            <tr><td colspan="4" style="text-align:center; padding:20px;">Loading pending tenants...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Tab 3: Create -->
+            <section class="order-form-container" id="tab-create-org" style="display: none;">
                 <h2>Create New Tenant</h2>
                 <form id="create-org-form">
                     <div style="margin-bottom: 20px;">
@@ -303,6 +356,30 @@
                     <div id="org-message" style="margin-top: 15px; text-align: center; font-weight: 500;"></div>
                 </form>
             </section>
+
+            <script>
+                function switchTenantTab(event, tabId) {
+                    document.querySelectorAll('.tab-btn').forEach(btn => {
+                        btn.style.color = 'var(--brand-slate)';
+                        btn.style.borderBottom = '3px solid transparent';
+                        btn.style.fontWeight = '600';
+                        btn.classList.remove('active');
+                    });
+                    document.getElementById('tab-active-orgs').style.display = 'none';
+                    document.getElementById('tab-pending-orgs').style.display = 'none';
+                    document.getElementById('tab-create-org').style.display = 'none';
+
+                    const activeBtn = event.currentTarget;
+                    activeBtn.style.color = 'var(--brand-gold)';
+                    activeBtn.style.borderBottom = '3px solid var(--brand-gold)';
+                    activeBtn.style.fontWeight = '700';
+                    activeBtn.classList.add('active');
+
+                    if(tabId === 'active') document.getElementById('tab-active-orgs').style.display = 'block';
+                    if(tabId === 'pending') document.getElementById('tab-pending-orgs').style.display = 'block';
+                    if(tabId === 'create') document.getElementById('tab-create-org').style.display = 'block';
+                }
+            </script>
 
             <section class="order-list">
                 <h2>All Tenants</h2>

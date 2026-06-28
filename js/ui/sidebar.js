@@ -74,11 +74,25 @@ async function updateSidebarBranding(forcedName = null) {
 
             if (USER_PROFILE.role === 'superadmin') {
                 navHtml = `
-                    <a href="/views/superadmin/superadmin-dashboard.html" id="nav-dashboard"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> SaaS Dashboard</a>
+                    <div style="padding: 10px 15px; font-size: 0.7em; font-weight: 700; color: var(--brand-slate); letter-spacing: 1px; text-transform: uppercase; margin-top: 5px;">Overview</div>
+                    <a href="/views/superadmin/superadmin-dashboard.html" id="nav-dashboard"><i class="fas fa-chart-pie" style="margin-right: 8px;"></i> SaaS Dashboard</a>
+                    
+                    <div style="padding: 10px 15px; font-size: 0.7em; font-weight: 700; color: var(--brand-slate); letter-spacing: 1px; text-transform: uppercase; margin-top: 15px;">Management</div>
                     <a href="/views/superadmin/superadmin-orgs.html" id="nav-orgs"><i class="fas fa-building" style="margin-right: 8px;"></i> Manage Tenants</a>
-                    <a href="/views/superadmin/superadmin-users-list.html" id="nav-users"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
-                    <a href="/views/superadmin/superadmin-users.html" id="nav-admins"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
-                    <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+                    
+                    <div style="padding: 10px 15px; font-size: 0.7em; font-weight: 700; color: var(--brand-slate); letter-spacing: 1px; text-transform: uppercase; margin-top: 15px;">System</div>
+                    <div class="sidebar-dropdown">
+                        <button class="dropdown-trigger" id="nav-security-dropdown" onclick="toggleSidebarDropdown(this)">
+                            <span><i class="fas fa-shield-halved" style="margin-right: 8px;"></i> Security & Access</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="/views/superadmin/superadmin-users-list.html" id="nav-users"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
+                            <a href="/views/superadmin/superadmin-users.html" id="nav-admins"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
+                        </div>
+                    </div>
+
+                    <a href="#" id="logout-btn" onclick="handleLogout(); return false;" style="margin-top: 20px;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
                 `;
             } else if (USER_PROFILE.role === 'owner') {
                 navHtml = `

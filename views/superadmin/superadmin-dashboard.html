@@ -340,62 +340,18 @@
                 </div>
             </div>
 
-            <!-- 🔔 PENDING SHOP APPROVALS -->
-            <section class="order-list" id="pending-approvals-section" style="margin-top: 30px; border: 1px solid rgba(239,68,68,0.3); border-left: 4px solid #ef4444;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: #ef4444 !important; display: flex; align-items: center; gap: 10px;">
-                        <span style="width:10px; height:10px; background:#ef4444; border-radius:50%; display:inline-block;"></span>
-                        Pending Shop Approvals
-                        <span id="pending-badge" style="background:#ef4444; color:white; border-radius:20px; padding:2px 10px; font-size:0.6em; font-family:'Montserrat',sans-serif; font-weight:700; vertical-align:middle;">0</span>
-                    </h2>
-                    <span style="font-size:0.8em; color:var(--brand-slate);">New tailor shops awaiting activation</span>
-                </div>
-                <style>
-                    
-                        50% { opacity: 0.5; transform: scale(1.4); }
-                    }
-                </style>
-                <div style="width: 100%; overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Shop Name</th>
-                                <th>Owner Name</th>
-                                <th>Email</th>
-                                <th style="text-align:center;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pending-approvals-tbody">
-                            <tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            
+            </div> <!-- Close grid for charts -->
 
-            <!-- Registered Organizations -->
-            <section class="order-list" style="margin-top: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2>Registered Organizations</h2>
-                    <button onclick="location.href='/views/superadmin/superadmin-orgs.html'" class="small-btn" style="background: var(--card-bg); border: 1px solid var(--glass-border); color: var(--brand-navy); cursor: pointer;">Management View</button>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-top: 30px;">
+                <!-- Subscription Distribution -->
+                <div class="chart-container" style="flex: 1;">
+                    <span class="pulse-label" style="display: block; font-weight: 600; color: var(--brand-slate); margin-bottom: 15px;">Subscription Tier Distribution</span>
+                    <div style="height: 300px; position: relative; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="tierDistributionChart"></canvas>
+                    </div>
                 </div>
-                <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                    <table>
-                        <thead>
-                            <tr>
-                                 <th>Name</th>
-                                 <th>Setup Date</th>
-                                 <th>Tier</th>
-                                 <th>Expires In</th>
-                                 <th>Status</th>
-                                 <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="org-list-tbody">
-                            <tr><td colspan="6" style="text-align:center; padding:20px;">Loading organizations...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            </div>
         </main>
     </div>
 

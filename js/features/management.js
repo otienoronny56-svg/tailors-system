@@ -23,7 +23,10 @@ async function loadPendingApprovals() {
         const count = pending?.length || 0;
 
         // Update badge
-        if (badge) badge.textContent = count;
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'inline-block' : 'none';
+        }
         if (section) {
             section.style.borderLeftColor = count > 0 ? '#ef4444' : 'rgba(16,185,129,0.3)';
             section.style.borderColor = count > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.15)';

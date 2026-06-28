@@ -122,55 +122,52 @@ async function loadSuperadminDashboard() {
             });
         }
 
-        // Update Organization Table
-        const tbody = document.getElementById('org-list-tbody');
-        if (tbody) {
-            if (!orgs || orgs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No organizations found</td></tr>';
-                return;
+        // --- Subscription Tier Distribution Chart ---
+        const tierCanvas = document.getElementById('tierDistributionChart');
+        if (tierCanvas && orgs) {
+            const tierCtx = tierCanvas.getContext('2d');
+            
+            // Calculate distribution
+            const tiers = { 'Free': 0, 'Basic': 0, 'Premium': 0 };
+            orgs.forEach(o => {
+                const t = o.subscription_tier || 'Free';
+                if (tiers[t] !== undefined) tiers[t]++;
+                else tiers[t] = 1;
+            });
+
+            if (window.superadminCharts && window.superadminCharts.tierDist) {
+                window.superadminCharts.tierDist.destroy();
             }
 
-            // Show latest 10
-            const latestOrgs = [...orgs].reverse().slice(0, 10);
-            tbody.innerHTML = latestOrgs.map(org => {
-                const setupDate = new Date(org.created_at);
-                const today = new Date();
-                const diffTime = today - setupDate;
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                const billingDays = org.billing_cycle === '3 Months' ? 90 : 30;
-                const daysLeft = billingDays - diffDays;
-                
-                const badgeClass = daysLeft <= 0 ? 'badge-danger' : (daysLeft < 7 ? 'badge-warning' : 'badge-active');
-                const badgeText = daysLeft <= 0 ? 'Expired' : `${daysLeft} Days Left`;
-                // Inline color support for alerts
-                let inlineStyle = "";
-                if (daysLeft <= 0) inlineStyle = "background: #ef4444; color: white;";
-                else if (daysLeft < 7) inlineStyle = "background: #f59e0b; color: white;";
-
-                return `
-                <tr>
-                    <td><strong>${org.name}</strong></td>
-                    <td>${formatDate(org.created_at)}</td>
-                    <td>
-                        <span class="org-badge badge-${(org.subscription_tier || 'basic').toLowerCase()}">
-                            ${org.subscription_tier || 'Basic'}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="org-badge ${badgeClass}" style="${inlineStyle}">${badgeText}</span>
-                    </td>
-                    <td>
-                        <span class="org-badge badge-active">${org.subscription_status || 'Active'}</span>
-                    </td>
-                    <td><button class="small-btn" onclick="location.href='/views/superadmin/superadmin-orgs.html'">Manage</button></td>
-                </tr>
-                `;
-            }).join('');
+            window.superadminCharts.tierDist = new Chart(tierCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(tiers),
+                    datasets: [{
+                        data: Object.values(tiers),
+                        backgroundColor: [
+                            'rgba(136, 146, 176, 0.8)', // Free (Slate)
+                            'rgba(56, 189, 248, 0.8)',  // Basic (Blue)
+                            'rgba(212, 175, 55, 0.8)'   // Premium (Gold)
+                        ],
+                        borderColor: document.body.classList.contains('dark-mode') ? '#1e293b' : '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: document.body.classList.contains('dark-mode') ? '#e2e8f0' : '#475569'
+                            }
+                        }
+                    }
+                }
+            });
         }
-
-        // Load pending approvals separately
-        await loadPendingApprovals();
 
     } catch (err) {
         console.error("Superadmin Dashboard Error:", err);

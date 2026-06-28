@@ -337,6 +337,7 @@ async function routeToPage(path) {
             await loadSuperadminDashboard();
         } else if (path.includes('superadmin-orgs')) {
             await loadOrganizations();
+            if (typeof loadPendingApprovals === 'function') await loadPendingApprovals();
         } else if (path.includes('superadmin-users-list')) {
             await loadPlatformUsers();
         } else if (path.includes('superadmin-users')) {
