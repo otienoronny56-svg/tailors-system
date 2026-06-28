@@ -1724,7 +1724,27 @@
                     }])
                     .select();
 
-                if (error) throw error;
+                if (error) {
+                    if (error.message.includes('messages_recipient_id_fkey')) {
+                        // Retry without recipient_id for guests/legacy threads
+                        const { data: retryData, error: retryError } = await supabaseClient
+                            .from('messages')
+                            .insert([{
+                                inquiry_id: activeThread.all_inquiry_ids ? activeThread.all_inquiry_ids[activeThread.all_inquiry_ids.length - 1] : activeThread.id,
+                                sender_id: USER_PROFILE.id,
+                                message_text: text
+                            }])
+                            .select();
+                        if (retryError) throw retryError;
+                        if (retryData && retryData[0]) {
+                            messages.push(retryData[0]);
+                            renderChatHistory();
+                            scrollToBottom();
+                        }
+                        return;
+                    }
+                    throw error;
+                }
 
                 if (data && data[0]) {
                     messages.push(data[0]);
