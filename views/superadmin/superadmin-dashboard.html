@@ -182,6 +182,14 @@
             .main-content > header > h1 {
                 padding-left: 45px;
             }
+            .main-content > header > div > div:last-child {
+                flex-wrap: wrap;
+                padding-left: 45px;
+                gap: 8px !important;
+            }
+            .metrics-grid, .dashboard-charts-grid, .advanced-metrics-grid {
+                grid-template-columns: 1fr !important;
+            }
         }
     </style>
     <link rel="manifest" href="../../manifest.json">
@@ -424,7 +432,7 @@
             </div>
 
             <!-- Dashboard Charts Grid -->
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="dashboard-charts-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <!-- SaaS Growth Pulse -->
                 <div class="stat-card chart-container">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -450,7 +458,7 @@
             </div>
 
             <!-- Advanced Metrics Grid -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div class="advanced-metrics-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px;">
                 <!-- Revenue by Tier -->
                 <div class="stat-card chart-container">
                     <h3 style="margin: 0 0 15px 0;">Revenue by Tier</h3>
