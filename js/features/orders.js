@@ -410,12 +410,15 @@ async function loadOrderDetailsScreen() {
         // Calculate financials
         const paid = payments ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) : 0;
         const balance = (order.price || 0) - paid;
-
-        // Update UI
         const container = document.getElementById('order-detail-container');
         if (container) {
             const orderIdStr = String(order.id);
             const shortId = orderIdStr.slice(-6);
+
+            const headerIdSpan = document.getElementById('order-id-header');
+            if (headerIdSpan) {
+                headerIdSpan.innerText = shortId;
+            }
 
             container.innerHTML = `
                 <div class="pro-card-header">
@@ -430,35 +433,35 @@ async function loadOrderDetailsScreen() {
                     </div>
                 </div>
                 
-                <div class="financial-strip">
-                    <div class="stat-box box-black">
-                        <small>Total</small>
-                        <strong>Ksh ${(order.price || 0).toLocaleString()}</strong>
+                <div class="financial-strip" style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                    <div class="stat-box" style="flex: 1; min-width: 120px; background: var(--card-bg, #ffffff); border: 1px solid var(--glass-border, #e2e8f0); padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); text-align: left;" class="dark-mode-card">
+                        <small style="display: block; font-size: 0.72em; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 2px;">Total</small>
+                        <strong style="font-size: 1.25em; color: var(--brand-navy, #0f172a);" class="dark-mode-text">Ksh ${(order.price || 0).toLocaleString()}</strong>
                     </div>
-                    <div class="stat-box box-blue">
-                        <small>Paid</small>
-                        <strong>Ksh ${paid.toLocaleString()}</strong>
+                    <div class="stat-box" style="flex: 1; min-width: 120px; background: var(--card-bg, #ffffff); border: 1px solid var(--glass-border, #e2e8f0); padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); text-align: left;" class="dark-mode-card">
+                        <small style="display: block; font-size: 0.72em; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 2px;">Paid</small>
+                        <strong style="font-size: 1.25em; color: #10b981;">Ksh ${paid.toLocaleString()}</strong>
                     </div>
-                    <div class="stat-box ${balance > 0 ? 'box-red' : 'box-green'}">
-                        <small>Balance</small>
-                        <strong>Ksh ${balance.toLocaleString()}</strong>
+                    <div class="stat-box" style="flex: 1; min-width: 120px; background: var(--card-bg, #ffffff); border: 1px solid var(--glass-border, #e2e8f0); padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); text-align: left;" class="dark-mode-card">
+                        <small style="display: block; font-size: 0.72em; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 2px;">Balance</small>
+                        <strong style="font-size: 1.25em; color: ${balance > 0 ? '#ef4444' : '#10b981'};">Ksh ${balance.toLocaleString()}</strong>
                     </div>
                 </div>
                 
-                <div class="quick-actions-toolbar">
-                    <button class="small-btn" style="background:#6c757d;" 
+                <div class="quick-actions-toolbar" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+                    <button class="small-btn" style="flex: 1; min-width: 130px; background: #475569; border: none; color: white; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" 
                             onclick="generateAndShareReceipt('${order.id}')">
-                        <i class="fas fa-file-invoice"></i> Generate Receipt
+                        <i class="fas fa-file-invoice"></i> Receipt
                     </button>
-                    <button class="small-btn" style="background:#3b82f6;" 
+                    <button class="small-btn" style="flex: 1; min-width: 130px; background: #3b82f6; border: none; color: white; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" 
                             onclick="downloadInvoicePDF('${order.id}')">
-                        <i class="fas fa-file-alt"></i> Generate Invoice
+                        <i class="fas fa-file-alt"></i> Invoice
                     </button>
-                    <button class="small-btn" style="background:#28a745;" 
+                    <button class="small-btn" style="flex: 1; min-width: 130px; background: #10b981; border: none; color: white; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; ${balance <= 0 ? 'opacity: 0.5; cursor: not-allowed;' : ''}" 
                             onclick="quickPay('${order.id}', ${balance})" ${balance <= 0 ? 'disabled' : ''}>
                         <i class="fas fa-hand-holding-usd"></i> Record Payment
                     </button>
-                    <button class="small-btn" style="background:#ffc107; color:black;" 
+                    <button class="small-btn" style="flex: 1; min-width: 130px; background: #f59e0b; border: none; color: white; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" 
                             onclick="updateStatus('${order.id}')">
                         <i class="fas fa-sync-alt"></i> Update Status
                     </button>
