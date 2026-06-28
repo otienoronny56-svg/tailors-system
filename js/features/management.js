@@ -200,52 +200,37 @@ async function loadPlatformUsers() {
     if (!tbody) return;
 
     try {
-        const adminClient = window.supabaseClient;
-        
-
-        // 1. Fetch data in parallel
-        const [authRes, profileRes, orgsRes] = await Promise.all([
-            window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'listUsers' } }),
-            supabaseClient.from('user_profiles').select('*'),
-            supabaseClient.from('organizations').select('id, name')
+        // Fetch profiles and orgs in parallel
+        const [profileRes, orgsRes] = await Promise.all([
+            window.supabaseClient.from('user_profiles').select('*').order('created_at', { ascending: false }),
+            window.supabaseClient.from('organizations').select('id, name')
         ]);
 
-        if (authRes.error) throw authRes.error;
         if (profileRes.error) throw profileRes.error;
         if (orgsRes.error) throw orgsRes.error;
 
-        // Safely extract users from the Edge Function response
-        const authUsers = (authRes.data && authRes.data.data && authRes.data.data.users) ? authRes.data.data.users : [];
         const profiles = profileRes.data || [];
         const orgs = orgsRes.data || [];
 
-        // 2. Map data
+        // Map organizations for quick lookup
         const orgMap = Object.fromEntries(orgs.map(o => [o.id, o.name]));
-        const profileMap = Object.fromEntries(profiles.map(p => [p.id, p]));
 
-        // 3. Render
-        if (authUsers.length === 0) {
+        if (profiles.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">No platform users found</td></tr>';
             return;
         }
 
-        tbody.innerHTML = authUsers.map(user => {
-            const profile = profileMap[user.id] || {};
+        tbody.innerHTML = profiles.map(profile => {
             const orgName = orgMap[profile.organization_id] || 'Platform Level';
             
-            // Priority: Use last_seen_at from database (manually tracked Heartbeat)
-            // Fallback: Use last_sign_in_at from auth (only updates on login)
-            const lastActive = profile.last_seen_at ? new Date(profile.last_seen_at) : 
-                              (user.last_sign_in_at ? new Date(user.last_sign_in_at) : null);
-            
-            // Check if online (active in last 5 minutes)
+            const lastActive = profile.last_seen_at ? new Date(profile.last_seen_at) : null;
             const isOnline = lastActive && (new Date() - lastActive < 5 * 60 * 1000);
 
             return `
                 <tr>
                     <td>
                         <div style="font-weight:700;">${profile.full_name || 'Anonymous User'}</div>
-                        <div style="font-size:0.85em; color:#64748b;">${user.email}</div>
+                        <div style="font-size:0.85em; color:#64748b;">${profile.email || 'No email provided'}</div>
                     </td>
                     <td><span class="org-badge badge-basic">${orgName}</span></td>
                     <td><span style="text-transform:capitalize;">${profile.role || 'user'}</span></td>
