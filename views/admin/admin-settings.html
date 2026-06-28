@@ -141,6 +141,40 @@
         }
         .btn-primary:hover { background: #2563eb; }
         .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* Dark Mode Support */
+        body.dark-mode .settings-card {
+            background: #1e293b;
+            border-color: #334155;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        body.dark-mode .settings-card h2 {
+            color: #f8fafc;
+            border-bottom-color: #334155;
+        }
+        body.dark-mode .settings-card p,
+        body.dark-mode .form-group label {
+            color: #cbd5e1;
+        }
+        body.dark-mode .form-group input {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+        body.dark-mode .form-group input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        body.dark-mode #org-name-display {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+        }
+        body.dark-mode #org-name-display div:first-child {
+            color: #cbd5e1 !important;
+        }
+        body.dark-mode #current-org-name {
+            color: #f8fafc !important;
+        }
     </style>
 </head>
 
