@@ -25,12 +25,16 @@
         .blog-list table { 
             width: 100%; 
             border-collapse: collapse; 
-            min-width: 600px;
         }
         .blog-list th, .blog-list td { 
             padding: 12px; 
             text-align: left; 
             border-bottom: 1px solid #e2e8f0; 
+        }
+        .blog-list td:first-child {
+            max-width: 150px;
+            white-space: normal;
+            word-wrap: break-word;
         }
         .dark-mode .blog-list th, .dark-mode .blog-list td {
             border-bottom: 1px solid #334155; 
