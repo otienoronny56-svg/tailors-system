@@ -502,27 +502,36 @@
     </div>
 
     <!-- View Shops Modal -->
-    <div id="view-shops-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
-        <div style="background: var(--card-bg, #fff); width: 80%; max-width: 900px; border-radius: 12px; border: 1px solid var(--glass-border, #e2e8f0); display: flex; flex-direction: column; max-height: 85vh; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-            <div style="padding: 20px 25px; border-bottom: 1px solid var(--glass-border, #e2e8f0); display: flex; justify-content: space-between; align-items: center;">
-                <h2 id="view-shops-org-name" style="margin: 0; color: var(--brand-gold, #D4AF37); font-family: 'Playfair Display', serif;">Organization - Shops</h2>
-                <button onclick="document.getElementById('view-shops-modal').style.display='none'" style="background: none; border: none; font-size: 1.8em; color: var(--text-main, #333); cursor: pointer; line-height: 1;">&times;</button>
+    <div id="view-shops-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.75); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
+        <div style="background: var(--main-bg, #fff); width: 85%; max-width: 1000px; border-radius: 16px; border: 1px solid var(--glass-border, #e2e8f0); display: flex; flex-direction: column; max-height: 85vh; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden;">
+            
+            <div style="padding: 25px 30px; border-bottom: 1px solid var(--glass-border, #e2e8f0); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg, #f8fafc);">
+                <div>
+                    <h2 id="view-shops-org-name" style="margin: 0; font-size: 1.6em; color: var(--text-main, #1e293b); font-family: 'Playfair Display', serif; font-weight: 700;">Organization Shops</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color: var(--brand-slate, #64748b);">Manage branches and access control for this tenant.</p>
+                </div>
+                <button onclick="document.getElementById('view-shops-modal').style.display='none'" style="background: var(--input-bg, #f1f5f9); border: 1px solid var(--glass-border, #e2e8f0); width: 40px; height: 40px; border-radius: 50%; font-size: 1.2em; color: var(--text-main, #333); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);" onmouseover="this.style.background='#ef4444'; this.style.color='white'; this.style.transform='rotate(90deg)';" onmouseout="this.style.background='var(--input-bg, #f1f5f9)'; this.style.color='var(--text-main, #333)'; this.style.transform='rotate(0deg)';">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="order-list" style="padding: 0; overflow-y: auto; background: transparent; border: none; box-shadow: none;">
-                <table style="margin: 0; width: 100%;">
-                    <thead style="position: sticky; top: 0; background: var(--card-bg, #fff); z-index: 10;">
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="org-shops-tbody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
+            
+            <div style="padding: 20px; overflow-y: auto; background: var(--main-bg, #fff);">
+                <div class="order-list" style="padding: 0; background: transparent; border: 1px solid var(--glass-border, #e2e8f0); border-radius: 12px; box-shadow: none; overflow: hidden;">
+                    <table style="margin: 0; width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: var(--card-bg, #f8fafc); z-index: 10;">
+                            <tr>
+                                <th style="padding: 15px 20px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;">Shop ID</th>
+                                <th style="padding: 15px 20px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;">Name</th>
+                                <th style="padding: 15px 20px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;">Location</th>
+                                <th style="padding: 15px 20px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
+                                <th style="padding: 15px 20px; text-align: center; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="org-shops-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
