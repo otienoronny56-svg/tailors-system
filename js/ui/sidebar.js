@@ -78,7 +78,14 @@ async function updateSidebarBranding(forcedName = null) {
                     <a href="/views/superadmin/superadmin-orgs.html" id="nav-orgs"><i class="fas fa-building" style="margin-right: 8px;"></i> Manage Tenants</a>
                     <a href="/views/superadmin/superadmin-users-list.html" id="nav-users"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
                     <a href="/views/superadmin/superadmin-users.html" id="nav-admins"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
-                    <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+                    <div style="display: flex; gap: 10px; margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <button onclick="toggleTheme()" class="theme-toggle-btn" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--brand-slate); border-radius: 8px; cursor: pointer; padding: 10px; transition: all 0.3s; font-weight: 500;">
+                            <i class="fa-solid fa-moon theme-toggle-icon" style="margin-right: 5px;"></i> Theme
+                        </button>
+                        <button onclick="handleLogout(); return false;" id="logout-btn" style="flex: 1; background: rgba(225, 29, 72, 0.15); border: 1px solid rgba(225, 29, 72, 0.3); color: #fb7185; border-radius: 8px; cursor: pointer; padding: 10px; transition: all 0.3s; font-weight: 600;">
+                            <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i> Logout
+                        </button>
+                    </div>
                 `;
             } else if (USER_PROFILE.role === 'owner') {
                 navHtml = `
@@ -123,7 +130,14 @@ async function updateSidebarBranding(forcedName = null) {
 
                     <a href="/views/admin/admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
 
-                    <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+                    <div style="display: flex; gap: 10px; margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <button onclick="toggleTheme()" class="theme-toggle-btn" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--brand-slate); border-radius: 8px; cursor: pointer; padding: 10px; transition: all 0.3s; font-weight: 500;">
+                            <i class="fa-solid fa-moon theme-toggle-icon" style="margin-right: 5px;"></i> Theme
+                        </button>
+                        <button onclick="handleLogout(); return false;" id="logout-btn" style="flex: 1; background: rgba(225, 29, 72, 0.15); border: 1px solid rgba(225, 29, 72, 0.3); color: #fb7185; border-radius: 8px; cursor: pointer; padding: 10px; transition: all 0.3s; font-weight: 600;">
+                            <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i> Logout
+                        </button>
+                    </div>
                 `;
             } else {
                 navHtml = `
@@ -175,7 +189,14 @@ async function updateSidebarBranding(forcedName = null) {
 
                     <a href="/views/manager/order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> Create Order</a>
 
-                    <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+                    <div style="display: flex; gap: 10px; margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <button onclick="toggleTheme()" class="theme-toggle-btn" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--brand-slate); border-radius: 8px; cursor: pointer; padding: 10px; transition: all 0.3s; font-weight: 500;">
+                            <i class="fa-solid fa-moon theme-toggle-icon" style="margin-right: 5px;"></i> Theme
+                        </button>
+                        <button onclick="handleLogout(); return false;" id="logout-btn" style="flex: 1; background: rgba(225, 29, 72, 0.15); border: 1px solid rgba(225, 29, 72, 0.3); color: #fb7185; border-radius: 8px; cursor: pointer; padding: 10px; transition: all 0.3s; font-weight: 600;">
+                            <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i> Logout
+                        </button>
+                    </div>
                 `;
 
 
