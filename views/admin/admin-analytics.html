@@ -133,6 +133,10 @@
                         style="padding: 8px; width: 38px; justify-content: center;">
                         <i class="fas fa-sync-alt"></i>
                     </button>
+                    <button class="control-btn" onclick="toggleGuide('analytics-guide')" title="Help & Guide"
+                        style="padding: 8px; width: 38px; justify-content: center; background: white; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer;">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
                     <button onclick="handleLogout()" title="Logout"
                         style="background: #ef4444; border: none; color: white; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
                         onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
@@ -141,6 +145,29 @@
                     </button>
                 </div>
             </header>
+
+            <!-- Interactive Analytics Guide -->
+            <div class="dashboard-guide-banner" id="analytics-guide" style="display: flex; margin-bottom: 25px;">
+                <i class="fas fa-brain" style="font-size: 1.8em; color: var(--brand-gold); margin-top: 2px;"></i>
+                <div>
+                    <h4>💡 AI & Business Intelligence Guide</h4>
+                    <p>This analytics module automatically consolidates transactions, tracks cost-to-profit ratios, maps fabric choices, and processes demand patterns. Toggle between all or single shops and select date ranges to recalculate metrics dynamically.</p>
+                </div>
+                <button class="close-guide-btn" onclick="toggleGuide('analytics-guide');" title="Dismiss Guide">&times;</button>
+            </div>
+            <script>
+                if (localStorage.getItem('guide_visible_analytics-guide') === 'false') {
+                    document.getElementById('analytics-guide').style.display = 'none';
+                }
+                function toggleGuide(id) {
+                    const guide = document.getElementById(id);
+                    if (guide) {
+                        const isHidden = guide.style.display === 'none';
+                        guide.style.display = isHidden ? 'flex' : 'none';
+                        localStorage.setItem('guide_visible_' + id, isHidden ? 'true' : 'false');
+                    }
+                }
+            </script>
 
             <!-- 1. Trend Scorecards -->
             <section class="scorecard-grid">

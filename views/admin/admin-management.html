@@ -581,8 +581,12 @@
                     <p>Manage Shops, Managers, and Workers globally.</p>
                 </div>
                 <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="toggleGuide('management-guide')" title="Help & Setup Guide" class="btn-modern"
+                        style="width: 42px; height: 42px; padding: 0; background: white; color: #475569; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer;">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
                     <button onclick="loadAdminManagementScreen()" title="Refresh Data" class="btn-modern"
-                        style="width: 42px; height: 42px; padding: 0; background: white; color: #475569; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                        style="width: 42px; height: 42px; padding: 0; background: white; color: #475569; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer;">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <button onclick="handleLogout()" title="Logout"
@@ -593,6 +597,29 @@
                     </button>
                 </div>
             </header>
+
+            <!-- Interactive Management Guide -->
+            <div class="dashboard-guide-banner" id="management-guide" style="display: flex; margin-bottom: 25px;">
+                <i class="fas fa-cogs" style="font-size: 1.8em; color: var(--brand-gold); margin-top: 2px;"></i>
+                <div>
+                    <h4>💡 Command Center Administration Guide</h4>
+                    <p>Welcome to your master setup command center. Here you can launch new tailoring outlets (Shops), assign administrators or Managers to outlets, register Workers, and control system variables. Setup adjustments will apply immediately across all employee nodes.</p>
+                </div>
+                <button class="close-guide-btn" onclick="toggleGuide('management-guide');" title="Dismiss Guide">&times;</button>
+            </div>
+            <script>
+                if (localStorage.getItem('guide_visible_management-guide') === 'false') {
+                    document.getElementById('management-guide').style.display = 'none';
+                }
+                function toggleGuide(id) {
+                    const guide = document.getElementById(id);
+                    if (guide) {
+                        const isHidden = guide.style.display === 'none';
+                        guide.style.display = isHidden ? 'flex' : 'none';
+                        localStorage.setItem('guide_visible_' + id, isHidden ? 'true' : 'false');
+                    }
+                }
+            </script>
 
             <div class="action-panels">
                 <!-- Shop Creation Section -->

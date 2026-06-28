@@ -59,8 +59,17 @@
             }
 
             .main-content {
-                padding: 20px;
-                padding-top: 20px;
+                padding: 15px;
+                padding-top: 60px;
+            }
+            .dashboard-header-container {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+            .top-header-actions {
+                width: 100% !important;
+                justify-content: flex-end !important;
             }
         }
 
@@ -178,32 +187,38 @@
         <!-- Main Content Area -->
         <main class="main-content">
             <header>
-                <div
+                <div class="dashboard-header-container"
                     style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 15px;">
                     <h1 class="dashboard-main-title" style="margin: 0; font-size: 1.5em; color: var(--brand-navy);">
                         Global Operations Oversight</h1>
                     <div class="top-header-actions"
-                        style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                        style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="toggleGuide('dashboard-guide')" title="Help & Dashboard Guide"
+                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
+                            onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
+                            onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
+                            <i class="fa-solid fa-question-circle"></i>
+                        </button>
                         <button onclick="location.href='/views/admin/admin-management.html'" title="Management & Setup"
-                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                             onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
                             onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
                             <i class="fa-solid fa-cog"></i>
                         </button>
                         <button onclick="toggleTheme()" title="Toggle Dark Mode"
-                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                             onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
                             onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
                             <i class="fa-solid fa-moon theme-toggle-icon"></i>
                         </button>
                         <button onclick="loadAdminDashboard()" title="Refresh Data"
-                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                             onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
                             onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
                             <i class="fa-solid fa-arrows-rotate"></i>
                         </button>
                         <button onclick="handleLogout()" title="Logout"
-                            style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                            style="background: #ef4444; border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                             onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
                             onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -211,16 +226,39 @@
                     </div>
                 </div>
 
+                <!-- Interactive Dashboard Guide -->
+                <div class="dashboard-guide-banner" id="dashboard-guide" style="display: flex;">
+                    <i class="fas fa-lightbulb" style="font-size: 1.8em; color: var(--brand-gold); margin-top: 2px;"></i>
+                    <div>
+                        <h4>💡 Operations Oversight Guide</h4>
+                        <p>Welcome to your operational control center. Here you can monitor business health, track active order workflow stages, see upcoming delivery due dates, and finalize orders. Click <strong>Refresh Data</strong> to pull the latest updates instantly.</p>
+                    </div>
+                    <button class="close-guide-btn" onclick="toggleGuide('dashboard-guide');" title="Dismiss Guide">&times;</button>
+                </div>
+                <script>
+                    if (localStorage.getItem('guide_visible_dashboard-guide') === 'false') {
+                        document.getElementById('dashboard-guide').style.display = 'none';
+                    }
+                    function toggleGuide(id) {
+                        const guide = document.getElementById(id);
+                        if (guide) {
+                            const isHidden = guide.style.display === 'none';
+                            guide.style.display = isHidden ? 'flex' : 'none';
+                            localStorage.setItem('guide_visible_' + id, isHidden ? 'true' : 'false');
+                        }
+                    }
+                </script>
+
                 <!-- QUICK ACTIONS -->
-                <div class="quick-actions-toolbar" style="display: flex; gap: 15px; margin-bottom: 25px;">
+                <div class="quick-actions-toolbar" style="display: flex; gap: 8px; margin-bottom: 12px;">
                     <button onclick="window.location.href='/views/admin/admin-expenses.html'"
-                        style="background: white; color: var(--brand-navy); border: 1px solid var(--brand-navy); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"
+                        style="background: white; color: var(--brand-navy); border: 1px solid var(--brand-navy); padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"
                         onmouseover="this.style.background='#f8fafc'; this.style.transform='translateY(-1px)'"
                         onmouseout="this.style.background='white'; this.style.transform='translateY(0)'">
                         <i class="fas fa-file-invoice-dollar" style="color: var(--brand-gold);"></i> Manage Expenses
                     </button>
                     <button onclick="shareMyStorefront()"
-                        style="background: white; color: #8b5cf6; border: 1px solid #8b5cf6; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"
+                        style="background: white; color: #8b5cf6; border: 1px solid #8b5cf6; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"
                         onmouseover="this.style.background='#f3e8ff'; this.style.transform='translateY(-1px)'"
                         onmouseout="this.style.background='white'; this.style.transform='translateY(0)'">
                         <i class="fas fa-share-nodes"></i> Share My Storefront
@@ -283,13 +321,13 @@
                         };
                     </script>
                     <button onclick="window.location.href='/views/admin/admin-order-form.html'"
-                        style="background: var(--brand-navy); color: var(--brand-gold); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);"
+                        style="background: var(--brand-navy); color: var(--brand-gold); border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);"
                         onmouseover="this.style.transform='translateY(-1px)'"
                         onmouseout="this.style.transform='translateY(0)'">
                         <i class="fas fa-plus"></i> New Global Order
                     </button>
                     <button onclick="openCustomInvoiceModal()"
-                        style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);"
+                        style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);"
                         onmouseover="this.style.transform='translateY(-1px)'; this.style.background='#059669';"
                         onmouseout="this.style.transform='translateY(0)'; this.style.background='#10b981';">
                         <i class="fas fa-file-pdf"></i> Generate Invoice
@@ -408,10 +446,9 @@
                     </div>
                 </section>
 
-                <br>
                 <!-- PENDING CLOSURE LIST -->
-                <section class="order-list" style="background: white; border-radius: 16px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                <section class="order-list" style="background: white; border-radius: 8px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <h2 style="margin: 0; color: var(--brand-navy); font-size: 1.1em; font-family: 'Inter', sans-serif; font-weight: 800;">
                                 Pending Orders
@@ -428,12 +465,12 @@
                         <table style="width: 100%; border-collapse: collapse; margin: 0;">
                             <thead>
                                 <tr style="background: #f8fafc;">
-                                    <th style="padding: 15px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0;">ID</th>
-                                    <th style="padding: 15px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0;">Shop</th>
-                                    <th style="padding: 15px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0;">Customer</th>
-                                    <th style="padding: 15px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0;">Total Paid</th>
-                                    <th style="padding: 15px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0;">Status</th>
-                                    <th style="padding: 15px; text-align: left; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; border-bottom: 2px solid #e2e8f0;">Action</th>
+                                    <th style="padding: 8px 10px; text-align: left; font-size: 11.5px; color: #475569; font-weight: 600; border-bottom: 1px solid #cbd5e1; text-transform: none;">ID</th>
+                                    <th style="padding: 8px 10px; text-align: left; font-size: 11.5px; color: #475569; font-weight: 600; border-bottom: 1px solid #cbd5e1; text-transform: none;">Shop</th>
+                                    <th style="padding: 8px 10px; text-align: left; font-size: 11.5px; color: #475569; font-weight: 600; border-bottom: 1px solid #cbd5e1; text-transform: none;">Customer</th>
+                                    <th style="padding: 8px 10px; text-align: left; font-size: 11.5px; color: #475569; font-weight: 600; border-bottom: 1px solid #cbd5e1; text-transform: none;">Total Paid</th>
+                                    <th style="padding: 8px 10px; text-align: left; font-size: 11.5px; color: #475569; font-weight: 600; border-bottom: 1px solid #cbd5e1; text-transform: none;">Status</th>
+                                    <th style="padding: 8px 10px; text-align: left; font-size: 11.5px; color: #475569; font-weight: 600; border-bottom: 1px solid #cbd5e1; text-transform: none;">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="orders-tbody">

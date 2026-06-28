@@ -335,10 +335,34 @@
                         <p style="color: var(--brand-slate); font-size: 0.95em; font-weight: 500; margin-top: 5px;">Platform Health & Growth Monitoring</p>
                     </div>
                     <div style="display: flex; gap: 10px;">
+                        <button onclick="toggleGuide('superadmin-guide')" class="small-btn" style="background: rgba(17, 34, 64, 0.75); border: 1px solid var(--glass-border); color: var(--brand-gold); cursor: pointer;"><i class="fas fa-question-circle"></i> Guide</button>
                         <button onclick="location.reload()" class="small-btn" style="background: rgba(17, 34, 64, 0.75); border: 1px solid var(--glass-border); color: var(--brand-gold);"><i class="fas fa-sync-alt"></i> Refresh</button>
                         <button onclick="handleLogout()" class="small-btn" style="background: #e11d48; color: white; border: none;">Logout</button>
                     </div>
                 </div>
+
+                <!-- Interactive Superadmin Guide -->
+                <div class="dashboard-guide-banner" id="superadmin-guide" style="display: flex; margin-bottom: 25px;">
+                    <i class="fas fa-crown" style="font-size: 1.8em; color: var(--brand-gold); margin-top: 2px;"></i>
+                    <div>
+                        <h4>💡 SaaS Platform Control Centre Guide</h4>
+                        <p>Welcome to the global platform monitor. Track all tenant registrations, monitor system MRR metrics, verify security event telemetry, and review active user stats across shops.</p>
+                    </div>
+                    <button class="close-guide-btn" onclick="toggleGuide('superadmin-guide');" title="Dismiss Guide">&times;</button>
+                </div>
+                <script>
+                    if (localStorage.getItem('guide_visible_superadmin-guide') === 'false') {
+                        document.getElementById('superadmin-guide').style.display = 'none';
+                    }
+                    function toggleGuide(id) {
+                        const guide = document.getElementById(id);
+                        if (guide) {
+                            const isHidden = guide.style.display === 'none';
+                            guide.style.display = isHidden ? 'flex' : 'none';
+                            localStorage.setItem('guide_visible_' + id, isHidden ? 'true' : 'false');
+                        }
+                    }
+                </script>
 
                 <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
                     <div class="super-metric-card">

@@ -54,36 +54,110 @@
             }
 
             .main-content {
-                padding: 20px;
+                padding: 15px;
                 padding-top: 60px;
+            }
+            header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+            .top-header-actions {
+                width: 100% !important;
+                justify-content: flex-end !important;
+                margin-top: -5px !important;
+            }
+            #orders-subtitle-desc {
+                display: none !important;
+            }
+
+            /* Prevent layout overflow & wrap tabs/filters row cleanly on mobile */
+            .orders-nav-filters-row {
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+            .orders-nav-filters-row .quick-actions-toolbar {
+                width: 100% !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                gap: 8px !important;
+            }
+            .orders-nav-filters-row .quick-actions-toolbar button {
+                flex: 1 1 0% !important;
+                justify-content: center !important;
+                padding: 6px 4px !important;
+                font-size: 11px !important;
+            }
+            .filter-controls-row {
+                width: 100% !important;
+                justify-content: space-between !important;
+                gap: 6px !important;
+            }
+            .search-input-wrapper {
+                width: 38% !important;
+            }
+            .shop-filter-wrapper {
+                width: 30% !important;
+            }
+            .status-filter-wrapper {
+                width: 28% !important;
+            }
+            .filter-controls-row input,
+            .filter-controls-row select {
+                font-size: 11px !important;
+                padding: 6px 6px 6px 24px !important;
+                height: 30px !important;
+            }
+            .filter-controls-row select {
+                padding: 6px !important;
             }
         }
 
-        /* Tabs Interface */
+        /* Tabs Interface - ShopZen Flat Modern Style */
         .tab-btn {
-            background: rgba(17, 34, 64, 0.75);
-            border: 1px solid var(--glass-border);
-            color: var(--brand-gold);
-            padding: 10px 20px !important;
-            border-radius: 8px !important;
+            background: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #475569 !important;
+            padding: 5px 12px !important;
+            border-radius: 6px !important;
             cursor: pointer;
-            font-weight: 600 !important;
-            transition: all 0.3s !important;
-            font-size: 0.9em;
+            font-weight: 500 !important;
+            transition: all 0.2s ease !important;
+            font-size: 12px !important;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
         }
 
         .tab-btn.active {
-            background: var(--brand-gold) !important;
-            color: var(--brand-navy) !important;
-            border-color: var(--brand-gold) !important;
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #94a3b8 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+            font-weight: 600 !important;
         }
 
         .tab-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        body.dark-mode .tab-btn {
+            background: #1e293b !important;
+            border: 1px solid #334155 !important;
+            color: #94a3b8 !important;
+        }
+        body.dark-mode .tab-btn.active {
+            background: #334155 !important;
+            color: #ffffff !important;
+            border: 1px solid #475569 !important;
+        }
+        body.dark-mode .tab-btn:hover {
+            background: #475569 !important;
+            color: #ffffff !important;
         }
     </style>
     <link rel="manifest" href="../../manifest.json">
@@ -166,34 +240,40 @@
         </aside>
 
         <main class="main-content" style="font-family: 'Montserrat', sans-serif;">
-            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <div>
                     <h1 class="dashboard-main-title" style="margin: 0; font-family: 'Playfair Display', serif;">Global Orders</h1>
                     <p style="color: #666; margin: 5px 0 0 0; font-size: 0.9em;" id="orders-subtitle-desc">
                         Manage active production and order history.
                     </p>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="top-header-actions" style="display: flex; gap: 8px; align-items: center;">
+                    <button onclick="toggleGuide('orders-guide')" title="Help & Orders Guide"
+                        style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
+                        onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-question-circle"></i>
+                    </button>
                     <button onclick="location.href='/views/admin/admin-management.html'" title="Management & Setup"
-                        style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                         onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
                         onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
                         <i class="fa-solid fa-cog"></i>
                     </button>
                     <button onclick="toggleTheme()" title="Toggle Dark Mode"
-                        style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                         onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
                         onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
                         <i class="fa-solid fa-moon theme-toggle-icon"></i>
                     </button>
                     <button onclick="loadAdminOrders(currentAdminOrdersMode)" title="Refresh Data"
-                        style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                         onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
                         onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <button onclick="handleLogout()" title="Logout"
-                        style="background: #ef4444; border: none; color: white; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        style="background: #ef4444; border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(239,68,68,0.2); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
                         onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
                         onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -201,47 +281,72 @@
                 </div>
             </header>
 
-            <!-- Tabs selector -->
-            <div class="quick-actions-toolbar" style="display: flex; gap: 10px; margin-bottom: 10px; padding-bottom: 0; flex-wrap: wrap;">
-                <button onclick="switchAdminOrdersTab('current')" id="tab-btn-current" class="tab-btn active">
-                    <i class="fas fa-globe"></i> Active Orders
-                </button>
-                <button onclick="switchAdminOrdersTab('all')" id="tab-btn-all" class="tab-btn">
-                    <i class="fas fa-folder-open"></i> Order History
-                </button>
-                <button onclick="switchAdminOrdersTab('urgent')" id="tab-btn-urgent" class="tab-btn" style="color: #ef4444;">
-                    <i class="fas fa-fire"></i> Urgent Hot List
-                </button>
+            <!-- Interactive Orders Guide -->
+            <div class="dashboard-guide-banner" id="orders-guide" style="display: flex; margin-bottom: 12px;">
+                <i class="fas fa-folder-open" style="font-size: 1.8em; color: var(--brand-gold); margin-top: 2px;"></i>
+                <div>
+                    <h4>💡 Order Workflow Management Guide</h4>
+                    <p>Track active orders through production stages, filter by specific tailors/shops, or search for customer details. Use the tabs below to switch between Active Production, Completed/History list, or delivery items on the Urgent Hot List.</p>
+                </div>
+                <button class="close-guide-btn" onclick="toggleGuide('orders-guide');" title="Dismiss Guide">&times;</button>
             </div>
+            <script>
+                if (localStorage.getItem('guide_visible_orders-guide') === 'false') {
+                    document.getElementById('orders-guide').style.display = 'none';
+                }
+                function toggleGuide(id) {
+                    const guide = document.getElementById(id);
+                    if (guide) {
+                        const isHidden = guide.style.display === 'none';
+                        guide.style.display = isHidden ? 'flex' : 'none';
+                        localStorage.setItem('guide_visible_' + id, isHidden ? 'true' : 'false');
+                    }
+                }
+            </script>
 
-            <div class="filter-bar"
-                style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); flex-wrap: wrap;">
-                <div style="flex: 2; position: relative; min-width: 250px;">
-                    <i class="fas fa-search"
-                        style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
-                    <input type="text" id="admin-search-input" placeholder="Search by name or phone..."
-                        style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
-                        oninput="debounceLoadOrders(currentAdminOrdersMode)" autocomplete="off">
+            <!-- Tabs & Filters Row -->
+            <div class="orders-nav-filters-row" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; width: 100%;">
+                <!-- Tabs selector (left) -->
+                <div class="quick-actions-toolbar" style="display: flex; gap: 10px; padding-bottom: 0; margin-bottom: 0; flex-shrink: 0;">
+                    <button onclick="switchAdminOrdersTab('current')" id="tab-btn-current" class="tab-btn active">
+                        <i class="fas fa-globe"></i> Active
+                    </button>
+                    <button onclick="switchAdminOrdersTab('all')" id="tab-btn-all" class="tab-btn">
+                        <i class="fas fa-folder-open"></i> History
+                    </button>
+                    <button onclick="switchAdminOrdersTab('urgent')" id="tab-btn-urgent" class="tab-btn" style="color: #ef4444;">
+                        <i class="fas fa-fire"></i> Urgent
+                    </button>
                 </div>
-                <div style="flex: 1; min-width: 180px;">
-                    <select id="admin-shop-filter"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
-                        onchange="loadAdminOrders(currentAdminOrdersMode)">
-                        <option value="">Filter by Shop (All)</option>
-                    </select>
-                </div>
-                <div style="flex: 1; min-width: 180px;" id="status-filter-wrapper">
-                    <select id="admin-status-filter"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
-                        onchange="loadAdminOrders(currentAdminOrdersMode)">
-                        <option value="">Filter by Status (All)</option>
-                        <option value="1">1. Assigned</option>
-                        <option value="2">2. In Progress</option>
-                        <option value="3">3. QA Check</option>
-                        <option value="4">4. Ready</option>
-                        <option value="5">5. Collected (Pending Closure)</option>
-                        <option value="6">6. Closed</option>
-                    </select>
+                
+                <!-- Filters Controls (right) -->
+                <div class="filter-controls-row" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-shrink: 0;">
+                    <div class="search-input-wrapper" style="position: relative; width: 150px;">
+                        <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.9em;"></i>
+                        <input type="text" id="admin-search-input" placeholder="Search..."
+                            style="width: 100%; padding: 8px 10px 8px 30px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 12.5px; height: 34px;"
+                            oninput="debounceLoadOrders(currentAdminOrdersMode)" autocomplete="off">
+                    </div>
+                    <div class="shop-filter-wrapper" style="width: 120px;">
+                        <select id="admin-shop-filter"
+                            style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 12.5px; height: 34px;"
+                            onchange="loadAdminOrders(currentAdminOrdersMode)">
+                            <option value="">Shop: All</option>
+                        </select>
+                    </div>
+                    <div class="status-filter-wrapper" style="width: 125px;">
+                        <select id="admin-status-filter"
+                            style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 12.5px; height: 34px;"
+                            onchange="loadAdminOrders(currentAdminOrdersMode)">
+                            <option value="">Status: All</option>
+                            <option value="1">1. Assigned</option>
+                            <option value="2">2. In Progress</option>
+                            <option value="3">3. QA Check</option>
+                            <option value="4">4. Ready</option>
+                            <option value="5">5. Collected (Pending Closure)</option>
+                            <option value="6">6. Closed</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -253,7 +358,6 @@
                                 <th>Shop</th>
                                 <th>Customer</th>
                                 <th>Garment</th>
-                                <th>References</th>
                                 <th>Due Date</th>
                                 <th>Worker</th>
                                 <th>Status</th>
@@ -263,7 +367,7 @@
                         </thead>
                         <tbody id="admin-orders-tbody">
                             <tr>
-                                <td colspan="9" style="text-align:center; padding: 20px;">Loading orders...</td>
+                                <td colspan="8" style="text-align:center; padding: 20px;">Loading orders...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -320,13 +424,13 @@
                 if (statusWrapper) statusWrapper.style.display = 'block';
                 // Reset select option defaults for active list
                 if (statusSelect) {
-                    statusSelect.options[0].text = 'Filter by Status (All Active)';
+                    statusSelect.options[0].text = 'Status: Active';
                 }
             } else if (mode === 'all') {
                 subtitle.textContent = 'All orders history';
                 if (statusWrapper) statusWrapper.style.display = 'block';
                 if (statusSelect) {
-                    statusSelect.options[0].text = 'Filter by Status (All)';
+                    statusSelect.options[0].text = 'Status: All';
                 }
             } else if (mode === 'urgent') {
                 subtitle.textContent = '🔥 Hot List: Urgent orders';
