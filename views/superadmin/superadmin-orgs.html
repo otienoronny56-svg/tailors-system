@@ -377,7 +377,7 @@
                 <button class="tab-btn active" onclick="switchTenantTab(event, 'active')" style="background: none; border: none; color: var(--brand-gold); font-weight: 700; padding: 10px 15px; border-bottom: 3px solid var(--brand-gold); cursor: pointer; font-size: 1.1em; white-space: nowrap;">Active Organizations</button>
                 <button class="tab-btn" onclick="switchTenantTab(event, 'pending')" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;">Pending Approvals <span id="pending-badge" style="background:#ef4444; color:white; border-radius:20px; padding:2px 8px; font-size:0.7em; margin-left: 5px; display: none;">0</span></button>
                 <button class="tab-btn" onclick="switchTenantTab(event, 'create')" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;"><i class="fas fa-plus"></i> New Tenant</button>
-                <button class="tab-btn" onclick="window.location.href='/views/superadmin/superadmin-users.html'" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;"><i class="fas fa-user-shield"></i> Admin Accounts</button>
+                <button class="tab-btn" onclick="switchTenantTab(event, 'admins')" style="background: none; border: none; color: var(--brand-slate); font-weight: 600; padding: 10px 15px; cursor: pointer; font-size: 1.1em; border-bottom: 3px solid transparent; white-space: nowrap;"><i class="fas fa-user-shield"></i> Admin Accounts</button>
             </div>
 
             <!-- Tab 1: Active Orgs -->
@@ -426,12 +426,46 @@
                 <form id="create-org-form">
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Organization Name</label>
-                        <input type="text" id="new-org-name" placeholder="e.g. Elegant Fashion" required style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--main-bg); color: var(--text-main); font-size: 1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='var(--glass-border)'">
+                        <input type="text" id="new-org-name" placeholder="e.g. Elegant Fashion" required style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg, rgba(255, 255, 255, 0.05)); color: var(--text-main); font-size: 1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='var(--glass-border)'">
                     </div>
                     <button type="submit" class="submit-btn" style="width: 100%; padding: 14px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 1.05em; cursor: pointer; transition: background 0.2s, transform 0.1s; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);" onmouseover="this.style.background='#0284c7'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#0ea5e9'; this.style.transform='translateY(0)';">
                         <i class="fas fa-plus"></i> Initialize Organization
                     </button>
                     <div id="org-message" style="margin-top: 15px; text-align: center; font-weight: 500;"></div>
+                </form>
+            </section>
+
+            <!-- Tab 4: Admin Accounts -->
+            <section class="order-form-container" id="tab-admins" style="display: none;">
+                <h2>Create Tenant Admin (Owner)</h2>
+                <form id="create-admin-form">
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Full Name</label>
+                            <input type="text" id="admin-fullname" placeholder="John Doe" required style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg, rgba(255, 255, 255, 0.05)); color: var(--text-main); font-size: 1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='var(--glass-border)'">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Email Address</label>
+                            <input type="email" id="admin-email" placeholder="admin@shop.com" required style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg, rgba(255, 255, 255, 0.05)); color: var(--text-main); font-size: 1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='var(--glass-border)'">
+                        </div>
+                    </div>
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Initial Password</label>
+                            <input type="password" id="admin-password" placeholder="Min 6 characters" required style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg, rgba(255, 255, 255, 0.05)); color: var(--text-main); font-size: 1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='var(--glass-border)'">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Assign to Organization</label>
+                            <select id="admin-org-select" required style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg, rgba(255, 255, 255, 0.05)); color: var(--text-main); font-size: 1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='var(--glass-border)'">
+                                <option value="">Select Organization...</option>
+                                <!-- Orgs will be loaded by JS -->
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn" id="create-admin-btn" style="width: 100%; padding: 14px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 1.05em; cursor: pointer; transition: background 0.2s, transform 0.1s; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);" onmouseover="this.style.background='#0284c7'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#0ea5e9'; this.style.transform='translateY(0)';">
+                        <i class="fas fa-user-plus"></i> Create Admin Account
+                    </button>
+                    <div id="admin-message" style="margin-top: 15px; text-align: center; font-weight: 500;"></div>
                 </form>
             </section>
 
@@ -446,6 +480,7 @@
                     document.getElementById('tab-active-orgs').style.display = 'none';
                     document.getElementById('tab-pending-orgs').style.display = 'none';
                     document.getElementById('tab-create-org').style.display = 'none';
+                    document.getElementById('tab-admins').style.display = 'none';
 
                     const activeBtn = event.currentTarget;
                     activeBtn.style.color = 'var(--brand-gold)';
@@ -456,6 +491,7 @@
                     if(tabId === 'active') document.getElementById('tab-active-orgs').style.display = 'block';
                     if(tabId === 'pending') document.getElementById('tab-pending-orgs').style.display = 'block';
                     if(tabId === 'create') document.getElementById('tab-create-org').style.display = 'block';
+                    if(tabId === 'admins') document.getElementById('tab-admins').style.display = 'block';
                 }
             </script>
 
