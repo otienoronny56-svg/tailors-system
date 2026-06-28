@@ -31,6 +31,20 @@ async function loadPendingApprovals() {
             section.style.borderLeftColor = count > 0 ? '#ef4444' : 'rgba(16,185,129,0.3)';
             section.style.borderColor = count > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.15)';
         }
+        
+        // Blink effects
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.classList.toggle('blink-alert', count > 0);
+        }
+        if (badge) {
+            badge.classList.toggle('blink-alert', count > 0);
+        }
+        const sidebarTenantsLink = document.getElementById('nav-orgs');
+        if (sidebarTenantsLink) {
+            const li = sidebarTenantsLink.closest('li');
+            if (li) li.classList.toggle('blink-alert', count > 0);
+        }
 
         if (count === 0) {
             tbody.innerHTML = `

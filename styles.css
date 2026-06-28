@@ -3889,4 +3889,8 @@ body.dark-mode .inv-table td::before {
     button:not(.close-btn):not(.close-guide-btn):not(.mobile-menu-btn):not(.dropdown-trigger):active {
         transform: translateY(0) !important;
     }
-}
+} 
+ / *   - - -   A l e r t   A n i m a t i o n s   - - -   * /  
+ @ k e y f r a m e s   a l e r t B l i n k   {   0 % ,   1 0 0 %   {   b o x - s h a d o w :   0   0   0   0   r g b a ( 2 3 9 ,   6 8 ,   6 8 ,   0 ) ;   }   5 0 %   {   b o x - s h a d o w :   0   0   1 0 p x   4 p x   r g b a ( 2 3 9 ,   6 8 ,   6 8 ,   0 . 6 ) ;   }   }  
+ . b l i n k - a l e r t   {   a n i m a t i o n :   a l e r t B l i n k   2 s   i n f i n i t e   e a s e - i n - o u t ;   p o s i t i o n :   r e l a t i v e ;   b o r d e r - r a d i u s :   i n h e r i t ;   }  
+ 
