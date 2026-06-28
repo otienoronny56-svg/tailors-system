@@ -51,7 +51,7 @@ async function loadPendingApprovals() {
                 <tr>
                     <td colspan="4" style="text-align:center; padding:30px; color:#10b981;">
                         <i class="fas fa-check-circle" style="font-size:1.5em; margin-bottom:8px; display:block;"></i>
-                        No pending approvals â€” all caught up!
+                        No pending approvals! You're all caught up ✨
                     </td>
                 </tr>`;
             return;
