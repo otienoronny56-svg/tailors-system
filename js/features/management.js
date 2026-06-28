@@ -246,7 +246,7 @@ async function loadPlatformUsers() {
                         </div>
                     </td>
                     <td>
-                        <button onclick="toggleUserStatus('${user.id}', '${profile.status || 'Active'}')" class="small-btn" style="background: ${profile.status === 'Suspended' ? '#10b981' : '#ef4444'}; color: white; border: none; padding: 5px 10px; font-size: 0.8em;">
+                        <button onclick="toggleUserStatus('${profile.id}', '${profile.status || 'Active'}')" class="small-btn" style="background: ${profile.status === 'Suspended' ? '#10b981' : '#ef4444'}; color: white; border: none; padding: 5px 10px; font-size: 0.8em;">
                             <i class="fas ${profile.status === 'Suspended' ? 'fa-play' : 'fa-pause'}"></i> 
                             ${profile.status === 'Suspended' ? 'Activate' : 'Suspend'}
                         </button>
