@@ -380,6 +380,8 @@ async function routeToPage(path) {
             initAdminOrderForm();
         } else if (path.includes('admin-analytics')) {
             loadBIAnalytics();
+        } else if (path.includes('admin-settings')) {
+            if (typeof initSettingsPage === 'function') await initSettingsPage();
         }
     }
     // Manager pages
