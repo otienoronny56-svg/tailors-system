@@ -304,25 +304,84 @@ async function loadSuperadminDashboard() {
         // --- Recent Activity Feed ---
         const activityFeed = document.getElementById('platform-activity-feed');
         if (activityFeed) {
-            // Mock Activity for now
-            const mockEvents = [
-                { icon: 'fa-user-plus', color: '#10b981', text: 'New tenant registered: Ashley\'s Fashion', time: '10 mins ago' },
-                { icon: 'fa-arrow-up', color: '#38bdf8', text: 'SOAV | REIGN upgraded to Basic Tier', time: '1 hour ago' },
-                { icon: 'fa-ban', color: '#ef4444', text: 'Rigo Wear suspended (Payment Failure)', time: '3 hours ago' },
-                { icon: 'fa-envelope', color: '#94a3b8', text: 'System generated invoices for 3 tenants', time: '5 hours ago' }
-            ];
+            let realEvents = [];
+
+            // 1. Organization Events
+            if (orgs) {
+                orgs.forEach(o => {
+                    // Registration
+                    realEvents.push({
+                        icon: 'fa-building', color: '#10b981', 
+                        text: `New tenant registered: ${o.name}`, 
+                        timestamp: new Date(o.created_at)
+                    });
+                    
+                    // Suspended
+                    if (o.status && o.status.toLowerCase() === 'suspended') {
+                        realEvents.push({
+                            icon: 'fa-ban', color: '#ef4444', 
+                            text: `${o.name} was suspended`, 
+                            timestamp: new Date(o.updated_at || o.created_at)
+                        });
+                    }
+                    
+                    // Upgraded Tier
+                    if (o.subscription_tier && o.subscription_tier.toLowerCase() !== 'free') {
+                        realEvents.push({
+                            icon: 'fa-arrow-up', color: '#38bdf8', 
+                            text: `${o.name} upgraded to ${o.subscription_tier} Tier`, 
+                            timestamp: new Date(o.updated_at || o.created_at)
+                        });
+                    }
+                });
+            }
+
+            // 2. Profile Events
+            if (profiles) {
+                profiles.forEach(p => {
+                    if (p.role === 'owner' || p.role === 'admin') {
+                        realEvents.push({
+                            icon: 'fa-user-tie', color: '#8b5cf6', 
+                            text: `New admin account: ${p.full_name || 'User'}`, 
+                            timestamp: new Date(p.created_at)
+                        });
+                    }
+                });
+            }
+
+            // Sort descending by date
+            realEvents.sort((a, b) => b.timestamp - a.timestamp);
             
-            activityFeed.innerHTML = mockEvents.map(ev => `
-                <div style="display: flex; gap: 12px; align-items: flex-start; padding: 10px; background: rgba(148, 163, 184, 0.05); border-radius: 8px;">
-                    <div style="background: ${ev.color}20; color: ${ev.color}; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fas ${ev.icon}"></i>
+            // Take top 15
+            realEvents = realEvents.slice(0, 15);
+
+            // TimeAgo helper
+            const timeAgo = (date) => {
+                const seconds = Math.floor((new Date() - date) / 1000);
+                if (seconds < 60) return "Just now";
+                const minutes = Math.floor(seconds / 60);
+                if (minutes < 60) return minutes + " mins ago";
+                const hours = Math.floor(minutes / 60);
+                if (hours < 24) return hours + " hours ago";
+                const days = Math.floor(hours / 24);
+                return days + " days ago";
+            };
+
+            if (realEvents.length === 0) {
+                activityFeed.innerHTML = '<div style="text-align: center; color: #94a3b8; margin-top: 50px;">No recent activity found.</div>';
+            } else {
+                activityFeed.innerHTML = realEvents.map(ev => `
+                    <div style="display: flex; gap: 12px; align-items: flex-start; padding: 10px; background: rgba(148, 163, 184, 0.05); border-radius: 8px;">
+                        <div style="background: ${ev.color}20; color: ${ev.color}; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas ${ev.icon}"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9em; font-weight: 500; color: var(--brand-slate);">${ev.text}</div>
+                            <div style="font-size: 0.75em; color: #94a3b8; margin-top: 4px;">${timeAgo(ev.timestamp)}</div>
+                        </div>
                     </div>
-                    <div>
-                        <div style="font-size: 0.9em; font-weight: 500; color: var(--brand-slate);">${ev.text}</div>
-                        <div style="font-size: 0.75em; color: #94a3b8; margin-top: 4px;">${ev.time}</div>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
 
     } catch (err) {
