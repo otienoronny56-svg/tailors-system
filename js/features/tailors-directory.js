@@ -11,7 +11,7 @@ async function loadTailorsDirectoryPage() {
     grid.innerHTML = '<div style="text-align:center;padding:50px;color:#94a3b8;grid-column:1/-1;"><i class="fas fa-spinner fa-spin" style="font-size:2em;margin-bottom:15px;"></i><p>Loading tailors directory...</p></div>';
     
     try {
-        if (!window.supabaseClient || !USER_PROFILE) {
+        if (typeof window.supabaseClient === 'undefined' || typeof USER_PROFILE === 'undefined' || !USER_PROFILE) {
             setTimeout(loadTailorsDirectoryPage, 800);
             return;
         }
@@ -20,7 +20,7 @@ async function loadTailorsDirectoryPage() {
         const [{ data: shops }, { data: workers }, { data: managers }, { data: activeOrders }] = await Promise.all([
             window.supabaseClient.from('shops').select('id, name').eq('organization_id', orgId).order('name'),
             window.supabaseClient.from('workers').select('*').eq('organization_id', orgId).order('name'),
-            window.supabaseClient.from('profiles').select('id, full_name, shop_id').eq('organization_id', orgId).eq('role', 'manager'),
+            window.supabaseClient.from('user_profiles').select('id, full_name, shop_id').eq('organization_id', orgId).eq('role', 'manager'),
             window.supabaseClient.from('orders').select('worker_id, additional_workers').eq('organization_id', orgId).lt('status', 4)
         ]);
 
@@ -63,6 +63,14 @@ async function loadTailorsDirectoryPage() {
         }
 
         renderTailorsGrid();
+
+        // Check if we need to auto-open a specific tailor from a dashboard link
+        const urlParams = new URLSearchParams(window.location.search);
+        const viewId = urlParams.get('view');
+        if (viewId) {
+            // Give it a tiny delay to ensure DOM is ready
+            setTimeout(() => openTailorDetails(viewId), 200);
+        }
 
     } catch (err) {
         console.error("Error loading tailors directory:", err);
@@ -323,7 +331,7 @@ async function fireTailor() {
 
 // Init
 (function waitForProfile() {
-    if (USER_PROFILE && window.supabaseClient) { 
+    if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE && window.supabaseClient) { 
         loadTailorsDirectoryPage(); 
     } else { 
         setTimeout(waitForProfile, 800); 

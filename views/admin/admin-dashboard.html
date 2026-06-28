@@ -520,12 +520,12 @@
                     if (!container) return;
                     container.innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8;grid-column:1/-1;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
                     try {
-                        if (!window.supabaseClient || !window.USER_PROFILE) { setTimeout(loadTailorsDirectory, 1200); return; }
+                        if (typeof window.supabaseClient === 'undefined' || typeof USER_PROFILE === 'undefined' || !USER_PROFILE) { setTimeout(loadTailorsDirectory, 1200); return; }
                         const orgId = USER_PROFILE.organization_id;
                         const [{ data: shops }, { data: allWorkers }, { data: managers }] = await Promise.all([
                             supabaseClient.from('shops').select('id, name').eq('organization_id', orgId).order('name'),
                             supabaseClient.from('workers').select('id, name, role, shop_id').eq('organization_id', orgId).order('name'),
-                            supabaseClient.from('profiles').select('id, full_name, shop_id').eq('organization_id', orgId).eq('role', 'manager')
+                            supabaseClient.from('user_profiles').select('id, full_name, shop_id').eq('organization_id', orgId).eq('role', 'manager')
                         ]);
                         if (!shops || shops.length === 0) {
                             container.innerHTML = '<p style="color:#94a3b8;text-align:center;grid-column:1/-1;padding:20px;">No shops found.</p>';
@@ -539,22 +539,22 @@
                             const workers = workerMap[shop.id] || [];
                             const mgr = managerMap[shop.id];
                             const workerRows = workers.length === 0
-                                ? `<li style="padding:8px 0;color:#94a3b8;font-size:0.85em;text-align:center;">No workers assigned</li>`
+                                ? `<li style="padding:8px 0;color:var(--text-muted, #94a3b8);font-size:0.85em;text-align:center;">No workers assigned</li>`
                                 : workers.map(w => `
-                                    <li style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f8fafc;gap:8px;">
+                                    <li onclick="window.location.href='admin-tailors-directory.html?view=${w.id}'" style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border-color, #f1f5f9);gap:8px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--hover-bg, rgba(0,0,0,0.03))'" onmouseout="this.style.background='transparent'">
                                         <div style="display:flex;align-items:center;gap:8px;">
-                                            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#e2e8f0,#cbd5e1);display:flex;align-items:center;justify-content:center;font-size:0.75em;font-weight:700;color:#475569;flex-shrink:0;">${w.name.substring(0,2).toUpperCase()}</div>
-                                            <span style="font-weight:600;font-size:0.9em;color:var(--brand-navy);">${w.name}</span>
+                                            <div style="width:30px;height:30px;border-radius:50%;background:var(--border-color, #e2e8f0);display:flex;align-items:center;justify-content:center;font-size:0.75em;font-weight:700;color:var(--text-main, #475569);flex-shrink:0;">${w.name.substring(0,2).toUpperCase()}</div>
+                                            <span style="font-weight:600;font-size:0.9em;color:inherit;">${w.name}</span>
                                         </div>
                                         <span style="font-size:0.72em;font-weight:700;color:#fff;background:#6366f1;padding:2px 8px;border-radius:20px;white-space:nowrap;">${w.role || 'Tailor'}</span>
                                     </li>`).join('');
                             const mgrHtml = mgr
-                                ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 0 10px;border-bottom:1px solid #f1f5f9;margin-bottom:6px;"><div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--brand-navy),#334155);display:flex;align-items:center;justify-content:center;font-size:0.8em;font-weight:800;color:var(--brand-gold);flex-shrink:0;">${mgr.full_name.substring(0,2).toUpperCase()}</div><div><div style="font-weight:700;font-size:0.9em;color:var(--brand-navy);">${mgr.full_name}</div><div style="font-size:0.72em;color:#10b981;font-weight:600;text-transform:uppercase;">Shop Manager</div></div></div>`
-                                : `<div style="padding:8px 0 10px;border-bottom:1px solid #f1f5f9;margin-bottom:6px;color:#94a3b8;font-size:0.85em;"><i class="fas fa-user-slash" style="margin-right:5px;"></i>No Manager Assigned</div>`;
-                            return `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.07)'" onmouseout="this.style.boxShadow='none'">
+                                ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 0 10px;border-bottom:1px solid var(--border-color, #f1f5f9);margin-bottom:6px;"><div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg, #1e293b, #334155);display:flex;align-items:center;justify-content:center;font-size:0.8em;font-weight:800;color:var(--brand-gold);flex-shrink:0;">${mgr.full_name.substring(0,2).toUpperCase()}</div><div><div style="font-weight:700;font-size:0.9em;color:inherit;">${mgr.full_name}</div><div style="font-size:0.72em;color:#10b981;font-weight:600;text-transform:uppercase;">Shop Manager</div></div></div>`
+                                : `<div style="padding:8px 0 10px;border-bottom:1px solid var(--border-color, #f1f5f9);margin-bottom:6px;color:var(--text-muted, #94a3b8);font-size:0.85em;"><i class="fas fa-user-slash" style="margin-right:5px;"></i>No Manager Assigned</div>`;
+                            return `<div class="entity-card" style="border:1px solid var(--border-color, #e2e8f0);border-radius:10px;padding:14px;transition:box-shadow 0.2s;margin-bottom:12px;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                                    <div style="font-weight:800;font-size:1em;color:var(--brand-navy);display:flex;align-items:center;gap:6px;"><i class="fas fa-store-alt" style="color:var(--brand-gold);"></i> ${shop.name}</div>
-                                    <span style="font-size:0.7em;font-weight:700;color:#fff;background:${workers.length > 0 ? 'var(--brand-navy)' : '#94a3b8'};padding:3px 10px;border-radius:20px;">${workers.length} worker${workers.length !== 1 ? 's' : ''}</span>
+                                    <div style="font-weight:800;font-size:1em;color:inherit;display:flex;align-items:center;gap:6px;"><i class="fas fa-store-alt" style="color:var(--brand-gold);"></i> ${shop.name}</div>
+                                    <span style="font-size:0.7em;font-weight:700;color:#fff;background:${workers.length > 0 ? '#3b82f6' : '#94a3b8'};padding:3px 10px;border-radius:20px;">${workers.length} worker${workers.length !== 1 ? 's' : ''}</span>
                                 </div>
                                 ${mgrHtml}
                                 <ul style="list-style:none;margin:0;padding:0;max-height:220px;overflow-y:auto;">${workerRows}</ul>
@@ -565,7 +565,7 @@
                     }
                 }
                 (function waitForProfile() {
-                    if (window.USER_PROFILE && window.supabaseClient) { loadTailorsDirectory(); }
+                    if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE && window.supabaseClient) { loadTailorsDirectory(); }
                     else { setTimeout(waitForProfile, 800); }
                 })();
                 </script>
