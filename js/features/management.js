@@ -230,7 +230,7 @@ async function loadPlatformUsers() {
         const orgMap = Object.fromEntries(orgs.map(o => [o.id, o.name]));
 
         if (profiles.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">No platform users found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px;">No platform users found</td></tr>';
             return;
         }
 
@@ -244,23 +244,25 @@ async function loadPlatformUsers() {
                 <tr>
                     <td>
                         <div style="font-weight:700;">${profile.full_name || 'Anonymous User'}</div>
-                        <div style="font-size:0.85em; color:#64748b;">${profile.email || 'No email provided'}</div>
+                    </td>
+                    <td>
+                        <div style="font-size:0.9em; color:#64748b;">${profile.email || 'No email provided'}</div>
                     </td>
                     <td><span class="org-badge badge-basic">${orgName}</span></td>
                     <td><span style="text-transform:capitalize;">${profile.role || 'user'}</span></td>
                     <td>${lastActive ? getRelativeTime(lastActive) : 'Never'}</td>
                     <td>
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <span class="status-badge ${isOnline ? 'status-online' : 'status-offline'}">
+                        <div style="display: flex; flex-direction: row; gap: 5px; align-items: center;">
+                            <span class="status-badge ${isOnline ? 'status-online' : 'status-offline'}" style="padding: 4px 8px; font-size: 0.75em; border-radius: 4px;">
                                 ${isOnline ? 'Online' : 'Offline'}
                             </span>
-                            <span class="status-badge ${profile.status === 'Suspended' ? 'badge-premium' : 'status-online'}" style="background: ${profile.status === 'Suspended' ? '#fee2e2' : '#dcfce7'}; color: ${profile.status === 'Suspended' ? '#991b1b' : '#15803d'};">
+                            <span class="status-badge ${profile.status === 'Suspended' ? 'badge-premium' : 'status-online'}" style="background: ${profile.status === 'Suspended' ? '#fee2e2' : '#dcfce7'}; color: ${profile.status === 'Suspended' ? '#991b1b' : '#15803d'}; padding: 4px 8px; font-size: 0.75em; border-radius: 4px;">
                                 ${profile.status || 'Active'}
                             </span>
                         </div>
                     </td>
                     <td>
-                        <button onclick="toggleUserStatus('${profile.id}', '${profile.status || 'Active'}')" class="small-btn" style="background: ${profile.status === 'Suspended' ? '#10b981' : '#ef4444'}; color: white; border: none; padding: 5px 10px; font-size: 0.8em;">
+                        <button onclick="toggleUserStatus('${profile.id}', '${profile.status || 'Active'}')" class="small-btn" style="background: ${profile.status === 'Suspended' ? '#10b981' : '#ef4444'}; color: white; border: none; padding: 5px 10px; font-size: 0.8em; white-space: nowrap;">
                             <i class="fas ${profile.status === 'Suspended' ? 'fa-play' : 'fa-pause'}"></i> 
                             ${profile.status === 'Suspended' ? 'Activate' : 'Suspend'}
                         </button>

@@ -276,9 +276,11 @@
         .dark-mode table th { border-bottom: 1px solid #334155 !important; color: #94a3b8 !important; }
         
         table td {
-            font-size: 0.9em !important;
+            font-size: 0.85em !important;
             border-bottom: 1px solid #f8fafc !important;
-            color: #334155 !important;
+            padding: 10px 8px !important;
+            vertical-align: middle !important;
+            white-space: nowrap;
         }
         .dark-mode table td { border-bottom: 1px solid #1e293b !important; color: #cbd5e1 !important; }
         
@@ -359,7 +361,8 @@
                     <table class="user-table">
                         <thead>
                             <tr>
-                                <th>User Details</th>
+                                <th>Name</th>
+                                <th>Email</th>
                                 <th>Organization</th>
                                 <th>Role</th>
                                 <th>Last Activity</th>
@@ -368,7 +371,7 @@
                             </tr>
                         </thead>
                         <tbody id="platform-users-tbody">
-                            <tr><td colspan="5" style="text-align:center; padding:40px;">Initializing secure connection...</td></tr>
+                            <tr><td colspan="7" style="text-align:center; padding:40px;">Initializing secure connection...</td></tr>
                         </tbody>
                     </table>
                 </div>
