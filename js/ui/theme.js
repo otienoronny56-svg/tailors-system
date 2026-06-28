@@ -21,5 +21,8 @@ function toggleTheme() {
     document.querySelectorAll('.theme-toggle-icon').forEach(icon => {
         icon.className = isDark ? 'fa-solid fa-sun theme-toggle-icon' : 'fa-solid fa-moon theme-toggle-icon';
     });
+    
+    // Notify charts and other components
+    document.dispatchEvent(new CustomEvent('themeToggled', { detail: { isDark } }));
 }
 initTheme();

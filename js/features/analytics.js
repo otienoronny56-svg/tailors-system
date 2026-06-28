@@ -174,6 +174,12 @@ async function loadSuperadminDashboard() {
     }
 }
 
+document.addEventListener('themeToggled', () => {
+    if (window.location.pathname.includes('superadmin-dashboard')) {
+        loadSuperadminDashboard();
+    }
+});
+
 async function loadAdminDashboard() {/* Lines 1587-1601 omitted */ }
 
 async function loadAdminDashboard() {
