@@ -2512,8 +2512,8 @@ body.dark-mode .rank-5 {
 .inv-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 2px;
+    margin-bottom: 2px;
 }
 
 @media (max-width: 768px) {
@@ -2523,8 +2523,8 @@ body.dark-mode .rank-5 {
 
     .inv-stats {
         grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
-        margin-bottom: 12px;
+        gap: 2px;
+        margin-bottom: 2px;
     }
 
     .inv-stat-card {
@@ -2585,7 +2585,7 @@ body.dark-mode .rank-5 {
     padding: 15px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    margin-bottom: 15px;
+    margin-bottom: 2px;
     border-top: 4px solid var(--brand-gold);
     border: 1px solid #f1f5f9;
 }
