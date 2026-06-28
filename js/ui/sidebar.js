@@ -122,6 +122,7 @@ async function updateSidebarBranding(forcedName = null) {
                     </div>
 
                     <a href="/views/admin/admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
+                    <a href="/views/admin/admin-settings.html" id="nav-settings" style="margin-top: 15px;"><i class="fas fa-cog" style="margin-right: 8px;"></i> Settings</a>
                     <a href="#" id="logout-btn" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
                 `;
             } else {
