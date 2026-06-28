@@ -4,7 +4,7 @@
 // ==========================================
 
 async function checkUnreadMessages() {
-    if (typeof USER_PROFILE === 'undefined' || !USER_PROFILE || USER_PROFILE.role === 'client') return;
+    if (typeof USER_PROFILE === 'undefined' || !USER_PROFILE || USER_PROFILE.role === 'client' || USER_PROFILE.role === 'superadmin') return;
 
     try {
         let shopIds = [];
