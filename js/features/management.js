@@ -438,7 +438,7 @@ async function loadWorkerScreen() {
                         <td>
                             <button class="small-btn" style="background:#007bff;" 
                                     onclick="location.href='/views/worker/worker-assignments.html?id=${worker.id}'">
-                                ðŸ“‚ View Work
+                                <i class="fas fa-briefcase"></i> View Work
                             </button>
                         </td>
                     </tr>

@@ -234,8 +234,8 @@ async function loadOrders(mode = 'open') {
                 <td style="color:${balance > 0 ? '#dc3545' : '#28a745'}; font-weight:bold;">${balance.toLocaleString()}</td>
                 <td>
                     <div style="display:flex; gap:5px;">
-                        <button class="small-btn" onclick="location.href='/views/manager/order-details.html?id=${order.id}'">ðŸ‘ï¸ View</button>
-                        <button class="small-btn" style="background:#28a745;" onclick="generateAndShareReceipt('${order.id}')">ðŸ“„</button>
+                        <button class="small-btn" onclick="location.href='/views/manager/order-details.html?id=${order.id}'"><i class="fas fa-eye"></i> View</button>
+                        <button class="small-btn" style="background:#28a745;" onclick="generateAndShareReceipt('${order.id}')"><i class="fas fa-file-invoice"></i></button>
                     </div>
                 </td>
             </tr>`;
@@ -448,19 +448,19 @@ async function loadOrderDetailsScreen() {
                 <div class="quick-actions-toolbar">
                     <button class="small-btn" style="background:#6c757d;" 
                             onclick="generateAndShareReceipt('${order.id}')">
-                        ðŸ“„ Generate Receipt
+                        <i class="fas fa-file-invoice"></i> Generate Receipt
                     </button>
                     <button class="small-btn" style="background:#3b82f6;" 
                             onclick="downloadInvoicePDF('${order.id}')">
-                        ðŸ“„ Generate Invoice
+                        <i class="fas fa-file-alt"></i> Generate Invoice
                     </button>
                     <button class="small-btn" style="background:#28a745;" 
                             onclick="quickPay('${order.id}', ${balance})" ${balance <= 0 ? 'disabled' : ''}>
-                        ðŸ’° Record Payment
+                        <i class="fas fa-hand-holding-usd"></i> Record Payment
                     </button>
                     <button class="small-btn" style="background:#ffc107; color:black;" 
                             onclick="updateStatus('${order.id}')">
-                        ðŸ”„ Update Status
+                        <i class="fas fa-sync-alt"></i> Update Status
                     </button>
                 </div>
                 
