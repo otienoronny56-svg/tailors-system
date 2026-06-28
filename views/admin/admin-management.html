@@ -484,6 +484,70 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
+        .shop-worker-count {
+            font-size: 0.7em;
+            background: #e0e7ff;
+            color: #4f46e5;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+
+        .shop-settings-btn {
+            background: #f1f5f9;
+            color: var(--brand-navy, #0f172a);
+            border: none;
+            padding: 4px 8px;
+            font-size: 0.85em;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .worker-role-badge {
+            font-size: 0.85em;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 8px;
+            color: #475569;
+        }
+
+        /* Dark Mode Overrides for Action Buttons and Badges */
+        body.dark-mode .action-btn {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #cbd5e1 !important;
+        }
+        body.dark-mode .action-btn:hover {
+            background: #334155 !important;
+            color: #f8fafc !important;
+        }
+        body.dark-mode .action-btn.danger {
+            color: #ef4444 !important;
+            border-color: #ef4444 !important;
+        }
+        body.dark-mode .action-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.1) !important;
+        }
+        body.dark-mode .shop-worker-count {
+            background: rgba(79, 70, 229, 0.2) !important;
+            color: #818cf8 !important;
+        }
+        body.dark-mode .shop-settings-btn {
+            background: #1e293b !important;
+            color: #cbd5e1 !important;
+            border: 1px solid #334155 !important;
+        }
+        body.dark-mode .shop-settings-btn:hover {
+            background: #334155 !important;
+            color: #f8fafc !important;
+        }
+        body.dark-mode .worker-role-badge {
+            background: #1e293b !important;
+            color: #94a3b8 !important;
+            border: 1px solid #334155 !important;
+        }
     </style>
     <link rel="manifest" href="../../manifest.json">
 </head>

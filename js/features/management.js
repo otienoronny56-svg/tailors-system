@@ -821,7 +821,7 @@ async function loadShopCommandCenter() {
                     <li class="worker-item">
                         <span><i class="fas fa-user-tag" style="color:#cbd5e1; margin-right:8px;"></i>${w.name}</span>
                         <div>
-                            <span style="font-size:0.85em; background:#f1f5f9; padding:2px 6px; border-radius:4px; margin-right:8px;">${w.role || 'Tailor'}</span>
+                            <span class="worker-role-badge">${w.role || 'Tailor'}</span>
                             <button onclick="deleteWorker('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="small-btn" style="background:transparent; color:#ef4444; border:none; padding:4px; font-size:1em; cursor:pointer;" title="Remove Worker">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
@@ -835,8 +835,8 @@ async function loadShopCommandCenter() {
                     <div class="entity-header">
                         <div class="shop-name"><i class="fas fa-store-alt" style="color:var(--brand-gold);"></i> ${shop.name}</div>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-                            <span style="font-size:0.7em; background:#e0e7ff; color:#4f46e5; padding:4px 8px; border-radius:12px; font-weight:700;">${workers.length} WORKERS</span>
-                            <button onclick="openEditShopModal('${shop.id}')" class="small-btn" style="background:#f1f5f9; color:var(--brand-navy); border:none; padding:4px 8px; font-size:0.85em; border-radius: 6px; cursor:pointer;" title="Edit Shop Settings">
+                            <span class="shop-worker-count">${workers.length} WORKERS</span>
+                            <button onclick="openEditShopModal('${shop.id}')" class="small-btn shop-settings-btn" title="Edit Shop Settings">
                                 <i class="fas fa-cog"></i> Settings
                             </button>
                         </div>
