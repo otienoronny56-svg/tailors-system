@@ -77,7 +77,6 @@ async function updateSidebarBranding(forcedName = null) {
                     <a href="/views/superadmin/superadmin-dashboard.html" id="nav-dashboard"><i class="fas fa-chart-pie" style="margin-right: 8px;"></i> Dashboard</a>
                     <a href="/views/superadmin/superadmin-orgs.html" id="nav-orgs"><i class="fas fa-building" style="margin-right: 8px;"></i> Tenants</a>
                     <a href="/views/superadmin/superadmin-users-list.html" id="nav-users"><i class="fas fa-users" style="margin-right: 8px;"></i> Platform Users</a>
-                    <a href="/views/superadmin/superadmin-users.html" id="nav-admins"><i class="fas fa-user-shield" style="margin-right: 8px;"></i> Admin Accounts</a>
 
                     <a href="#" id="logout-btn" onclick="handleLogout(); return false;" style="margin-top: 20px;"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
                 `;
