@@ -23,6 +23,9 @@
         .status-published { background: rgba(16, 185, 129, 0.2); color: #34d399; }
     </style>
 
+    
+
+
     <!-- Sleek UI Override for Superadmin -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -46,7 +49,7 @@
             color: #0f172a !important;
             letter-spacing: 0px !important;
         }
-        .dark-mode .sidebar-logo { color: #f8fafc !important; }
+        .dark-mode .sidebar-logo, .dark-mode .dark-mode-text { color: #f8fafc !important; }
         
         .sidebar-subtitle { display: none !important; }
         
@@ -72,8 +75,6 @@
         .dark-mode .sidebar nav a { color: #94a3b8 !important; }
         .dark-mode .sidebar nav a:hover { background: #1e293b !important; color: #60a5fa !important; }
         .dark-mode .sidebar nav a.active { background: rgba(96, 165, 250, 0.1) !important; color: #60a5fa !important; }
-
-        #user-info { display: none !important; } /* Remove bulky logged in text */
 
         /* Main Content Spacing */
         .dashboard-container {
@@ -110,23 +111,6 @@
             font-size: 0.9em !important;
             color: #64748b !important;
             font-weight: 500 !important;
-        }
-        .stat-card p.stat-value {
-            font-size: 2.2em !important;
-            color: #0f172a !important;
-            font-weight: 600 !important;
-            margin-top: 10px !important;
-        }
-        .dark-mode .stat-card p.stat-value { color: #f8fafc !important; }
-        
-        /* Badges */
-        .badge-premium, .badge-active, .badge-warning {
-            border-radius: 20px !important;
-            font-size: 0.75em !important;
-            padding: 4px 10px !important;
-            text-transform: none !important;
-            font-weight: 500 !important;
-            border: none !important;
         }
         
         /* Table Styling */

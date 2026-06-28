@@ -186,6 +186,9 @@
     </style>
     <link rel="manifest" href="../../manifest.json">
 
+    
+
+
     <!-- Sleek UI Override for Superadmin -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -209,7 +212,7 @@
             color: #0f172a !important;
             letter-spacing: 0px !important;
         }
-        .dark-mode .sidebar-logo { color: #f8fafc !important; }
+        .dark-mode .sidebar-logo, .dark-mode .dark-mode-text { color: #f8fafc !important; }
         
         .sidebar-subtitle { display: none !important; }
         
@@ -235,8 +238,6 @@
         .dark-mode .sidebar nav a { color: #94a3b8 !important; }
         .dark-mode .sidebar nav a:hover { background: #1e293b !important; color: #60a5fa !important; }
         .dark-mode .sidebar nav a.active { background: rgba(96, 165, 250, 0.1) !important; color: #60a5fa !important; }
-
-        #user-info { display: none !important; } /* Remove bulky logged in text */
 
         /* Main Content Spacing */
         .dashboard-container {
@@ -273,23 +274,6 @@
             font-size: 0.9em !important;
             color: #64748b !important;
             font-weight: 500 !important;
-        }
-        .stat-card p.stat-value {
-            font-size: 2.2em !important;
-            color: #0f172a !important;
-            font-weight: 600 !important;
-            margin-top: 10px !important;
-        }
-        .dark-mode .stat-card p.stat-value { color: #f8fafc !important; }
-        
-        /* Badges */
-        .badge-premium, .badge-active, .badge-warning {
-            border-radius: 20px !important;
-            font-size: 0.75em !important;
-            padding: 4px 10px !important;
-            text-transform: none !important;
-            font-weight: 500 !important;
-            border: none !important;
         }
         
         /* Table Styling */
@@ -354,100 +338,125 @@
                         if (dropdown) {
                             dropdown.classList.toggle('open');
                         }
+</head>
+<body>
+    <!-- Dark Mode Initializer -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+    <div class="mobile-menu-btn" id="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+    </div>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="sidebar-logo">STITCH & STYLES KENYA</h1>
+                    <span class="sidebar-subtitle">SAAS CONTROL</span>
+                </div>
+            </div>
+
+            <p id="user-info" style="padding: 10px 15px; font-size: 0.8em; color: #64748b;">Logged in as: Owner</p>
+                        <nav></nav>
+            <script>
+                if (typeof window.toggleSidebarDropdown !== 'function') {
+                    window.toggleSidebarDropdown = function(button) {
+                        const event = window.event || (arguments.length > 1 ? arguments[1] : null);
+                        if (event) {
+                            event.alreadyHandledDropdown = true;
+                        }
+                        const dropdown = button.closest('.sidebar-dropdown');
+                        if (dropdown) {
+                            dropdown.classList.toggle('open');
+                        }
                     };
                 }
             </script>
         </aside>
 
         <main class="main-content">
-            <header>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                    <div>
-                        <h1 style="margin: 0;">SaaS Control Centre</h1>
-                        <p style="color: var(--brand-slate); font-size: 0.95em; font-weight: 500; margin-top: 5px;">Platform Health & Growth Monitoring</p>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="toggleGuide('superadmin-guide')" class="small-btn" style="background: var(--card-bg); border: 1px solid var(--glass-border); color: var(--brand-navy); cursor: pointer;"><i class="fas fa-question-circle"></i> Guide</button>
-                        <button onclick="location.reload()" class="small-btn" style="background: var(--card-bg); border: 1px solid var(--glass-border); color: var(--brand-navy); cursor: pointer;"><i class="fas fa-sync-alt"></i> Refresh</button>
-                        
-                          <button onclick="toggleTheme()" class="top-right-theme-toggle" title="Toggle Dark Mode"
-                              style="background: transparent; border: 1px solid var(--glass-border, #e2e8f0); color: var(--brand-slate, #475569); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em;"
-                              onmouseover="this.style.background='var(--card-bg, #f8fafc)'; this.style.transform='translateY(-1px)'"
-                              onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'">
-                              <i class="fa-solid fa-moon theme-toggle-icon"></i>
-                          </button>
-                          <button onclick="handleLogout()" class="small-btn" style="background: #e11d48; color: white; border: none;">Logout</button>
-                    </div>
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div>
+                    <h1 style="margin: 0; font-size: 1.8em !important; color: #0f172a !important;" class="dark-mode-text">SaaS Control Centre</h1>
+                    <p id="dashboard-welcome-text" style="color: #64748b; font-size: 0.95em; font-weight: 500; margin-top: 5px;">Welcome back! Here is your platform overview.</p>
                 </div>
-
-                <!-- Interactive Superadmin Guide -->
-                <div class="dashboard-guide-banner" id="superadmin-guide" style="display: flex; margin-bottom: 25px;">
-                    <i class="fas fa-crown" style="font-size: 1.8em; color: var(--brand-gold); margin-top: 2px;"></i>
-                    <div>
-                        <h4>💡 SaaS Platform Control Centre Guide</h4>
-                        <p>Welcome to the global platform monitor. Track all tenant registrations, monitor system MRR metrics, verify security event telemetry, and review active user stats across shops.</p>
-                    </div>
-                    <button class="close-guide-btn" onclick="toggleGuide('superadmin-guide');" title="Dismiss Guide">&times;</button>
-                </div>
-                <script>
-                    if (localStorage.getItem('guide_visible_superadmin-guide') === 'false') {
-                        document.getElementById('superadmin-guide').style.display = 'none';
-                    }
-                    function toggleGuide(id) {
-                        const guide = document.getElementById(id);
-                        if (guide) {
-                            const isHidden = guide.style.display === 'none';
-                            guide.style.display = isHidden ? 'flex' : 'none';
-                            localStorage.setItem('guide_visible_' + id, isHidden ? 'true' : 'false');
-                        }
-                    }
-                </script>
-
-                <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
-                    <div class="super-metric-card">
-                        <span style="font-size: 0.8em; color: var(--brand-slate); font-weight: 700;">TOTAL ORGANIZATIONS</span>
-                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-white); margin: 5px 0;" id="total-orgs">...</div>
-                        <div style="font-size: 0.75em; color: #10b981; font-weight: 600;"><i class="fas fa-arrow-up"></i> <span id="org-growth-text">...</span> from last month</div>
-                    </div>
-                    <div class="super-metric-card" style="border-bottom-color: var(--brand-gold);">
-                        <span style="font-size: 0.8em; color: var(--brand-slate); font-weight: 700;">PROJECTED MRR</span>
-                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-white); margin: 5px 0;" id="projected-mrr">...</div>
-                        <div style="font-size: 0.75em; color: var(--brand-slate); font-weight: 600;">Monthly Recurring Revenue</div>
-                    </div>
-                    <div class="super-metric-card" style="border-bottom-color: #10b981;">
-                        <span style="font-size: 0.8em; color: var(--brand-slate); font-weight: 700;">ACTIVE PLATFORM USERS</span>
-                        <div style="font-size: 2.2em; font-weight: 800; color: var(--brand-white); margin: 5px 0;" id="total-users">...</div>
-                        <div style="font-size: 0.75em; color: var(--brand-slate); font-weight: 600;">Across all tenants</div>
-                    </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="toggleGuide('superadmin-guide')" class="small-btn" style="background: #ffffff; border: 1px solid #e2e8f0; color: #475569; cursor: pointer;"><i class="fas fa-question-circle"></i> Guide</button>
+                    <button onclick="location.reload()" class="small-btn" style="background: #ffffff; border: 1px solid #e2e8f0; color: #475569; cursor: pointer;"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    
+                    <button onclick="toggleTheme()" class="top-right-theme-toggle" title="Toggle Dark Mode"
+                        style="background: transparent; border: 1px solid #e2e8f0; color: #475569; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em;"
+                        onmouseover="this.style.background='#f8fafc'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-moon theme-toggle-icon"></i>
+                    </button>
+                    <button onclick="handleLogout()" class="small-btn" style="background: #e11d48; color: white; border: none;">Logout</button>
                 </div>
             </header>
 
-            <!-- SaaS Growth Pulse -->
-            <div class="chart-container">
-                <span class="pulse-label">SaaS Growth Pulse (Organization Sign-ups)</span>
-                <div style="height: 300px; position: relative;">
-                    <canvas id="growthPulseChart"></canvas>
+            <!-- Interactive Superadmin Guide -->
+            <div class="dashboard-guide-banner stat-card" id="superadmin-guide" style="display: flex; margin-bottom: 25px; align-items: flex-start; gap: 15px;">
+                <i class="fas fa-crown" style="font-size: 1.8em; color: #fbbf24; margin-top: 2px;"></i>
+                <div style="flex-grow: 1;">
+                    <h4 style="margin: 0 0 5px 0; color: #0f172a;" class="dark-mode-text">💡 SaaS Platform Control Centre Guide</h4>
+                    <p style="margin: 0; color: #64748b;">Welcome to the global platform monitor. Track all tenant registrations, monitor system MRR metrics, verify security event telemetry, and review active user stats across shops.</p>
+                </div>
+                <button class="close-guide-btn" onclick="toggleGuide('superadmin-guide');" style="background: none; border: none; font-size: 1.5em; color: #94a3b8; cursor: pointer;" title="Dismiss Guide">&times;</button>
+            </div>
+            <script>
+                if (localStorage.getItem('guide_visible_superadmin-guide') === 'false') {
+                    document.getElementById('superadmin-guide').style.display = 'none';
+                }
+                function toggleGuide(id) {
+                    const guide = document.getElementById(id);
+                    if (guide) {
+                        const isHidden = guide.style.display === 'none';
+                        guide.style.display = isHidden ? 'flex' : 'none';
+                        localStorage.setItem('guide_visible_' + id, isHidden ? 'true' : 'false');
+                    }
+                }
+            </script>
+
+            <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+                <div class="stat-card">
+                    <h3>Total Organizations</h3>
+                    <div style="font-size: 2.2em; font-weight: 700; color: #0f172a; margin: 10px 0;" id="total-orgs" class="dark-mode-text">...</div>
+                    <div style="font-size: 0.8em; font-weight: 500; display: flex; align-items: center; gap: 5px;">
+                        <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 2px 8px; border-radius: 12px;"><i class="fas fa-arrow-up"></i> <span id="org-growth-text">...</span></span>
+                        <span style="color: #64748b;">from last month</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>Projected MRR</h3>
+                    <div style="font-size: 2.2em; font-weight: 700; color: #0f172a; margin: 10px 0;" id="projected-mrr" class="dark-mode-text">...</div>
+                    <div style="font-size: 0.8em; color: #64748b; font-weight: 500;">Monthly Recurring Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Platform Users</h3>
+                    <div style="font-size: 2.2em; font-weight: 700; color: #0f172a; margin: 10px 0;" id="total-users" class="dark-mode-text">...</div>
+                    <div style="font-size: 0.8em; color: #64748b; font-weight: 500;">Across all tenants</div>
                 </div>
             </div>
 
-            
-            </div> <!-- Close grid for charts -->
+            <!-- Dashboard Charts Grid -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <!-- SaaS Growth Pulse -->
+                <div class="stat-card chart-container">
+                    <h3 style="margin: 0 0 15px 0;">SaaS Growth Pulse</h3>
+                    <div style="height: 300px; position: relative; width: 100%;">
+                        <canvas id="growthPulseChart"></canvas>
+                    </div>
+                </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-top: 30px;">
                 <!-- Subscription Distribution -->
-                <div class="chart-container" style="flex: 1;">
-                    <span class="pulse-label" style="display: block; font-weight: 600; color: var(--brand-slate); margin-bottom: 15px;">Subscription Tier Distribution</span>
-                    <div style="height: 300px; position: relative; display: flex; align-items: center; justify-content: center;">
+                <div class="stat-card chart-container">
+                    <h3 style="margin: 0 0 15px 0;">Subscription Tiers</h3>
+                    <div style="height: 300px; position: relative; display: flex; align-items: center; justify-content: center; width: 100%;">
                         <canvas id="tierDistributionChart"></canvas>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
-
-    <script src="../../js/core/config.js?v=1781824528054"></script>
-    
-    <!-- Core & Utils -->
     <script src="../../js/utils/helpers.js?v=1781824528054"></script>
     <script src="../../js/ui/theme.js?v=1781824528054"></script>
     <script src="../../js/core/globals.js?v=1781824528054"></script>
