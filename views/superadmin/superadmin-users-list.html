@@ -48,13 +48,12 @@
 
         /* Search input styling */
         #user-search {
-            background: rgba(6, 12, 24, 0.6) !important;
-            border: 1px solid var(--glass-border) !important;
-            
             padding: 12px 15px !important;
             border-radius: 8px !important;
             font-family: inherit;
+            border: 1px solid var(--glass-border) !important;
         }
+        .dark-mode #user-search { background: rgba(6, 12, 24, 0.6) !important; }
 
         #user-search:focus {
             outline: none;
@@ -62,63 +61,7 @@
             box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
         }
 
-        /* Table styling overrides to override styles.css light modes */
-        .user-table {
-            width: 100%;
-            border-collapse: separate !important;
-            border-spacing: 0 12px !important; /* Spacing between rows */
-            background: transparent !important;
-        }
-
-        .user-table th {
-            background: rgba(6, 12, 24, 0.6) !important;
-            color: var(--brand-gold) !important;
-            font-weight: 700;
-            border: none !important;
-            text-transform: uppercase;
-            font-size: 0.85em;
-            letter-spacing: 1px;
-            padding: 12px 15px !important;
-            text-align: left;
-            white-space: normal !important;
-        }
-
-        /* Space out and style rows like floating cards */
-        .user-table tbody tr {
-            background: rgba(17, 34, 64, 0.5) !important;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .user-table tbody tr:hover {
-            background: rgba(17, 34, 64, 0.85) !important;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Prevent parent styles.css hover-td background light override */
-        .user-table tbody tr:hover td {
-            background-color: transparent !important;
-        }
-
-        .user-table td {
-            padding: 12px 15px !important;
-            border: none !important; /* Remove standard borders */
-            color: var(--brand-slate) !important;
-            vertical-align: middle;
-            background: transparent !important;
-            white-space: normal !important;
-        }
-
-        .user-table td:first-child {
-            border-radius: 12px 0 0 12px;
-        }
-
-        .user-table td:last-child {
-            border-radius: 0 12px 12px 0;
-        }
-
-        /* Text colors inside table */
+        /* Stripped bulky table styles */
         .user-table td div {
             
         }
@@ -133,9 +76,11 @@
 
         /* Larger Email styling */
         .user-table td div:last-child {
-            font-size: 0.95em !important; /* Increased size to make readable */
-            color: var(--brand-slate) !important;
+            font-size: 0.95em !important;
             font-weight: 500;
+        }
+        .dark-mode .user-table td div:last-child {
+            color: var(--brand-slate) !important;
         }
 
         /* Badge details */
@@ -228,6 +173,142 @@
         }
     </style>
     <link rel="manifest" href="../../manifest.json">
+
+    <!-- Sleek UI Override for Superadmin -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body, .main-content h1, .sidebar-logo, h2, h3, h4, .stat-card h3 {
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        /* Sleek Sidebar */
+        .sidebar {
+            background: #ffffff !important;
+            border-right: 1px solid #f1f5f9 !important;
+        }
+        .dark-mode .sidebar {
+            background: #0f172a !important;
+            border-right: 1px solid #1e293b !important;
+        }
+
+        .sidebar-logo {
+            font-size: 1.2em !important;
+            color: #0f172a !important;
+            letter-spacing: 0px !important;
+        }
+        .dark-mode .sidebar-logo { color: #f8fafc !important; }
+        
+        .sidebar-subtitle { display: none !important; }
+        
+        .sidebar nav a {
+            color: #64748b !important;
+            font-size: 0.95em !important;
+            padding: 12px 15px !important;
+            margin: 4px 15px !important;
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+        }
+        .sidebar nav a:hover {
+            background: #f8fafc !important;
+            color: #3b82f6 !important;
+        }
+        .sidebar nav a.active {
+            background: rgba(59, 130, 246, 0.1) !important;
+            color: #3b82f6 !important;
+            border: none !important;
+            font-weight: 600 !important;
+        }
+        
+        .dark-mode .sidebar nav a { color: #94a3b8 !important; }
+        .dark-mode .sidebar nav a:hover { background: #1e293b !important; color: #60a5fa !important; }
+        .dark-mode .sidebar nav a.active { background: rgba(96, 165, 250, 0.1) !important; color: #60a5fa !important; }
+
+        #user-info { display: none !important; } /* Remove bulky logged in text */
+
+        /* Main Content Spacing */
+        .dashboard-container {
+            background: #f8fafc !important;
+        }
+        .dark-mode .dashboard-container { background: #0b1120 !important; }
+        
+        .main-content {
+            padding: 30px 40px !important;
+        }
+        
+        .main-content h1 {
+            font-size: 1.5em !important;
+            color: #0f172a !important;
+            font-weight: 600 !important;
+        }
+        .dark-mode .main-content h1 { color: #f8fafc !important; }
+
+        /* Sleek Cards */
+        .stat-card, .dashboard-section, .order-list, .order-form-container {
+            background: #ffffff !important;
+            border-radius: 16px !important;
+            border: 1px solid #f1f5f9 !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02) !important;
+            padding: 24px !important;
+        }
+        .dark-mode .stat-card, .dark-mode .dashboard-section, .dark-mode .order-list, .dark-mode .order-form-container {
+            background: #1e293b !important;
+            border: 1px solid #334155 !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em !important;
+            color: #64748b !important;
+            font-weight: 500 !important;
+        }
+        .stat-card p.stat-value {
+            font-size: 2.2em !important;
+            color: #0f172a !important;
+            font-weight: 600 !important;
+            margin-top: 10px !important;
+        }
+        .dark-mode .stat-card p.stat-value { color: #f8fafc !important; }
+        
+        /* Badges */
+        .badge-premium, .badge-active, .badge-warning {
+            border-radius: 20px !important;
+            font-size: 0.75em !important;
+            padding: 4px 10px !important;
+            text-transform: none !important;
+            font-weight: 500 !important;
+            border: none !important;
+        }
+        
+        /* Table Styling */
+        table th {
+            font-family: 'Inter', sans-serif !important;
+            color: #64748b !important;
+            font-size: 0.8em !important;
+            font-weight: 500 !important;
+            background: transparent !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+        .dark-mode table th { border-bottom: 1px solid #334155 !important; color: #94a3b8 !important; }
+        
+        table td {
+            font-size: 0.9em !important;
+            border-bottom: 1px solid #f8fafc !important;
+            color: #334155 !important;
+        }
+        .dark-mode table td { border-bottom: 1px solid #1e293b !important; color: #cbd5e1 !important; }
+        
+        /* Inputs & Buttons */
+        .small-btn, .submit-btn {
+            border-radius: 8px !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+            font-size: 0.85em !important;
+            padding: 8px 16px !important;
+            box-shadow: none !important;
+        }
+    </style>
+
 </head>
 <body>
     <!-- Dark Mode Initializer -->
@@ -249,50 +330,7 @@
             </div>
 
             <p id="user-info">Logged in as: Owner</p>
-                        <nav>
-                <a href="../../views/admin/admin-dashboard.html" id="nav-dashboard" ><i class="fas fa-crown" style="margin-right: 8px;"></i> Admin Dashboard</a>
-                
-                <a href="../../views/admin/admin-orders.html" id="nav-orders"><i class="fas fa-folder-open" style="margin-right: 8px;"></i> Global Orders</a>
-                
-                <div class="sidebar-dropdown">
-                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
-                        <span><i class="fas fa-address-book" style="margin-right: 8px;"></i> Clients & Inbox</span>
-                        <i class="fas fa-chevron-down dropdown-arrow"></i>
-                    </button>
-                    <div class="dropdown-content">
-                        <a href="../../views/admin/admin-clients.html" id="nav-clients"><i class="fas fa-users" style="margin-right: 8px;"></i> Client Database</a>
-                        <a href="../../views/admin/admin-messages.html" id="nav-messages"><i class="fas fa-comments" style="margin-right: 8px;"></i> Messages Inbox</a>
-                    </div>
-                </div>
-
-                <div class="sidebar-dropdown">
-                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
-                        <span><i class="fas fa-boxes-stacked" style="margin-right: 8px;"></i> Products & Stock</span>
-                        <i class="fas fa-chevron-down dropdown-arrow"></i>
-                    </button>
-                    <div class="dropdown-content">
-                        <a href="../../views/admin/admin-inventory.html" id="nav-inventory"><i class="fas fa-box-open" style="margin-right: 8px;"></i> Inventory</a>
-                        <a href="../../views/admin/admin-listings.html" id="nav-listings"><i class="fas fa-tags" style="margin-right: 8px;"></i> Marketplace Catalog</a>
-                    </div>
-                </div>
-
-                <div class="sidebar-dropdown">
-                    <button class="dropdown-trigger" onclick="toggleSidebarDropdown(this)">
-                        <span><i class="fas fa-wallet" style="margin-right: 8px;"></i> Finance & Analytics</span>
-                        <i class="fas fa-chevron-down dropdown-arrow"></i>
-                    </button>
-                    <div class="dropdown-content">
-                        <a href="../../views/admin/financial-overview.html" id="nav-finance"><i class="fas fa-chart-line" style="margin-right: 8px;"></i> Financial Overview</a>
-                        <a href="../../views/admin/admin-analytics.html" id="nav-analytics"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> BI Analytics & AI</a>
-                        <a href="../../views/admin/admin-transactions.html" id="nav-transactions"><i class="fas fa-list-ul" style="margin-right: 8px;"></i> Transactions</a>
-                        <a href="../../views/admin/admin-expenses.html" id="nav-expenses"><i class="fas fa-file-invoice-dollar" style="margin-right: 8px;"></i> Expenses</a>
-                    </div>
-                </div>
-
-                <a href="../../views/admin/admin-order-form.html" class="nav-cta" id="nav-new-order"><i class="fas fa-plus" style="margin-right: 8px;"></i> New Global Order</a>
-
-                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
-            </nav>
+                        <nav></nav>
             <script>
                 if (typeof window.toggleSidebarDropdown !== 'function') {
                     window.toggleSidebarDropdown = function(button) {
