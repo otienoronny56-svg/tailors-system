@@ -194,40 +194,65 @@
                 <div class="settings-card">
                     <h2><i class="fas fa-building" style="color:#3b82f6; margin-right:8px;"></i> Organization Details</h2>
                     <p style="color: var(--brand-slate, #64748b); font-size: 0.9em; margin-bottom: 20px;">
-                        Your current organization name is: <strong id="current-org-name" style="color: var(--text-main, #0f172a);">Loading...</strong>
+                        This is the registered name of your business on the platform. Changing this will update how your organization appears to clients and workers.
                     </p>
-                    <form id="rename-org-form">
-                        <div class="form-group">
-                            <label>New Organization Name</label>
-                            <input type="text" id="new-org-name" placeholder="Enter new organization name" required>
+                    <div id="org-name-display" style="padding: 12px 15px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span style="font-size: 0.85em; color: var(--brand-slate, #64748b);">Current Registered Name:</span><br>
+                            <strong id="current-org-name" style="color: #3b82f6; font-size: 1.1em;">Loading...</strong>
                         </div>
-                        <button type="submit" class="btn-primary" id="rename-org-btn">
-                            <i class="fas fa-save"></i> Save New Name
+                        <button type="button" onclick="document.getElementById('rename-org-container').style.display='block'; this.style.display='none';" style="background: transparent; border: 1px solid #3b82f6; color: #3b82f6; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 0.85em; transition: all 0.2s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#3b82f6';">
+                            <i class="fas fa-edit"></i> Change Name
                         </button>
-                        <div id="rename-org-msg" style="margin-top: 10px; font-weight: 500;"></div>
-                    </form>
+                    </div>
+                    
+                    <div id="rename-org-container" style="display: none; padding-top: 15px; border-top: 1px solid var(--glass-border, #e2e8f0);">
+                        <form id="rename-org-form">
+                            <div class="form-group">
+                                <label>Update Business Name</label>
+                                <input type="text" id="new-org-name" placeholder="e.g. Stitch & Styles Boutique" required>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" class="btn-primary" id="rename-org-btn">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                                <button type="button" onclick="document.getElementById('rename-org-container').style.display='none'; document.querySelector('#org-name-display button').style.display='block';" style="background: transparent; border: 1px solid var(--brand-slate); color: var(--brand-slate); padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+                            </div>
+                            <div id="rename-org-msg" style="margin-top: 10px; font-weight: 500;"></div>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- Security Credentials -->
                 <div class="settings-card">
-                    <h2><i class="fas fa-shield-alt" style="color:#10b981; margin-right:8px;"></i> Security Credentials</h2>
+                    <h2><i class="fas fa-shield-alt" style="color:#10b981; margin-right:8px;"></i> Administrator Credentials</h2>
                     <p style="color: var(--brand-slate, #64748b); font-size: 0.9em; margin-bottom: 20px;">
-                        Update your login email or password. You will use these to log into your dashboard.
+                        Manage the master email and password used to access this administrative dashboard. Leave a field blank if you do not wish to change it.
                     </p>
-                    <form id="update-security-form">
-                        <div class="form-group">
-                            <label>New Email Address (Leave blank to keep current)</label>
-                            <input type="email" id="new-email" placeholder="new-email@example.com">
-                        </div>
-                        <div class="form-group">
-                            <label>New Password (Leave blank to keep current)</label>
-                            <input type="password" id="new-password" placeholder="Min 6 characters">
-                        </div>
-                        <button type="submit" class="btn-primary" id="update-security-btn" style="background: #10b981;">
-                            <i class="fas fa-shield-alt"></i> Update Security Credentials
-                        </button>
-                        <div id="security-msg" style="margin-top: 10px; font-weight: 500;"></div>
-                    </form>
+                    
+                    <button type="button" id="show-security-form-btn" onclick="document.getElementById('security-form-container').style.display='block'; this.style.display='none';" style="background: transparent; border: 1px solid #10b981; color: #10b981; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#10b981';">
+                        <i class="fas fa-key"></i> Change Credentials
+                    </button>
+
+                    <div id="security-form-container" style="display: none; padding-top: 15px; margin-top: 15px; border-top: 1px solid var(--glass-border, #e2e8f0);">
+                        <form id="update-security-form">
+                            <div class="form-group">
+                                <label>Primary Contact Email</label>
+                                <input type="email" id="new-email" placeholder="Enter new email address for login">
+                            </div>
+                            <div class="form-group">
+                                <label>Master Password</label>
+                                <input type="password" id="new-password" placeholder="Enter new secure password (minimum 6 characters)">
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" class="btn-primary" id="update-security-btn" style="background: #10b981;">
+                                    <i class="fas fa-shield-alt"></i> Update Security Settings
+                                </button>
+                                <button type="button" onclick="document.getElementById('security-form-container').style.display='none'; document.getElementById('show-security-form-btn').style.display='block';" style="background: transparent; border: 1px solid var(--brand-slate); color: var(--brand-slate); padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+                            </div>
+                            <div id="security-msg" style="margin-top: 10px; font-weight: 500;"></div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </main>
