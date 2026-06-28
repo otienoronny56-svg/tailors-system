@@ -267,14 +267,21 @@ body {
 }
 
 .dropdown-content {
-    display: none;
+    display: flex;
     flex-direction: column;
     padding-left: 15px;
     margin-top: 4px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.28s ease, opacity 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .sidebar-dropdown.open .dropdown-content {
-    display: flex;
+    max-height: 300px;
+    opacity: 1;
+    pointer-events: all;
 }
 
 .dropdown-content a {
@@ -798,27 +805,27 @@ p {
         margin: 0 !important;
     }
 
-    /* The Dock Container */
+    /* The Dock Container - fixed height, never shifts */
     .bottom-nav {
-        display: none !important;
-        /* Hide Bottom Nav */
+        display: flex !important;
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
-        height: 65px;
+        height: 60px;
+        min-height: 60px;
+        max-height: 60px;
         background: var(--brand-navy);
-        border-top: 3px solid #D4AF37;
-        /* Brand Gold */
+        border-top: 2px solid #D4AF37;
         z-index: 9999;
         justify-content: space-around;
         align-items: center;
         box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.5);
-        padding-bottom: env(safe-area-inset-bottom);
-        /* iPhone X safe area */
+        padding-bottom: 0;
+        overflow: visible;
     }
 
-    /* The Icons */
+    /* The Icons - fixed height prevents shifting */
     .nav-item {
         color: #888;
         text-decoration: none;
@@ -829,7 +836,9 @@ p {
         font-size: 0.7em;
         font-weight: 600;
         width: 20%;
-        /* 5 items = 20% width each */
+        height: 60px;
+        min-height: 60px;
+        flex-shrink: 0;
     }
 
     .nav-item i {
@@ -846,29 +855,29 @@ p {
         /* Gold */
     }
 
-    /* The "New Order" Center Button (Pop-up effect) */
+    /* The "New Order" Center Button - stable, no floating */
     .nav-item.center-fab {
         position: relative;
-        top: -25px;
-        /* Moves it up */
+        top: 0;
+        /* ⛔ removed top:-25px - was causing bottom nav to dance */
     }
 
     .nav-item.center-fab .fab-circle {
-        width: 55px;
-        height: 55px;
+        width: 46px;
+        height: 46px;
         background: #D4AF37;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 5px solid var(--brand-navy);
-        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        border: 3px solid var(--brand-navy);
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.5);
     }
 
     .nav-item.center-fab i {
         color: #000;
         margin: 0;
-        font-size: 1.8em;
+        font-size: 1.5em;
     }
 }
 
