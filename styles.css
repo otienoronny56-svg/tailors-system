@@ -1636,6 +1636,110 @@ body.dark-mode .close-btn:hover {
     color: #f8fafc;
 }
 
+/* --- Messages Interface Dark Mode --- */
+body.dark-mode .inbox-layout {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .inbox-sidebar {
+    background: #0f172a;
+    border-right-color: #334155;
+}
+
+body.dark-mode .inbox-sidebar-title {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .thread-card {
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .thread-card:hover {
+    background-color: #1e293b;
+}
+
+body.dark-mode .thread-card.active {
+    background-color: rgba(212, 175, 55, 0.15);
+}
+
+body.dark-mode .thread-client-name {
+    color: #e2e8f0;
+}
+
+body.dark-mode .thread-meta {
+    color: #94a3b8;
+}
+
+body.dark-mode .chat-container {
+    background: #1e293b;
+}
+
+body.dark-mode .chat-pane-header {
+    background: #1e293b;
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .client-info-title {
+    color: #e2e8f0;
+}
+
+body.dark-mode .chat-messages-stream {
+    background-color: #0f172a;
+}
+
+body.dark-mode .msg-bubble.them {
+    background: #1e293b;
+    color: #cbd5e1;
+    border-color: #334155;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .msg-bubble.me {
+    background: #2563eb;
+    color: #f8fafc;
+    border-color: #1d4ed8;
+}
+
+body.dark-mode .btn-chat-send {
+    background: var(--brand-gold);
+    color: #0f172a;
+}
+
+body.dark-mode .btn-chat-send:hover {
+    background: #ca8a04;
+    color: #0f172a;
+}
+
+body.dark-mode .msg-input-pane {
+    background: #1e293b;
+    border-top-color: #334155;
+}
+
+body.dark-mode .msg-input-pane .input-group input {
+    background: #0f172a;
+    border-color: #334155;
+    color: #f8fafc;
+}
+
+body.dark-mode .msg-input-pane .input-group input:focus {
+    border-color: var(--brand-gold);
+    outline: none;
+}
+
+body.dark-mode #thread-bulk-actions {
+    background: #1e293b !important;
+    border-top-color: #334155 !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.4) !important;
+}
+
+body.dark-mode #thread-selected-count {
+    color: #e2e8f0 !important;
+}
+
 /* --- Search Results Popover (Floating Dropdown) --- */
 .form-group {
     position: relative;
@@ -1689,6 +1793,233 @@ body.dark-mode .search-result-item {
 body.dark-mode .search-result-item:hover {
     background: #0f172a;
 }
+
+/* ============================================ */
+/* 🌙 DARK MODE — Client Details Overlay        */
+/* ============================================ */
+
+/* Full-page modal background */
+body.dark-mode #order-modal {
+    background: #0f172a !important;
+}
+
+body.dark-mode #order-modal .modal-content {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+/* Client name heading */
+body.dark-mode #client-info-view h2 {
+    color: #f8fafc !important;
+}
+
+/* Phone + label text */
+body.dark-mode #client-info-view p,
+body.dark-mode #client-info-view span {
+    color: #94a3b8 !important;
+}
+
+/* Edit Info button */
+body.dark-mode #client-info-view .small-btn {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+    border: 1px solid #334155 !important;
+}
+
+/* Measurement cards */
+body.dark-mode .history-item {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-mode .history-item [style*="border-bottom: 2px solid #f1f5f9"],
+body.dark-mode .history-item [style*="border-bottom:2px solid #f1f5f9"] {
+    border-bottom-color: #334155 !important;
+}
+
+/* Coat Details header text inside cards */
+body.dark-mode .history-item h4,
+body.dark-mode .history-item span,
+body.dark-mode .history-item div {
+    color: #e2e8f0 !important;
+}
+
+/* Measurement label text (Hips, Chest, etc.) */
+body.dark-mode .history-measurements td:first-child,
+body.dark-mode .history-measurements [style*="color: #64748b"],
+body.dark-mode .history-measurements [style*="color:#64748b"] {
+    color: #94a3b8 !important;
+}
+
+/* Measurement value text */
+body.dark-mode .history-measurements td:last-child,
+body.dark-mode .history-measurements strong {
+    color: #f8fafc !important;
+}
+
+/* Category section backgrounds (#f8fafc blocks inside measurement cards) */
+body.dark-mode .history-item [style*="background: #f8fafc"],
+body.dark-mode .history-item [style*="background:#f8fafc"],
+body.dark-mode .history-item [style*="background: #f1f5f9"],
+body.dark-mode .history-item [style*="background:#f1f5f9"] {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+/* Edit pencil button on cards */
+body.dark-mode .history-item .small-btn {
+    background: #0f172a !important;
+    color: #94a3b8 !important;
+    border: 1px solid #334155 !important;
+}
+
+/* Date badge on measurement cards */
+body.dark-mode .history-item [style*="background: #f1f5f9"] {
+    background: #0f172a !important;
+    color: #94a3b8 !important;
+}
+
+/* Audit log section */
+body.dark-mode .history-item [style*="border-top:1px dashed"],
+body.dark-mode .history-item [style*="border-top: 1px dashed"] {
+    border-top-color: #334155 !important;
+}
+
+body.dark-mode .history-item [id^="audit-log-"] {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .history-item [id^="audit-diff-"] {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Section headers (Measurement History / Order & Billing History) */
+body.dark-mode .client-details-grid h3 {
+    color: #f8fafc !important;
+}
+
+/* Order & Billing table */
+body.dark-mode #order-modal table {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode #order-modal thead tr {
+    background: #0f172a !important;
+}
+
+body.dark-mode #order-modal th {
+    background: #0f172a !important;
+    color: #94a3b8 !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode #order-modal td {
+    color: #cbd5e1 !important;
+    border-bottom-color: #1e293b !important;
+}
+
+body.dark-mode #order-modal tbody tr:hover td {
+    background: #0f172a !important;
+}
+
+/* "No history found" empty state */
+body.dark-mode #order-modal [style*="color: #64748b"][style*="font-style: italic"] {
+    color: #475569 !important;
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Client notes (yellow card) stays readable in dark mode */
+body.dark-mode #client-notes-container [style*="background: #fff8e1"] {
+    background: #1c1a00 !important;
+    border-left-color: #ffc107 !important;
+}
+
+/* Add Profile button stays gold-on-navy */
+body.dark-mode #order-modal .small-btn[style*="background: var(--brand-navy)"] {
+    background: #1e3a5f !important;
+    color: var(--brand-gold) !important;
+}
+
+/* Close button */
+body.dark-mode #order-modal .close-btn {
+    color: #94a3b8 !important;
+}
+body.dark-mode #order-modal .close-btn:hover {
+    color: #f8fafc !important;
+}
+
+/* ---- Measurement sub-cards (dm-meas-card) ---- */
+body.dark-mode .dm-meas-card {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .dm-meas-header {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .dm-meas-field {
+    border-bottom-color: #334155 !important;
+}
+
+body.dark-mode .dm-meas-label {
+    color: #64748b !important;
+}
+
+body.dark-mode .dm-meas-value {
+    color: #e2e8f0 !important;
+}
+
+/* ---- Date badge pill on measurement cards ---- */
+body.dark-mode .history-item [style*="background: #f1f5f9"],
+body.dark-mode .history-item [style*="background:#f1f5f9"] {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+    border-color: #334155 !important;
+}
+
+/* ---- Edit pencil icon button on cards ---- */
+body.dark-mode .history-item button.small-btn,
+body.dark-mode .history-item .small-btn {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+    border: 1px solid #334155 !important;
+}
+
+/* ---- Top-right Edit Info button ---- */
+body.dark-mode #client-info-view button.small-btn {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+    border: 1px solid #334155 !important;
+}
+
+/* ---- Add Profile / Add Garment button ---- */
+body.dark-mode .client-details-grid button.small-btn {
+    border: 1px solid var(--brand-gold) !important;
+}
+
+/* ---- "No measurements recorded" text inside dark card ---- */
+body.dark-mode .history-item p,
+body.dark-mode .history-item > div > p {
+    color: #64748b !important;
+}
+
+/* ---- Known Garments badge (Suit pill) ---- */
+body.dark-mode #client-info-view [style*="background: var(--brand-navy)"],
+body.dark-mode #client-info-view span[style*="border-radius: 20px"] {
+    background: #1e3a5f !important;
+    color: var(--brand-gold) !important;
+}
+
+
+
+
 
 .mobile-back-btn {
     display: none;

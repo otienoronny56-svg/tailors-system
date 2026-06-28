@@ -50,7 +50,22 @@
                 display: none !important;
             }
             .filter-bar {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 10px !important;
                 margin-bottom: 10px !important;
+                padding: 0 !important;
+            }
+            .search-box {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            .shop-filter-wrapper {
+                width: 100% !important;
+            }
+            .client-details-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
             }
             .table-responsive {
                 overflow-x: auto;
@@ -73,12 +88,16 @@
             .table-responsive tr {
                 border-bottom: 1px solid #f1f5f9;
             }
+            /* Hide 'No.' column on mobile to preserve layout integrity */
+            .table-responsive th:nth-child(1), .table-responsive td:nth-child(1) {
+                display: none !important;
+            }
             /* Reorder columns: Name(1), Phone(2), Action(5), Last Item(3), Last Visit(4) */
-            .table-responsive th:nth-child(1), .table-responsive td:nth-child(1) { order: 1; }
-            .table-responsive th:nth-child(2), .table-responsive td:nth-child(2) { order: 2; }
-            .table-responsive th:nth-child(5), .table-responsive td:nth-child(5) { order: 3; }
-            .table-responsive th:nth-child(3), .table-responsive td:nth-child(3) { order: 4; }
-            .table-responsive th:nth-child(4), .table-responsive td:nth-child(4) { order: 5; }
+            .table-responsive th:nth-child(2), .table-responsive td:nth-child(2) { order: 1; }
+            .table-responsive th:nth-child(3), .table-responsive td:nth-child(3) { order: 2; }
+            .table-responsive th:nth-child(6), .table-responsive td:nth-child(6) { order: 3; }
+            .table-responsive th:nth-child(4), .table-responsive td:nth-child(4) { order: 4; }
+            .table-responsive th:nth-child(5), .table-responsive td:nth-child(5) { order: 5; }
 
             .header-stats-container {
                 display: none !important;
@@ -225,12 +244,18 @@
                 </div>
             </header>
 
-            <div class="filter-bar" style="margin-bottom: 12px;">
-                <div class="search-box" style="flex: 1; position: relative;">
+            <div class="filter-bar" style="margin-bottom: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div class="search-box" style="flex: 1; min-width: 250px; max-width: 400px; position: relative;">
                     <i class="fas fa-search"
                         style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.95em;"></i>
                     <input type="text" id="client-search" placeholder="Search across all shops..."
                         style="padding: 8px 10px 8px 36px; width: 100%; height: 36px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 13px; margin: 0;" oninput="loadClients()">
+                </div>
+                <div class="shop-filter-wrapper" style="width: 150px;">
+                    <select id="client-shop-filter" onchange="loadClients()"
+                        style="width: 100%; height: 36px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 13px; margin: 0; cursor: pointer; outline: none; padding: 0 10px;">
+                        <option value="all">Shop: All</option>
+                    </select>
                 </div>
             </div>
 
@@ -239,6 +264,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th style="width: 40px; text-align: center;">No.</th>
                                 <th>Name</th>
                                 <th>Phone</th>
                                 <th>Last Item</th>
@@ -248,7 +274,7 @@
                         </thead>
                         <tbody id="clients-tbody">
                             <tr>
-                                <td colspan="5" style="text-align:center; padding:20px;">Loading clients...</td>
+                                <td colspan="6" style="text-align:center; padding:20px;">Loading clients...</td>
                             </tr>
                         </tbody>
                     </table>

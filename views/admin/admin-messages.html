@@ -247,24 +247,24 @@
             height: 100vh !important;
             display: flex !important;
             flex-direction: column !important;
-            padding: 20px !important;
+            padding: 15px !important;
             overflow: hidden !important;
             box-sizing: border-box !important;
         }
 
         .inv-header {
             flex-shrink: 0 !important;
-            margin-bottom: 15px !important;
+            margin-bottom: 10px !important;
         }
 
         .inbox-layout {
             flex-grow: 1 !important;
-            height: calc(100vh - 180px) !important;
-            min-height: calc(100vh - 180px) !important;
+            height: 100% !important;
+            min-height: 0 !important;
         }
 
         #global-ronny-footer {
-            margin-top: 10px !important;
+            display: none !important;
         }
 
         .mobile-back-btn {
@@ -402,11 +402,17 @@
 
         <!-- 🏢 MAIN WORKSPACE -->
         <main class="main-content">
-            <header class="inv-header" style="margin-bottom: 20px;">
+            <header class="inv-header" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h1><i class="fas fa-comments" style="color: var(--brand-gold); margin-right: 10px;"></i>In-App
-                        Messages</h1>
-                    <p>Communicate directly with marketplace consumers inquiring about your tailored items.</p>
+                    <h1 style="margin: 0; font-size: 1.5em;"><i class="fas fa-comments" style="color: var(--brand-gold); margin-right: 10px;"></i>In-App Messages</h1>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button onclick="toggleTheme()" title="Toggle Dark Mode"
+                        style="background: white; border: 1px solid #e2e8f0; color: #475569; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9em;"
+                        onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'; this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.background='white'; this.style.color='#475569'; this.style.transform='translateY(0)'">
+                        <i class="fa-solid fa-moon theme-toggle-icon"></i>
+                    </button>
                 </div>
             </header>
 
@@ -889,7 +895,12 @@
                             <div class="client-info-sub">${escapeHTML(subtitleInfo)}</div>
                         </div>
                     </div>
-                    <div id="header-action-container"></div>
+                    <div style="display:flex; align-items:center; gap: 12px;">
+                        <div id="header-action-container"></div>
+                        <button onclick="closeChatThread()" title="Close Chat" style="background:none; border:none; cursor:pointer; font-size:1.25em; color:#94a3b8; transition:color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="chat-messages-stream" id="chat-messages-stream">
                     <div style="text-align:center; padding:20px; color:#94a3b8;">
@@ -1910,6 +1921,21 @@
                     const existingTime = new Date(history[existingIdx].updated_at || 0).getTime();
                     const newTime = new Date(entry.updated_at).getTime();
                     if (newTime > existingTime) {
+                        // --- AUDIT TRAIL: snapshot previous before overwriting ---
+                        const prevMeasurements = history[existingIdx].measurements;
+                        if (prevMeasurements && Object.keys(prevMeasurements).length > 0) {
+                            if (!history[existingIdx].audit_log) history[existingIdx].audit_log = [];
+                            history[existingIdx].audit_log.push({
+                                changed_at: entry.updated_at,
+                                changed_by: activeThread.client_name || 'Client',
+                                changed_by_role: 'client',
+                                source: 'client', // client submitted from their app
+                                previous_measurements: JSON.parse(JSON.stringify(prevMeasurements))
+                            });
+                        }
+                        // Carry over audit_log to the new entry
+                        entry.audit_log = history[existingIdx].audit_log || [];
+                        // --- END AUDIT TRAIL ---
                         history[existingIdx] = entry;
                     } else {
                         return; // already up to date

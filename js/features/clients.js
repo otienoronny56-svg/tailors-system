@@ -3,6 +3,105 @@
 // ==========================================
 
 /**
+ * Returns a modern SVG icon representing a garment type.
+ * Used on measurement cards and order history rows.
+ */
+function getGarmentIcon(garmentType) {
+    const g = (garmentType || '').toLowerCase();
+
+    const wrap = (svg) => `<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:rgba(212,175,55,0.12);border-radius:7px;flex-shrink:0;" aria-hidden="true">${svg}</span>`;
+
+    const svgAttr = `width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
+
+    // Suit / Senator / Kaunda
+    if (g.includes('suit') || g.includes('senator') || g.includes('kaunda')) return wrap(`
+        <svg ${svgAttr}>
+            <path d="M5 4l3-1 4 5 4-5 3 1-2 6H5L3 4z"/>
+            <rect x="5" y="10" width="14" height="11" rx="1"/>
+            <line x1="12" y1="10" x2="12" y2="21"/>
+        </svg>`);
+
+    // Shirt / Blouse
+    if (g.includes('shirt') || g.includes('blouse')) return wrap(`
+        <svg ${svgAttr}>
+            <path d="M3 5l5-2 4 4 4-4 5 2-2 5h-3v11H7V10H4z"/>
+        </svg>`);
+
+    // Dress
+    if (g.includes('dress')) return wrap(`
+        <svg ${svgAttr}>
+            <path d="M9 3h6l3 18H6L9 3z"/>
+            <path d="M9 3c0 0 1.5 3 3 4 1.5-1 3-4 3-4"/>
+            <line x1="6" y1="12" x2="18" y2="12"/>
+        </svg>`);
+
+    // Trouser / Skirt / Pant
+    if (g.includes('trouser') || g.includes('pant') || g.includes('skirt')) return wrap(`
+        <svg ${svgAttr}>
+            <path d="M5 3h14l-2 9-3 9h-4l-3-9L5 3z"/>
+            <line x1="12" y1="7" x2="12" y2="21"/>
+        </svg>`);
+
+    // Coat / Jacket / Blazer / Half Coat
+    if (g.includes('coat') || g.includes('jacket') || g.includes('blazer')) return wrap(`
+        <svg ${svgAttr}>
+            <path d="M4 5l4-2 4 5 4-5 4 2-2 7h-3v10H6V12H3z"/>
+            <line x1="12" y1="8" x2="12" y2="22"/>
+        </svg>`);
+
+    // Shoes / Boots / Sandals
+    if (g.includes('shoe') || g.includes('boot') || g.includes('sandal')) return wrap(`
+        <svg ${svgAttr}>
+            <path d="M2 18c0-3 5-8 9-8h5c3 0 6 2 6 4v2H2v-2z"/>
+            <path d="M9 10V7a2 2 0 0 1 4 0v2"/>
+        </svg>`);
+
+    // Accessories / Belt / Hat / Watch
+    if (g.includes('accessor') || g.includes('belt') || g.includes('hat') || g.includes('cap')) return wrap(`
+        <svg ${svgAttr}>
+            <path d="M2 12l8-5v10L2 12z"/>
+            <path d="M22 12l-8-5v10l8-5z"/>
+            <circle cx="12" cy="12" r="2"/>
+        </svg>`);
+
+    // Alteration / Repair
+    if (g.includes('alteration') || g.includes('repair')) return wrap(`
+        <svg ${svgAttr}>
+            <circle cx="6" cy="6" r="3"/>
+            <circle cx="6" cy="18" r="3"/>
+            <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+            <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+            <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+        </svg>`);
+
+    // Standard Size / Measurements
+    if (g.includes('standard') || g.includes('size')) return wrap(`
+        <svg ${svgAttr}>
+            <rect x="2" y="7" width="20" height="10" rx="2"/>
+            <line x1="6" y1="7" x2="6" y2="12"/>
+            <line x1="10" y1="7" x2="10" y2="10"/>
+            <line x1="14" y1="7" x2="14" y2="12"/>
+            <line x1="18" y1="7" x2="18" y2="10"/>
+        </svg>`);
+
+    // Kanzu / Robe / Kaftan / Abaya
+    if (g.includes('kanzu') || g.includes('robe') || g.includes('kaftan') || g.includes('abaya')) return wrap(`
+        <svg ${svgAttr}>
+            <path d="M12 3c-2 0-4 2-4 4v14h8V7c0-2-2-4-4-4z"/>
+            <path d="M8 7H4l2 14M16 7h4l-2 14"/>
+        </svg>`);
+
+    // Default — sewing needle / thread
+    return wrap(`
+        <svg ${svgAttr}>
+            <path d="M20.24 4.76a3 3 0 0 0-4.24 0L4 16.76V20h3.24L19.24 8a3 3 0 0 0 1-3.24z"/>
+            <line x1="16" y1="8" x2="2" y2="22"/>
+            <line x1="17.5" y1="15" x2="9" y2="15"/>
+        </svg>`);
+}
+
+
+/**
  * Attaches a search dropdown listener to the phone number field
  * @param {string} phoneInputId - The ID of the phone input field
  */
@@ -150,12 +249,26 @@ async function loadClients() {
     const tbody = document.getElementById('clients-tbody');
     if (!tbody) return;
 
+    // Populate shop filter dropdown dynamically if empty
+    const shopFilter = document.getElementById('client-shop-filter');
+    if (shopFilter && shopFilter.options.length <= 1) {
+        if (typeof loadShopsForDropdown === 'function') {
+            await loadShopsForDropdown('client-shop-filter');
+        }
+    }
+
     try {
         const searchVal = document.getElementById('client-search')?.value.trim() || '';
+        const shopFilterVal = shopFilter?.value || 'all';
+
         let query = supabaseClient.from('clients').select('*').eq('organization_id', USER_PROFILE.organization_id).order('name');
 
         if (searchVal) {
             query = query.or(`name.ilike.%${searchVal}%,phone.ilike.%${searchVal}%`);
+        }
+
+        if (shopFilterVal && shopFilterVal !== 'all') {
+            query = query.eq('shop_id', shopFilterVal);
         }
 
         const { data: clients, error } = await query;
@@ -165,12 +278,13 @@ async function loadClients() {
         updateClientMiniStats(clients || []);
 
         if (!clients || clients.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No clients found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No clients found</td></tr>';
             return;
         }
 
-        tbody.innerHTML = clients.map(c => `
+        tbody.innerHTML = clients.map((c, index) => `
             <tr>
+                <td style="text-align: center; color: #64748b; font-weight: 500;">${index + 1}</td>
                 <td style="font-weight:bold;">${c.name}</td>
                 <td>${c.phone}</td>
                 <td>${c.last_garment_type || '-'}</td>
@@ -185,7 +299,7 @@ async function loadClients() {
 
     } catch (error) {
         logDebug("Error loading clients:", error, 'error');
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:red;">Error loading clients</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:red;">Error loading clients</td></tr>';
     }
 }
 
@@ -243,6 +357,19 @@ async function viewClientDetails(clientId) {
 
         if (error) throw error;
 
+        // Fetch client order/billing history using their phone number
+        let orders = [];
+        if (client.phone) {
+            const { data: ordersData, error: ordersError } = await supabaseClient
+                .from('orders')
+                .select('created_at, garment_type, price, status')
+                .eq('customer_phone', client.phone)
+                .order('created_at', { ascending: false });
+            if (!ordersError && ordersData) {
+                orders = ordersData;
+            }
+        }
+
         const modal = document.getElementById('order-modal');
         const content = modal.querySelector('.modal-content');
 
@@ -254,16 +381,92 @@ async function viewClientDetails(clientId) {
             </span>
         `).join('');
 
-        let historyHtml = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">No measurement history found.</p>';
+        let historyHtml = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px; background: white; border: 1px solid #e2e8f0; border-radius: 12px;">No measurement history found.</p>';
         if (client.measurements_history && client.measurements_history.length > 0) {
-            historyHtml = client.measurements_history.map((h, index) => `
+            historyHtml = client.measurements_history.map((h, index) => {
+                const auditLog = h.audit_log || [];
+                const changeCount = auditLog.length;
+
+                // Build audit log rows
+                let auditRowsHtml = '';
+                if (changeCount > 0) {
+                    // Reverse so newest change is first
+                    auditRowsHtml = [...auditLog].reverse().map((entry, i) => {
+                        const isClient = entry.source === 'client';
+                        const sourceBadge = isClient
+                            ? `<span style="background:#dbeafe; color:#1d4ed8; padding:1px 7px; border-radius:10px; font-size:0.75em; font-weight:700;"><i class="fas fa-mobile-alt" style="margin-right:3px;"></i>Client App</span>`
+                            : `<span style="background:#f3e8ff; color:#7e22ce; padding:1px 7px; border-radius:10px; font-size:0.75em; font-weight:700;"><i class="fas fa-user-edit" style="margin-right:3px;"></i>Staff</span>`;
+
+                        // Build field diff
+                        const prev = entry.previous_measurements || {};
+                        const curr = h.measurements || {};
+                        let diffHtml = '';
+                        const allCats = new Set([...Object.keys(prev), ...Object.keys(curr)]);
+                        allCats.forEach(cat => {
+                            const prevCat = prev[cat] || {};
+                            const currCat = curr[cat] || {};
+                            const allKeys = new Set([...Object.keys(prevCat), ...Object.keys(currCat)]);
+                            allKeys.forEach(key => {
+                                const oldVal = prevCat[key] || '—';
+                                const newVal = currCat[key] || '—';
+                                if (oldVal !== newVal) {
+                                    diffHtml += `
+                                        <div style="display:flex; align-items:center; gap:6px; font-size:0.8em; padding:3px 0; border-bottom:1px solid #f1f5f9;">
+                                            <span style="color:#64748b; min-width:100px;">${key}</span>
+                                            <span style="color:#ef4444; text-decoration:line-through;">${oldVal}"</span>
+                                            <i class="fas fa-arrow-right" style="color:#94a3b8; font-size:0.7em;"></i>
+                                            <span style="color:#16a34a; font-weight:700;">${newVal}"</span>
+                                        </div>`;
+                                }
+                            });
+                        });
+                        if (!diffHtml) diffHtml = `<span style="color:#94a3b8; font-size:0.8em; font-style:italic;">No field-level differences captured</span>`;
+
+                        const entryId = `audit-diff-${client.id}-${index}-${i}`;
+                        return `
+                            <div style="border-bottom:1px solid #f1f5f9; padding:8px 0;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; cursor:pointer;"
+                                     onclick="const el=document.getElementById('${entryId}'); el.style.display=el.style.display==='none'?'block':'none';">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        ${sourceBadge}
+                                        <span style="font-size:0.82em; font-weight:600; color:#1e293b;">${entry.changed_by || 'Unknown'}</span>
+                                        <span style="font-size:0.75em; color:#94a3b8; font-style:italic; text-transform:capitalize;">(${entry.changed_by_role || 'unknown'})</span>
+                                    </div>
+                                    <span style="font-size:0.75em; color:#64748b; white-space:nowrap;">
+                                        <i class="fas fa-clock" style="margin-right:3px;"></i>
+                                        ${entry.changed_at ? new Date(entry.changed_at).toLocaleString('en-KE', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}
+                                    </span>
+                                </div>
+                                <div id="${entryId}" style="display:none; margin-top:8px; padding:8px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0;">
+                                    <div style="font-size:0.78em; font-weight:700; color:#64748b; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px;">Changes Made</div>
+                                    ${diffHtml}
+                                </div>
+                            </div>`;
+                    }).join('');
+                }
+
+                const auditSection = changeCount > 0 ? `
+                    <div style="margin-top:12px; border-top:1px dashed #e2e8f0; padding-top:10px;">
+                        <button onclick="const el=document.getElementById('audit-log-${client.id}-${index}'); el.style.display=el.style.display==='none'?'block':'none';"
+                                style="background:none; border:none; cursor:pointer; font-size:0.8em; color:#64748b; font-weight:600; display:flex; align-items:center; gap:5px; padding:0;">
+                            <i class="fas fa-history" style="color:#94a3b8;"></i>
+                            <span style="border-bottom:1px dashed #cbd5e1;">${changeCount} change${changeCount > 1 ? 's' : ''} recorded</span>
+                        </button>
+                        <div id="audit-log-${client.id}-${index}" style="display:none; margin-top:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;">
+                            <div style="font-size:0.78em; font-weight:700; color:#64748b; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.4px;">Change Log</div>
+                            ${auditRowsHtml}
+                        </div>
+                    </div>` : '';
+
+                return `
                 <div class="history-item" id="history-item-${index}" style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                     <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <span style="font-weight: 800; color: var(--brand-navy); font-size: 1.1em; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fas fa-cut" style="margin-right: 8px; color: var(--brand-gold);"></i>${h.garment}
+                        <span style="font-weight: 800; color: var(--brand-navy); font-size: 1.1em; text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+                            ${getGarmentIcon(h.garment)}${h.garment}
                         </span>
                         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                            <span style="color: #64748b; font-size: 0.85em; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; white-space: nowrap;">${formatDate(h.date)}</span>
+                            ${changeCount > 0 ? `<span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:0.75em; font-weight:700;"><i class="fas fa-history" style="margin-right:3px;"></i>${changeCount}</span>` : ''}
+                            <span style="color: #64748b; font-size: 0.85em; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; white-space: nowrap;">${formatDate(h.date || h.updated_at)}</span>
                             <button class="small-btn" onclick="editClientMeasurement('${client.id}', ${index})" style="background: #f1f5f9; color: var(--brand-navy); border: none;">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -272,40 +475,115 @@ async function viewClientDetails(clientId) {
                     <div class="history-measurements" style="font-size: 0.95em; line-height: 1.6; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px;">
                         ${formatMeasurements(JSON.stringify(h.measurements))}
                     </div>
+                    ${auditSection}
+                </div>`;
+            }).join('');
+        }
+
+
+        let ordersHtml = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px; background: white; border: 1px solid #e2e8f0; border-radius: 12px;">No order history found.</p>';
+        if (orders && orders.length > 0) {
+            ordersHtml = `
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: 100%;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9em;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                                <th style="padding: 10px 15px; color: #64748b; font-weight: 600;">Date</th>
+                                <th style="padding: 10px 15px; color: #64748b; font-weight: 600;">Garment</th>
+                                <th style="padding: 10px 15px; color: #64748b; font-weight: 600; text-align: right;">Price</th>
+                                <th style="padding: 10px 15px; color: #64748b; font-weight: 600; text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(o => {
+                                // Resolve numeric status → readable word via STATUS_MAP
+                                const numericStatus = Number(o.status);
+                                const statusWord = !isNaN(numericStatus) && STATUS_MAP?.[numericStatus]
+                                    ? STATUS_MAP[numericStatus]
+                                    : String(o.status ?? 'Unknown');
+
+                                // Map words to colors (covers both numeric-resolved and legacy text statuses)
+                                const statusColorMap = {
+                                    'assigned':            { bg: '#dbeafe', text: '#1d4ed8' },
+                                    'in progress':         { bg: '#e0f2fe', text: '#0369a1' },
+                                    'qa check':            { bg: '#fef9c3', text: '#854d0e' },
+                                    'ready':               { bg: '#d1fae5', text: '#065f46' },
+                                    'collected (pending)': { bg: '#ede9fe', text: '#6d28d9' },
+                                    'closed':              { bg: '#f1f5f9', text: '#475569' },
+                                    // Legacy text statuses
+                                    'completed':           { bg: '#d1fae5', text: '#065f46' },
+                                    'delivered':           { bg: '#d1fae5', text: '#065f46' },
+                                    'pending':             { bg: '#fef3c7', text: '#92400e' },
+                                    'cancelled':           { bg: '#fee2e2', text: '#991b1b' },
+                                };
+                                const color = statusColorMap[statusWord.toLowerCase()] || { bg: '#f1f5f9', text: '#475569' };
+
+                                return `
+                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        <td style="padding: 10px 15px; color: #64748b;">${formatDate(o.created_at)}</td>
+                                        <td style="padding: 10px 15px; font-weight: 600; color: var(--brand-navy);">
+                                            <span style="display:inline-flex; align-items:center; gap:6px;">
+                                                <span style="font-size:1.1em;">${getGarmentIcon(o.garment_type)}</span>${o.garment_type || '-'}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 10px 15px; text-align: right; font-weight: 700; color: #0f172a;">KES ${o.price ? Number(o.price).toLocaleString() : '0'}</td>
+                                        <td style="padding: 10px 15px; text-align: center;">
+                                            <span style="background: ${color.bg}; color: ${color.text}; padding: 3px 10px; border-radius: 12px; font-size: 0.78em; font-weight: 700; white-space: nowrap;">
+                                                ${statusWord}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+
+                        </tbody>
+
+                    </table>
                 </div>
-            `).join('');
+            `;
         }
 
         content.innerHTML = `
             <span class="close-btn" onclick="document.getElementById('order-modal').style.display='none'">&times;</span>
-            <div style="padding: 15px;">
-                <div id="client-info-header" style="margin-bottom: 25px; position: relative;">
+            <div style="padding: 10px 15px; display: flex; flex-direction: column; height: 100%;">
+                <div id="client-info-header" style="margin-bottom: 10px; position: relative;">
                     <div id="client-info-view">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
                             <div>
                                 <h2 style="color: var(--brand-navy); margin: 0 0 5px 0; font-size: 1.8em;">${client.name}</h2>
-                                <p style="color: #64748b; margin: 0 0 15px 0; font-weight: 500;"><i class="fas fa-phone" style="margin-right: 8px;"></i>${client.phone}</p>
+                                <p style="color: #64748b; margin: 0 0 4px 0; font-weight: 500;"><i class="fas fa-phone" style="margin-right: 8px;"></i>${client.phone}</p>
                             </div>
                             <button class="small-btn" onclick="editClientInfo('${client.id}')" style="background: #f1f5f9; color: var(--brand-navy); border: none;">
                                 <i class="fas fa-user-edit"></i> Edit Info
                             </button>
                         </div>
-                        <div style="margin-top: 10px;">
-                            <span style="font-size: 0.85em; color: #94a3b8; display: block; margin-bottom: 5px; font-weight: 600; text-transform: uppercase;">Known Garments</span>
+                        <div style="margin-top: 5px;">
+                            <span style="font-size: 0.78em; color: #94a3b8; display: block; margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">Known Garments</span>
                             ${garmentBadges || '<span style="color: #cbd5e1; font-style: italic; font-size: 0.9em;">None yet</span>'}
                         </div>
                     </div>
                 </div>
                 
-                <div style="margin-bottom: 25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; margin-bottom: 20px;">
-                        <h3 style="font-size: 1.1em; color: var(--brand-navy); font-weight: 700; margin: 0;">Measurement History</h3>
-                        <button class="small-btn" onclick="addNewMeasurementProfile('${client.id}')" style="background: var(--brand-navy); color: var(--brand-gold); border: none;">
-                            <i class="fas fa-plus"></i> Add Garment
-                        </button>
+                <div class="client-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; align-items: start; margin-bottom: 10px;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; margin-bottom: 12px;">
+                            <h3 style="font-size: 1.1em; color: var(--brand-navy); font-weight: 700; margin: 0;">Measurement History</h3>
+                            <button class="small-btn" onclick="addNewMeasurementProfile('${client.id}')" style="background: var(--brand-navy); color: var(--brand-gold); border: none;">
+                                <i class="fas fa-plus"></i> Add Profile
+                            </button>
+                        </div>
+                        <div style="max-height: 55vh; overflow-y: auto; padding-right: 5px;">
+                            ${historyHtml}
+                        </div>
                     </div>
-                    <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
-                        ${historyHtml}
+                    
+                    <div>
+                        <div style="border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; margin-bottom: 12px;">
+                            <h3 style="font-size: 1.1em; color: var(--brand-navy); font-weight: 700; margin: 0;">Order &amp; Billing History</h3>
+                        </div>
+                        <div style="max-height: 55vh; overflow-y: auto; padding-right: 5px;">
+                            ${ordersHtml}
+                        </div>
                     </div>
                 </div>
 
@@ -328,7 +606,7 @@ async function viewClientDetails(clientId) {
             modalContent.style.maxHeight = '100vh';
             modalContent.style.display = 'flex';
             modalContent.style.flexDirection = 'column';
-            modalContent.style.padding = window.innerWidth <= 768 ? '20px 15px' : '40px 60px'; // Generous padding for desktop, smaller for mobile
+            modalContent.style.padding = window.innerWidth <= 768 ? '12px 15px' : '20px 40px'; // Tight padding to reduce whitespace
             modalContent.style.borderRadius = '0';
             modalContent.style.margin = '0';
             modalContent.style.border = 'none';
@@ -623,58 +901,240 @@ async function editClientMeasurement(clientId, historyIndex) {
     try {
         const { data: client, error } = await supabaseClient
             .from('clients')
-            .select('measurements_history')
+            .select('name, measurements_history')
             .eq('id', clientId)
             .single();
 
         if (error) throw error;
 
         const historyItem = client.measurements_history[historyIndex];
-        const container = document.getElementById(`history-item-${historyIndex}`);
-        const measurementsDiv = container.querySelector('.history-measurements');
-
         let measurementsObj = historyItem.measurements;
         if (typeof measurementsObj === 'string') {
             try { measurementsObj = JSON.parse(measurementsObj); } catch (e) { measurementsObj = {}; }
         }
-
         const garmentType = historyItem.garment || 'Suit';
 
-        let formHtml = `
-            <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--brand-navy); font-size: 0.9em;">Change Garment Type:</label>
-                <select id="edit-client-garment-select" onchange="updateEditGarmentFields('${clientId}', ${historyIndex})"
-                    style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600;">
-                    ${Object.keys(GARMENT_MEASUREMENTS).map(type => `
-                        <option value="${type}" ${type === garmentType ? 'selected' : ''}>${type}</option>
-                    `).join('')}
-                </select>
+        // Remove existing editor modal if any
+        const existingModal = document.getElementById('meas-edit-modal');
+        if (existingModal) existingModal.remove();
+
+        const standardFields = GARMENT_MEASUREMENTS[garmentType] || {};
+        const sections = Object.keys({ ...standardFields, ...(measurementsObj || {}) });
+
+        // Build section tabs HTML
+        const tabsHtml = sections.map((sec, i) => `
+            <button id="meas-tab-${i}"
+                onclick="window._activeMeasTab(${i})"
+                style="padding: 8px 18px; border-radius: 20px; border: 1.5px solid ${i === 0 ? 'var(--brand-navy)' : '#e2e8f0'};
+                       background: ${i === 0 ? 'var(--brand-navy)' : 'white'}; color: ${i === 0 ? 'var(--brand-gold)' : '#64748b'};
+                       font-weight: 700; font-size: 0.85em; cursor: pointer; white-space: nowrap; transition: all 0.2s;">
+                ${sec}
+            </button>
+        `).join('');
+
+        // Build section panels HTML
+        const panelsHtml = sections.map((sec, i) => {
+            const stdKeys = (standardFields[sec] || []);
+            const existingKeys = measurementsObj && measurementsObj[sec] ? Object.keys(measurementsObj[sec]) : [];
+            const allKeys = [...new Set([...stdKeys, ...existingKeys])];
+
+            const fieldsHtml = allKeys.map(key => {
+                const val = (measurementsObj && measurementsObj[sec] && measurementsObj[sec][key]) ? measurementsObj[sec][key] : '';
+                return `
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <label style="font-size:0.75em; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">${key}</label>
+                        <div style="display:flex; align-items:center; border:1.5px solid #e2e8f0; border-radius:8px; overflow:hidden; background:white; transition: border-color 0.2s;"
+                             onfocusin="this.style.borderColor='var(--brand-navy)'" onfocusout="this.style.borderColor='#e2e8f0'">
+                            <input type="number" inputmode="decimal" step="0.1"
+                                   value="${val}"
+                                   class="meas-edit-input"
+                                   data-cat="${sec}" data-key="${key}"
+                                   style="flex:1; padding:12px 10px; border:none; outline:none; font-size:1.1em; font-weight:700; color:#0f172a; background:transparent; width:100%;">
+                            <span style="padding:0 10px; color:#94a3b8; font-size:0.85em; font-weight:600; background:#f8fafc; height:100%; display:flex; align-items:center; border-left:1px solid #e2e8f0;">"</span>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            return `
+                <div id="meas-panel-${i}" style="display:${i === 0 ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:14px; padding:5px 0;">
+                    ${fieldsHtml || '<p style="color:#94a3b8; font-style:italic; grid-column:1/-1;">No fields defined for this section.</p>'}
+                </div>`;
+        }).join('');
+
+        const garmentOptions = Object.keys(GARMENT_MEASUREMENTS).map(type =>
+            `<option value="${type}" ${type === garmentType ? 'selected' : ''}>${type}</option>`
+        ).join('');
+
+        const modal = document.createElement('div');
+        modal.id = 'meas-edit-modal';
+        modal.style.cssText = `
+            position: fixed; inset: 0; z-index: 999999;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; padding: 16px;
+        `;
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 16px; width: 100%; max-width: 600px;
+                        max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.25); overflow: hidden;">
+
+                <!-- Header -->
+                <div style="background: var(--brand-navy); padding: 18px 20px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+                    <div>
+                        <div style="color: var(--brand-gold); font-size: 0.75em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">Editing Measurements</div>
+                        <div style="color: white; font-size: 1.2em; font-weight: 800;">${client.name || 'Client'}</div>
+                    </div>
+                    <button onclick="document.getElementById('meas-edit-modal').remove()"
+                            style="background: rgba(255,255,255,0.1); border: none; color: white; width:34px; height:34px; border-radius:50%; font-size:1.2em; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+                </div>
+
+                <!-- Garment Type -->
+                <div style="padding: 14px 20px; border-bottom: 1px solid #f1f5f9; background: #fafafa; flex-shrink:0;">
+                    <label style="font-size:0.75em; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Garment Type</label>
+                    <select id="meas-edit-garment-select"
+                            onchange="window._refreshMeasEditModal('${clientId}', ${historyIndex})"
+                            style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.95em; font-weight:700; color:var(--brand-navy); background:white; cursor:pointer;">
+                        ${garmentOptions}
+                    </select>
+                </div>
+
+                <!-- Section Tabs -->
+                <div style="padding: 12px 20px; display: flex; gap: 8px; overflow-x: auto; flex-shrink:0; border-bottom:1px solid #f1f5f9; scrollbar-width: none;">
+                    ${tabsHtml}
+                </div>
+
+                <!-- Fields Panel (scrollable) -->
+                <div style="flex:1; overflow-y:auto; padding:18px 20px;" id="meas-panels-container">
+                    ${panelsHtml}
+                </div>
+
+                <!-- Footer Actions -->
+                <div style="padding: 14px 20px; border-top: 1px solid #f1f5f9; display:flex; gap:10px; flex-shrink:0; background:white;">
+                    <button onclick="window._saveMeasEditModal('${clientId}', ${historyIndex})"
+                            style="flex:1; padding: 12px; background: var(--brand-navy); color: var(--brand-gold);
+                                   border: none; border-radius: 10px; font-weight: 800; font-size: 0.95em; cursor:pointer;
+                                   display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button onclick="document.getElementById('meas-edit-modal').remove()"
+                            style="padding: 12px 20px; background: #f1f5f9; color: #64748b;
+                                   border: none; border-radius: 10px; font-weight: 700; font-size: 0.95em; cursor:pointer;">
+                        Cancel
+                    </button>
+                </div>
             </div>
-            <div id="edit-measurements-fields-area">
         `;
 
-        formHtml += generateFieldsAreaHTML(garmentType, measurementsObj);
-        formHtml += '</div>';
-        formHtml += `
-            <div style="margin-top: 15px; display: flex; gap: 10px;">
-                <button class="small-btn" style="background: var(--brand-navy); color: var(--brand-gold);" 
-                        onclick="saveClientMeasurement('${clientId}', ${historyIndex})">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
-                <button class="small-btn" style="background: #e2e8f0; color: #475569;" 
-                        onclick="viewClientDetails('${clientId}')">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </div>
-        `;
+        document.body.appendChild(modal);
 
-        measurementsDiv.innerHTML = formHtml;
+        // Tab switching logic
+        const totalSections = sections.length;
+        window._activeMeasTab = function(activeIdx) {
+            for (let i = 0; i < totalSections; i++) {
+                const tab = document.getElementById(`meas-tab-${i}`);
+                const panel = document.getElementById(`meas-panel-${i}`);
+                if (i === activeIdx) {
+                    tab.style.background = 'var(--brand-navy)';
+                    tab.style.color = 'var(--brand-gold)';
+                    tab.style.borderColor = 'var(--brand-navy)';
+                    panel.style.display = 'grid';
+                } else {
+                    tab.style.background = 'white';
+                    tab.style.color = '#64748b';
+                    tab.style.borderColor = '#e2e8f0';
+                    panel.style.display = 'none';
+                }
+            }
+        };
+
+        // Refresh modal when garment type changes
+        window._refreshMeasEditModal = function(cId, hIdx) {
+            const newType = document.getElementById('meas-edit-garment-select').value;
+            // Collect current values before rebuild
+            const currentVals = {};
+            document.querySelectorAll('#meas-panels-container .meas-edit-input').forEach(inp => {
+                if (!currentVals[inp.dataset.cat]) currentVals[inp.dataset.cat] = {};
+                currentVals[inp.dataset.cat][inp.dataset.key] = inp.value;
+            });
+            // Rebuild with new garment type
+            document.getElementById('meas-edit-modal').remove();
+            // Temporarily patch historyItem garment for rebuild
+            editClientMeasurementWithOverride(cId, hIdx, newType, currentVals);
+        };
+
+        // Save modal values
+        window._saveMeasEditModal = async function(cId, hIdx) {
+            const newGarmentType = document.getElementById('meas-edit-garment-select').value;
+            const measurementsObj2 = {};
+            document.querySelectorAll('#meas-panels-container .meas-edit-input').forEach(inp => {
+                if (inp.value.trim()) {
+                    if (!measurementsObj2[inp.dataset.cat]) measurementsObj2[inp.dataset.cat] = {};
+                    measurementsObj2[inp.dataset.cat][inp.dataset.key] = inp.value.trim();
+                }
+            });
+
+            try {
+                const { data: freshClient, error: fetchError } = await supabaseClient
+                    .from('clients').select('measurements_history').eq('id', cId).single();
+                if (fetchError) throw fetchError;
+
+                const history = [...freshClient.measurements_history];
+                const item = history[hIdx];
+                item.garment = newGarmentType;
+
+                // Audit log
+                if (item.measurements && Object.keys(item.measurements).length > 0) {
+                    if (!item.audit_log) item.audit_log = [];
+                    item.audit_log.push({
+                        changed_at: new Date().toISOString(),
+                        changed_by: USER_PROFILE?.full_name || USER_PROFILE?.name || 'Unknown Staff',
+                        changed_by_role: USER_PROFILE?.role || 'unknown',
+                        source: 'staff',
+                        previous_measurements: JSON.parse(JSON.stringify(item.measurements))
+                    });
+                }
+                item.measurements = measurementsObj2;
+
+                const { error: updateError } = await supabaseClient
+                    .from('clients')
+                    .update({ measurements_history: history, last_garment_type: newGarmentType, last_visit: new Date().toISOString() })
+                    .eq('id', cId);
+                if (updateError) throw updateError;
+
+                document.getElementById('meas-edit-modal').remove();
+                viewClientDetails(cId);
+            } catch (err) {
+                alert('Error saving: ' + err.message);
+            }
+        };
 
     } catch (error) {
         logDebug("Error editing measurement:", error, 'error');
         alert("Error loading measurement data for editing");
     }
 }
+
+/**
+ * Rebuilds the edit modal with an overridden garment type (for garment-type switching)
+ */
+async function editClientMeasurementWithOverride(clientId, historyIndex, overrideGarment, overrideValues) {
+    try {
+        const { data: client, error } = await supabaseClient
+            .from('clients').select('name, measurements_history').eq('id', clientId).single();
+        if (error) throw error;
+
+        // Temporarily override for render
+        const historyItem = { ...client.measurements_history[historyIndex], garment: overrideGarment, measurements: overrideValues };
+        client.measurements_history[historyIndex] = historyItem;
+
+        await editClientMeasurement(clientId, historyIndex);
+
+        // Re-select the correct garment type in the dropdown
+        const sel = document.getElementById('meas-edit-garment-select');
+        if (sel) sel.value = overrideGarment;
+    } catch (e) {
+        alert('Error switching garment type: ' + e.message);
+    }
+}
+
 
 /**
  * Creates a brand new empty measurement profile for a client and opens it in edit mode
@@ -808,6 +1268,20 @@ async function saveClientMeasurement(clientId, historyIndex) {
             }
         });
 
+        // --- AUDIT TRAIL ---
+        // Snapshot the previous values before overwriting (only if there was existing data)
+        if (item.measurements && Object.keys(item.measurements).length > 0) {
+            if (!item.audit_log) item.audit_log = [];
+            item.audit_log.push({
+                changed_at: new Date().toISOString(),
+                changed_by: USER_PROFILE?.full_name || USER_PROFILE?.name || 'Unknown Staff',
+                changed_by_role: USER_PROFILE?.role || 'unknown',
+                source: 'staff', // staff edited, not client-submitted
+                previous_measurements: JSON.parse(JSON.stringify(item.measurements))
+            });
+        }
+        // --- END AUDIT TRAIL ---
+
         item.measurements = measurementsObj;
 
         const { error: updateError } = await supabaseClient
@@ -826,3 +1300,4 @@ async function saveClientMeasurement(clientId, historyIndex) {
         alert("Error saving measurement changes");
     }
 }
+
