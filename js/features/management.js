@@ -202,7 +202,7 @@ async function loadPlatformUsers() {
     try {
         // Fetch profiles and orgs in parallel
         const [profileRes, orgsRes] = await Promise.all([
-            window.supabaseClient.from('user_profiles').select('*').order('created_at', { ascending: false }),
+            window.supabaseClient.from('user_profiles').select('*'),
             window.supabaseClient.from('organizations').select('id, name')
         ]);
 
