@@ -201,13 +201,20 @@ async function loadPlatformUsers() {
         
 
         // 1. Fetch data in parallel
-        const [{ data: { users: authUsers }, error: authError }, { data: profiles }, { data: orgs }] = await Promise.all([
-            window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'listUsers' } }).then(res => ({ data: res.data ? res.data.data : null, error: res.error })),
+        const [authRes, profileRes, orgsRes] = await Promise.all([
+            window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'listUsers' } }),
             supabaseClient.from('user_profiles').select('*'),
             supabaseClient.from('organizations').select('id, name')
         ]);
 
-        if (authError) throw authError;
+        if (authRes.error) throw authRes.error;
+        if (profileRes.error) throw profileRes.error;
+        if (orgsRes.error) throw orgsRes.error;
+
+        // Safely extract users from the Edge Function response
+        const authUsers = (authRes.data && authRes.data.data && authRes.data.data.users) ? authRes.data.data.users : [];
+        const profiles = profileRes.data || [];
+        const orgs = orgsRes.data || [];
 
         // 2. Map data
         const orgMap = Object.fromEntries(orgs.map(o => [o.id, o.name]));

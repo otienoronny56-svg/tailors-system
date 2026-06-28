@@ -112,6 +112,12 @@
 </head>
 
 <body>
+    <!-- Dark Mode Initializer -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
     <div class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></div>
     <div class="dashboard-container">
         <aside class="sidebar" id="sidebar">
