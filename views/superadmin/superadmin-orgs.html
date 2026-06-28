@@ -426,9 +426,9 @@
                 <form id="create-org-form">
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand-slate);">Organization Name</label>
-                        <input type="text" id="new-org-name" placeholder="e.g. Elegant Fashion" required>
+                        <input type="text" id="new-org-name" placeholder="e.g. Elegant Fashion" required style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--main-bg); color: var(--text-main); font-size: 1rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--brand-gold)'" onblur="this.style.borderColor='var(--glass-border)'">
                     </div>
-                    <button type="submit" class="submit-btn">
+                    <button type="submit" class="submit-btn" style="width: 100%; padding: 14px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 1.05em; cursor: pointer; transition: background 0.2s, transform 0.1s; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);" onmouseover="this.style.background='#0284c7'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#0ea5e9'; this.style.transform='translateY(0)';">
                         <i class="fas fa-plus"></i> Initialize Organization
                     </button>
                     <div id="org-message" style="margin-top: 15px; text-align: center; font-weight: 500;"></div>
