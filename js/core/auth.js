@@ -345,6 +345,8 @@ async function routeToPage(path) {
             await loadPlatformUsers();
         } else if (path.includes('superadmin-users')) {
             await loadAdminAccountScreen();
+        } else if (path.includes('superadmin-blog')) {
+            if (typeof fetchBlogs === 'function') await fetchBlogs();
         }
         return;
     }
