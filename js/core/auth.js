@@ -247,9 +247,11 @@ async function checkSession() {
         updateSidebarBranding();
         
         // Start unread messages polling
-        checkUnreadMessages();
-        if (!window._inboxPollInterval) {
-            window._inboxPollInterval = setInterval(checkUnreadMessages, 60000); // Check every minute
+        if (typeof checkUnreadMessages === 'function') {
+            checkUnreadMessages();
+            if (!window._inboxPollInterval) {
+                window._inboxPollInterval = setInterval(checkUnreadMessages, 60000); // Check every minute
+            }
         }
         
         // Start GLOBAL Realtime Notification Listener

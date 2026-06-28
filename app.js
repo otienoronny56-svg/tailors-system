@@ -629,19 +629,19 @@ window.addEventListener('DOMContentLoaded', function () {
     checkSession();
 
     // FIX 2: Explicitly attach core functions to window to prevent "ReferenceError: XXX is not defined"
-    window.refreshCurrentView = refreshCurrentView;
-    window.generateAndShareReceipt = generateAndShareReceipt;
-    window.saveAdminOrder = saveAdminOrder;
-    window.downloadOrderPDF = downloadOrderPDF;
-    window.deleteOrder = deleteOrder;
-    window.openResetPasswordModal = openResetPasswordModal;
-    window.handlePasswordReset = handlePasswordReset;
-    window.fireManager = fireManager;
-    window.deleteShop = deleteShop;
-    window.deleteWorker = deleteWorker;
-    window.closeAdminModal = closeAdminModal;
-    window.handleLogin = handleLogin;
-    window.handleLogout = handleLogout;
+    if (typeof refreshCurrentView !== 'undefined') window.refreshCurrentView = refreshCurrentView;
+    if (typeof generateAndShareReceipt !== 'undefined') window.generateAndShareReceipt = generateAndShareReceipt;
+    if (typeof saveAdminOrder !== 'undefined') window.saveAdminOrder = saveAdminOrder;
+    if (typeof downloadOrderPDF !== 'undefined') window.downloadOrderPDF = downloadOrderPDF;
+    if (typeof deleteOrder !== 'undefined') window.deleteOrder = deleteOrder;
+    if (typeof openResetPasswordModal !== 'undefined') window.openResetPasswordModal = openResetPasswordModal;
+    if (typeof handlePasswordReset !== 'undefined') window.handlePasswordReset = handlePasswordReset;
+    if (typeof fireManager !== 'undefined') window.fireManager = fireManager;
+    if (typeof deleteShop !== 'undefined') window.deleteShop = deleteShop;
+    if (typeof deleteWorker !== 'undefined') window.deleteWorker = deleteWorker;
+    if (typeof closeAdminModal !== 'undefined') window.closeAdminModal = closeAdminModal;
+    if (typeof handleLogin !== 'undefined') window.handleLogin = handleLogin;
+    if (typeof handleLogout !== 'undefined') window.handleLogout = handleLogout;
 
     // GLOBAL REFRESH ANIMATION
     document.addEventListener('click', function(e) {
@@ -700,8 +700,9 @@ window.addEventListener('click', (e) => {
 
 
 // Override the original loadAdminOrderDetails to call our enhancement
-const originalLoadAdminOrderDetails = loadAdminOrderDetails;
-;
+if (typeof loadAdminOrderDetails !== 'undefined') {
+    const originalLoadAdminOrderDetails = loadAdminOrderDetails;
+}
 
 // ==========================================
 // 🚀 NEW ANALYTICS FEATURES
