@@ -69,6 +69,7 @@ async function loadSuperadminDashboard() {
             
             let labels = [];
             let dataPoints = [];
+            let base = orgs.length > 0 ? orgs.length : 10; // Use actual length for stepSize scaling
             
             // Helper: Count orgs created on or before a given date
             const countOrgsUpTo = (dateObj) => {
