@@ -3929,6 +3929,13 @@ body.dark-mode .inv-table td::before {
         transform: translateY(0) !important;
     }
 }
+
+/* Fix for client details modal sideways scrolling on mobile */
+@media (max-width: 768px) {
+    .client-details-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
  
  / *   - - -   A l e r t   A n i m a t i o n s   - - -   * / 
  
