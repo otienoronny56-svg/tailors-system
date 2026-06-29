@@ -390,6 +390,8 @@ button:hover {
     background-color: rgba(0, 0, 0, 0.5);
     justify-content: center;
     align-items: center;
+    padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(safe-area-inset-bottom, 20px) env(safe-area-inset-left, 20px);
+    box-sizing: border-box;
 }
 
 .modal-content {
@@ -399,8 +401,11 @@ button:hover {
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     position: relative;
-    max-height: 90vh;
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
     overflow-y: auto;
+    width: 100%;
+    max-width: 600px; /* Sensible default */
 }
 
 .close-btn {
@@ -1199,9 +1204,11 @@ button {
 
 /* Adjust modal for mobile */
 .modal-content {
-    width: 90%;
-    margin: 10% auto;
-    padding: 20px;
+    width: 95%;
+    margin: auto;
+    padding: 20px 15px;
+    max-height: calc(100vh - 60px);
+    max-height: calc(100dvh - 60px);
 }
 
 /* Login container adjustments */
