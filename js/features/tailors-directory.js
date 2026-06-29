@@ -113,12 +113,12 @@ function renderTailorsGrid() {
         <table style="width:100%; border-collapse:collapse; text-align:left;">
             <thead style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
                 <tr>
-                    <th style="padding:15px 20px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase;">Tailor Name</th>
-                    <th style="padding:15px 20px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase;">Role</th>
-                    <th style="padding:15px 20px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase;">Assigned Shop</th>
-                    <th style="padding:15px 20px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase;">Phone</th>
-                    <th style="padding:15px 20px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase; text-align:center;">Workload</th>
-                    <th style="padding:15px 20px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase; text-align:right;">Action</th>
+                    <th style="padding:10px 15px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase;">Tailor Name</th>
+                    <th style="padding:10px 15px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase; text-align:center;">Workload</th>
+                    <th style="padding:10px 15px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase;">Assigned Shop</th>
+                    <th style="padding:10px 15px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase;">Phone</th>
+                    <th style="padding:10px 15px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase;">Role</th>
+                    <th style="padding:10px 15px; color:#64748b; font-size:0.85em; font-weight:700; text-transform:uppercase; text-align:right;">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -134,7 +134,7 @@ function renderTailorsGrid() {
         <tr onclick="openTailorDetails('${w.id}')" style="cursor:pointer; transition:background 0.2s; border-bottom:1px solid #f1f5f9;"
             onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
             
-            <td style="padding:15px 20px;">
+            <td style="padding:10px 15px;">
                 <div style="display:flex; align-items:center; gap:12px;">
                     <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, var(--brand-navy), #334155); display:flex; align-items:center; justify-content:center; color:var(--brand-gold); font-weight:800; font-size:0.9em; flex-shrink:0;">
                         ${initial}
@@ -145,25 +145,25 @@ function renderTailorsGrid() {
                 </div>
             </td>
             
-            <td style="padding:15px 20px;">
-                <span style="font-size:0.75em; color:white; background:#6366f1; padding:4px 10px; border-radius:20px; font-weight:600; white-space:nowrap;">${role}</span>
-            </td>
-            
-            <td style="padding:15px 20px; color:#475569; font-size:0.95em;">
-                <i class="fas fa-store-alt" style="color:var(--brand-gold); margin-right:6px;"></i> ${shopName}
-            </td>
-            
-            <td style="padding:15px 20px; color:#475569; font-size:0.95em;">
-                ${phone}
-            </td>
-            
-            <td style="padding:15px 20px; text-align:center;">
+            <td style="padding:10px 15px; text-align:center;">
                 <div style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; font-weight:700; font-size:0.85em; ${w.activeWorkload === 0 ? 'background:#f1f5f9; color:#64748b;' : w.activeWorkload < 4 ? 'background:#dcfce7; color:#16a34a;' : w.activeWorkload < 7 ? 'background:#fef3c7; color:#d97706;' : 'background:#fee2e2; color:#dc2626;'}">
                     ${w.activeWorkload}
                 </div>
             </td>
             
-            <td style="padding:15px 20px; text-align:right;">
+            <td style="padding:10px 15px; color:#475569; font-size:0.95em;">
+                <i class="fas fa-store-alt" style="color:var(--brand-gold); margin-right:6px;"></i> ${shopName}
+            </td>
+            
+            <td style="padding:10px 15px; color:#475569; font-size:0.95em;">
+                ${phone}
+            </td>
+            
+            <td style="padding:10px 15px;">
+                <span style="font-size:0.75em; color:white; background:#6366f1; padding:4px 10px; border-radius:20px; font-weight:600; white-space:nowrap;">${role}</span>
+            </td>
+            
+            <td style="padding:10px 15px; text-align:right;">
                 <i class="fas fa-chevron-right" style="color:#cbd5e1;"></i>
             </td>
             
