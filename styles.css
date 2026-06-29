@@ -812,25 +812,6 @@ p {
         margin: 0 !important;
     }
 
-    /* Fix headers overlapping with the hamburger icon on all pages */
-    .main-content > header {
-        padding-left: 65px !important; /* Clear the hamburger menu */
-        padding-top: 5px !important;
-        flex-wrap: wrap !important; /* Allow buttons to wrap if screen is tight */
-        gap: 10px !important;
-    }
-
-    .main-content > header h1 {
-        font-size: 1.3em !important; /* Slightly smaller for mobile */
-        white-space: normal !important;
-        line-height: 1.3 !important;
-    }
-
-    /* Reset padding when chat is active since hamburger is hidden */
-    body.chat-active .main-content > header {
-        padding-left: 15px !important;
-    }
-
     /* The Dock Container - fixed height, never shifts */
     .bottom-nav {
         display: flex !important;
@@ -1024,7 +1005,7 @@ p {
 
     /* Prevent title overlapping with hamburger menu */
     .dashboard-main-title {
-        margin-left: 45px !important;
+        margin-left: 55px !important;
         /* Push to right of hamburger */
         font-size: 1.3em !important;
         line-height: 1.2 !important;
@@ -1346,7 +1327,7 @@ button {
 
     /* Prevent title overlapping with hamburger menu */
     .dashboard-main-title {
-        margin-left: 45px !important;
+        margin-left: 55px !important;
         /* Push to right of hamburger */
         font-size: 1.3em !important;
         line-height: 1.2 !important;
