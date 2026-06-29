@@ -1005,8 +1005,6 @@ p {
 
     /* Prevent title overlapping with hamburger menu */
     .dashboard-main-title {
-        margin-left: 45px !important;
-        padding-right: 75px !important; /* Avoid right absolute buttons */
         font-size: 1.05em !important;
         line-height: 1.2 !important;
         text-align: left;
