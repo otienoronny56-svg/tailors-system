@@ -265,6 +265,9 @@
 
         /* Mobile specific layout for Inbox */
         @media (max-width: 768px) {
+            .hide-mobile-text {
+                display: none !important;
+            }
             .main-content {
                 padding-bottom: 80px !important; /* Clear bottom nav */
             }
@@ -988,7 +991,7 @@
                         headerButtons += `
                             <div style="position:relative;">
                                 <button class="btn-chat-send" style="padding: 8px 12px; font-size:0.85em; background:var(--brand-gold); color:var(--brand-navy); border-radius:6px; font-weight:600; display:flex; align-items:center; gap:6px; cursor:pointer; height:auto; box-shadow:none; border:none;" onclick="toggleMeasurementDropdown(event)">
-                                    <i class="fas fa-ruler-combined"></i> Request Measurements
+                                    <i class="fas fa-ruler-combined"></i> <span class="hide-mobile-text">Request Measurements</span>
                                 </button>
                                 <div id="measurement-req-dropdown" style="display:none; position:absolute; left:0; top:110%; background:#1e293b; border:1px solid var(--brand-gold); border-radius:6px; width:220px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:100;">
                                     <div style="padding:8px; font-size:0.8em; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Select Garment Type</div>
