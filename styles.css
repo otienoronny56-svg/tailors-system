@@ -382,21 +382,24 @@ button:hover {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 10000; /* Increased to be above bottom-nav (9999) */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Changed from center to prevent top clipping when content is tall */
     padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(safe-area-inset-bottom, 20px) env(safe-area-inset-left, 20px);
     box-sizing: border-box;
+    overflow-y: auto; /* Allow scrolling of the modal container itself just in case */
 }
 
 .modal-content {
     background-color: white;
     margin: auto;
+    margin-top: 20px; /* Instead of relying purely on flex center, add top margin */
+    margin-bottom: 20px;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
@@ -406,6 +409,7 @@ button:hover {
     overflow-y: auto;
     width: 100%;
     max-width: 600px; /* Sensible default */
+    box-sizing: border-box;
 }
 
 .close-btn {
@@ -1205,10 +1209,11 @@ button {
 /* Adjust modal for mobile */
 .modal-content {
     width: 95%;
-    margin: auto;
+    margin: 20px auto; /* Force margin instead of auto to prevent flex centering clipping */
     padding: 20px 15px;
-    max-height: calc(100vh - 60px);
-    max-height: calc(100dvh - 60px);
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    box-sizing: border-box;
 }
 
 /* Login container adjustments */
