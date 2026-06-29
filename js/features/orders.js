@@ -608,8 +608,6 @@ function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
             </table>
 
             <div style="text-align: center;">
-                ${shopConfig.paybill_number ? `<p style="margin: 10px 0 5px 0; font-size: 0.85em; color: #333; font-weight: 600;">Paybill: ${shopConfig.paybill_number}</p>` : ''}
-                ${shopConfig.paybill_account ? `<p style="margin: 0 0 10px 0; font-size: 0.85em; color: #333;">Account: ${shopConfig.paybill_account}</p>` : ''}
                 <p style="margin: 0; font-size: 0.8em; color: #999; font-style: italic; letter-spacing: 0.5px;">Thank you for your business.</p>
                 <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #eee; font-size: 0.75em; color: #aaa;">
                     Powered by <strong>Stitch &amp; Styles Kenya</strong><br>
@@ -667,8 +665,6 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     lines.push(`Total Paid: Ksh ${realTotalPaid.toLocaleString()}`);
     lines.push(`Balance Due: Ksh ${remainingBalance.toLocaleString()}`);
     lines.push('-----------------------------');
-    if (shopConfig.paybill_number) lines.push(`Paybill: ${shopConfig.paybill_number}`);
-    if (shopConfig.paybill_account) lines.push(`Account: ${shopConfig.paybill_account}`);
     lines.push(remainingBalance > 0 ? 'Balance Due' : 'âœ… PAID IN FULL');
     lines.push('');
     lines.push('Thank you for your business!');
