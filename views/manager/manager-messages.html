@@ -265,6 +265,12 @@
 
         /* Mobile specific layout for Inbox */
         @media (max-width: 768px) {
+            .main-content {
+                padding-bottom: 80px !important; /* Clear bottom nav */
+            }
+            .inv-header {
+                padding-left: 100px !important; /* Avoid overlap with back and menu buttons */
+            }
             .inbox-layout {
                 grid-template-columns: 1fr;
                 grid-template-rows: 1fr;
