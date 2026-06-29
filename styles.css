@@ -1564,11 +1564,24 @@ body.dark-mode .modal-content,
 body.dark-mode table,
 body.dark-mode .filter-bar,
 body.dark-mode [style*="background: #fff"],
-body.dark-mode [style*="background:#fff"] {
+body.dark-mode [style*="background:#fff"],
+body.dark-mode .tdm-sidebar,
+body.dark-mode [style*="background:#f8fafc"] {
     background: #1e293b !important;
     border-color: #334155 !important;
     color: #f8fafc !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Fix Tailor Details Modal Header (which uses var(--brand-navy) that gets inverted to white) */
+body.dark-mode #tailor-details-modal > div > div:first-child {
+    background: #020617 !important;
+    border-bottom: 2px solid var(--brand-gold) !important;
+}
+
+/* Fix phone text color */
+body.dark-mode #tdm-phone {
+    color: #f8fafc !important;
 }
 
 /* Force all text inside dark cards to be white */
