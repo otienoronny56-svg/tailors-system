@@ -1006,8 +1006,8 @@ p {
     /* Prevent title overlapping with hamburger menu */
     .dashboard-main-title {
         margin-left: 55px !important;
-        /* Push to right of hamburger */
-        font-size: 1.3em !important;
+        padding-right: 110px !important; /* Avoid right absolute buttons */
+        font-size: 1.1em !important;
         line-height: 1.2 !important;
         text-align: left;
     }
@@ -1335,8 +1335,8 @@ button {
     /* Prevent title overlapping with hamburger menu */
     .dashboard-main-title {
         margin-left: 55px !important;
-        /* Push to right of hamburger */
-        font-size: 1.3em !important;
+        padding-right: 110px !important; /* Avoid right absolute buttons */
+        font-size: 1.1em !important;
         line-height: 1.2 !important;
         text-align: left;
     }
