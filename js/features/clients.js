@@ -472,7 +472,7 @@ async function viewClientDetails(clientId) {
                             </button>
                         </div>
                     </div>
-                    <div class="history-measurements" style="font-size: 0.95em; line-height: 1.6; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px;">
+                    <div class="history-measurements" style="font-size: 0.95em; line-height: 1.6; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
                         ${formatMeasurements(JSON.stringify(h.measurements))}
                     </div>
                     ${auditSection}
@@ -600,8 +600,8 @@ async function viewClientDetails(clientId) {
 
         const modalContent = modal.querySelector('.modal-content');
         if(modalContent) {
-            modalContent.style.width = '100vw';
-            modalContent.style.maxWidth = '100vw';
+            modalContent.style.width = '100%';
+            modalContent.style.maxWidth = '100%';
             modalContent.style.height = '100vh';
             modalContent.style.maxHeight = '100vh';
             modalContent.style.display = 'flex';
@@ -611,6 +611,7 @@ async function viewClientDetails(clientId) {
             modalContent.style.margin = '0';
             modalContent.style.border = 'none';
             modalContent.style.boxShadow = 'none';
+            modalContent.style.overflowX = 'hidden';
             modalContent.style.overflowY = 'auto';
         }
 
