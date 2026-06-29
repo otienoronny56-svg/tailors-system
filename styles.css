@@ -1012,6 +1012,14 @@ p {
         text-align: left;
     }
 
+    .main-content > header p,
+    .dashboard-header-container p {
+        margin-left: 55px !important;
+        padding-right: 110px !important;
+        font-size: 0.85em !important;
+        text-align: left;
+    }
+
     /* Overlay for mobile sidebar */
     .sidebar::after {
         content: '';
