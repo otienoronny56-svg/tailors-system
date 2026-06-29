@@ -545,7 +545,7 @@ async function viewClientDetails(clientId) {
 
         content.innerHTML = `
             <span class="close-btn" onclick="document.getElementById('order-modal').style.display='none'">&times;</span>
-            <div style="padding: 10px 15px; display: flex; flex-direction: column; height: 100%;">
+            <div style="padding: 10px 0; display: flex; flex-direction: column; height: 100%;">
                 <div id="client-info-header" style="margin-bottom: 10px; position: relative;">
                     <div id="client-info-view">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
@@ -565,7 +565,7 @@ async function viewClientDetails(clientId) {
                 </div>
                 
                 <div class="client-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; align-items: start; margin-bottom: 10px;">
-                    <div>
+                    <div style="min-width: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; margin-bottom: 12px;">
                             <h3 style="font-size: 1.1em; color: var(--brand-navy); font-weight: 700; margin: 0;">Measurement History</h3>
                             <button class="small-btn" onclick="addNewMeasurementProfile('${client.id}')" style="background: var(--brand-navy); color: var(--brand-gold); border: none;">
@@ -577,7 +577,7 @@ async function viewClientDetails(clientId) {
                         </div>
                     </div>
                     
-                    <div>
+                    <div style="min-width: 0;">
                         <div style="border-bottom: 2px solid var(--brand-gold); padding-bottom: 5px; margin-bottom: 12px;">
                             <h3 style="font-size: 1.1em; color: var(--brand-navy); font-weight: 700; margin: 0;">Order &amp; Billing History</h3>
                         </div>
