@@ -1877,15 +1877,15 @@ window.loadAuditLogs = async function() {
             const orgName = log.organizations ? log.organizations.name : 'Unknown';
             let detailsHtml = '';
             
-            if (log.action === 'RENAME_ORGANIZATION') {
-                detailsHtml = `Changed from <strong>${log.details.old_name}</strong> to <strong>${log.details.new_name}</strong>`;
+            if (log.action === 'RENAME_ORGANIZATION' || log.action === 'RENAME_ORG') {
+                detailsHtml = `Changed from <strong>${escapeHTML(log.details.old_name)}</strong> to <strong>${escapeHTML(log.details.new_name)}</strong>`;
             } else if (log.action === 'SECURITY_UPDATE') {
                 const updates = [];
                 if (log.details.email_updated) updates.push('Email');
                 if (log.details.password_updated) updates.push('Password');
                 detailsHtml = `Updated: ${updates.join(', ')}`;
             } else {
-                detailsHtml = JSON.stringify(log.details);
+                detailsHtml = escapeHTML(JSON.stringify(log.details));
             }
 
             return `
