@@ -410,12 +410,13 @@
             1: { title: "Order Assigned", desc: "Your order has been officially registered and assigned to a tailor." },
             2: { title: "In Progress", desc: "Your garment is actively being crafted." },
             3: { title: "Quality Check", desc: "Final inspections and finishing touches are underway." },
-            4: { title: "Ready for Delivery", desc: "Your tailored garment is complete and ready!" },
-            5: { title: "Collected", desc: "The garment has been handed over to you." },
-            6: { title: "Closed", desc: "Order finalized." }
+            4: { title: "Ready for Fitting", desc: "Your garment is ready for fitting." },
+            5: { title: "Ready for Collection", desc: "Your tailored garment is complete and ready!" },
+            6: { title: "Collected", desc: "The garment has been handed over to you." },
+            7: { title: "Closed", desc: "Order finalized." }
         };
 
-        const STATUS_FLOW = [1, 2, 3, 4, 5];
+        const STATUS_FLOW = [1, 2, 3, 4, 5, 6];
 
         async function initTracking() {
             const params = new URLSearchParams(window.location.search);
@@ -472,7 +473,8 @@
                 let step = STATUS_FLOW[i];
                 let stateClass = '';
                 
-                if (currentStatus === 6) { 
+                if (currentStatus === 7) { 
+                    statusMessage = "🎉 Order successfully closed!";
                     stateClass = 'completed';
                     activeIndex = STATUS_FLOW.length;
                 } else if (step < currentStatus) {
@@ -495,8 +497,7 @@
             }
             timelineHtml += '</div>';
 
-            // Calculate progress percentage for the gradient line
-            const progressPercent = currentStatus === 6 ? 100 : (activeIndex / (STATUS_FLOW.length - 1)) * 100;
+            const progressPercent = currentStatus === 7 ? 100 : (activeIndex / (STATUS_FLOW.length - 1)) * 100;
 
             document.getElementById('tracking-container').innerHTML = `
                 <div class="card-header">

@@ -498,13 +498,13 @@ async function loadMetrics() {
             }
 
             // Status counts
-            if (o.status === 6) closedCount++;
-            else if (o.status === 5) pendingCount++;
+            if (o.status === 7) closedCount++;
+            else if (o.status === 6) pendingCount++;
             else if (o.status === 4) readyCount++;
             else activeCount++; // Status 1, 2, 3
 
             // Due status (only for non-closed orders)
-            if (o.status < 6 && o.due_date) {
+            if (o.status < 7 && o.due_date) {
                 const dueDate = new Date(o.due_date);
                 dueDate.setHours(0, 0, 0, 0);
 
@@ -593,8 +593,8 @@ async function loadKPIMetrics(shopId) {
         const netProfit = totalRevenue - totalExpenses;
         const outstandingBalance = totalOrderValue - totalRevenue;
 
-        const activeOrders = orders.filter(o => o.status < 6).length;
-        const completedOrders = orders.filter(o => o.status === 6).length;
+        const activeOrders = orders.filter(o => o.status < 7).length;
+        const completedOrders = orders.filter(o => o.status === 7).length;
 
         const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
 
@@ -653,8 +653,8 @@ async function loadKPIMetrics(shopId) {
         const netProfit = totalRevenue - totalExpenses;
         const outstandingBalance = totalOrderValue - totalRevenue;
 
-        const activeOrders = orders.filter(o => o.status < 6).length;
-        const completedOrders = orders.filter(o => o.status === 6).length;
+        const activeOrders = orders.filter(o => o.status < 7).length;
+        const completedOrders = orders.filter(o => o.status === 7).length;
 
         const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
 
@@ -1684,7 +1684,7 @@ async function loadEfficiencyChart(shopId = 'all') {
     let data = [];
 
     if (orders && orders.length > 0) {
-        const completedOrders = orders.filter(o => o.status === 4 || o.status === '4' || o.status === 5 || o.status === '5');
+        const completedOrders = orders.filter(o => o.status === 5 || o.status === '5' || o.status === 6 || o.status === '6');
         
         if (completedOrders.length > 0) {
             // Group by month to show trend

@@ -484,7 +484,7 @@
             const totalClients = clientSet.size;
 
             // 4. Avg Fulfillment (Orders with status 6 - Closed)
-            const closedOrders = rawOrders.filter(o => o.status === 6 && o.updated_at && o.created_at);
+            const closedOrders = rawOrders.filter(o => o.status === 7 && o.updated_at && o.created_at);
             let totalDays = 0;
             closedOrders.forEach(o => {
                 const d1 = new Date(o.created_at);
@@ -682,7 +682,7 @@
                 const clientScore = Math.min((rawClients.length / 20) * 100, 100) || 30;
                 
                 // Active completion rate
-                const completed = rawOrders.filter(o => o.status === 6).length;
+                const completed = rawOrders.filter(o => o.status === 7).length;
                 const total = rawOrders.length;
                 const completionScore = total > 0 ? (completed / total) * 100 : 50;
 

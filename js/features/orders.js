@@ -113,7 +113,7 @@ async function loadOrders(mode = 'open') {
             .limit(mode === 'all' ? 200 : 1000);
 
         if (mode === 'open' || mode === 'urgent') {
-            query = query.neq('status', 6);
+            query = query.neq('status', 7);
         }
 
         const statusFilter = document.getElementById('status-filter')?.value;
@@ -144,7 +144,7 @@ async function loadOrders(mode = 'open') {
 
         if (!orders.length) {
             tbody.innerHTML = mode === 'urgent'
-                ? '<tr><td colspan="8" style="text-align:center; padding:30px;">âœ… Good job! No urgent orders.</td></tr>'
+                ? '<tr><td colspan="8" style="text-align:center; padding:30px;">✅ Good job! No urgent orders.</td></tr>'
                 : '<tr><td colspan="8" style="text-align:center; padding:20px;">No orders found</td></tr>';
             return;
         }
@@ -192,7 +192,7 @@ async function loadOrders(mode = 'open') {
             const diffDays = Math.ceil((new Date(order.due_date) - new Date()) / (86400000));
             let dueDisplay = formatDate(order.due_date);
 
-            if (order.status < 5) {
+            if (order.status < 6) {
                 if (diffDays < 0) {
                     dueDisplay = `<div style="color:#dc3545; font-weight:800; line-height:1.2;">
                         <i class="fas fa-exclamation-circle"></i> ${formatDate(order.due_date)} <span style="font-size:0.85em; opacity:0.9;">(${Math.abs(diffDays)})</span>
@@ -285,7 +285,7 @@ function initOrderForm() {
                 const finalPrice = basePrice + extrasTotal;
 
                 const orderData = {
-                    organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safety
+                    organization_id: USER_PROFILE.organization_id, // ☝️ Multi-tenant safety
                     shop_id: USER_PROFILE.shop_id,
                     manager_id: USER_PROFILE.id,
                     customer_name: document.getElementById('customer_name').value,
@@ -320,15 +320,15 @@ function initOrderForm() {
                     history = history.slice(0, 10); // Keep last 10
 
                     await supabaseClient.from('clients').upsert({
-                        organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
-                        shop_id: orderData.shop_id, // ðŸ‘ˆ RLS safe
+                        organization_id: USER_PROFILE.organization_id, // ☝️ Multi-tenant safe
+                        shop_id: orderData.shop_id, // ☝️ RLS safe
                         name: orderData.customer_name,
                         phone: orderData.customer_phone,
                         measurements_history: history,
                         last_garment_type: orderData.garment_type,
                         notes: orderData.customer_preferences,
                         updated_at: new Date().toISOString()
-                    }, { onConflict: 'organization_id,phone' }); // ðŸ‘ˆ Updated Conflict target
+                    }, { onConflict: 'organization_id,phone' }); // ☝️ Updated Conflict target
                 } catch (e) {
                     console.error("Error upserting client:", e);
                 }
@@ -336,7 +336,7 @@ function initOrderForm() {
                 const deposit = parseFloat(document.getElementById('deposit_paid').value) || 0;
                 if (deposit > 0) {
                     await supabaseClient.from('payments').insert([{
-                        organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
+                        organization_id: USER_PROFILE.organization_id, // ☝️ Multi-tenant safe
                         order_id: order.id,
                         manager_id: USER_PROFILE.id,
                         amount: deposit,
@@ -514,7 +514,7 @@ function generateSimpleReceiptHTML(order, payments, paymentAmount = 0, accessori
     const receiptLogo = shopConfig.logo_url ? `<img src="${shopConfig.logo_url}" style="height: 60px; margin-bottom: 10px;" />` : '';
     const receiptHeader = shopConfig.receipt_header_text ? `<p style="margin: 5px 0 0 0; font-size: 0.8em; font-weight: 600; color: #555;">${shopConfig.receipt_header_text}</p>` : '';
 
-    // --- ðŸŽ¨ ULTIMATE MODERN DESIGN ---
+    // --- 🎨 ULTIMATE MODERN DESIGN ---
     const orderIdStr = (order.id !== undefined && order.id !== null) ? String(order.id) : '';
     let clientPhone = '';
     if (order.phone_number && String(order.phone_number).trim() !== '') clientPhone = order.phone_number;
@@ -565,7 +565,7 @@ function generateSimpleReceiptHTML(order, payments, paymentAmount = 0, accessori
                             <p style="margin: 0 0 4px 0; font-size: 0.7em; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing:0.5px;">Extras / Accessories</p>
                             ${accessories.map(a => `
                                 <div style="display: flex; justify-content: space-between; font-size: 0.85em; color: #444; margin-bottom: 3px;">
-                                    <span>â€¢ ${a.name || a.item_name} (x${a.quantity || 1})</span>
+                                    <span>• ${a.name || a.item_name} (x${a.quantity || 1})</span>
                                     <span>${formatCurrency((a.quantity || 1) * (a.price || 0))}</span>
                                 </div>
                             `).join('')}
@@ -656,7 +656,7 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
         accessories.forEach(a => {
             const price = parseFloat(a.price) || 0;
             const aName = a.name || a.item_name || 'Accessory';
-            lines.push(`â€¢ ${aName} (x${a.quantity || 1}): Ksh ${(price * (a.quantity || 1)).toLocaleString()}`);
+            lines.push(`• ${aName} (x${a.quantity || 1}): Ksh ${(price * (a.quantity || 1)).toLocaleString()}`);
         });
     }
     lines.push('');
@@ -665,7 +665,7 @@ function generateTextReceipt(order, payments, paymentAmount = 0, accessories = [
     lines.push(`Total Paid: Ksh ${realTotalPaid.toLocaleString()}`);
     lines.push(`Balance Due: Ksh ${remainingBalance.toLocaleString()}`);
     lines.push('-----------------------------');
-    lines.push(remainingBalance > 0 ? 'Balance Due' : 'âœ… PAID IN FULL');
+    lines.push(remainingBalance > 0 ? 'Balance Due' : '✅ PAID IN FULL');
     lines.push('');
     lines.push('Thank you for your business!');
     lines.push('');
@@ -802,11 +802,11 @@ function shareViaSMS(receiptText, phoneNumber) {
 async function shareReceiptAsImage(shopName = 'tailors.co.ke') {
     const receiptContent = document.querySelector('#receipt-preview-container > div');
     if (!receiptContent) {
-        showStatusMessage('âŒ Receipt content not found', 'error');
+        showStatusMessage('❌ Receipt content not found', 'error');
         return;
     }
 
-    showStatusMessage('ðŸ”„ Creating image...', 'info');
+    showStatusMessage('🔄 Creating image...', 'info');
 
     try {
         // *** CRITICAL FIX: Ensure html2canvas is loaded and available ***
@@ -839,25 +839,25 @@ async function shareReceiptAsImage(shopName = 'tailors.co.ke') {
                             title: 'Tailoring Receipt',
                             text: `Receipt from ${shopName} via tailors.co.ke`
                         });
-                        showStatusMessage('âœ… Image shared!', 'success');
+                        showStatusMessage('✅ Image shared!', 'success');
                     } catch (shareError) {
-                        showStatusMessage('âœ… Image downloaded!', 'success');
+                        showStatusMessage('✅ Image downloaded!', 'success');
                     }
                 } else {
-                    showStatusMessage('âœ… Image downloaded!', 'success');
+                    showStatusMessage('✅ Image downloaded!', 'success');
                 }
             }
         }, 'image/png');
 
     } catch (error) {
         logDebug("Image generation error:", error, 'error');
-        showStatusMessage('âŒ Error creating image', 'error');
+        showStatusMessage('❌ Error creating image', 'error');
     }
 }
 
 function copyReceiptText(receiptText) {
     navigator.clipboard.writeText(receiptText)
-        .then(() => showStatusMessage('âœ… Copied to clipboard!', 'success'))
+        .then(() => showStatusMessage('✅ Copied to clipboard!', 'success'))
         .catch(() => {
             // Fallback
             const textArea = document.createElement('textarea');
@@ -866,7 +866,7 @@ function copyReceiptText(receiptText) {
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            showStatusMessage('âœ… Copied to clipboard!', 'success');
+            showStatusMessage('✅ Copied to clipboard!', 'success');
         });
 }
 
@@ -883,13 +883,11 @@ function closeReceiptModal() {
     if (modal) modal.remove();
 }
 
-async function loadPendingClosureOrders() {/* Lines 1628-1709 omitted */ }
-
 async function loadPendingClosureOrders() {
     try {
         let query = supabaseClient
             .from('orders')
-            .select('*')  // FIXED: Removed shops embed
+            .select('*')
             .eq('status', 5)
             .order('created_at', { ascending: false });
 
@@ -953,7 +951,7 @@ async function loadPendingClosureOrders() {
                     <td>${shopMap[order.shop_id] || 'Unknown'}</td>
                     <td>${order.customer_name}</td>
                     <td>Ksh ${paid.toLocaleString()}</td>
-                    <td><span class="status-indicator status-5">Pending Closure</span></td>
+                    <td><span class="status-indicator status-6">Pending Closure</span></td>
                     <td>
                         <button class="small-btn" style="background:#343a40; color:white;" 
                                 onclick="openReviewModal('${order.id}')">
@@ -1031,7 +1029,7 @@ async function finalizeOrder(orderId, hasDebt) {
         const { error } = await supabaseClient
             .from('orders')
             .update({
-                status: 6
+                status: 7
             })
             .eq('id', orderId);
 
@@ -1076,7 +1074,7 @@ async function loadAdminOrders(mode = 'current') {
 
         // If mode is current or urgent, exclude closed
         if (mode === 'current' || mode === 'urgent') {
-            query = query.neq('status', 6);
+            query = query.neq('status', 7);
         }
 
         // Apply filters
@@ -1123,7 +1121,7 @@ async function loadAdminOrders(mode = 'current') {
 
         if (!orders || orders.length === 0) {
             tbody.innerHTML = mode === 'urgent'
-                ? '<tr><td colspan="9" style="text-align:center; padding:30px; font-size:1.2em;">âœ… No urgent issues across shops.</td></tr>'
+                ? '<tr><td colspan="9" style="text-align:center; padding:30px; font-size:1.2em;">✅ No urgent issues across shops.</td></tr>'
                 : '<tr><td colspan="9" style="text-align:center; padding:20px;">No orders found</td></tr>';
             return;
         }
@@ -1446,13 +1444,9 @@ async function openAdminOrderView(orderId) {
 
 async function updateAdminStatus(orderId) {
     const statusCode = prompt(`Enter Status Code:
-2: In Progress
-3: QA Check
-4: Ready
-5: Collected
-6: Closed`);
+1: Assigned, 2: In Progress, 3: QA Check, 4: Ready for fitting, 5: Ready for collection, 6: Collected, 7: Closed`);
 
-    if (!statusCode || ![2, 3, 4, 5, 6].includes(Number(statusCode))) return;
+    if (!statusCode || ![1, 2, 3, 4, 5, 6, 7].includes(Number(statusCode))) return;
 
     try {
         const { error } = await supabaseClient
@@ -2104,7 +2098,7 @@ function initAdminOrderForm() {
                 due_date: orderType === 'retail' ? new Date().toISOString().split('T')[0] : document.getElementById('due_date').value,
                 worker_id: orderType === 'retail' ? null : (document.getElementById('worker-select').value || null),
                 additional_workers: orderType === 'retail' ? '[]' : JSON.stringify(squad),
-                status: orderType === 'retail' ? 5 : 1, // 5 = Collected
+                status: orderType === 'retail' ? 6 : 1, // 6 = Collected
                 measurements_details: orderType === 'retail' ? '{}' : JSON.stringify(measurements),
                 created_at: new Date().toISOString()
             };
@@ -2765,14 +2759,9 @@ window.quickPay = async function (orderId, balance) {
 
 window.updateStatus = async function (orderId) {
     const statusCode = prompt(`Enter Status Code:
-1: Assigned
-2: In Progress
-3: QA Check
-4: Ready
-5: Collected (Pending)
-6: Closed`);
+1: Assigned, 2: In Progress, 3: QA Check, 4: Ready for fitting, 5: Ready for collection, 6: Collected, 7: Closed`);
 
-    if (!statusCode || ![1, 2, 3, 4, 5, 6].includes(Number(statusCode))) return;
+    if (!statusCode || ![1, 2, 3, 4, 5, 6, 7].includes(Number(statusCode))) return;
 
     try {
         const { error } = await supabaseClient
