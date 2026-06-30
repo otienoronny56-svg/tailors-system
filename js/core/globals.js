@@ -29,7 +29,7 @@ const STATUS_MAP = {
 
 const GARMENT_MEASUREMENTS = {
     'Suit': {
-        Coat: ['Shoulder', 'Chest', 'Bodice', 'Waist', 'Bicep', 'Sleeve', 'Length', 'Hips'],
+        Coat: ['Shoulder', 'Chest', 'Bodice', 'Waist', 'Bicep', 'Sleeve', 'Wrist', 'Length', 'Hips'],
         Shirt: ['Shoulder', 'Chest', 'Bodice', 'Waist', 'Sleeve', 'Length', 'Neck', 'Cuff'],
         Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
     },
@@ -49,7 +49,7 @@ const GARMENT_MEASUREMENTS = {
         Dress: ['Shoulder', 'Bust', 'Waist', 'Hips', 'Length', 'Sleeve']
     },
     'Coat': {
-        Coat: ['Shoulder', 'Chest', 'Waist', 'Sleeve', 'Length', 'Hips']
+        Coat: ['Shoulder', 'Chest', 'Waist', 'Sleeve', 'Wrist', 'Length', 'Hips']
     },
     'Half Coat': {
         Coat: ['Shoulder', 'Chest', 'Waist', 'Length']
