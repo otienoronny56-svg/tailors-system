@@ -490,14 +490,14 @@ async function loadOrderDetailsScreen() {
     }
 }
 
-function generateSimpleReceiptHTML(order, paymentAmount, accessories = []) {
+function generateSimpleReceiptHTML(order, payments, paymentAmount = 0, accessories = []) {
     const dateStr = new Date().toLocaleDateString();
 
-    // --- â˜¢ï¸ NUCLEAR ARITHMETIC (Do not touch) â˜¢ï¸ ---
+    // --- ☢️ NUCLEAR ARITHMETIC (Do not touch) ☢️ ---
     const accTotal = accessories ? accessories.reduce((sum, a) => sum + ((a.quantity || 0) * (a.price || 0)), 0) : 0;
     const totalCost = parseFloat(order.price) || 0; // [NEW] order.price is now the absolute total cost
     const garmentCost = Math.max(0, totalCost - accTotal); // Back-calculate garment cost
-    const existingPaid = parseFloat(order.amount_paid) || 0;
+    const existingPaid = payments ? payments.reduce((sum, p) => sum + (p.amount || 0), 0) : 0;
     const payingNow = parseFloat(paymentAmount) || 0;
 
     let realTotalPaid = 0;
@@ -2627,7 +2627,7 @@ window.generateAndShareReceipt = async function (orderId) {
             order.shops = shop;
         }
 
-        const receiptHTML = generateSimpleReceiptHTML(order, payments, accessories);
+        const receiptHTML = generateSimpleReceiptHTML(order, payments, 0, accessories);
         const receiptText = generateTextReceipt(order, payments, 0, accessories);
 
         showNuclearSharingModal(receiptHTML, receiptText, order.customer_name, order.customer_phone, order.shops?.name);
