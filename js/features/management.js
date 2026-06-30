@@ -340,7 +340,17 @@ async function handleCreateAdminAccount(e) {
         } } });
         const authUser = edgeData ? edgeData.data.user : null;
 
-        if (authError) throw authError;
+        if (authError) {
+            if (authError.context && typeof authError.context.json === 'function') {
+                try {
+                    const errBody = await authError.context.json();
+                    throw new Error(errBody.error || authError.message);
+                } catch (e) {
+                    throw authError;
+                }
+            }
+            throw authError;
+        }
 
         // 2. Create User Profile
         const { error: profileError } = await supabaseClient.from('user_profiles').insert([{
@@ -1035,7 +1045,17 @@ window.handleAssignManagerToShop = async function(e) {
         } } });
         const authUser = edgeData ? edgeData.data.user : null;
 
-        if (authErr) throw authErr;
+        if (authErr) {
+            if (authErr.context && typeof authErr.context.json === 'function') {
+                try {
+                    const errBody = await authErr.context.json();
+                    throw new Error(errBody.error || authErr.message);
+                } catch (e) {
+                    throw authErr;
+                }
+            }
+            throw authErr;
+        }
 
         // 2. Create Manager User Profile
         const { error: profileErr } = await supabaseClient.from('user_profiles').insert([{
@@ -1125,7 +1145,17 @@ async function handleAddShopAndManager(e) {
         } } });
         const authUser = edgeData ? edgeData.data.user : null;
 
-        if (authErr) throw authErr;
+        if (authErr) {
+            if (authErr.context && typeof authErr.context.json === 'function') {
+                try {
+                    const errBody = await authErr.context.json();
+                    throw new Error(errBody.error || authErr.message);
+                } catch (e) {
+                    throw authErr;
+                }
+            }
+            throw authErr;
+        }
 
         // 3. Create Manager User Profile
         const { error: profileErr } = await supabaseClient.from('user_profiles').insert([{
