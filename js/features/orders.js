@@ -1671,14 +1671,20 @@ async function loadAdminOrderDetails() {
         // --- 4. POPULATE PAYMENT HISTORY TABLE ---
         const paymentTbody = document.getElementById('payment-history-tbody');
         if (paymentTbody && payments) {
-            paymentTbody.innerHTML = payments.length ? payments.map(p => `
-                <tr>
-                    <td>${formatDate(p.recorded_at)}</td>
-                    <td style="color: #28a745; font-weight: bold;">Ksh ${p.amount.toLocaleString()}</td>
-                    <td>${p.manager_id ? p.manager_id.slice(-6) : 'System'}</td>
-                    <td>${p.notes || '-'}</td>
-                </tr>
-            `).join('') : '<tr><td colspan="4" style="text-align:center; padding:15px;">No payments recorded yet.</td></tr>';
+            window.CURRENT_PAYMENTS = payments;
+            if (typeof enhancePaymentDisplay === 'function') {
+                enhancePaymentDisplay();
+            } else {
+                paymentTbody.innerHTML = payments.length ? payments.map(p => `
+                    <tr>
+                        <td>${formatDate(p.recorded_at)}</td>
+                        <td style="color: #28a745; font-weight: bold;">Ksh ${p.amount.toLocaleString()}</td>
+                        <td>${p.payment_method || 'cash'}</td>
+                        <td>${p.notes || '-'}</td>
+                        <td>-</td>
+                    </tr>
+                `).join('') : '<tr><td colspan="5" style="text-align:center; padding:15px;">No payments recorded yet.</td></tr>';
+            }
         }
 
         logDebug("Admin order details loaded", { orderId }, 'success');
