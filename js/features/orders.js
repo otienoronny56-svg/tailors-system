@@ -888,7 +888,7 @@ async function loadPendingClosureOrders() {
         let query = supabaseClient
             .from('orders')
             .select('*')
-            .eq('status', 5)
+            .eq('status', 6)
             .order('created_at', { ascending: false });
 
         const shopFilter = document.getElementById('shop-filter')?.value;
