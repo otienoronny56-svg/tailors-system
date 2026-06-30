@@ -344,7 +344,7 @@ async function handleCreateAdminAccount(e) {
 
         // 2. Create User Profile
         const { error: profileError } = await supabaseClient.from('user_profiles').insert([{
-            id: authUser.user.id,
+            id: authUser.id,
             organization_id: orgId,
             full_name: fullNameStatus,
             role: 'owner' // Organization Admin
@@ -1039,7 +1039,7 @@ window.handleAssignManagerToShop = async function(e) {
 
         // 2. Create Manager User Profile
         const { error: profileErr } = await supabaseClient.from('user_profiles').insert([{
-            id: authUser.user.id,
+            id: authUser.id,
             organization_id: USER_PROFILE.organization_id,
             shop_id: shopId,
             full_name: mgrName,
@@ -1129,7 +1129,7 @@ async function handleAddShopAndManager(e) {
 
         // 3. Create Manager User Profile
         const { error: profileErr } = await supabaseClient.from('user_profiles').insert([{
-            id: authUser.user.id,
+            id: authUser.id,
             organization_id: USER_PROFILE.organization_id,
             shop_id: newShop.id,
             full_name: mgrName,
