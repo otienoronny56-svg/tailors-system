@@ -910,14 +910,19 @@ function setMarketplaceMode(mode) {
     const btnListings = document.getElementById('mkt-btn-listings');
     const btnShops = document.getElementById('mkt-btn-shops');
     const btnFavourites = document.getElementById('mkt-btn-favourites');
+    const btnMap = document.getElementById('mkt-btn-map');
     const sectionListings = document.getElementById('mkt-section-listings');
     const sectionShops = document.getElementById('mkt-section-shops');
+    const sectionMap = document.getElementById('mkt-section-map');
 
     if (!btnListings || !btnShops || !sectionListings || !sectionShops) return;
 
     btnListings.classList.remove('active');
     btnShops.classList.remove('active');
     if (btnFavourites) btnFavourites.classList.remove('active');
+    if (btnMap) btnMap.classList.remove('active');
+    
+    if (sectionMap) sectionMap.style.display = 'none';
 
     if (mode === 'listings') {
         btnListings.classList.add('active');
@@ -934,6 +939,117 @@ function setMarketplaceMode(mode) {
         sectionListings.style.display = 'block';
         sectionShops.style.display = 'none';
         filterMarketplace();
+    } else if (mode === 'map') {
+        if (btnMap) btnMap.classList.add('active');
+        sectionListings.style.display = 'none';
+        sectionShops.style.display = 'none';
+        if (sectionMap) sectionMap.style.display = 'block';
+        initMarketplaceMap();
+    }
+}
+
+let mapboxInstance = null;
+let markersLayer = null;
+
+function initMarketplaceMap() {
+    // If map already exists, just tell it to resize in case the div changed
+    if (mapboxInstance) {
+        setTimeout(() => mapboxInstance.invalidateSize(), 200);
+        return;
+    }
+
+    // Default to Nairobi coordinates
+    const defaultLat = -1.2921;
+    const defaultLng = 36.8219;
+
+    // Initialize Leaflet Map
+    mapboxInstance = L.map('marketplace-map').setView([defaultLat, defaultLng], 12);
+
+    // Use OpenStreetMap standard free tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(mapboxInstance);
+    
+    markersLayer = L.layerGroup().addTo(mapboxInstance);
+
+    // Try to get user's actual location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                mapboxInstance.setView([userLat, userLng], 13);
+                
+                // Add a marker for the user
+                const userIcon = L.divIcon({
+                    html: '<i class="fas fa-street-view" style="color: #ef4444; font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i>',
+                    className: 'user-location-marker',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 24]
+                });
+                L.marker([userLat, userLng], {icon: userIcon})
+                 .addTo(mapboxInstance)
+                 .bindPopup('<b>You are here</b>')
+                 .openPopup();
+                 
+                loadShopsOnMap(userLat, userLng);
+            },
+            (error) => {
+                console.warn("Geolocation denied or failed. Using default location.", error);
+                loadShopsOnMap(defaultLat, defaultLng);
+            }
+        );
+    } else {
+        loadShopsOnMap(defaultLat, defaultLng);
+    }
+}
+
+async function loadShopsOnMap(lat, lng) {
+    if (!markersLayer) return;
+    markersLayer.clearLayers();
+
+    try {
+        // Call the Supabase RPC we created in Phase 1
+        const { data: shops, error } = await supabaseClient
+            .rpc('get_shops_near_me', {
+                user_lat: lat,
+                user_lon: lng,
+                radius_in_meters: 50000 // 50km radius
+            });
+
+        if (error) {
+            console.error("Supabase Map RPC Error:", error);
+            throw error;
+        }
+        
+        console.log("Shops found near me:", shops);
+        console.log("Number of shops:", shops ? shops.length : 0);
+        // Define a custom icon for tailors
+        const tailorIcon = L.divIcon({
+            html: '<div style="background: var(--brand-navy); border: 2px solid var(--brand-gold); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><i class="fas fa-cut" style="color: var(--brand-gold); font-size: 14px;"></i></div>',
+            className: 'tailor-map-marker',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        shops.forEach(shop => {
+            if (shop.latitude && shop.longitude) {
+                const distKm = (shop.distance_meters / 1000).toFixed(1);
+                const popupContent = `
+                    <div style="font-family: 'Montserrat', sans-serif; min-width: 180px;">
+                        <h4 style="margin: 0 0 5px 0; color: #0a192f; font-family: 'Playfair Display', serif;">${shop.shop_name}</h4>
+                        <p style="margin: 0 0 10px 0; font-size: 12px; color: #475569;">${distKm} km away</p>
+                        <button onclick="viewShopDetails('${shop.id}')" style="width: 100%; background: #D4AF37; color: #fff; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">View Shop</button>
+                    </div>
+                `;
+                L.marker([shop.latitude, shop.longitude], {icon: tailorIcon})
+                 .addTo(markersLayer)
+                 .bindPopup(popupContent);
+            }
+        });
+    } catch (err) {
+        console.error("Error loading shops on map:", err);
     }
 }
 

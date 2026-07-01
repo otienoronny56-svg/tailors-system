@@ -26,6 +26,9 @@
     <script src="/js/lib/supabase.min.js"></script>
     <!-- Paystack Client -->
     <script src="https://js.paystack.co/v1/inline.js"></script>
+    <!-- Leaflet Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         :root {
             --brand-navy: #0a192f;
@@ -1995,6 +1998,15 @@
                         <button class="mkt-toggle-btn" id="mkt-btn-favourites" onclick="setMarketplaceMode('favourites')">
                             <i class="fas fa-heart"></i> Saved Favourites
                         </button>
+                        <button class="mkt-toggle-btn" id="mkt-btn-map" onclick="setMarketplaceMode('map')">
+                            <i class="fas fa-map-marked-alt"></i> Map View
+                        </button>
+                    </div>
+
+                    <div id="mkt-section-map" style="display: none; height: calc(100vh - 250px); min-height: 500px; padding: 15px 0;">
+                        <div id="marketplace-map" style="width: 100%; height: 100%; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--card-bg); position: relative; z-index: 1;">
+                            <!-- Map renders here -->
+                        </div>
                     </div>
 
                     <div id="mkt-section-shops" style="display: none;">

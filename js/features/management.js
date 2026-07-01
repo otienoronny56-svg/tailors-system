@@ -1115,8 +1115,12 @@ async function handleAddShopAndManager(e) {
     const msg = document.getElementById('shop-message');
     const submitBtn = document.querySelector('#add-shop-form button[type="submit"]');
 
-    if (!shopName || !mgrName || !mgrEmail || !mgrPass) {
-        msg.innerHTML = '<span style="color:red;">Please fill all fields</span>';
+    const addressInput = document.getElementById('new-shop-address').value.trim();
+    let latInput = document.getElementById('new-shop-lat').value;
+    let lngInput = document.getElementById('new-shop-lng').value;
+
+    if (!shopName || !mgrName || !mgrEmail || !mgrPass || !addressInput) {
+        msg.innerHTML = '<span style="color:red;">Please fill all fields, including Address</span>';
         return;
     }
 
@@ -1125,11 +1129,34 @@ async function handleAddShopAndManager(e) {
     msg.innerHTML = '';
 
     try {
+        // If they typed an address but didn't click "Use My Location", geocode it now
+        if (!latInput || !lngInput) {
+            msg.innerHTML = '<i class="fas fa-search-location"></i> Looking up address coordinates...';
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressInput)}`);
+            const geoData = await geoRes.json();
+            if (geoData && geoData.length > 0) {
+                latInput = geoData[0].lat;
+                lngInput = geoData[0].lon;
+            } else {
+                msg.innerHTML = '<span style="color:orange;">Warning: Could not find exact map coordinates for this address. It will not appear on the map.</span>';
+                // Proceed anyway, but without coordinates
+            }
+        }
+
         // 1. Create the Shop
-        const { data: newShop, error: shopErr } = await supabaseClient.from('shops').insert([{
+        msg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating shop record...';
+        const shopPayload = {
             organization_id: USER_PROFILE.organization_id,
             name: shopName
-        }]).select().single();
+        };
+
+        // Add coordinates if we have them
+        if (latInput && lngInput) {
+            shopPayload.latitude = parseFloat(latInput);
+            shopPayload.longitude = parseFloat(lngInput);
+        }
+
+        const { data: newShop, error: shopErr } = await supabaseClient.from('shops').insert([shopPayload]).select().single();
 
         if (shopErr) throw shopErr;
 
@@ -1175,11 +1202,67 @@ async function handleAddShopAndManager(e) {
 
     } catch (error) {
         msg.innerHTML = `<span style="color:red;">❌ Error: ${error.message}</span>`;
-        logDebug("Create Shop/Manager Error", error, 'error');
-    } finally {
+           document.getElementById('new-manager-email').value = '';
+        document.getElementById('new-manager-password').value = '';
+        if(document.getElementById('new-shop-address')) document.getElementById('new-shop-address').value = '';
+        if(document.getElementById('new-shop-lat')) document.getElementById('new-shop-lat').value = '';
+        if(document.getElementById('new-shop-lng')) document.getElementById('new-shop-lng').value = '';
+
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Create Shop & Manager';
     }
+}
+
+// --- Map Location Helper for Shop Registration ---
+function getAdminLocation() {
+    const btn = document.getElementById('btn-get-location');
+    const msg = document.getElementById('shop-message');
+    
+    if (!navigator.geolocation) {
+        msg.innerHTML = '<span style="color:red;">Geolocation is not supported by your browser.</span>';
+        return;
+    }
+
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Locating...';
+    btn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        document.getElementById('new-shop-lat').value = lat;
+        document.getElementById('new-shop-lng').value = lng;
+
+        try {
+            // Reverse Geocode to get a human readable address
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await res.json();
+            
+            if (data && data.display_name) {
+                // Simplify the address a bit
+                const addressParts = data.display_name.split(',').slice(0, 3);
+                document.getElementById('new-shop-address').value = addressParts.join(',');
+            } else {
+                document.getElementById('new-shop-address').value = "Pinned Location";
+            }
+        } catch (e) {
+            console.error("Reverse geocoding failed", e);
+            document.getElementById('new-shop-address').value = "Pinned Location";
+        }
+
+        btn.innerHTML = '<i class="fas fa-check"></i> Location Set';
+        btn.style.color = '#10b981';
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
+            btn.style.color = 'var(--brand-gold)';
+            btn.disabled = false;
+        }, 3000);
+
+    }, (error) => {
+        btn.innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
+        btn.disabled = false;
+        msg.innerHTML = '<span style="color:red;">Location access denied or failed.</span>';
+    });
 }
 
 async function handleAdminAddWorker(e) {
@@ -1388,6 +1471,11 @@ window.deleteWorker = async function(id, name) {
 }
 
 window.openEditShopModal = async function(shopId) {
+    // Reset to first tab
+    if (typeof switchShopSettingsTab === 'function') {
+        switchShopSettingsTab('tab-basic');
+    }
+    
     try {
         const { data: shop, error } = await supabaseClient.from('shops').select('*').eq('id', shopId).single();
         if (error) throw error;
@@ -1407,6 +1495,26 @@ window.openEditShopModal = async function(shopId) {
         document.getElementById('edit-shop-phone').value = shop.phone_number || '';
         document.getElementById('edit-shop-receipt').value = shop.receipt_header_text || '';
         document.getElementById('edit-shop-bank').value = shop.bank_details || '';
+        
+        if (document.getElementById('edit-shop-address')) {
+            document.getElementById('edit-shop-address').value = shop.location_name || '';
+            
+            const displayContainer = document.getElementById('display-location-container');
+            const editContainer = document.getElementById('edit-location-container');
+            const displaySpan = document.getElementById('saved-shop-address-display');
+            
+            if (shop.location_name) {
+                if (displaySpan) displaySpan.innerText = shop.location_name;
+                if (displayContainer) displayContainer.style.display = 'flex';
+                if (editContainer) editContainer.style.display = 'none';
+            } else {
+                if (displayContainer) displayContainer.style.display = 'none';
+                if (editContainer) editContainer.style.display = 'flex';
+            }
+        }
+        
+        if (document.getElementById('edit-shop-lat')) document.getElementById('edit-shop-lat').value = shop.latitude || '';
+        if (document.getElementById('edit-shop-lng')) document.getElementById('edit-shop-lng').value = shop.longitude || '';
         
         if (document.getElementById('edit-shop-is-public')) {
             document.getElementById('edit-shop-is-public').checked = !!shop.is_public;
@@ -1479,14 +1587,16 @@ window.openEditShopModal = async function(shopId) {
         
         const preview = document.getElementById('edit-shop-logo-preview');
         const fileInput = document.getElementById('edit-shop-logo-file');
-        fileInput.value = ''; // clear any old selection
+        if (fileInput) fileInput.value = ''; // clear any old selection
         
-        if (shop.logo_url) {
-            preview.src = shop.logo_url;
-            preview.style.display = 'block';
-        } else {
-            preview.src = '';
-            preview.style.display = 'none';
+        if (preview) {
+            if (shop.logo_url) {
+                preview.src = shop.logo_url;
+                preview.style.display = 'block';
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+            }
         }
 
         // Reset upload status texts
@@ -1569,11 +1679,34 @@ window.saveShopDetails = async function(e) {
             bank_details
         };
 
+        const editAddress = document.getElementById('edit-shop-address')?.value.trim();
+        let editLat = document.getElementById('edit-shop-lat')?.value;
+        let editLng = document.getElementById('edit-shop-lng')?.value;
+        
+        if (editAddress) {
+            updatePayload.location_name = editAddress;
+            if (!editLat || !editLng) {
+                btn.innerHTML = '<i class="fas fa-search-location"></i> Geocoding...';
+                try {
+                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(editAddress)}`);
+                    const geoData = await geoRes.json();
+                    if (geoData && geoData.length > 0) {
+                        editLat = geoData[0].lat;
+                        editLng = geoData[0].lon;
+                    }
+                } catch (e) {
+                    console.warn("Geocoding failed during edit", e);
+                }
+            }
+        }
+        
+        if (editLat && editLng) {
+            updatePayload.latitude = parseFloat(editLat);
+            updatePayload.longitude = parseFloat(editLng);
+        }
+
         if (document.getElementById('edit-shop-is-public')) {
             updatePayload.is_public = document.getElementById('edit-shop-is-public').checked;
-        }
-        if (document.getElementById('edit-shop-loc-name')) {
-            updatePayload.location_name = document.getElementById('edit-shop-loc-name').value.trim();
         }
         if (document.getElementById('edit-shop-specialization')) {
             updatePayload.specialization = document.getElementById('edit-shop-specialization').value.trim();
@@ -1635,8 +1768,12 @@ window.saveShopDetails = async function(e) {
             updatePayload.logo_url = data.publicUrl;
         }
 
-        const { error: updateError } = await supabaseClient.from('shops').update(updatePayload).eq('id', shopId);
+        const { data: updatedData, error: updateError } = await supabaseClient.from('shops').update(updatePayload).eq('id', shopId).select();
         if (updateError) throw updateError;
+        
+        if (!updatedData || updatedData.length === 0) {
+            throw new Error("Update blocked by Database Security (RLS) or Shop not found.");
+        }
         
         alert("✅ Shop configuration updated safely!");
         closeEditShopModal();
@@ -1653,6 +1790,73 @@ window.saveShopDetails = async function(e) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-save"></i> Save Configuration';
     }
+}
+
+// --- Map Location Helper for Edit Shop Modal ---
+window.toggleLocationEditMode = function() {
+    document.getElementById('display-location-container').style.display = 'none';
+    document.getElementById('edit-location-container').style.display = 'flex';
+}
+
+// --- Tab Toggle for Edit Shop Modal ---
+window.switchShopSettingsTab = function(tabId) {
+    // Hide all contents
+    document.querySelectorAll('.shop-tab-content').forEach(el => el.classList.remove('active'));
+    // Remove active from all buttons
+    document.querySelectorAll('.shop-tab-btn').forEach(el => el.classList.remove('active'));
+    
+    // Show selected content
+    document.getElementById(tabId).classList.add('active');
+    // Highlight selected button
+    document.getElementById('btn-' + tabId).classList.add('active');
+}
+
+window.getEditAdminLocation = function() {
+    const btn = document.getElementById('btn-edit-get-location');
+    
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        return;
+    }
+
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Locating...';
+    btn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        document.getElementById('edit-shop-lat').value = lat;
+        document.getElementById('edit-shop-lng').value = lng;
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await res.json();
+            
+            if (data && data.display_name) {
+                const addressParts = data.display_name.split(',').slice(0, 3);
+                document.getElementById('edit-shop-address').value = addressParts.join(',');
+            } else {
+                document.getElementById('edit-shop-address').value = "Pinned Location";
+            }
+        } catch (e) {
+            console.error("Reverse geocoding failed", e);
+            document.getElementById('edit-shop-address').value = "Pinned Location";
+        }
+
+        btn.innerHTML = '<i class="fas fa-check"></i> Found';
+        btn.style.color = '#10b981';
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-location-arrow"></i> Locate';
+            btn.style.color = 'var(--brand-gold)';
+            btn.disabled = false;
+        }, 3000);
+
+    }, (error) => {
+        btn.innerHTML = '<i class="fas fa-location-arrow"></i> Locate';
+        btn.disabled = false;
+        alert('Location access denied or failed.');
+    });
 }
 
 // ==========================================
