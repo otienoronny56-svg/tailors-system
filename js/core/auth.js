@@ -12,7 +12,7 @@ async function checkSession() {
         if (sessionError || !user) {
             const isPublicPage = window.location.pathname.includes('index.html') || window.location.pathname.includes('login.html') || window.location.pathname.endsWith('/');
             if (!isPublicPage && window.location.pathname !== '/') {
-                window.location.href = '/index.html';
+                window.location.replace('/index.html');
             }
             return;
         }
@@ -64,7 +64,7 @@ async function checkSession() {
                 
                 // Redirect to role selection page if no profile exists
                 logDebug("Profile not found. Redirecting to choose-role.html...", null, 'info');
-                window.location.href = '/choose-role.html';
+                window.location.replace('/choose-role.html');
                 return;
             } else {
                 USER_PROFILE = {
@@ -210,7 +210,7 @@ async function checkSession() {
             if (USER_PROFILE && USER_PROFILE.status !== 'Pending' && USER_PROFILE.organization_id) {
                 let redirectTo = '/views/admin/admin-dashboard.html';
                 if (USER_PROFILE.role === 'client') redirectTo = '/views/client/client-dashboard.html';
-                window.location.href = redirectTo;
+                window.location.replace(redirectTo);
             }
             return; // Always stop here â€” let the onboarding page handle itself
         }
@@ -231,7 +231,7 @@ async function checkSession() {
                 }
             }
             
-            window.location.href = redirectTo;
+            window.location.replace(redirectTo);
             return;
         }
 
@@ -354,7 +354,7 @@ async function routeToPage(path) {
     // Owner pages
     if (USER_PROFILE.role === 'owner') {
         if (path.includes('manager') || path.includes('superadmin')) {
-            window.location.href = '/views/admin/admin-dashboard.html';
+            window.location.replace('/views/admin/admin-dashboard.html');
             return;
         }
 
@@ -389,7 +389,7 @@ async function routeToPage(path) {
     // Manager pages
     else {
         if (path.includes('admin-')) {
-            window.location.href = '/views/manager/manager-dashboard.html';
+            window.location.replace('/views/manager/manager-dashboard.html');
             return;
         }
 
@@ -481,10 +481,10 @@ async function handleLogout() {
     try {
         await supabaseClient.auth.signOut();
         USER_PROFILE = null; // Clear the memory!
-        window.location.href = '/index.html';
+        window.location.replace('/index.html');
     } catch (error) {
-        alert("Logout error: " + error.message);
+        console.error("Logout error:", error);
         // Force redirect anyway to break loops
-        window.location.href = '/index.html';
+        window.location.replace('/index.html');
     }
 }

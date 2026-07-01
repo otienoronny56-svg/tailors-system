@@ -62,6 +62,25 @@
             --font-display: 'Playfair Display', serif;
             --font-sans: 'Plus Jakarta Sans', sans-serif;
             --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            --bg-header: rgba(3, 7, 18, 0.75);
+            --bg-header-scrolled: rgba(3, 7, 18, 0.9);
+            --slide-dot-bg: rgba(255, 255, 255, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #ffffff;
+            --bg-card: #f9fafb;
+            --bg-card-hover: #f3f4f6;
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --text-slate: #374151;
+            --border-glass: rgba(0, 0, 0, 0.08);
+            --gold-glow: rgba(212, 175, 55, 0.1);
+            --bg-header: rgba(255, 255, 255, 0.75);
+            --bg-header-scrolled: rgba(255, 255, 255, 0.95);
+            --slide-dot-bg: rgba(0, 0, 0, 0.4);
+            --cta-bg: linear-gradient(135deg, #f0ebe0 0%, #f5f0e8 100%);
+            --footer-bg: #1a1008;
         }
 
         /* ===== RESET & BASE ===== */
@@ -113,8 +132,8 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 14px 8%;
-            background: rgba(3, 7, 18, 0.75);
+            padding: 10px 5%;
+            background: var(--bg-header);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             display: flex;
@@ -126,9 +145,9 @@
         }
 
         header.scrolled {
-            padding: 10px 8%;
-            background: rgba(3, 7, 18, 0.9);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 8px 5%;
+            background: var(--bg-header-scrolled);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
         .logo-group {
@@ -158,23 +177,24 @@
         nav {
             display: flex;
             align-items: center;
-            gap: 32px;
+            gap: 20px;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 28px;
+            gap: 18px;
         }
 
         .nav-links a {
             color: var(--text-slate);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.92em;
+            font-size: 0.86em;
             transition: var(--transition-smooth);
             position: relative;
-            padding: 4px 0;
+            padding: 3px 0;
+            white-space: nowrap;
         }
 
         .nav-links a::after {
@@ -206,10 +226,11 @@
             color: var(--text-slate);
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.9em;
+            font-size: 0.84em;
             transition: var(--transition-smooth);
-            padding: 10px 16px;
-            border-radius: 8px;
+            padding: 7px 12px;
+            border-radius: 7px;
+            white-space: nowrap;
         }
 
         .btn-login:hover {
@@ -221,11 +242,12 @@
             background: var(--gold);
             border: none;
             color: var(--bg-deep);
-            padding: 10px 22px;
-            border-radius: 8px;
+            padding: 7px 16px;
+            border-radius: 7px;
             text-decoration: none;
             font-weight: 700;
-            font-size: 0.9em;
+            font-size: 0.84em;
+            white-space: nowrap;
             cursor: pointer;
             transition: var(--transition-smooth);
             box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2);
@@ -344,7 +366,7 @@
             width: 80%;
             max-width: 320px;
             height: 100vh;
-            background: rgba(10, 15, 30, 0.98);
+            background: var(--bg-card);
             backdrop-filter: blur(25px);
             z-index: 1005;
             padding: 100px 30px 40px;
@@ -441,9 +463,9 @@
             position: absolute;
             inset: 0;
             background: 
-                radial-gradient(circle at 30% 40%, rgba(3, 7, 18, 0.4), rgba(3, 7, 18, 0.95)),
-                linear-gradient(to top, var(--bg-deep) 0%, transparent 40%),
-                linear-gradient(to bottom, var(--bg-deep) 0%, transparent 20%);
+                radial-gradient(circle at 30% 40%, rgba(3, 7, 18, 0.4), rgba(3, 7, 18, 0.9)),
+                linear-gradient(to top, rgba(3, 7, 18, 0.85) 0%, transparent 45%),
+                linear-gradient(to bottom, rgba(3, 7, 18, 0.5) 0%, transparent 20%);
             z-index: 1;
         }
 
@@ -477,7 +499,7 @@
             font-size: clamp(2.3em, 6vw, 4em);
             font-weight: 700;
             line-height: 1.15;
-            color: var(--text-main);
+            color: #f3f4f6;
             margin-bottom: 20px;
         }
 
@@ -487,7 +509,7 @@
         }
 
         .hero p {
-            color: var(--text-slate);
+            color: #d1d5db; /* Force light text for dark hero background */
             font-size: clamp(0.95em, 2vw, 1.15em);
             margin-bottom: 36px;
             line-height: 1.7;
@@ -558,7 +580,7 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--slide-dot-bg);
             cursor: pointer;
             transition: var(--transition-smooth);
         }
@@ -571,7 +593,7 @@
 
         /* ===== INFINITE FASHION STRIP ===== */
         .fashion-strip {
-            background: #02040a;
+            background: var(--bg-card);
             border-top: 1px solid var(--border-glass);
             border-bottom: 1px solid var(--border-glass);
             overflow: hidden;
@@ -1093,6 +1115,10 @@
             padding: 100px 8%;
         }
 
+        [data-theme="light"] .hiw-section {
+            background: #f0ece0;
+        }
+
         .hiw-inner {
             max-width: 1400px;
             margin: 0 auto;
@@ -1114,6 +1140,12 @@
             text-align: center;
             transition: var(--transition-smooth);
             position: relative;
+        }
+
+        [data-theme="light"] .hiw-step {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(212, 175, 55, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
         }
 
         .hiw-step:hover {
@@ -1286,6 +1318,13 @@
             overflow: hidden;
         }
 
+        [data-theme="light"] .cta-section {
+            background:
+                radial-gradient(circle at top right, rgba(212, 175, 55, 0.15), transparent),
+                linear-gradient(135deg, #fdf6e3 0%, #f5f0e8 100%);
+            border-color: rgba(212, 175, 55, 0.2);
+        }
+
         .cta-section h2 {
             font-family: var(--font-display);
             font-size: clamp(1.8em, 4vw, 2.5em);
@@ -1310,6 +1349,10 @@
             background: #020408;
             border-top: 1px solid var(--border-glass);
             padding: 80px 8% 40px;
+        }
+
+        [data-theme="light"] footer {
+            background: #1a1206;
         }
 
         .footer-inner {
@@ -1510,8 +1553,8 @@
             .hero-overlay {
                 background: 
                     radial-gradient(circle at 50% 40%, rgba(3, 7, 18, 0.45), rgba(3, 7, 18, 0.9)),
-                    linear-gradient(to top, var(--bg-deep) 0%, transparent 50%),
-                    linear-gradient(to bottom, var(--bg-deep) 0%, transparent 15%);
+                    linear-gradient(to top, rgba(3, 7, 18, 0.85) 0%, transparent 50%),
+                    linear-gradient(to bottom, rgba(3, 7, 18, 0.5) 0%, transparent 15%);
             }
 
             .hero h1 {
@@ -1891,13 +1934,13 @@
 
     <!-- ===== HEADER ===== -->
     <header id="main-header">
-        <a href="#" class="logo-group" style="flex-direction: row; align-items: center; gap: 16px; text-decoration: none;">
-            <div style="width: 54px; height: 54px; border-radius: 12px; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15); border: 1px solid var(--gold-border);">
+        <a href="#" class="logo-group" style="flex-direction: row; align-items: center; gap: 10px; text-decoration: none;">
+            <div style="width: 36px; height: 36px; border-radius: 8px; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15); border: 1px solid var(--gold-border); flex-shrink: 0;">
                 <img src="logo.jpeg" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
             <div style="display: flex; flex-direction: column;">
-                <span class="logo-text" style="font-size: 1.35em; line-height: 1.1; margin-bottom: 2px;">Stitch & Styles</span>
-                <span class="logo-sub" style="font-size: 0.55em; letter-spacing: 2px;">Find Your Perfect Fit</span>
+                <span class="logo-text" style="font-size: 1.1em; line-height: 1.1; margin-bottom: 1px;">Stitch &amp; Styles</span>
+                <span class="logo-sub" style="font-size: 0.5em; letter-spacing: 1.5px;">Find Your Perfect Fit</span>
             </div>
         </a>
         
@@ -1911,6 +1954,7 @@
             </div>
             
             <div id="nav-auth-area">
+                <button class="theme-toggle" onclick="toggleTheme()" style="background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:1.2em; margin-right: 15px;"><i class="fas fa-moon theme-toggle-icon"></i></button>
                 <a href="./login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
                 <a href="./login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>
             </div>
@@ -2278,6 +2322,7 @@
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) {
                     const guestNav = `
+                        <button class="theme-toggle" onclick="toggleTheme()" style="background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:1.2em; margin-right: 15px;"><i class="fas fa-moon theme-toggle-icon"></i></button>
                         <a href="./login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Log In</a>
                         <a href="./login.html?mode=signup" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</a>`;
                     if (authArea) authArea.innerHTML = guestNav;
@@ -2781,8 +2826,8 @@
                 if (!window.isUserLoggedIn) {
                     e.preventDefault();
                     alert("Please log in or sign up to inquire about this design.");
-                    const returnUrl = encodeURIComponent(targetShopUrl);
-                    window.location.href = `login.html?redirect=${returnUrl}`;
+                    const returnUrl = encodeURIComponent(window.location.href);
+                    window.location.replace(`login.html?redirect=${returnUrl}`);
                 }
             };
 
@@ -2835,6 +2880,45 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const icons = document.querySelectorAll('.theme-toggle-icon');
+            icons.forEach(icon => {
+                if (newTheme === 'light') {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            });
+        }
+        
+        // Initialize theme on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                const icons = document.querySelectorAll('.theme-toggle-icon');
+                icons.forEach(icon => {
+                    if (savedTheme === 'light') {
+                        icon.classList.remove('fa-moon');
+                        icon.classList.add('fa-sun');
+                    } else {
+                        icon.classList.remove('fa-sun');
+                        icon.classList.add('fa-moon');
+                    }
+                });
+            }
+        });
+    </script>
+
 </body>
 
 </html>

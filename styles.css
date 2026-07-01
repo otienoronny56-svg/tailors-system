@@ -3970,6 +3970,13 @@ body.dark-mode .inv-table td::before {
         grid-template-columns: 1fr !important;
     }
 }
+
+/* Hide "You may be looking for" suggestion card on large screens (laptops/desktops) */
+@media (min-width: 769px) {
+    .suggestion-card {
+        display: none !important;
+    }
+}
  
  / *   - - -   A l e r t   A n i m a t i o n s   - - -   * / 
  

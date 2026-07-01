@@ -37,6 +37,19 @@
             --bg-dark: #060c18;
             --card-bg: rgba(17, 34, 64, 0.65);
             --glass-border: rgba(212, 175, 55, 0.15);
+            --header-bg: rgba(6, 12, 24, 0.9);
+        }
+
+        [data-theme="light"] {
+            --brand-navy: #f8fafc;
+            --brand-navy-light: #ffffff;
+            --brand-white: #0f172a;
+            --brand-slate: #475569;
+            --brand-light-slate: #334155;
+            --bg-dark: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(212, 175, 55, 0.3);
+            --header-bg: rgba(255, 255, 255, 0.95);
         }
 
         * {
@@ -62,7 +75,7 @@
             left: 0;
             width: 100%;
             padding: 20px 8%;
-            background: rgba(6, 12, 24, 0.9);
+            background: var(--header-bg);
             backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-between;
@@ -1232,6 +1245,40 @@
         .listing-modal-close:hover { background: #ef4444; transform: scale(1.1); }
     </style>
     <link rel="manifest" href="../../manifest.json">
+    <script>
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const icons = document.querySelectorAll('.theme-toggle-icon');
+            icons.forEach(icon => {
+                if (newTheme === 'light') {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            });
+        }
+        
+        // Initialize theme on load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.addEventListener('DOMContentLoaded', () => {
+                const icons = document.querySelectorAll('.theme-toggle-icon');
+                icons.forEach(icon => {
+                    if (savedTheme === 'light') {
+                        icon.classList.remove('fa-moon');
+                        icon.classList.add('fa-sun');
+                    }
+                });
+            });
+        }
+    </script>
 </head>
 
 <body>
@@ -1614,6 +1661,29 @@
             populateInquiryDropdown();
             renderReviews();
             renderBookmarkButton();
+            
+            const targetListingId = urlParams.get('listing');
+            if (targetListingId) {
+                setTimeout(() => {
+                    const el = document.getElementById('listing-card-' + targetListingId);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        const originalBoxShadow = el.style.boxShadow;
+                        const originalTransform = el.style.transform;
+                        const originalTransition = el.style.transition;
+                        
+                        el.style.transition = 'all 0.5s ease';
+                        el.style.boxShadow = '0 0 30px 10px rgba(212, 175, 55, 0.7)';
+                        el.style.transform = 'scale(1.03)';
+                        
+                        setTimeout(() => {
+                            el.style.boxShadow = originalBoxShadow || 'none';
+                            el.style.transform = originalTransform || 'scale(1)';
+                            setTimeout(() => { el.style.transition = originalTransition || ''; }, 500);
+                        }, 2500);
+                    }
+                }, 500);
+            }
         }
 
         async function checkSession() {

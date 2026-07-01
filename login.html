@@ -655,7 +655,7 @@
                 if (profileError) throw profileError;
 
                 alert("Shop registered successfully! Awaiting administrator approval.");
-                window.location.href = '/views/admin/admin-dashboard.html';
+                window.location.replace('/views/admin/admin-dashboard.html');
             } catch (err) {
                 console.error("Tailor Signup Error:", err);
                 messageEl.textContent = "❌ " + err.message;

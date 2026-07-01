@@ -160,6 +160,16 @@ function selectSidebarCategory(catName) {
     if (select) {
         select.value = catName;
     }
+    
+    // Push state to browser history so 'back' button can undo category selection
+    const url = new URL(window.location);
+    if (catName) {
+        url.searchParams.set('category', catName);
+    } else {
+        url.searchParams.delete('category');
+    }
+    window.history.pushState({ category: catName }, '', url);
+
     if (activeMarketplaceMode === 'shops' || activeMarketplaceMode === 'favourites') {
         setMarketplaceMode('listings');
     } else {
@@ -737,11 +747,7 @@ function filterMarketplace() {
             let isAudienceMatch = true;
             if (audience) {
                 const itemAudience = list.target_audience || 'Unisex';
-                if (audience !== 'Unisex') {
-                    isAudienceMatch = (itemAudience === audience || itemAudience === 'Unisex');
-                } else {
-                    isAudienceMatch = (itemAudience === 'Unisex');
-                }
+                isAudienceMatch = (itemAudience === audience);
             }
 
             const shop = allMarketplaceShops.find(s => s.id === list.shop_id);
@@ -964,14 +970,14 @@ function getMockListings() {
 }
 
 window.openListingModal = function(listingId) {
-    const list = window.allMarketplaceListings.find(l => l.id === listingId) || [];
+    const list = allMarketplaceListings.find(l => l.id === listingId);
     if (!list) return;
 
-    const shopFromCache = window.allMarketplaceShops.find(s => s.id === list.shop_id);
+    const shopFromCache = allMarketplaceShops.find(s => s.id === list.shop_id);
     const shopName = list.shops?.name || shopFromCache?.name || 'Style Shop';
     const shopProfileImg = list.shops?.profile_image || shopFromCache?.profile_image;
 
-    const STORAGE_URL = window.APP_CONFIG ? `${window.APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/` : '';
+    const STORAGE_URL = typeof APP_CONFIG !== 'undefined' ? `${APP_CONFIG.supabaseUrl}/storage/v1/object/public/marketplace-assets/` : '';
     const avatarImgUrl = shopProfileImg ? (shopProfileImg.startsWith('http') ? shopProfileImg : STORAGE_URL + shopProfileImg) : null;
     const avatarIconHtml = avatarImgUrl 
         ? `<img src="${avatarImgUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; border: 1px solid var(--brand-gold);">`
@@ -1006,6 +1012,11 @@ window.openListingModal = function(listingId) {
     const inquireBtn = document.getElementById('modal-inquire-btn');
     inquireBtn.href = `../../views/manager/shop.html?id=${list.shop_id}&inquire=${list.id}`;
 
+    const visitBtn = document.getElementById('modal-visit-shop-btn');
+    if (visitBtn) {
+        visitBtn.href = `../../views/manager/shop.html?id=${list.shop_id}&listing=${list.id}`;
+    }
+
     const overlay = document.getElementById('listing-modal-overlay');
     overlay.classList.add('active');
 };
@@ -1018,5 +1029,19 @@ window.closeListingModal = function() {
 document.getElementById('listing-modal-overlay')?.addEventListener('click', function(e) {
     if (e.target === this) {
         closeListingModal();
+    }
+});
+
+
+window.addEventListener('popstate', (event) => {
+    const catName = event.state?.category || '';
+    const select = document.getElementById('marketplace-category-filter');
+    if (select) {
+        select.value = catName;
+        if (activeMarketplaceMode === 'shops' || activeMarketplaceMode === 'favourites') {
+            setMarketplaceMode('listings');
+        } else {
+            filterMarketplace();
+        }
     }
 });
