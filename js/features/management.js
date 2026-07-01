@@ -566,7 +566,7 @@ async function loadWorkerAssignments() {
                     <tr>
                         <td>#${shortId}</td>
                         <td>${order.customer_name}</td>
-                        <td>${order.garment_type}</td>
+                        <td style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${order.garment_type}">${order.garment_type}</td>
                         <td>${formatDate(order.due_date)}</td>
                         <td><span class="status-indicator status-${order.status}">${statusText}</span></td>
                         <td>

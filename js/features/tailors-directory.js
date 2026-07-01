@@ -230,7 +230,7 @@ async function openTailorDetails(workerId) {
                 <tr style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'" onclick="openReviewModal('${o.id}')">
                     <td style="padding:10px; border-bottom:1px solid #f1f5f9; font-size:0.85em; font-weight:700; color:var(--brand-navy);">#${o.id.substring(0,8)}</td>
                     <td style="padding:10px; border-bottom:1px solid #f1f5f9; font-size:0.85em; color:#475569;">${o.customer_name}</td>
-                    <td style="padding:10px; border-bottom:1px solid #f1f5f9; font-size:0.85em; color:#475569;">${o.garment_type}</td>
+                    <td style="padding:10px; border-bottom:1px solid #f1f5f9; font-size:0.85em; color:#475569; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${o.garment_type}">${o.garment_type}</td>
                     <td style="padding:10px; border-bottom:1px solid #f1f5f9; font-size:0.85em;">${statusBadge}</td>
                 </tr>`;
             }).join('');

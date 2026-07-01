@@ -630,9 +630,8 @@ td {
 }
 
 .admin-actions-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .btn-compact {

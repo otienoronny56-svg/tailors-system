@@ -101,7 +101,7 @@ async function loadOrders(mode = 'open') {
 
     const headerTitle = document.querySelector('header h1');
     if (headerTitle) {
-        if (mode === 'urgent') headerTitle.innerHTML = 'ðŸ”¥ Urgent Attention Required';
+        if (mode === 'urgent') headerTitle.innerHTML = '🔥 Express Attention Required';
         else headerTitle.textContent = 'Manager Dashboard (Orders In Progress)';
     }
 
@@ -144,7 +144,7 @@ async function loadOrders(mode = 'open') {
 
         if (!orders.length) {
             tbody.innerHTML = mode === 'urgent'
-                ? '<tr><td colspan="8" style="text-align:center; padding:30px;">✅ Good job! No urgent orders.</td></tr>'
+                ? '<tr><td colspan="8" style="text-align:center; padding:30px;">✅ Good job! No express orders.</td></tr>'
                 : '<tr><td colspan="8" style="text-align:center; padding:20px;">No orders found</td></tr>';
             return;
         }
@@ -227,7 +227,7 @@ async function loadOrders(mode = 'open') {
             return `<tr>
                 <td>#${String(order.id).slice(-6)}</td>
                 <td>${order.customer_name}<br><small>${order.customer_phone}</small></td>
-                <td>${order.garment_type}</td>
+                <td style="width: 120px; min-width: 100px; max-width: 120px; white-space: normal; word-break: break-word;">${order.garment_type}</td>
                 <td>${dueDisplay}</td>
                 <td>${workerName}${squadBadge}</td>
                 <td><span class="status-indicator status-${order.status}">${STATUS_MAP[order.status]}</span></td>
@@ -1158,7 +1158,7 @@ async function loadAdminOrders(mode = 'current') {
 
         if (!orders || orders.length === 0) {
             tbody.innerHTML = mode === 'urgent'
-                ? '<tr><td colspan="9" style="text-align:center; padding:30px; font-size:1.2em;">✅ No urgent issues across shops.</td></tr>'
+                ? '<tr><td colspan="9" style="text-align:center; padding:30px; font-size:1.2em;">✅ No express issues across shops.</td></tr>'
                 : '<tr><td colspan="9" style="text-align:center; padding:20px;">No orders found</td></tr>';
             return;
         }
@@ -1259,7 +1259,7 @@ async function loadAdminOrders(mode = 'current') {
                 return `
                     <tr>
                         <td>${order.customer_name}</td>
-                        <td>${order.garment_type}</td>
+                        <td style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${order.garment_type}">${order.garment_type}</td>
                         ${actionCell}
                         <td>${shopName}</td>
                         <td class="ref-column">${order.customer_preferences || 'None'}</td>
@@ -1274,7 +1274,7 @@ async function loadAdminOrders(mode = 'current') {
                     <tr>
                         <td>${shopName}</td>
                         <td>${order.customer_name}</td>
-                        <td>${order.garment_type}</td>
+                        <td style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${order.garment_type}">${order.garment_type}</td>
                         <td>${dueDisplay}</td>
                         <td>${workerName}${squadBadge}</td>
                         <td><span class="status-indicator status-${order.status}">${statusText}</span></td>
