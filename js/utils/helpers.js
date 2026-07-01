@@ -40,6 +40,48 @@ function escapeHTML(str) {
 }
 
 // ==========================================
+// 📷 FILE PREVIEW UTILS
+// ==========================================
+window.previewImage = function (inputElement, imgElementId) {
+    const imgElement = document.getElementById(imgElementId);
+    if (!imgElement) return;
+    
+    if (inputElement.files && inputElement.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imgElement.src = e.target.result;
+            imgElement.style.display = 'block';
+        };
+        reader.readAsDataURL(inputElement.files[0]);
+    } else {
+        imgElement.src = '';
+        imgElement.style.display = 'none';
+    }
+};
+
+window.uploadInspirationPhoto = async function(fileInputId) {
+    const fileInput = document.getElementById(fileInputId);
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
+    
+    const file = fileInput.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `inspiration/${fileName}`;
+    
+    const { data, error } = await supabaseClient.storage
+        .from('orders')
+        .upload(filePath, file);
+        
+    if (error) {
+        console.error("Upload error:", error);
+        throw new Error("Failed to upload inspiration photo: " + error.message);
+    }
+    
+    const { data: publicUrlData } = supabaseClient.storage.from('orders').getPublicUrl(filePath);
+    return publicUrlData.publicUrl;
+};
+
+// ==========================================
 // 📱 MODAL BACK-BUTTON HANDLER
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {

@@ -38,6 +38,16 @@ const GARMENT_MEASUREMENTS = {
         Top: ['Shoulder', 'Sleeve', 'Arm', 'Chest', 'Waist', 'Hips', 'Length', 'Neck'],
         Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
     },
+    'African Wear/Kaftan': {
+        Top: ['Shoulder', 'Sleeve', 'Arm', 'Chest', 'Waist', 'Hips', 'Length', 'Neck'],
+        Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
+    },
+    'Corporate Wear': {
+        Coat: ['Shoulder', 'Chest', 'Bodice', 'Waist', 'Bicep', 'Sleeve', 'Wrist', 'Length', 'Hips'],
+        Shirt: ['Shoulder', 'Chest', 'Bodice', 'Waist', 'Sleeve', 'Length', 'Neck', 'Cuff'],
+        Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch'],
+        Dress: ['Shoulder', 'Bust', 'Waist', 'Hips', 'Length', 'Sleeve']
+    },
     'Trouser': {
         Trouser: ['Waist', 'Hips', 'Thigh', 'Knee', 'Bottom', 'Length', 'Crotch']
     },
@@ -54,6 +64,9 @@ const GARMENT_MEASUREMENTS = {
     },
     'Half Coat': {
         Coat: ['Shoulder', 'Chest', 'Waist', 'Length']
+    },
+    'Trench Coat': {
+        Coat: ['Shoulder', 'Chest', 'Waist', 'Hips', 'Sleeve', 'Wrist', 'Length']
     },
     'Standard Size': {
         'Standard Size': ['Top/Shirt Size (e.g. S/M/L/XL)', 'Bottom/Trouser Size (e.g. 30/32/34/36)', 'Chest Size (inches)', 'Waist Size (inches)', 'Height (feet/inches)', 'Weight (kg/lbs)']

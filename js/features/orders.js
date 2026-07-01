@@ -247,6 +247,28 @@ async function loadOrders(mode = 'open') {
     }
 }
 
+async function uploadInspirationPhoto(fileInputId) {
+    const fileInput = document.getElementById(fileInputId);
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
+    
+    const file = fileInput.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `inspiration/${fileName}`;
+    
+    const { data, error } = await supabaseClient.storage
+        .from('orders')
+        .upload(filePath, file);
+        
+    if (error) {
+        console.error("Upload error:", error);
+        throw new Error("Failed to upload inspiration photo: " + error.message);
+    }
+    
+    const { data: publicUrlData } = supabaseClient.storage.from('orders').getPublicUrl(filePath);
+    return publicUrlData.publicUrl;
+}
+
 function initOrderForm() {
     loadWorkersDropdown();
     loadWorkersForSquad(USER_PROFILE.shop_id); // [NEW] Load checkboxes
@@ -284,6 +306,15 @@ function initOrderForm() {
                 const basePrice = parseFloat(document.getElementById('price').value) || 0;
                 const finalPrice = basePrice + extrasTotal;
 
+                let inspirationPhotoUrl = null;
+                try {
+                    inspirationPhotoUrl = await uploadInspirationPhoto('order-inspiration-photo');
+                } catch (e) {
+                    alert(e.message);
+                    submitBtn.disabled = false;
+                    return;
+                }
+
                 const orderData = {
                     organization_id: USER_PROFILE.organization_id, // ☝️ Multi-tenant safety
                     shop_id: USER_PROFILE.shop_id,
@@ -297,6 +328,9 @@ function initOrderForm() {
                     additional_workers: JSON.stringify(squad), // [NEW] Save Squad
                     status: 1,
                     customer_preferences: document.getElementById('customer_preferences').value || '',
+                    description_top: document.getElementById('order-desc-top') ? document.getElementById('order-desc-top').value : '',
+                    description_pant: document.getElementById('order-desc-pant') ? document.getElementById('order-desc-pant').value : '',
+                    inspiration_photo_url: inspirationPhotoUrl,
                     measurements_details: JSON.stringify(measurements),
                     created_at: new Date().toISOString()
                 };
@@ -474,7 +508,10 @@ async function loadOrderDetailsScreen() {
                         <p><strong>Garment:</strong> ${order.garment_type}</p>
                         <p><strong>Due Date:</strong> ${formatDate(order.due_date)}</p>
                         <p><strong>Assigned Worker:</strong> ${workerDisplay}</p>
+                        ${order.description_top ? `<p><strong>Description (Top):</strong> ${order.description_top}</p>` : ''}
+                        ${order.description_pant ? `<p><strong>Description (Pant):</strong> ${order.description_pant}</p>` : ''}
                         ${order.customer_preferences ? `<p><strong>Customer Notes:</strong> ${order.customer_preferences}</p>` : ''}
+                        ${order.inspiration_photo_url ? `<p><strong>Inspiration Photo:</strong><br><a href="${order.inspiration_photo_url}" target="_blank"><img src="${order.inspiration_photo_url}" style="max-width:200px; border-radius:8px; margin-top:8px;"></a></p>` : ''}
                         <p><strong>Measurements:</strong><br>${formatMeasurements(order.measurements_details)}</p>
                     </div>
                 </div>
@@ -1533,6 +1570,28 @@ async function loadAdminOrderDetails() {
 
         // Update the new Summary UI
         if (document.getElementById('summary-worker-display')) document.getElementById('summary-worker-display').innerHTML = workerDisplay;
+        
+        if (order.description_top) {
+            const topCont = document.getElementById('summary-desc-top-container');
+            const topEl = document.getElementById('summary-desc-top');
+            if (topCont && topEl) { topCont.style.display = 'block'; topEl.textContent = order.description_top; }
+        }
+        if (order.description_pant) {
+            const pantCont = document.getElementById('summary-desc-pant-container');
+            const pantEl = document.getElementById('summary-desc-pant');
+            if (pantCont && pantEl) { pantCont.style.display = 'block'; pantEl.textContent = order.description_pant; }
+        }
+        if (order.inspiration_photo_url) {
+            const photoCont = document.getElementById('summary-inspiration-photo-container');
+            const photoEl = document.getElementById('summary-inspiration-photo');
+            const photoLink = document.getElementById('summary-inspiration-photo-link');
+            if (photoCont && photoEl && photoLink) {
+                photoCont.style.display = 'block';
+                photoEl.src = order.inspiration_photo_url;
+                photoLink.href = order.inspiration_photo_url;
+            }
+        }
+
         if (document.getElementById('summary-notes')) document.getElementById('summary-notes').textContent = order.customer_preferences || 'None';
         if (document.getElementById('summary-measurements')) document.getElementById('summary-measurements').innerHTML = formatMeasurements(order.measurements_details);
 
@@ -1542,6 +1601,8 @@ async function loadAdminOrderDetails() {
         document.getElementById('edit-garment-type').value = order.garment_type;
         document.getElementById('edit-price').value = order.price;
         if (order.due_date) document.getElementById('edit-due-date').value = order.due_date.split('T')[0];
+        document.getElementById('edit-desc-top').value = order.description_top || '';
+        document.getElementById('edit-desc-pant').value = order.description_pant || '';
         document.getElementById('edit-preferences').value = order.customer_preferences || '';
         document.getElementById('edit-status').value = order.status;
 
@@ -1801,6 +1862,11 @@ async function saveAdminOrder() {
         const basePrice = parseFloat(document.getElementById('edit-price').value) || 0;
         const finalPrice = basePrice + extrasTotal;
 
+        let inspirationPhotoUrl = null;
+        if (document.getElementById('edit-inspiration-photo') && document.getElementById('edit-inspiration-photo').files.length > 0) {
+            inspirationPhotoUrl = await uploadInspirationPhoto('edit-inspiration-photo');
+        }
+
         const updateData = {
             customer_name: document.getElementById('edit-customer-name').value,
             customer_phone: document.getElementById('edit-customer-phone').value,
@@ -1808,11 +1874,17 @@ async function saveAdminOrder() {
             price: finalPrice,
             due_date: document.getElementById('edit-due-date').value,
             customer_preferences: document.getElementById('edit-preferences').value || '',
+            description_top: document.getElementById('edit-desc-top') ? document.getElementById('edit-desc-top').value : '',
+            description_pant: document.getElementById('edit-desc-pant') ? document.getElementById('edit-desc-pant').value : '',
             status: parseInt(document.getElementById('edit-status').value) || 1,
             worker_id: document.getElementById('edit-worker-select').value || null,
             additional_workers: JSON.stringify(squad),
             measurements_details: JSON.stringify(measurements)
         };
+        
+        if (inspirationPhotoUrl) {
+            updateData.inspiration_photo_url = inspirationPhotoUrl;
+        }
 
         // Save to database
         const { error } = await supabaseClient
@@ -1924,6 +1996,13 @@ function initAdminOrderForm() {
             const basePrice = parseFloat(document.getElementById('price').value) || 0;
             const finalPrice = basePrice + extrasTotal;
 
+            let inspirationPhotoUrl = null;
+            try {
+                inspirationPhotoUrl = await uploadInspirationPhoto('order-inspiration-photo');
+            } catch (e) {
+                return alert(e.message);
+            }
+
             const orderData = {
                 organization_id: USER_PROFILE.organization_id, // ðŸ‘ˆ Multi-tenant safe
                 shop_id: shopId,
@@ -1935,6 +2014,10 @@ function initAdminOrderForm() {
                 worker_id: document.getElementById('worker-select').value || null,
                 additional_workers: JSON.stringify(squad),
                 status: 1,
+                customer_preferences: document.getElementById('customer_preferences') ? document.getElementById('customer_preferences').value : '',
+                description_top: document.getElementById('order-desc-top') ? document.getElementById('order-desc-top').value : '',
+                description_pant: document.getElementById('order-desc-pant') ? document.getElementById('order-desc-pant').value : '',
+                inspiration_photo_url: inspirationPhotoUrl,
                 measurements_details: JSON.stringify(measurements),
                 created_at: new Date().toISOString()
             };
@@ -2094,6 +2177,15 @@ function initAdminOrderForm() {
             const basePrice = parseFloat(document.getElementById('price').value) || 0;
             const finalPrice = basePrice + extrasTotal;
 
+            let inspirationPhotoUrl = null;
+            if (typeof uploadInspirationPhoto === 'function') {
+                try {
+                    inspirationPhotoUrl = await uploadInspirationPhoto('order-inspiration-photo');
+                } catch (e) {
+                    return alert(e.message);
+                }
+            }
+
             const orderData = {
                 organization_id: USER_PROFILE.organization_id,
                 shop_id: shopId,
@@ -2105,6 +2197,10 @@ function initAdminOrderForm() {
                 worker_id: orderType === 'retail' ? null : (document.getElementById('worker-select').value || null),
                 additional_workers: orderType === 'retail' ? '[]' : JSON.stringify(squad),
                 status: orderType === 'retail' ? 6 : 1, // 6 = Collected
+                customer_preferences: document.getElementById('customer_preferences') ? document.getElementById('customer_preferences').value : '',
+                description_top: document.getElementById('order-desc-top') ? document.getElementById('order-desc-top').value : '',
+                description_pant: document.getElementById('order-desc-pant') ? document.getElementById('order-desc-pant').value : '',
+                inspiration_photo_url: inspirationPhotoUrl,
                 measurements_details: orderType === 'retail' ? '{}' : JSON.stringify(measurements),
                 created_at: new Date().toISOString()
             };

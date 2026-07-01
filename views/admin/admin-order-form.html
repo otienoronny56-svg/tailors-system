@@ -183,11 +183,14 @@
                                     <option value="">-- Select Garment Type --</option>
                                     <option value="Suit">Suit</option>
                                     <option value="Kaunda/Senator Suit">Kaunda/Senator Suit</option>
+                                    <option value="African Wear/Kaftan">African Wear/Kaftan</option>
+                                    <option value="Corporate Wear">Corporate Wear</option>
                                     <option value="Trouser">Trouser</option>
                                     <option value="Dress">Dress</option>
                                     <option value="Shirt">Shirt</option>
                                     <option value="Coat">Coat</option>
                                     <option value="Half Coat">Half Coat</option>
+                                    <option value="Trench Coat">Trench Coat</option>
                                     <option value="Alteration">Alteration</option>
                                 </select>
                             </div>
@@ -202,9 +205,24 @@
                         <legend><i class="fas fa-ruler-combined"></i> Measurements (Inches)</legend>
                         <div id="measurement-fields-container"></div>
                         <div class="form-group" style="margin-top: 20px;">
+                            <label>Inspiration Photo (Optional)</label>
+                            <input type="file" id="order-inspiration-photo" accept="image/*" style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px;" onchange="if(typeof previewImage === 'function') previewImage(this, 'preview-admin-order-inspiration-photo')">
+                            <img id="preview-admin-order-inspiration-photo" src="" style="display: none; max-width: 150px; max-height: 150px; border-radius: 8px; margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); object-fit: cover;">
+                        </div>
+                        <div class="form-row" style="margin-top: 15px;">
+                            <div class="form-group">
+                                <label>Description (Top Garment)</label>
+                                <textarea id="order-desc-top" placeholder="Fabric, styling, and design notes for the top..." rows="2"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Description (Pant/Bottom Garment)</label>
+                                <textarea id="order-desc-pant" placeholder="Fabric, styling, and design notes for the pant/bottom..." rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px;">
                             <label>Customer Preferences & Notes</label>
                             <textarea id="customer_preferences"
-                                placeholder="Special requests, design notes, style constraints..." rows="3"></textarea>
+                                placeholder="Special requests, design notes, style constraints..." rows="2"></textarea>
                         </div>
                     </fieldset>
 
