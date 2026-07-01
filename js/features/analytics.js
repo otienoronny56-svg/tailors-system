@@ -2117,7 +2117,7 @@ function generateDynamicInsights(topClients, sortedGarments, rev, exp) {
         insightsHTML += `
             <div class="insight-item" style="border-left-color: #f59e0b;">
                 <div class="insight-title" style="color: #fbbf24;"><i class="fas fa-star"></i> Client Retention Notice</div>
-                <div class="insight-text">Client <strong>${topClients[0][0]}</strong> is your top spender. Consider a VIP outreach or priority fitting to enhance lifetime value.</div>
+                <div class="insight-text">Client <strong>${topClients[0][0]}</strong> is your top spender. Consider a VIP outreach or priority review/fitting to enhance lifetime value.</div>
             </div>`;
     }
 

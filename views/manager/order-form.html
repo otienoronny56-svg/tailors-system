@@ -69,7 +69,7 @@
                 <form id="order-form">
                     <!-- Customer & Garment -->
                     <fieldset>
-                        <legend><i class="fas fa-user-tag"></i> Customer &amp; Garment</legend>
+                        <legend><i class="fas fa-user-tag"></i> Customer &amp; <span class="garment-text">Garment</span><span class="product-text" style="display:none;">Product</span></legend>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Customer Name</label>
@@ -83,7 +83,7 @@
 
                         <div class="form-row" id="garment-type-row">
                             <div class="form-group">
-                                <label>Garment Type</label>
+                                <label><span class="garment-text">Garment Type</span><span class="product-text" style="display:none;">Product Type</span></label>
                                 <select id="garment-type-select" required onchange="generateMeasurementFieldsManager()">
                                     <option value="">-- Select Garment Type --</option>
                                     <option value="Suit">Suit</option>
@@ -107,7 +107,7 @@
                     </fieldset>
 
                     <!-- Measurements -->
-                    <fieldset id="measurement-fieldset" style="display: none;">
+                    <fieldset id="measurement-fieldset" class="tailor-only" style="display: none;">
                         <legend><i class="fas fa-ruler-combined"></i> Measurements (Inches)</legend>
                         <div id="measurement-fields-container"></div>
                         <div class="form-group" style="margin-top: 20px;">
@@ -117,11 +117,11 @@
                         </div>
                         <div class="form-row" style="margin-top: 15px;">
                             <div class="form-group">
-                                <label>Description (Top Garment)</label>
+                                <label>Description (Top <span class="garment-text">Garment</span><span class="product-text" style="display:none;">Item</span>)</label>
                                 <textarea id="order-desc-top" placeholder="Fabric, styling, and design notes for the top..." rows="2"></textarea>
                             </div>
                             <div class="form-group">
-                                <label>Description (Pant/Bottom Garment)</label>
+                                <label>Description (Pant/Bottom <span class="garment-text">Garment</span><span class="product-text" style="display:none;">Item</span>)</label>
                                 <textarea id="order-desc-pant" placeholder="Fabric, styling, and design notes for the pant/bottom..." rows="2"></textarea>
                             </div>
                         </div>
@@ -137,7 +137,7 @@
                         <legend><i class="fas fa-money-bill-wave"></i> Financials (Ksh)</legend>
                         <div class="form-row">
                             <div class="form-group" id="base-price-group">
-                                <label>Garment Cost / Base Price (Excl. Extras)</label>
+                                <label><span class="garment-text">Garment Cost</span><span class="product-text" style="display:none;">Item Cost</span> / Base Price (Excl. Extras)</label>
                                 <input type="number" id="price" placeholder="0.00" step="0.01" min="1" required
                                     oninput="updateExtrasSubtotal()">
                             </div>
@@ -258,7 +258,7 @@
                 document.getElementById('garment-type-row').style.display = '';
                 document.getElementById('due-date-group').style.display = '';
                 document.getElementById('team-assignment-fieldset').style.display = '';
-                document.getElementById('base-price-group').querySelector('label').textContent = 'Garment Cost / Base Price (Excl. Extras)';
+                document.getElementById('base-price-group').querySelector('label').innerHTML = '<span class="garment-text">Garment Cost</span><span class="product-text" style="display:none;">Item Cost</span> / Base Price (Excl. Extras)';
                 document.getElementById('price').setAttribute('required', 'true');
             } else {
                 btnRetail.style.background = 'var(--brand-navy)';

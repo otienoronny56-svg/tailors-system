@@ -79,6 +79,23 @@ async function checkSession() {
 
         // [PERF] Cache the loaded profile
         if (USER_PROFILE) {
+            // [DYNAMIC CRM] Fetch business type if user is tied to a specific shop
+            if (USER_PROFILE.shop_id) {
+                try {
+                    const { data: shopData } = await window.supabaseClient.from('shops').select('business_type').eq('id', USER_PROFILE.shop_id).single();
+                    if (shopData && shopData.business_type) {
+                        USER_PROFILE.business_type = shopData.business_type;
+                        document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
+                        document.body.classList.add('business-type-' + shopData.business_type);
+                    }
+                } catch (e) {
+                    console.warn("Failed to fetch shop business_type", e);
+                }
+            } else if (USER_PROFILE.business_type) {
+                 document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
+                 document.body.classList.add('business-type-' + USER_PROFILE.business_type);
+            }
+            
             sessionStorage.setItem('USER_PROFILE_' + user.id, JSON.stringify(USER_PROFILE));
         }
         } // End of if (!USER_PROFILE)

@@ -1359,7 +1359,7 @@
 
                 <div class="shop-action-buttons" style="margin-top: 25px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
                     <button onclick="switchShopTab('inquiry')" style="background: var(--brand-gold); border: none; color: var(--bg-dark); padding: 12px; border-radius: 8px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: all 0.3s; font-size: 0.95em;">
-                        <i class="fas fa-calendar-alt"></i> Book Fitting / Inquiry
+                        <i class="fas fa-calendar-alt"></i> Book <span class="garment-text">Fitting</span><span class="product-text" style="display:none;">Consultation</span> / Inquiry
                     </button>
                     <button onclick="switchShopTab('reviews')" style="background: transparent; border: 1px solid var(--brand-gold); color: var(--brand-gold); padding: 12px; border-radius: 8px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: all 0.3s; font-size: 0.95em;">
                         <i class="fas fa-star"></i> Reviews & Ratings
@@ -1437,7 +1437,7 @@
                 <div class="inquiry-form-card" id="inquiry-section" style="margin-top: 0; padding-top: 5px;">
                     <div class="section-header-row" style="border-bottom:none; margin-bottom:15px; padding-bottom:0;">
                         <h2 class="column-section-title" style="margin:0;"><i class="fas fa-envelope"></i> Send Inquiry
-                            or Book Fitting</h2>
+                            or Book <span class="garment-text">Fitting</span><span class="product-text" style="display:none;">Consultation</span></h2>
                     </div>
                     <p style="color: var(--brand-slate); font-size: 0.92em; margin-bottom: 25px;">
                         Fill out the form below to message this tailor. You can request custom garments, upload design
@@ -1463,7 +1463,7 @@
                             <div class="form-group">
                                 <label for="select-item">Interested In</label>
                                 <select id="select-item">
-                                    <option value="">General Custom Fitting</option>
+                                    <option value="">General Custom <span class="garment-text">Fitting</span><span class="product-text" style="display:none;">Consultation</span></option>
                                     <!-- Populated dynamically based on listings -->
                                 </select>
                             </div>
@@ -2265,7 +2265,7 @@
             if (!select) return;
 
             // Clear extra options
-            select.innerHTML = '<option value="">General Custom Fitting</option>';
+            select.innerHTML = '<option value="">General Custom <span class="garment-text">Fitting</span><span class="product-text" style="display:none;">Consultation</span></option>';
 
             shopListings.forEach(list => {
                 const opt = document.createElement('option');

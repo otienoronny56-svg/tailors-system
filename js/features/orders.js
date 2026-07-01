@@ -1481,7 +1481,7 @@ async function openAdminOrderView(orderId) {
 
 async function updateAdminStatus(orderId) {
     const statusCode = prompt(`Enter Status Code:
-1: Assigned, 2: In Progress, 3: QA Check, 4: Ready for fitting, 5: Ready for collection, 6: Collected, 7: Closed`);
+1: Assigned, 2: In Progress, 3: QA Check, 4: Ready for Review/Fitting, 5: Ready for collection, 6: Collected, 7: Closed`);
 
     if (!statusCode || ![1, 2, 3, 4, 5, 6, 7].includes(Number(statusCode))) return;
 
