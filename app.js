@@ -597,7 +597,14 @@ window.addEventListener('DOMContentLoaded', function () {
                 else if (id.includes('admin')) {
                     if (id === 'admin-shop-filter') {
                         const shopSelect = document.getElementById('admin-shop-filter');
-                        const selectedText = shopSelect.options[shopSelect.selectedIndex]?.text;
+                        const selectedOption = shopSelect.options[shopSelect.selectedIndex];
+                        const selectedText = selectedOption?.text;
+                        const businessType = selectedOption?.getAttribute('data-business-type') || 'tailor';
+                        
+                        // Update dynamic CRM body class
+                        document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
+                        document.body.classList.add('business-type-' + businessType);
+
                         if (selectedText && !selectedText.includes('All')) {
                             updateSidebarBranding(selectedText);
                         } else {

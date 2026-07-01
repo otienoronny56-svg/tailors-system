@@ -698,7 +698,7 @@ async function loadShopsForDropdown(elId) {
     }
 
     try {
-        let query = supabaseClient.from('shops').select('id, name');
+        let query = supabaseClient.from('shops').select('id, name, business_type');
         if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE && USER_PROFILE.role !== 'superadmin' && USER_PROFILE.organization_id) {
             query = query.eq('organization_id', USER_PROFILE.organization_id);
         }
@@ -717,6 +717,7 @@ async function loadShopsForDropdown(elId) {
                 const option = document.createElement('option');
                 option.value = s.id;
                 option.textContent = s.name;
+                option.setAttribute('data-business-type', s.business_type || 'tailor');
                 el.appendChild(option);
             });
 
@@ -1109,6 +1110,7 @@ async function handleAddShopAndManager(e) {
     }
 
     const shopName = document.getElementById('new-shop-name').value.trim();
+    const businessType = document.getElementById('new-shop-business-type')?.value || 'tailor';
     const mgrName = document.getElementById('new-manager-name').value.trim();
     const mgrEmail = document.getElementById('new-manager-email').value.trim();
     const mgrPass = document.getElementById('new-manager-password').value;
@@ -1147,7 +1149,8 @@ async function handleAddShopAndManager(e) {
         msg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating shop record...';
         const shopPayload = {
             organization_id: USER_PROFILE.organization_id,
-            name: shopName
+            name: shopName,
+            business_type: businessType
         };
 
         // Add coordinates if we have them
