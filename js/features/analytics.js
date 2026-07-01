@@ -1759,12 +1759,31 @@ async function loadSeasonalityChart(shopId = 'all') {
     const counts = [0, 0, 0, 0, 0, 0, 0];
 
     if (orders && orders.length > 0) {
+        let minDate = new Date();
+        let maxDate = new Date("1970-01-01");
+        
         orders.forEach(o => {
             if (o.created_at) {
-                const d = new Date(o.created_at).getDay();
+                const dateObj = new Date(o.created_at);
+                if (dateObj < minDate) minDate = dateObj;
+                if (dateObj > maxDate) maxDate = dateObj;
+                
+                const d = dateObj.getDay();
                 if (d >= 0 && d <= 6) counts[d]++;
             }
         });
+        
+        // Calculate total weeks to find the average per day
+        const now = new Date();
+        if (maxDate < minDate) maxDate = now;
+        const diffTime = Math.abs(maxDate - minDate);
+        let diffWeeks = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
+        if (diffWeeks < 1) diffWeeks = 1; // At least 1 week
+        
+        // Convert to average
+        for (let i = 0; i < 7; i++) {
+            counts[i] = parseFloat((counts[i] / diffWeeks).toFixed(1));
+        }
     }
 
     analyticsCharts.seasonalityChart = new Chart(ctx, {
