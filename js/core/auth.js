@@ -26,6 +26,12 @@ async function checkSession() {
                 if (tempProfile && tempProfile.status !== 'Pending') {
                     USER_PROFILE = tempProfile;
                     logDebug("Loaded user profile from cache", null, 'info');
+                    
+                    // [DYNAMIC CRM] Apply business type class immediately from cache
+                    if (USER_PROFILE.business_type) {
+                        document.body.className = document.body.className.replace(/\bbusiness-type-\S+/g, '');
+                        document.body.classList.add('business-type-' + USER_PROFILE.business_type);
+                    }
                 }
             } catch(e) {}
         }

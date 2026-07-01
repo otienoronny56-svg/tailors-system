@@ -841,15 +841,23 @@ async function loadShopCommandCenter() {
                 `).join('');
             }
 
+            const isPendingDeletion = shop.status === 'Pending Deletion';
+            const cardOpacity = isPendingDeletion ? '0.6' : '1';
+            const cardFilter = isPendingDeletion ? 'grayscale(100%)' : 'none';
+            const shopLabel = isPendingDeletion ? `<span style="color:#ef4444; font-size:0.75em; margin-left:10px; border:1px solid #ef4444; padding:2px 6px; border-radius:4px;">PENDING DELETION</span>` : '';
+
             return `
-                <div class="entity-card">
+                <div class="entity-card" style="opacity: ${cardOpacity}; filter: ${cardFilter}; position: relative;">
+                    ${isPendingDeletion ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.2); z-index:5; pointer-events:none;"></div>` : ''}
                     <div class="entity-header">
-                        <div class="shop-name"><i class="fas fa-store-alt" style="color:var(--brand-gold);"></i> ${shop.name}</div>
+                        <div class="shop-name"><i class="fas fa-store-alt" style="color:var(--brand-gold);"></i> ${shop.name} ${shopLabel}</div>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
                             <span class="shop-worker-count">${workers.length} WORKERS</span>
+                            ${!isPendingDeletion ? `
                             <button onclick="openEditShopModal('${shop.id}')" class="small-btn shop-settings-btn" title="Edit Shop Settings">
                                 <i class="fas fa-cog"></i> Settings
                             </button>
+                            ` : ''}
                         </div>
                     </div>
                     <div class="entity-body">
@@ -861,8 +869,12 @@ async function loadShopCommandCenter() {
                             </ul>
                         </div>
                     </div>
-                    <div class="entity-actions">
-                        ${manager ? `
+                    <div class="entity-actions" style="position: relative; z-index:10;">
+                        ${isPendingDeletion ? `
+                            <button onclick="restoreShop('${shop.id}', '${shop.name.replace(/'/g, "\\'")}')" class="action-btn" style="background:#10b981; color:white; border-color:#10b981; margin:0 auto;" title="Restore Shop">
+                                <i class="fas fa-trash-restore"></i> Restore Shop
+                            </button>
+                        ` : (manager ? `
                             <button class="action-btn" onclick="openResetPasswordModal('${manager.id}', '${manager.full_name.replace(/'/g, "\\'")}')" title="Reset Manager Password">
                                 <i class="fas fa-key"></i> Key Reset
                             </button>
@@ -873,7 +885,12 @@ async function loadShopCommandCenter() {
                             <button class="action-btn" style="background:#10b981; color:white; border-color:#10b981;" onclick="openAssignManagerModal('${shop.id}', '${shop.name.replace(/'/g, "\\'")}')" title="Assign New Manager">
                                 <i class="fas fa-user-plus"></i> Assign Manager
                             </button>
-                        `}
+                        `)}
+                        ${!isPendingDeletion ? `
+                        <button onclick="deleteShop('${shop.id}', '${shop.name.replace(/'/g, "\\'")}')" class="action-btn danger" style="margin-left:auto;" title="Delete Shop">
+                            <i class="fas fa-trash-alt"></i> Delete Shop
+                        </button>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -1085,7 +1102,15 @@ window.handleAssignManagerToShop = async function(e) {
 }
 
 async function deleteShop(shopId, name) {
-    if (!confirm(`Delete shop "${name}" and ALL associated data (orders, workers, manager)?`)) return;
+    if (!confirm(`Warning 1/4: Are you sure you want to delete shop "${name}"?`)) return;
+    if (!confirm(`Warning 2/4: This will soft-delete the shop for 48 hours and disable all operations. Proceed?`)) return;
+    if (!confirm(`Warning 3/4: Are you absolutely certain? This will affect all workers and the manager.`)) return;
+    const typed = prompt(`Warning 4/4: Type "${name}" to confirm deletion:`);
+    if (typed !== name) {
+        alert("Shop name did not match. Deletion cancelled.");
+        return;
+    }
+    
     try {
         const admin = window.supabaseClient;
         // Security check: Verify shop belongs to this owner's organization
@@ -1093,12 +1118,38 @@ async function deleteShop(shopId, name) {
         if (!targetShop || targetShop.organization_id !== USER_PROFILE.organization_id) {
             throw new Error("Unauthorized: This shop does not belong to your organization.");
         }
-        const { data: mgr } = await admin.from('user_profiles').select('id').eq('shop_id', shopId).eq('role', 'manager').single();
-        await admin.from('shops').delete().eq('id', shopId);
-        if (mgr) await window.supabaseClient.functions.invoke('admin-proxy', { body: { action: 'deleteUser', payload: { id: mgr.id } } });
+        
+        // Soft delete: update status and set deleted_at
+        const deletedAt = new Date().toISOString();
+        const { error } = await admin.from('shops').update({
+            status: 'Pending Deletion',
+            deleted_at: deletedAt
+        }).eq('id', shopId);
+        
+        if (error) throw error;
+        
+        // We do NOT delete the manager or workers yet. They remain attached but the shop is inaccessible.
+        alert(`Shop "${name}" has been placed in Pending Deletion state for 48 hours.`);
         loadShopCommandCenter();
     } catch (e) {
-        alert(e.message);
+        alert("Error: " + e.message);
+    }
+}
+
+async function restoreShop(shopId, name) {
+    if (!confirm(`Restore shop "${name}"? It will become fully active again.`)) return;
+    try {
+        const admin = window.supabaseClient;
+        const { error } = await admin.from('shops').update({
+            status: 'Active',
+            deleted_at: null
+        }).eq('id', shopId);
+        
+        if (error) throw error;
+        alert(`Shop "${name}" has been successfully restored.`);
+        loadShopCommandCenter();
+    } catch (e) {
+        alert("Error restoring shop: " + e.message);
     }
 }
 
@@ -2049,7 +2100,7 @@ window.viewOrgShops = async function(orgId, orgName) {
                 <td><span style="background:${badgeColor}; color:white; padding:3px 10px; border-radius:12px; font-weight:bold; font-size:0.85em;">${statusText}</span></td>
                 <td>
                     <button class="small-btn" onclick="toggleShopSuspension('${shop.id}', '${statusText}', '${orgId}', '${orgName.replace(/'/g, "\\'")}')" style="background:${btnBg}; color:white; border:none; margin-right:5px;">${btnText}</button>
-                    <button class="small-btn" onclick="deleteShop('${shop.id}', '${orgId}', '${orgName.replace(/'/g, "\\'")}')" style="background:#ef4444; color:white; border:none;">Delete</button>
+                    <button class="small-btn" onclick="adminDeleteShop('${shop.id}', '${orgId}', '${orgName.replace(/'/g, "\\'")}')" style="background:#ef4444; color:white; border:none;">Delete</button>
                 </td>
             </tr>`;
         }).join('');
@@ -2075,11 +2126,25 @@ window.toggleShopSuspension = async function(shopId, currentStatus, orgId, orgNa
     }
 }
 
-window.deleteShop = async function(shopId, orgId, orgName) {
-    if (!confirm("Are you sure? This will delete all data related to this shop!")) return;
+window.adminDeleteShop = async function(shopId, orgId, orgName) {
+    if (!confirm(`Warning 1/4: Are you sure you want to delete this shop?`)) return;
+    if (!confirm(`Warning 2/4: This will soft-delete the shop for 48 hours and disable all operations. Proceed?`)) return;
+    if (!confirm(`Warning 3/4: Are you absolutely certain? This will affect all workers and the manager.`)) return;
+    const typed = prompt(`Warning 4/4: Type "DELETE" to confirm deletion of the shop in ${orgName}:`);
+    if (typed !== "DELETE") {
+        alert("Confirmation did not match. Deletion cancelled.");
+        return;
+    }
+    
     try {
-        const { error } = await supabaseClient.from('shops').delete().eq('id', shopId);
+        const deletedAt = new Date().toISOString();
+        const { error } = await supabaseClient.from('shops').update({
+            status: 'Pending Deletion',
+            deleted_at: deletedAt
+        }).eq('id', shopId);
         if (error) throw error;
+        
+        alert(`Shop has been placed in Pending Deletion state for 48 hours.`);
         viewOrgShops(orgId, orgName);
         loadOrganizations(); // update shop count
     } catch (err) {
